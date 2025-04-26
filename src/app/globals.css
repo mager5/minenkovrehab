@@ -315,3 +315,11 @@ a[href^="tel:"] {
     image-rendering: -webkit-optimize-contrast;
   }
 }
+
+/* Предотвращение горизонтального скролла на мобильных устройствах */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+  position: relative;
+  overflow-y: auto;
+}

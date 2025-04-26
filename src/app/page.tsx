@@ -44,7 +44,7 @@ export default function Home() {
   const aboutContentY = useTransform(aboutScroll, [0, 0.5], [50, 0]);
   
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Hero секция с фоном и текстом */}
       <motion.section 
         ref={heroRef}
@@ -141,8 +141,8 @@ export default function Home() {
       </motion.section>
 
       {/* Блок с преимуществами */}
-      <section className="py-12 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 bg-white overflow-x-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 overflow-x-hidden">
           <div className="flex flex-col space-y-6 lg:space-y-0 lg:flex-row lg:space-x-6 lg:space-x-8">
             {/* Преимущество 1 */}
             <motion.div 
@@ -246,7 +246,7 @@ export default function Home() {
       {/* О нас и счетчики */}
       <motion.section 
         ref={aboutRef}
-        className="py-20 bg-gray-50"
+        className="py-20 bg-gray-50 overflow-x-hidden"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
@@ -393,7 +393,7 @@ export default function Home() {
       </motion.section>
 
       {/* Наши услуги */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white overflow-x-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16"
@@ -630,7 +630,7 @@ export default function Home() {
       </section>
 
       {/* Когда вам нужна помощь */}
-      <section className="py-20 bg-primary/95 text-white">
+      <section className="py-20 bg-primary/95 text-white overflow-x-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -747,7 +747,7 @@ export default function Home() {
       </section>
 
       {/* CTA секция */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 overflow-x-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h2 
             className="text-3xl font-bold text-primary mb-6"

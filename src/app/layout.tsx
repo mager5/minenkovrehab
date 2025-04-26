@@ -109,7 +109,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className="h-full">
+    <html lang="ru" className="h-full overflow-x-hidden overflow-y-auto">
       <head>
         <link rel="icon" href="/favicons/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
@@ -124,8 +124,8 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#0063A5" />
         <meta name="msapplication-config" content="/favicons/browserconfig.xml" />
       </head>
-      <body className={`${inter.variable} antialiased min-h-screen flex flex-col h-full`}>
-        <div className="flex flex-col min-h-screen">
+      <body className={`${inter.variable} antialiased min-h-screen flex flex-col h-full overflow-x-hidden overflow-y-auto`}>
+        <div className="flex flex-col min-h-screen overflow-x-hidden">
           <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:p-4 focus:bg-primary focus:text-white focus:z-50">
             Перейти к основному содержанию
           </a>

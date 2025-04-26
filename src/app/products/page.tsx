@@ -178,9 +178,9 @@ export default function ProductsPage() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                         <span>{feature}</span>
                       </motion.div>
                     ))}
@@ -195,9 +195,9 @@ export default function ProductsPage() {
                     <Link 
                       href="/products/consultation" 
                       className="inline-block bg-white hover:bg-gray-100 text-accent border border-accent py-2 px-6 rounded-md transition-colors"
-                    >
-                      Записаться
-                    </Link>
+                  >
+                    Записаться
+                  </Link>
                   </motion.div>
                 </motion.div>
               </div>
@@ -268,9 +268,9 @@ export default function ProductsPage() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                         <span>{feature}</span>
                       </motion.div>
                     ))}
@@ -285,14 +285,14 @@ export default function ProductsPage() {
                     <Link 
                       href="/products/personal-program" 
                       className="inline-block bg-white hover:bg-gray-100 text-accent border border-accent py-2 px-6 rounded-md transition-colors"
-                    >
-                      Заказать
-                    </Link>
+                  >
+                    Заказать
+                  </Link>
                   </motion.div>
                 </motion.div>
               </div>
             </motion.div>
-            
+
             {/* Услуга 3 */}
             <motion.div 
               className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all overflow-hidden border border-gray-100"
@@ -358,9 +358,9 @@ export default function ProductsPage() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                         <span>{feature}</span>
                       </motion.div>
                     ))}
@@ -375,14 +375,14 @@ export default function ProductsPage() {
                     <Link 
                       href="/products/movement-analysis" 
                       className="inline-block bg-white hover:bg-gray-100 text-accent border border-accent py-2 px-6 rounded-md transition-colors"
-                    >
-                      Присоединиться
-                    </Link>
+                  >
+                    Присоединиться
+                  </Link>
                   </motion.div>
                 </motion.div>
               </div>
             </motion.div>
-            
+
             {/* Услуга 4 */}
             <motion.div 
               className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all overflow-hidden border border-gray-100"
@@ -448,9 +448,9 @@ export default function ProductsPage() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                         <span>{feature}</span>
                       </motion.div>
                     ))}
@@ -465,9 +465,9 @@ export default function ProductsPage() {
                     <Link 
                       href="/products/online-support" 
                       className="inline-block bg-white hover:bg-gray-100 text-accent border border-accent py-2 px-6 rounded-md transition-colors"
-                    >
-                      Приобрести
-                    </Link>
+                  >
+                    Приобрести
+                  </Link>
                   </motion.div>
                 </motion.div>
               </div>
@@ -935,12 +935,12 @@ export default function ProductsPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Link 
-              href="/contacts"
+          <Link 
+            href="/contacts"
               className="btn bg-white hover:bg-gray-100 text-accent border border-accent px-8 py-3 rounded-md font-medium transition-all"
-            >
-              Записаться на консультацию
-            </Link>
+          >
+            Записаться на консультацию
+          </Link>
           </motion.div>
         </div>
       </motion.section>

@@ -127,9 +127,9 @@ export default function ContactsPage() {
                     {[
                       {
                         icon: (
-                          <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
+                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
                         ),
                         title: "Email",
                         content: (
@@ -140,9 +140,9 @@ export default function ContactsPage() {
                       },
                       {
                         icon: (
-                          <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
+                        </svg>
                         ),
                         title: "Телефон",
                         content: (
@@ -153,13 +153,13 @@ export default function ContactsPage() {
                       },
                       {
                         icon: (
-                          <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                          </svg>
+                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                        </svg>
                         ),
                         title: "Мессенджеры",
                         content: (
-                          <div className="flex space-x-4 mt-2">
+                        <div className="flex space-x-4 mt-2">
                             <motion.a 
                               href="https://t.me/MV_Rehab" 
                               target="_blank" 
@@ -167,9 +167,9 @@ export default function ContactsPage() {
                               className="text-dark hover:text-primary transition-all duration-300"
                               whileHover={{ scale: 1.2, rotate: 5 }}
                             >
-                              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.652 6.654-1.02 8.83-.125.718-.373 1.034-.613 1.068-.523.068-1.039-.242-1.602-.554-1.048-.581-1.738-.909-2.768-1.48-1.234-.68-.388-1.049.285-1.654.177-.158 3.182-2.904 3.235-3.15.006-.024.004-.053-.006-.08a.183.183 0 0 0-.105-.04c-.074-.009-.168.022-.294.09-.365.18-2.234 1.407-3.026 1.903-.566.355-1.107.439-1.61.251-.524-.197-1.098-.414-1.547-.57-.626-.217-1.227-.435-1.227-.98 0-.265.24-.521.72-.764.85-.432 1.559-.788 2.145-1.055.04-.018 3.957-1.626 4.494-1.838.536-.212 1.19-.465 1.813-.466z" />
-                              </svg>
+                            </svg>
                             </motion.a>
                             <motion.a 
                               href="https://youtube.com/@mv_rehab" 
@@ -178,35 +178,35 @@ export default function ContactsPage() {
                               className="text-dark hover:text-primary transition-all duration-300"
                               whileHover={{ scale: 1.2, rotate: 5 }}
                             >
-                              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                              </svg>
+                            </svg>
                             </motion.a>
                             <motion.a 
                               href="#" 
                               className="text-dark hover:text-primary transition-all duration-300"
                               whileHover={{ scale: 1.2, rotate: 5 }}
                             >
-                              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558a5.898 5.898 0 0 0 2.126-1.384c.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913a5.89 5.89 0 0 0-1.384-2.126A5.847 5.847 0 0 0 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227a3.81 3.81 0 0 1-.899 1.382 3.744 3.744 0 0 1-1.38.896c-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421a3.716 3.716 0 0 1-1.379-.899 3.644 3.644 0 0 1-.9-1.38c-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 1 0 0-12.324zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405a1.441 1.441 0 0 1-2.88 0 1.44 1.44 0 0 1 2.88 0z"/>
-                              </svg>
+                            </svg>
                             </motion.a>
-                          </div>
+                        </div>
                         )
                       },
                       {
                         icon: (
-                          <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
+                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         ),
                         title: "Время работы",
                         content: (
-                          <p className="text-dark">
+                        <p className="text-dark">
                             Понедельник - Пятница: 10:00 - 19:00<br/>
                             Суббота: 10:00 - 15:00<br/>
-                            Воскресенье: выходной
-                          </p>
+                          Воскресенье: выходной
+                        </p>
                         )
                       }
                     ].map((item, index) => (
@@ -220,11 +220,11 @@ export default function ContactsPage() {
                       >
                         <div className="bg-primary-light p-3 rounded-full mr-4">
                           {item.icon}
-                        </div>
+                      </div>
                         <div>
                           <h3 className="text-lg font-semibold text-primary mb-1">{item.title}</h3>
                           {item.content}
-                        </div>
+                    </div>
                       </motion.div>
                     ))}
                   </div>
@@ -273,7 +273,7 @@ export default function ContactsPage() {
                       </svg>
                       Записаться на консультацию
                     </motion.button>
-                  </div>
+                    </div>
                 </motion.div>
                 
                 <motion.div 
@@ -316,9 +316,9 @@ export default function ContactsPage() {
                         transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
                       >
                         <h3 className="text-lg font-semibold text-primary mb-2">{faq.question}</h3>
-                        <p className="text-dark">
+                      <p className="text-dark">
                           {faq.answer}
-                        </p>
+                      </p>
                       </motion.div>
                     ))}
                   </div>
@@ -337,12 +337,12 @@ export default function ContactsPage() {
                       <Link 
                         href="/products" 
                         className="inline-flex items-center text-primary hover:text-primary-dark font-medium transition-all duration-300"
-                      >
-                        Посмотреть все услуги
-                        <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                      </Link>
+                    >
+                      Посмотреть все услуги
+                      <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </Link>
                     </motion.div>
                   </motion.div>
                 </motion.div>

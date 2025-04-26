@@ -132,7 +132,7 @@ export default function ReviewsPage() {
   const heroOpacity = useTransform(heroScroll, [0, 0.8], [1, 0.3]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Hero секция */}
       <motion.section 
         ref={heroRef}
@@ -176,8 +176,8 @@ export default function ReviewsPage() {
       </motion.section>
 
       {/* Секция с отзывами */}
-      <section className="py-16 bg-[#F5F5F5]">
-        <div className="container mx-auto px-4">
+      <section className="py-16 bg-[#F5F5F5] overflow-x-hidden">
+        <div className="container mx-auto px-4 overflow-x-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {reviews.map((review, index) => (
               <motion.div 
@@ -253,7 +253,7 @@ export default function ReviewsPage() {
 
       {/* Секция со статистикой */}
       <motion.section 
-        className="py-16 bg-[#3A7CA5] text-white"
+        className="py-16 bg-[#3A7CA5] text-white overflow-x-hidden"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -302,7 +302,7 @@ export default function ReviewsPage() {
 
       {/* Секция "Поделитесь своей историей" */}
       <motion.section 
-        className="py-16 bg-white"
+        className="py-16 bg-white overflow-x-hidden"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -371,7 +371,7 @@ export default function ReviewsPage() {
 
       {/* CTA секция */}
       <motion.section 
-        className="py-16 bg-gradient-to-r from-[#3A7CA5] to-[#3A7CA5]/80 text-white"
+        className="py-16 bg-gradient-to-r from-[#3A7CA5] to-[#3A7CA5]/80 text-white overflow-x-hidden"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
