@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Product } from '../data';
+import { Product } from './data';
 import { motion } from 'framer-motion';
 
 // Анимации для появления элементов
@@ -19,11 +19,57 @@ const fadeIn = {
   })
 };
 
-// Клиентский компонент для страницы продукта
-export default function ProductClient({ product }: { product: Product }) {
+interface ProductPageWrapperProps {
+  product: Product | undefined;
+}
+
+export default function ProductPageWrapper({ product }: ProductPageWrapperProps) {
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [contactInfo, setContactInfo] = useState({ name: '', email: '', phone: '' });
+
+  // Если продукт не найден, возвращаем сообщение об ошибке
+  if (!product) {
+    return (
+      <motion.div 
+        className="container mx-auto px-4 py-12 text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.h1 
+          className="text-2xl font-semibold text-primary mb-4"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          Продукт не найден
+        </motion.h1>
+        <motion.p 
+          className="mb-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          Запрашиваемый продукт не существует или был удален.
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Link 
+            href="/products"
+            className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+          >
+            Вернуться к списку продуктов
+          </Link>
+        </motion.div>
+      </motion.div>
+    );
+  }
 
   // Обработчик изменения полей формы
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

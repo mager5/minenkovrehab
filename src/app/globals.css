@@ -39,7 +39,7 @@
 }
 
 body {
-  background: var(--background);
+  background: #FFFFFF;
   color: var(--foreground-dark);
   font-family: 'Inter', Arial, Helvetica, sans-serif;
   line-height: 1.6;

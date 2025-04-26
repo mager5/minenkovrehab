@@ -1,10 +1,25 @@
+'use client';
+
+import React from 'react';
+import Container from '@/components/ui/Container';
+import PageTitle from '@/components/ui/PageTitle';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Metadata } from 'next';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
-export const metadata: Metadata = {
-  title: 'Отзывы | Миненков Rehab - Физическая реабилитация и лечебная физкультура',
-  description: 'Ознакомьтесь с отзывами клиентов о методиках реабилитации, индивидуальном подходе и результатах лечения в центре Миненков Rehab.',
+// Анимации для появления элементов
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (custom: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { 
+      delay: custom * 0.1,
+      duration: 0.8,
+      ease: [0.25, 0.1, 0.25, 1.0]
+    }
+  })
 };
 
 // Тип отзыва
@@ -105,11 +120,30 @@ const renderStars = (rating: number) => {
 };
 
 export default function ReviewsPage() {
+  // Рефы для секций с параллакс-эффектом
+  const heroRef = useRef(null);
+  
+  // Эффект параллакса для героя
+  const { scrollYProgress: heroScroll } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const heroImageY = useTransform(heroScroll, [0, 1], [0, 150]);
+  const heroContentY = useTransform(heroScroll, [0, 1], [0, -50]);
+  const heroOpacity = useTransform(heroScroll, [0, 0.8], [1, 0.3]);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero секция */}
-      <section className="relative w-full h-[60vh] min-h-[400px] bg-[#3A7CA5] overflow-hidden">
-        <div className="absolute inset-0 w-full h-full">
+      <motion.section 
+        ref={heroRef}
+        className="relative w-full h-[60vh] min-h-[400px] bg-[#3A7CA5] overflow-hidden"
+      >
+        <motion.div 
+          className="absolute inset-0 w-full h-full"
+          style={{ y: heroImageY }}
+        >
           <Image 
             src="/images/services/reviews-hero.svg" 
             alt="Отзывы клиентов"
@@ -118,127 +152,270 @@ export default function ReviewsPage() {
             className="object-cover object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#3A7CA5]/80 via-[#3A7CA5]/50 to-transparent"></div>
-        </div>
+        </motion.div>
         
-        <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Отзывы наших клиентов</h1>
-          <p className="max-w-2xl text-xl text-white mb-8">
+        <motion.div 
+          className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center z-10"
+          style={{ y: heroContentY, opacity: heroOpacity }}
+        >
+          <motion.h1 
+            className="text-4xl md:text-5xl font-bold text-white mb-6"
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+            custom={0}
+          >Отзывы наших клиентов</motion.h1>
+          <motion.p 
+            className="max-w-2xl text-xl text-white mb-8"
+            variants={fadeIn}
+            initial="hidden"
+            animate="visible"
+            custom={1}
+          >
             Узнайте, как индивидуальные программы реабилитации помогли сотням людей вернуться к полноценной жизни.
-          </p>
-        </div>
-      </section>
+          </motion.p>
+        </motion.div>
+      </motion.section>
 
       {/* Секция с отзывами */}
       <section className="py-16 bg-[#F5F5F5]">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {reviews.map((review) => (
-            <div 
-              key={review.id}
+            {reviews.map((review, index) => (
+              <motion.div 
+                key={review.id}
                 className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
-            >
-              <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-[#3A7CA5] rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
-                  {review.name.charAt(0)}
-                </div>
-                <div>
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: 0.1 * (index % 3), 
+                  type: "spring", 
+                  stiffness: 50 
+                }}
+                whileHover={{ y: -10 }}
+              >
+                <motion.div 
+                  className="flex items-center mb-4"
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.2 + 0.1 * (index % 3) }}
+                >
+                  <motion.div 
+                    className="w-12 h-12 bg-[#3A7CA5] rounded-full flex items-center justify-center text-white font-bold text-xl mr-4"
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    {review.name.charAt(0)}
+                  </motion.div>
+                  <div>
                     <h3 className="font-semibold text-xl text-[#333333]">{review.name}</h3>
                     <p className="text-sm text-[#333333]/70">{review.problem}</p>
                   </div>
-                </div>
+                </motion.div>
                 
                 {review.rating && (
-                  <div className="mb-4">
+                  <motion.div 
+                    className="mb-4"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: 0.3 + 0.1 * (index % 3) }}
+                  >
                     {renderStars(review.rating)}
-              </div>
+                  </motion.div>
                 )}
-              
-                <p className="text-[#333333] mb-4">&quot;{review.text}&quot;</p>
-              
-                <div className="text-sm text-[#333333]/50 italic">
-                {review.date}
-              </div>
-            </div>
-          ))}
-        </div>
+                
+                <motion.p 
+                  className="text-[#333333] mb-4"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.4 + 0.1 * (index % 3) }}
+                >
+                  &quot;{review.text}&quot;
+                </motion.p>
+                
+                <motion.div 
+                  className="text-sm text-[#333333]/50 italic"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 0.5 + 0.1 * (index % 3) }}
+                >
+                  {review.date}
+                </motion.div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Секция со статистикой */}
-      <section className="py-16 bg-[#3A7CA5] text-white">
+      <motion.section 
+        className="py-16 bg-[#3A7CA5] text-white"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="p-4">
-              <div className="text-4xl font-bold mb-2">500+</div>
-              <p className="text-[#E0F2F8]">Довольных клиентов</p>
-            </div>
-            <div className="p-4">
-              <div className="text-4xl font-bold mb-2">98%</div>
-              <p className="text-[#E0F2F8]">Положительных отзывов</p>
-            </div>
-            <div className="p-4">
-              <div className="text-4xl font-bold mb-2">4.9</div>
-              <p className="text-[#E0F2F8]">Средний рейтинг</p>
-            </div>
-            <div className="p-4">
-              <div className="text-4xl font-bold mb-2">72%</div>
-              <p className="text-[#E0F2F8]">Клиентов по рекомендации</p>
-            </div>
+            {[
+              { value: "500+", label: "Довольных клиентов" },
+              { value: "98%", label: "Положительных отзывов" },
+              { value: "4.9", label: "Средний рейтинг" },
+              { value: "72%", label: "Клиентов по рекомендации" }
+            ].map((stat, index) => (
+              <motion.div 
+                key={index}
+                className="p-4"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 * index }}
+              >
+                <motion.div 
+                  className="text-4xl font-bold mb-2"
+                  initial={{ scale: 0.8 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ 
+                    duration: 0.5, 
+                    delay: 0.2 + 0.1 * index,
+                    type: "spring",
+                    stiffness: 100
+                  }}
+                >{stat.value}</motion.div>
+                <motion.p 
+                  className="text-[#E0F2F8]"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 0.3 + 0.1 * index }}
+                >{stat.label}</motion.p>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Секция "Поделитесь своей историей" */}
-      <section className="py-16 bg-white">
+      <motion.section 
+        className="py-16 bg-white"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-8 text-[#333333]">Поделитесь своей историей</h2>
-          <p className="max-w-2xl mx-auto text-lg text-[#333333] mb-10">
+          <motion.h2 
+            className="text-3xl font-bold mb-8 text-[#333333]"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >Поделитесь своей историей</motion.h2>
+          <motion.p 
+            className="max-w-2xl mx-auto text-lg text-[#333333] mb-10"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             Ваш отзыв поможет другим людям принять важное решение о своем здоровье 
             и вдохновит их начать путь к восстановлению.
-          </p>
+          </motion.p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-            <Link 
-              href="https://t.me/vadim_minenkov" 
-            target="_blank" 
-              className="inline-flex items-center justify-center px-6 py-3 bg-[#3A7CA5] text-white font-medium rounded-lg hover:bg-[#3A7CA5]/90 transition-colors"
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.1 14.9l-4-4 1.4-1.4 2.6 2.6 6.6-6.6 1.4 1.4-8 8z" />
-              </svg>
-              Написать в Telegram
-            </Link>
-            <Link 
-              href="mailto:vadim@minenkovrehab.ru"
-              className="inline-flex items-center justify-center px-6 py-3 bg-[#E0F2F8] text-[#333333] font-medium rounded-lg hover:bg-[#E0F2F8]/80 transition-colors"
+              <Link 
+                href="https://t.me/vadim_minenkov" 
+                target="_blank" 
+                className="inline-flex items-center justify-center px-6 py-3 bg-[#3A7CA5] text-white font-medium rounded-lg hover:bg-[#3A7CA5]/90 transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.1 14.9l-4-4 1.4-1.4 2.6 2.6 6.6-6.6 1.4 1.4-8 8z" />
+                </svg>
+                Написать в Telegram
+              </Link>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Отправить по email
-            </Link>
+              <Link 
+                href="mailto:vadim@minenkovrehab.ru"
+                className="inline-flex items-center justify-center px-6 py-3 bg-[#E0F2F8] text-[#333333] font-medium rounded-lg hover:bg-[#E0F2F8]/80 transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Отправить по email
+              </Link>
+            </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA секция */}
-      <section className="py-16 bg-gradient-to-r from-[#3A7CA5] to-[#3A7CA5]/80 text-white">
+      <motion.section 
+        className="py-16 bg-gradient-to-r from-[#3A7CA5] to-[#3A7CA5]/80 text-white"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Начните свой путь к восстановлению сегодня</h2>
-          <p className="max-w-2xl mx-auto text-xl mb-8">
-            Присоединяйтесь к сотням довольных клиентов и сделайте первый шаг к здоровой, активной жизни.
-          </p>
-          <Link 
-            href="/contact" 
-            className="inline-flex items-center px-8 py-4 bg-[#B5D334] text-white font-bold rounded-lg hover:bg-[#B5D334]/90 transition-colors"
+          <motion.h2 
+            className="text-3xl font-bold mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >Начните свой путь к восстановлению сегодня</motion.h2>
+          <motion.p 
+            className="max-w-2xl mx-auto text-xl mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
           >
-            Записаться на консультацию
-            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </Link>
+            Присоединяйтесь к сотням довольных клиентов и сделайте первый шаг к здоровой, активной жизни.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Link 
+              href="/contact" 
+              className="inline-flex items-center px-8 py-4 bg-[#B5D334] text-white font-bold rounded-lg hover:bg-[#B5D334]/90 transition-colors"
+            >
+              Записаться на консультацию
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Link>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 } 
