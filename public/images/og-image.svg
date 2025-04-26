@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#0063A5"/>
+  <rect x="50" y="50" width="1100" height="530" fill="#004D85" rx="20"/>
+  
+  <text x="600" y="200" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Миненков</text>
+  <text x="600" y="300" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#19BD90" text-anchor="middle">Rehab</text>
+  
+  <text x="600" y="400" font-family="Arial, sans-serif" font-size="40" font-weight="normal" fill="#D1F3EA" text-anchor="middle">Физическая реабилитация</text>
+  <text x="600" y="460" font-family="Arial, sans-serif" font-size="32" font-weight="normal" fill="#D1F3EA" text-anchor="middle">Профессиональный подход к восстановлению</text>
+  
+  <rect x="450" y="500" width="300" height="60" fill="#19BD90" rx="10"/>
+  <text x="600" y="542" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#FFFFFF" text-anchor="middle">minekovrehab.ru</text>
+</svg> 

@@ -1,0 +1,225 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import BookingModal from '../BookingModal';
+
+export default function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Отслеживание скролла для изменения внешнего вида хедера
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    // Добавляем обработчик события скролла
+    window.addEventListener('scroll', handleScroll);
+    
+    // Очистка обработчика при размонтировании компонента
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // Закрытие меню при клике на ссылку
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  // Открытие модального окна записи
+  const openBookingModal = () => {
+    setIsBookingModalOpen(true);
+    setIsMenuOpen(false); // Закрываем мобильное меню
+  };
+
+  return (
+    <>
+      {/* Верхняя инфо-панель */}
+      <div className={`hidden lg:block bg-primary text-white py-2 transition-all duration-500 ease-in-out ${isScrolled ? 'transform -translate-y-full opacity-0 h-0 overflow-hidden' : 'transform translate-y-0 opacity-100'}`} role="complementary" aria-label="Контактная информация">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+              <p className="text-sm font-medium" style={{color: '#ffffff'}}>Следите за нами:</p>
+              <div className="flex space-x-3">
+                <a href="https://t.me/MV_Rehab" target="_blank" rel="noopener noreferrer" className="text-white hover:text-accent transition-all duration-300 transform hover:scale-110" aria-label="Telegram канал">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#ffffff" style={{fill: '#ffffff'}} aria-hidden="true" focusable="false">
+                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                  </svg>
+              </a>
+                <a href="https://youtube.com/@mv_rehab" target="_blank" rel="noopener noreferrer" className="text-white hover:text-accent transition-all duration-300 transform hover:scale-110" aria-label="YouTube канал">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 16 16" style={{fill: '#ffffff'}} aria-hidden="true" focusable="false">
+                  <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-6">
+              <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" focusable="false">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+                <a href="tel:+79615854288" className="text-sm font-medium !text-white" style={{color: '#ffffff'}} onMouseOver={(e) => e.currentTarget.style.color = '#ffffff'} aria-label="Позвонить по телефону +7 (961) 585-42-88">+7 (961) 585-42-88</a>
+            </div>
+              <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" focusable="false">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm font-medium">Пн-Сб: 10:00-19:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      {/* Основная навигация - липкая часть */}
+      <header className={`sticky top-0 left-0 right-0 z-50 bg-white transition-all duration-500 ease-in-out ${isScrolled ? 'shadow-lg py-3' : 'shadow-sm py-4'}`} role="banner">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            {/* Логотип и название */}
+            <Link href="/" className="flex items-center" aria-label="МиненковRehab - На главную">
+              <span className="text-xl md:text-2xl font-bold text-primary transition-transform duration-300">Миненков<span className="text-accent">Rehab</span></span>
+            </Link>
+
+            {/* Десктопное меню */}
+            <nav className="hidden md:flex space-x-1 lg:space-x-2" aria-label="Основная навигация">
+              <Link href="/" className="px-2 lg:px-4 py-2 text-sm lg:text-base text-gray-800 font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3" aria-current={pathname === '/' ? 'page' : undefined}>
+                Главная
+              </Link>
+              <Link href="/about" className="px-2 lg:px-4 py-2 text-sm lg:text-base text-gray-800 font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3" aria-current={pathname === '/about' ? 'page' : undefined}>
+                Обо мне
+              </Link>
+              <Link href="/products" className="px-2 lg:px-4 py-2 text-sm lg:text-base text-gray-800 font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3" aria-current={pathname === '/products' ? 'page' : undefined}>
+                Услуги
+              </Link>
+              <Link href="/reviews" className="px-2 lg:px-4 py-2 text-sm lg:text-base text-gray-800 font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3" aria-current={pathname === '/reviews' ? 'page' : undefined}>
+                Отзывы
+              </Link>
+              <Link href="/contacts" className="px-2 lg:px-4 py-2 text-sm lg:text-base text-gray-800 font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3" aria-current={pathname === '/contacts' ? 'page' : undefined}>
+                Контакты
+              </Link>
+            </nav>
+
+            {/* Кнопка записи */}
+            <div className="hidden md:block">
+              <button 
+                onClick={openBookingModal}
+                className="bg-accent hover:bg-accent-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-2 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap"
+                aria-label="Записаться на консультацию"
+              >
+                Записаться
+              </button>
+            </div>
+
+            {/* Мобильное меню (бургер) */}
+            <div className="md:hidden">
+              <button
+                type="button"
+                className="text-gray-800 hover:text-primary focus:outline-none transition-all duration-300"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? "Закрыть меню" : "Открыть меню"}
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-menu"
+              >
+                <svg
+                  className="h-6 w-6 transition-transform duration-300 ease-in-out"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  style={{
+                    transform: isMenuOpen ? 'rotate(90deg)' : 'rotate(0)',
+                  }}
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  {isMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Мобильное меню (выпадающее) */}
+          <div 
+            id="mobile-menu"
+            className={`md:hidden transition-all duration-500 ease-in-out overflow-hidden ${
+              isMenuOpen ? 'max-h-[400px] opacity-100 mt-4 pb-4 border-t pt-4' : 'max-h-0 opacity-0 mt-0 pb-0 border-t border-transparent'
+            }`}
+            aria-hidden={!isMenuOpen}
+            role="navigation"
+            aria-label="Мобильная навигация"
+          >
+              <div className="flex flex-col space-y-4">
+              <Link 
+                href="/" 
+                onClick={closeMenu}
+                className="text-gray-800 font-medium hover:text-primary transition-all duration-300 pl-2 border-l-2 border-transparent hover:border-primary hover:pl-4"
+                aria-current={pathname === '/' ? 'page' : undefined}
+              >
+                  Главная
+                </Link>
+              <Link 
+                href="/about" 
+                onClick={closeMenu}
+                className="text-gray-800 font-medium hover:text-primary transition-all duration-300 pl-2 border-l-2 border-transparent hover:border-primary hover:pl-4"
+                aria-current={pathname === '/about' ? 'page' : undefined}
+              >
+                  Обо мне
+                </Link>
+              <Link 
+                href="/products" 
+                onClick={closeMenu}
+                className="text-gray-800 font-medium hover:text-primary transition-all duration-300 pl-2 border-l-2 border-transparent hover:border-primary hover:pl-4"
+                aria-current={pathname === '/products' ? 'page' : undefined}
+              >
+                  Услуги
+                </Link>
+              <Link 
+                href="/reviews" 
+                onClick={closeMenu}
+                className="text-gray-800 font-medium hover:text-primary transition-all duration-300 pl-2 border-l-2 border-transparent hover:border-primary hover:pl-4"
+                aria-current={pathname === '/reviews' ? 'page' : undefined}
+              >
+                  Отзывы
+                </Link>
+              <Link 
+                href="/contacts" 
+                onClick={closeMenu}
+                className="text-gray-800 font-medium hover:text-primary transition-all duration-300 pl-2 border-l-2 border-transparent hover:border-primary hover:pl-4"
+                aria-current={pathname === '/contacts' ? 'page' : undefined}
+              >
+                  Контакты
+                </Link>
+              <button 
+                onClick={openBookingModal}
+                className="bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md"
+                aria-label="Записаться на консультацию"
+              >
+                  Записаться
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      {/* Модальное окно для записи */}
+      <BookingModal 
+        isOpen={isBookingModalOpen} 
+        onClose={() => setIsBookingModalOpen(false)} 
+      />
+    </>
+  );
+} 
