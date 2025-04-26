@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import Container from '@/components/ui/Container';
-import PageTitle from '@/components/ui/PageTitle';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRef } from 'react';
