@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "favicons": "node scripts/convert-favicon.js",
-    "prebuild": "npm run favicons"
+    "prebuild": "npm run favicons",
+    "export": "next build --no-lint",
+    "deploy": "npm run export && touch out/.nojekyll && git add -f out/ && git commit -m \"Deploy Next.js app to gh-pages\" && git subtree push --prefix out origin gh-pages"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.2",

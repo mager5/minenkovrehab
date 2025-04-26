@@ -84,7 +84,7 @@ export default function ProductsPage() {
                     </div>
                   </div>
                   <Link 
-                    href="/contacts" 
+                    href="/products/consultation" 
                     className="inline-block bg-white hover:bg-gray-100 text-accent border border-accent py-2 px-6 rounded-md transition-colors"
                   >
                     Записаться
@@ -134,7 +134,7 @@ export default function ProductsPage() {
                     </div>
                   </div>
                   <Link 
-                    href="/contacts" 
+                    href="/products/personal-program" 
                     className="inline-block bg-white hover:bg-gray-100 text-accent border border-accent py-2 px-6 rounded-md transition-colors"
                   >
                     Заказать
@@ -184,7 +184,7 @@ export default function ProductsPage() {
                     </div>
                   </div>
                   <Link 
-                    href="/contacts" 
+                    href="/products/movement-analysis" 
                     className="inline-block bg-white hover:bg-gray-100 text-accent border border-accent py-2 px-6 rounded-md transition-colors"
                   >
                     Присоединиться
@@ -234,7 +234,7 @@ export default function ProductsPage() {
                     </div>
                   </div>
                   <Link 
-                    href="/contacts" 
+                    href="/products/online-support" 
                     className="inline-block bg-white hover:bg-gray-100 text-accent border border-accent py-2 px-6 rounded-md transition-colors"
                   >
                     Приобрести
