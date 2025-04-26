@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   output: 'export',  // Включаем статический экспорт для GitHub Pages
   
   // Установка basePath для GitHub Pages
-  // Если вы используете кастомный домен, установите это в пустую строку
-  basePath: process.env.NODE_ENV === 'production' ? '/minenkovrehab' : '',
+  // При использовании кастомного домена устанавливаем пустую строку
+  basePath: '',
   
   images: {
     remotePatterns: [
@@ -34,8 +34,8 @@ const nextConfig: NextConfig = {
     return config;
   },
   
-  // Установите префикс для асетов при деплое на GitHub Pages
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/minenkovrehab' : '',
+  // Установка пустого префикса для асетов при использовании кастомного домена
+  assetPrefix: '',
 };
 
 export default nextConfig;
