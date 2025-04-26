@@ -7,6 +7,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        '2xl': '1536px',
+        'retina': {'raw': '(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi)'},
+      },
       colors: {
         primary: '#0063A5', // синий (основной)
         'primary-dark': '#004D85', // темный синий

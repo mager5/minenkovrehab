@@ -283,3 +283,35 @@ a[href^="tel:"] {
   color: #ffffff !important;
   text-decoration: none;
 }
+
+/* Поддержка Retina изображений */
+.img-retina {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.bg-img {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Медиа-запрос для Retina дисплеев */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Классы для оптимизации изображений на Retina экранах */
+  .retina-ready img {
+    transform: translateZ(0); /* Включает GPU-акселерацию */
+  }
+}
+
+/* Классы для работы с фоновыми изображениями для Retina */
+.bg-retina {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* Это позволяет браузеру оптимизировать изображения на Retina дисплеях */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}

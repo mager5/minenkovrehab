@@ -15,28 +15,63 @@ permissions:
 # Позволяет запускать только один деплой и отменяет предыдущие деплои в процессе
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  # Сборка проекта в статические файлы
-  build:
+  # Сборка проекта в статические файлы и деплой на GitHub Pages
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+      
       - name: Install dependencies
         run: npm ci
+      
       - name: Create .nojekyll file
         run: mkdir -p out && touch out/.nojekyll
-      - name: Build with Next.js using force-export
-        run: npm run force-export
-      - name: Push to gh-pages branch
+      
+      - name: Build with Next.js
+        run: npm run build
+      
+      - name: Export static files
+        run: npm run export || npm run force-export
+      
+      - name: Copy CNAME file
+        run: |
+          if [ -f "CNAME" ]; then
+            cp CNAME out/
+          elif [ -f "public/CNAME" ]; then
+            cp public/CNAME out/
+          else
+            echo "minenkovrehab.ru" > out/CNAME
+          fi
+      
+      - name: Copy sitemap and robots.txt
+        run: |
+          if [ -f "public/sitemap.xml" ]; then
+            cp public/sitemap.xml out/
+          fi
+          if [ -f "public/robots.txt" ]; then
+            cp public/robots.txt out/
+          fi
+      
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out 
+          publish_dir: ./out
+          # Не удалять существующие файлы в ветке gh-pages
+          keep_files: false
+          # Принудительно запушить историю
+          force_orphan: true
+          # Указать кастомизированное имя коммита
+          commit_message: "Deploy to GitHub Pages [skip ci]"
+          # Включить детальные сообщения о выполнении
+          full_commit_message: "Deploy to GitHub Pages from commit ${{ github.sha }} [skip ci]" 

@@ -24,10 +24,16 @@ try {
   console.warn('⚠️ Сборка завершилась с ошибками, но мы продолжаем процесс...');
 }
 
-// Копируем файл CNAME
-if (fs.existsSync('public/CNAME')) {
-  console.log('📋 Копируем файл CNAME...');
+// Проверка и копирование CNAME файла
+console.log('📋 Проверяем и копируем файл CNAME...');
+if (fs.existsSync('CNAME')) {
+  fs.copyFileSync('CNAME', 'out/CNAME');
+} else if (fs.existsSync('public/CNAME')) {
   fs.copyFileSync('public/CNAME', 'out/CNAME');
+} else {
+  // Создаем CNAME файл, если он не существует
+  fs.writeFileSync('out/CNAME', 'minenkovrehab.ru');
+  console.log('📄 Создан файл CNAME с доменом minenkovrehab.ru');
 }
 
 // Копируем robots.txt и sitemap.xml
@@ -37,5 +43,11 @@ if (fs.existsSync('public/CNAME')) {
     fs.copyFileSync(`public/${file}`, `out/${file}`);
   }
 });
+
+// Создаем 404.html для перенаправления неизвестных маршрутов на главную
+if (!fs.existsSync('out/404.html') && fs.existsSync('out/index.html')) {
+  console.log('📄 Создаем файл 404.html для перенаправления...');
+  fs.copyFileSync('out/index.html', 'out/404.html');
+}
 
 console.log('🎉 Процесс сборки завершен! Проверьте директорию out для результатов.'); 

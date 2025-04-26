@@ -9,9 +9,9 @@
     "lint": "next lint",
     "favicons": "node scripts/convert-favicon.js",
     "prebuild": "npm run favicons",
-    "export": "next build --no-lint",
+    "export": "next export || next build && next export",
     "force-export": "node scripts/force-build.js",
-    "deploy": "npm run force-export && git add -f out/ && git commit -m \"Deploy Next.js app to gh-pages\" && git subtree push --prefix out origin gh-pages"
+    "deploy": "npm run build && npm run force-export && git add -f out/ && git commit -m \"Deploy Next.js app to gh-pages\" && git push origin `git subtree split --prefix out master`:gh-pages --force"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.2",
