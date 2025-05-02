@@ -687,7 +687,7 @@ export default function Home() {
                     whileHover={{ 
                       y: -5, 
                       boxShadow: "0 10px 25px rgba(209, 243, 234, 0.2)",
-                      backgroundColor: "rgba(209, 243, 234, 0.3)"
+                      backgroundColor: "#DCF5ED"
                     }}
                   >
                     <motion.div 
@@ -702,7 +702,7 @@ export default function Home() {
                     </motion.div>
                     <div>
                       <h3 className="text-xl font-medium mb-2" style={{color: '#d1f3ea'}}>{item.title}</h3>
-                      <p className="text-white/90" style={{color: '#d1f3ea'}}>
+                      <p className="text-gray-200" style={{color: '#d1f3ea'}}>
                         {item.text}
                       </p>
                     </div>
