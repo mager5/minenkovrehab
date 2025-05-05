@@ -35,15 +35,10 @@ jobs:
         run: npm ci
       
       - name: Create .nojekyll file
-        run: mkdir -p out && touch out/.nojekyll
+        run: touch out/.nojekyll
       
       - name: Build with Next.js
         run: npm run build
-      
-      - name: Copy build output
-        run: |
-          cp -r out/* out/
-          cp -r public/* out/
       
       - name: Copy CNAME file
         run: |
