@@ -35,6 +35,11 @@ export default function ContactsContentAdmin() {
       .then(data => {
         setContactInfo(data);
         setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error loading content:', error);
+        setError('Ошибка загрузки');
+        setLoading(false);
       });
   }, []);
 
@@ -61,8 +66,9 @@ export default function ContactsContentAdmin() {
       });
       if (!res.ok) throw new Error('Ошибка сохранения');
       setSuccess(true);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      console.error('Error saving content:', e);
+      setError('Ошибка сохранения');
     } finally {
       setSaving(false);
     }

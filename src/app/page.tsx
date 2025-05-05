@@ -19,6 +19,28 @@ const fadeIn = {
   })
 };
 
+interface HelpItem {
+  title: string;
+  description: string;
+}
+
+interface HeroContent {
+  title: string;
+  description: string;
+  bg?: string;
+}
+
+interface AboutContent {
+  title: string;
+  description: string;
+  experience: string;
+  priceTitle: string;
+  priceDescription: string;
+  methodsTitle: string;
+  methodsDescription: string;
+  bg?: string;
+}
+
 export default function Home() {
   // Рефы для секций с параллакс-эффектом
   const heroRef = useRef(null);
@@ -48,7 +70,7 @@ export default function Home() {
     hero: {
       title: 'Физическая реабилитация',
       description: 'Профессиональная помощь в восстановлении здоровья и физической формы'
-    },
+    } as HeroContent,
     about: {
       title: 'Обо мне',
       description: 'Опытный специалист по физической реабилитации',
@@ -57,7 +79,7 @@ export default function Home() {
       priceDescription: 'Индивидуальный подход к ценообразованию',
       methodsTitle: 'Методы работы',
       methodsDescription: 'Современные методики реабилитации'
-    },
+    } as AboutContent,
     advantages: [
       {
         title: 'Экспертная Реабилитация',
@@ -720,7 +742,7 @@ export default function Home() {
               </motion.h2>
               
               <div className="space-y-6">
-                {content.help.items.map((item: any, index: number) => (
+                {content.help.items.map((item: HelpItem, index: number) => (
                   <motion.div 
                     key={index}
                     className="flex items-start bg-primary-dark/50 p-4 rounded-lg" 

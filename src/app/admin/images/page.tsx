@@ -1,114 +1,100 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import ImageUpload from '@/components/ImageUpload';
 
-type Image = {
-  id: string;
+interface ImageItem {
   url: string;
-  name: string;
-  size: number;
-  uploadedAt: string;
-};
+  folder: string;
+}
 
-export default function ImagesPage() {
-  const [images, setImages] = useState<Image[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+export default function ImagesAdmin() {
+  const [images, setImages] = useState<ImageItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    setIsUploading(true);
-    
-    // Здесь будет реальная загрузка на сервер
-    // Пока просто эмулируем загрузку
-    const newImages = acceptedFiles.map(file => ({
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      url: URL.createObjectURL(file),
-      name: file.name,
-      size: file.size,
-      uploadedAt: new Date().toISOString(),
-    }));
-
-    setImages(prev => [...prev, ...newImages]);
-    setIsUploading(false);
+  useEffect(() => {
+    fetch('/api/images')
+      .then(res => res.json())
+      .then(data => {
+        setImages(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error loading images:', error);
+        setError('Failed to load images');
+        setLoading(false);
+      });
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp']
-    },
-    maxSize: 5 * 1024 * 1024, // 5MB
-  });
-
-  const handleDeleteImage = (id: string) => {
-    setImages(images.filter(img => img.id !== id));
+  const handleDelete = async (url: string) => {
+    try {
+      const res = await fetch('/api/images', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) throw new Error('Failed to delete image');
+      setImages(prev => prev.filter(img => img.url !== url));
+    } catch (error: unknown) {
+      console.error('Error deleting image:', error);
+      alert('Failed to delete image');
+    }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Изображения</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Image Management</h1>
 
-        {/* Область загрузки */}
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors duration-300
-            ${isDragActive ? 'border-accent bg-accent-light' : 'border-gray-300 hover:border-accent'}`}
-        >
-          <input {...getInputProps()} />
-          {isUploading ? (
-            <p className="text-gray-600">Загрузка...</p>
-          ) : isDragActive ? (
-            <p className="text-accent">Отпустите файлы здесь...</p>
+      <div className="space-y-8">
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Upload New Image</h2>
+          <ImageUpload
+            onUpload={url => {
+              setImages(prev => [...prev, { url, folder: 'uploads' }]);
+            }}
+          />
+        </section>
+
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Uploaded Images</h2>
+          {images.length === 0 ? (
+            <p className="text-gray-500">No images uploaded yet.</p>
           ) : (
-            <div>
-              <p className="text-gray-600 mb-2">
-                Перетащите изображения сюда или нажмите для выбора
-              </p>
-              <p className="text-sm text-gray-500">
-                Поддерживаемые форматы: PNG, JPG, JPEG, GIF, WEBP (до 5MB)
-              </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {images.map((image, index) => (
+                <div key={index} className="relative group">
+                  <div className="relative w-full h-32">
+                    <Image
+                      src={image.url}
+                      alt={`Image ${index + 1}`}
+                      fill
+                      className="object-cover rounded"
+                    />
+                    <button
+                      onClick={() => handleDelete(image.url)}
+                      className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="mt-1 text-sm text-gray-500 truncate">{image.folder}</div>
+                </div>
+              ))}
             </div>
           )}
-        </div>
+        </section>
 
-        {/* Список изображений */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {images.map((image) => (
-            <div key={image.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="relative aspect-square">
-                <img
-                  src={image.url}
-                  alt={image.name}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  onClick={() => handleDeleteImage(image.id)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors duration-300"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <div className="p-3">
-                <p className="text-sm font-medium text-gray-900 truncate">{image.name}</p>
-                <p className="text-xs text-gray-500">{formatFileSize(image.size)}</p>
-                <p className="text-xs text-gray-500">
-                  {new Date(image.uploadedAt).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 text-red-700 rounded">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,61 +1,30 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Image from 'next/image';
 
 interface ImageUploadProps {
-  onUpload: (path: string) => void;
+  onUpload: (url: string) => void;
   currentImage?: string;
-  folder?: string;
 }
 
-export default function ImageUpload({ onUpload, currentImage, folder }: ImageUploadProps) {
+export default function ImageUpload({ onUpload, currentImage }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [url, setUrl] = useState('');
+  const [previewImage, setPreviewImage] = useState<string | null>(currentImage || null);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
+  const uploadFile = useCallback(async (file: File) => {
     setError(null);
-
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
 
     if (!file.type.startsWith('image/')) {
       setError('Пожалуйста, загрузите изображение');
       return;
     }
 
-    await uploadFile(file);
-  }, [onUpload]);
+    const formData = new FormData();
+    formData.append('file', file);
 
-  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    await uploadFile(file);
-  }, [onUpload]);
-
-  const uploadFile = async (file: File) => {
     try {
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append('file', file);
-      if (folder) {
-        formData.append('folder', folder);
-      }
-
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
@@ -66,75 +35,78 @@ export default function ImageUpload({ onUpload, currentImage, folder }: ImageUpl
       }
 
       const data = await response.json();
-      onUpload(data.path);
+      setPreviewImage(data.url);
+      onUpload(data.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка загрузки файла');
-    } finally {
-      setIsUploading(false);
     }
-  };
+  }, [onUpload]);
 
-  // Вычисляем, что показывать в превью
-  const previewImage = url && /^https?:\/\//.test(url) ? url : currentImage;
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      uploadFile(e.dataTransfer.files[0]);
+    }
+  }, [uploadFile]);
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      await uploadFile(e.target.files[0]);
+    }
+  }, [uploadFile]);
 
   return (
-    <div className="space-y-4">
+    <div className="w-full">
       <div
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-          isDragging ? 'border-accent bg-accent/10' : 'border-gray-300 hover:border-accent'
+        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+          isDragging ? 'border-accent bg-accent-light' : 'border-gray-300 hover:border-accent'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => document.getElementById('file-input')?.click()}
+        onClick={() => document.getElementById('fileInput')?.click()}
       >
         <input
-          id="file-input"
           type="file"
-          accept="image/*"
+          id="fileInput"
           className="hidden"
+          accept="image/*"
           onChange={handleFileSelect}
         />
-        {isUploading ? (
-          <div className="text-gray-500">Загрузка...</div>
-        ) : (
-          <div className="text-gray-500">
-            Перетащите изображение сюда или кликните для выбора
-          </div>
-        )}
-      </div>
-
-      <div>
-        <input
-          type="text"
-          placeholder="Вставьте ссылку на изображение (URL)"
-          className="w-full px-3 py-2 border rounded-md"
-          value={url}
-          onChange={e => {
-            setUrl(e.target.value);
-            // onUpload не вызываем, чтобы не портить данные при ошибочном вводе
-          }}
-          onBlur={() => {
-            if (url && /^https?:\/\//.test(url)) {
-              onUpload(url);
-            }
-          }}
-        />
-        <div className="text-xs text-gray-400 mt-1">Можно вставить ссылку на изображение с Unsplash или другого сайта</div>
-      </div>
-
-      {previewImage && (
-        <div className="mt-4">
-          <img
-            src={previewImage}
-            alt="Текущее изображение"
-            className="max-w-full h-auto rounded-lg"
-          />
+        <div className="text-gray-600">
+          <p>Перетащите изображение сюда или кликните для выбора</p>
+          <p className="text-sm text-gray-500 mt-1">Поддерживаются форматы: JPG, PNG, GIF</p>
         </div>
-      )}
+      </div>
 
       {error && (
-        <div className="text-red-500 text-sm">{error}</div>
+        <p className="text-red-500 text-sm mt-2">{error}</p>
+      )}
+
+      {previewImage && (
+        <div className="relative w-full h-48 mt-4">
+          <Image
+            src={previewImage}
+            alt="Preview"
+            fill
+            className="object-contain"
+          />
+        </div>
       )}
     </div>
   );

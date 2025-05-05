@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import ImageUpload from '@/components/ImageUpload';
 import { ProductsContent, Service } from '@/types/content';
 
 export default function ProductsContentAdmin() {
   const [content, setContent] = useState<ProductsContent | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -17,186 +17,179 @@ export default function ProductsContentAdmin() {
       .then(data => {
         setContent(data);
         setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error loading content:', error);
+        setError('Failed to load content');
+        setLoading(false);
       });
   }, []);
-
-  const handleChange = (field: keyof ProductsContent, value: string) => {
-    setContent((prev: ProductsContent | null) => {
-      if (!prev) return null;
-      return { ...prev, [field]: value };
-    });
-  };
-
-  const handleServiceChange = (idx: number, field: keyof Service, value: string) => {
-    setContent((prev: ProductsContent | null) => {
-      if (!prev) return null;
-      const newArr = [...prev.services];
-      newArr[idx] = { ...newArr[idx], [field]: value };
-      return { ...prev, services: newArr };
-    });
-  };
-
-  const handleAddService = () => {
-    setContent((prev: ProductsContent | null) => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        services: [
-          ...prev.services,
-          {
-            title: '',
-            description: '',
-            image: '',
-            price: ''
-          }
-        ]
-      };
-    });
-  };
-
-  const handleRemoveService = (idx: number) => {
-    setContent((prev: ProductsContent | null) => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        services: prev.services.filter((_, i) => i !== idx)
-      };
-    });
-  };
 
   const handleSave = async () => {
     if (!content) return;
     
-    setSaving(true);
-    setError(null);
-    setSuccess(false);
     try {
       const res = await fetch('/api/content-products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(content),
       });
-      if (!res.ok) throw new Error('Ошибка сохранения');
+      if (!res.ok) throw new Error('Failed to save content');
       setSuccess(true);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setSaving(false);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (error: unknown) {
+      console.error('Error saving content:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error');
+      setTimeout(() => setError(null), 3000);
     }
   };
 
   if (loading || !content) {
-    return <div className="min-h-screen flex items-center justify-center text-gray-500">Загрузка...</div>;
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Редактирование страницы &quot;Услуги&quot;</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Edit Products Content</h1>
 
-        <section className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Основная информация</h2>
+      <div className="space-y-8">
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">General Information</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Заголовок</label>
-              <input type="text" value={content.title} onChange={e => handleChange('title', e.target.value)} className="w-full px-3 py-2 border rounded-md" />
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <input
+                type="text"
+                value={content.title}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  title: e.target.value
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Описание</label>
-              <textarea value={content.description} onChange={e => handleChange('description', e.target.value)} className="w-full px-3 py-2 border rounded-md" rows={3} />
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <textarea
+                value={content.description}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  description: e.target.value
+                } : null)}
+                rows={3}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Фоновое изображение (hero)</label>
+              <label className="block text-sm font-medium mb-1">Background Image</label>
               <div className="flex items-center gap-4">
                 {content.heroBg && (
-                  <div className="relative w-48 h-24">
-                    <img src={content.heroBg} alt="Фон hero" className="w-full h-full object-cover rounded-lg border" />
+                  <div className="relative w-32 h-32">
+                    <Image
+                      src={content.heroBg}
+                      alt="Hero background"
+                      fill
+                      className="object-cover rounded"
+                    />
                     <button
-                      type="button"
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
-                      onClick={() => handleChange('heroBg', '')}
-                      title="Удалить фон"
+                      onClick={() => setContent(prev => prev ? {
+                        ...prev,
+                        heroBg: ''
+                      } : null)}
+                      className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
                     >
-                      &times;
+                      ×
                     </button>
                   </div>
                 )}
-                <div className="max-w-xs">
-                  <ImageUpload
-                    onUpload={path => handleChange('heroBg', path)}
-                    folder="products-hero"
-                  />
-                </div>
+                <ImageUpload
+                  onUpload={url => setContent(prev => prev ? {
+                    ...prev,
+                    heroBg: url
+                  } : null)}
+                  currentImage={content.heroBg}
+                />
               </div>
             </div>
           </div>
         </section>
 
-        <section className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Список услуг</h2>
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Services</h2>
           <div className="space-y-6">
-            {content.services.map((service: Service, idx: number) => (
-              <div key={idx} className="border p-4 rounded-lg">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-medium">Услуга {idx + 1}</h3>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveService(idx)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Удалить
-                  </button>
-                </div>
+            {content.services.map((service: Service, index: number) => (
+              <div key={index} className="border-b pb-6 last:border-b-0 last:pb-0">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Название</label>
+                    <label className="block text-sm font-medium mb-1">Service {index + 1} Title</label>
                     <input
                       type="text"
                       value={service.title}
-                      onChange={e => handleServiceChange(idx, 'title', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md"
+                      onChange={e => {
+                        const newServices = [...content.services];
+                        newServices[index] = { ...service, title: e.target.value };
+                        setContent(prev => prev ? { ...prev, services: newServices } : null);
+                      }}
+                      className="w-full p-2 border rounded"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Описание</label>
+                    <label className="block text-sm font-medium mb-1">Service {index + 1} Description</label>
                     <textarea
                       value={service.description}
-                      onChange={e => handleServiceChange(idx, 'description', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md"
+                      onChange={e => {
+                        const newServices = [...content.services];
+                        newServices[index] = { ...service, description: e.target.value };
+                        setContent(prev => prev ? { ...prev, services: newServices } : null);
+                      }}
                       rows={3}
+                      className="w-full p-2 border rounded"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Цена</label>
+                    <label className="block text-sm font-medium mb-1">Service {index + 1} Price</label>
                     <input
                       type="text"
                       value={service.price}
-                      onChange={e => handleServiceChange(idx, 'price', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md"
+                      onChange={e => {
+                        const newServices = [...content.services];
+                        newServices[index] = { ...service, price: e.target.value };
+                        setContent(prev => prev ? { ...prev, services: newServices } : null);
+                      }}
+                      className="w-full p-2 border rounded"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Изображение</label>
+                    <label className="block text-sm font-medium mb-1">Service {index + 1} Image</label>
                     <div className="flex items-center gap-4">
                       {service.image && (
                         <div className="relative w-32 h-32">
-                          <img src={service.image} alt={`Изображение услуги ${idx + 1}`} className="w-full h-full object-cover rounded-lg border" />
+                          <Image
+                            src={service.image}
+                            alt={`Service ${index + 1}`}
+                            fill
+                            className="object-cover rounded"
+                          />
                           <button
-                            type="button"
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
-                            onClick={() => handleServiceChange(idx, 'image', '')}
-                            title="Удалить фото"
+                            onClick={() => {
+                              const newServices = [...content.services];
+                              newServices[index] = { ...service, image: '' };
+                              setContent(prev => prev ? { ...prev, services: newServices } : null);
+                            }}
+                            className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
                           >
-                            &times;
+                            ×
                           </button>
                         </div>
                       )}
-                      <div className="max-w-xs">
-                        <ImageUpload
-                          onUpload={path => handleServiceChange(idx, 'image', path)}
-                          folder="services"
-                        />
-                      </div>
+                      <ImageUpload
+                        onUpload={url => {
+                          const newServices = [...content.services];
+                          newServices[index] = { ...service, image: url };
+                          setContent(prev => prev ? { ...prev, services: newServices } : null);
+                        }}
+                        currentImage={service.image}
+                      />
                     </div>
                   </div>
                 </div>
@@ -204,25 +197,45 @@ export default function ProductsContentAdmin() {
             ))}
             <button
               type="button"
-              onClick={handleAddService}
-              className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition"
+              onClick={() => {
+                const newService: Service = {
+                  title: '',
+                  description: '',
+                  image: '',
+                  price: ''
+                };
+                setContent(prev => prev ? {
+                  ...prev,
+                  services: [...prev.services, newService]
+                } : null);
+              }}
+              className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors"
             >
-              Добавить услугу
+              Add Service
             </button>
           </div>
         </section>
 
-        <div className="mt-8">
+        <div className="flex justify-end space-x-4">
           <button
             onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-dark transition disabled:opacity-50"
+            className="px-6 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors"
           >
-            {saving ? 'Сохранение...' : 'Сохранить изменения'}
+            Save Changes
           </button>
-          {error && <p className="mt-4 text-red-500">{error}</p>}
-          {success && <p className="mt-4 text-green-500">Изменения сохранены</p>}
         </div>
+
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mt-4 p-4 bg-green-50 text-green-700 rounded">
+            Changes saved successfully!
+          </div>
+        )}
       </div>
     </div>
   );

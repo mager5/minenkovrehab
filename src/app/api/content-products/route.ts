@@ -1,27 +1,37 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
+import fs from 'fs';
 import path from 'path';
 
 const DATA_PATH = path.join(process.cwd(), 'content-products.json');
 
 export async function GET() {
   try {
-    const data = await fs.readFile(DATA_PATH, 'utf-8');
+    if (!fs.existsSync(DATA_PATH)) {
+      return NextResponse.json({
+        title: 'Продукты',
+        description: 'Наши продукты и услуги',
+        products: []
+      });
+    }
+
+    const data = fs.readFileSync(DATA_PATH, 'utf-8');
     const content = JSON.parse(data);
     return NextResponse.json(content);
-  } catch (e) {
-    return NextResponse.json({ error: 'Не удалось прочитать контент' }, { status: 500 });
+  } catch (error: unknown) {
+    console.error('Error reading content:', error);
+    return NextResponse.json({ error: 'Failed to read content' }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const newContent = await req.json();
-    await fs.writeFile(DATA_PATH, JSON.stringify(newContent, null, 2), 'utf-8');
+    fs.writeFileSync(DATA_PATH, JSON.stringify(newContent, null, 2), 'utf-8');
     return NextResponse.json({ success: true });
-  } catch (e) {
-    return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error('Error writing content:', error);
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 } 

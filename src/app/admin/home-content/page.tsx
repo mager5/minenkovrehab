@@ -1,12 +1,72 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import ImageUpload from '@/components/ImageUpload';
 
-export default function HomeContentAdmin() {
-  const [content, setContent] = useState<any>(null);
+interface HomeContent {
+  hero: {
+    title: string;
+    description: string;
+    bg: string;
+  };
+  about: {
+    title: string;
+    description: string;
+    experience: string;
+    priceTitle: string;
+    priceDescription: string;
+    methodsTitle: string;
+    methodsDescription: string;
+    bg: string;
+  };
+  advantages: Array<{
+    title: string;
+    description: string;
+  }>;
+  stats: {
+    satisfiedClients: number;
+    satisfiedClientsLabel: string;
+    consultations: number;
+    consultationsLabel: string;
+    onlinePrograms: number;
+    onlineProgramsLabel: string;
+    experience: number;
+    experienceLabel: string;
+  };
+  services: {
+    title: string;
+    consultations: {
+      title: string;
+      description: string;
+    };
+    programs: {
+      title: string;
+      description: string;
+    };
+    analysis: {
+      title: string;
+      description: string;
+    };
+  };
+  help: {
+    title: string;
+    subtitle: string;
+    items: Array<{
+      title: string;
+      description: string;
+    }>;
+  };
+  cta: {
+    title: string;
+    description: string;
+    buttonText: string;
+  };
+}
+
+export default function HomeContent() {
+  const [content, setContent] = useState<HomeContent | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -14,378 +74,610 @@ export default function HomeContentAdmin() {
     fetch('/api/content-home')
       .then(res => res.json())
       .then(data => {
-        if (!data.hero) data.hero = {};
-        if (!('bg' in data.hero)) data.hero.bg = data.hero.image || '';
-        if (!data.about) data.about = {};
-        if (!('bg' in data.about)) data.about.bg = data.about.image || '';
         setContent(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error loading content:', error);
+        setError('Failed to load content');
         setLoading(false);
       });
   }, []);
 
-  const handleChange = (section: string, field: string, value: any) => {
-    setContent((prev: any) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }));
-  };
-
   const handleSave = async () => {
-    setSaving(true);
-    setError(null);
-    setSuccess(false);
+    if (!content) return;
+    
     try {
       const res = await fetch('/api/content-home', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(content),
       });
-      if (!res.ok) throw new Error('Ошибка сохранения');
+      if (!res.ok) throw new Error('Failed to save content');
       setSuccess(true);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setSaving(false);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (error: unknown) {
+      console.error('Error saving content:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error');
+      setTimeout(() => setError(null), 3000);
     }
   };
 
   if (loading || !content) {
-    return <div className="min-h-screen flex items-center justify-center text-gray-500">Загрузка...</div>;
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Редактирование главной страницы</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Edit Home Content</h1>
 
-        {/* Hero */}
-        <section className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Hero</h2>
+      <div className="space-y-8">
+        {/* Hero Section */}
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Hero Section</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Заголовок</label>
-              <input type="text" value={content.hero.title} onChange={e => handleChange('hero', 'title', e.target.value)} className="w-full px-3 py-2 border rounded-md" />
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <input
+                type="text"
+                value={content.hero.title}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  hero: { ...prev.hero, title: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Описание</label>
-              <textarea value={content.hero.description} onChange={e => handleChange('hero', 'description', e.target.value)} className="w-full px-3 py-2 border rounded-md" rows={3} />
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <textarea
+                value={content.hero.description}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  hero: { ...prev.hero, description: e.target.value }
+                } : null)}
+                rows={3}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Картинка Hero (отображается на главной)</label>
-              <div className="flex items-center gap-4 mb-2">
-                {content.hero.image && (
-                  <div className="relative w-32 h-32">
-                    <img src={content.hero.image} alt="Hero" className="w-full h-full object-cover rounded-lg border" />
-                    <button
-                      type="button"
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
-                      onClick={() => handleChange('hero', 'image', '')}
-                      title="Удалить картинку"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                )}
-                <div className="max-w-xs">
-                  <ImageUpload
-                    onUpload={path => handleChange('hero', 'image', path)}
-                    currentImage={content.hero.image}
-                  />
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Фоновое изображение Hero (опционально)</label>
-              <div className="flex items-center gap-4 mb-2">
+              <label className="block text-sm font-medium mb-1">Background Image</label>
+              <div className="flex items-center gap-4">
                 {content.hero.bg && (
                   <div className="relative w-32 h-32">
-                    <img src={content.hero.bg} alt="Фон hero" className="w-full h-full object-cover rounded-lg border" />
+                    <Image
+                      src={content.hero.bg}
+                      alt="Hero background"
+                      fill
+                      className="object-cover rounded"
+                    />
                     <button
-                      type="button"
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
-                      onClick={() => handleChange('hero', 'bg', '')}
-                      title="Удалить фон"
+                      onClick={() => setContent(prev => prev ? {
+                        ...prev,
+                        hero: { ...prev.hero, bg: '' }
+                      } : null)}
+                      className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
                     >
-                      &times;
+                      ×
                     </button>
                   </div>
                 )}
-                <div className="max-w-xs">
-                  <ImageUpload
-                    onUpload={path => handleChange('hero', 'bg', path)}
-                    currentImage={content.hero.bg}
-                  />
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Фото специалиста (отображается справа в Hero)</label>
-              <div className="flex items-center gap-4 mb-2">
-                {content.hero.photo && (
-                  <div className="relative w-32 h-32">
-                    <img src={content.hero.photo} alt="Фото специалиста" className="w-full h-full object-cover rounded-lg border" />
-                    <button
-                      type="button"
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
-                      onClick={() => handleChange('hero', 'photo', '')}
-                      title="Удалить фото"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                )}
-                <div className="max-w-xs">
-                  <ImageUpload
-                    onUpload={path => handleChange('hero', 'photo', path)}
-                    currentImage={content.hero.photo}
-                  />
-                </div>
+                <ImageUpload
+                  onUpload={url => setContent(prev => prev ? {
+                    ...prev,
+                    hero: { ...prev.hero, bg: url }
+                  } : null)}
+                  currentImage={content.hero.bg}
+                />
               </div>
             </div>
           </div>
         </section>
 
-        {/* Преимущества */}
-        <section className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Преимущества</h2>
-          <div className="space-y-4">
-            {content.advantages.map((adv: any, idx: number) => (
-              <div key={idx} className="border-b pb-4 mb-4">
-                <label className="block text-sm font-medium mb-1">Заголовок</label>
-                <input type="text" value={adv.title} onChange={e => {
-                  const newArr = [...content.advantages];
-                  newArr[idx].title = e.target.value;
-                  setContent((prev: any) => ({ ...prev, advantages: newArr }));
-                }} className="w-full px-3 py-2 border rounded-md mb-2" />
-                <label className="block text-sm font-medium mb-1">Описание</label>
-                <textarea value={adv.description} onChange={e => {
-                  const newArr = [...content.advantages];
-                  newArr[idx].description = e.target.value;
-                  setContent((prev: any) => ({ ...prev, advantages: newArr }));
-                }} className="w-full px-3 py-2 border rounded-md" rows={2} />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* О нас + Статистика */}
-        <section className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">О нас</h2>
+        {/* About Section */}
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">About Section</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Заголовок</label>
-              <input type="text" value={content.about.title} onChange={e => handleChange('about', 'title', e.target.value)} className="w-full px-3 py-2 border rounded-md" />
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <input
+                type="text"
+                value={content.about.title}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  about: { ...prev.about, title: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Описание</label>
-              <textarea value={content.about.description} onChange={e => handleChange('about', 'description', e.target.value)} className="w-full px-3 py-2 border rounded-md" rows={3} />
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <textarea
+                value={content.about.description}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  about: { ...prev.about, description: e.target.value }
+                } : null)}
+                rows={3}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Опыт</label>
-              <input type="text" value={content.about.experience} onChange={e => handleChange('about', 'experience', e.target.value)} className="w-full px-3 py-2 border rounded-md" />
+              <label className="block text-sm font-medium mb-1">Experience</label>
+              <input
+                type="text"
+                value={content.about.experience}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  about: { ...prev.about, experience: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Картинка "О нас" (отображается на главной)</label>
-              <div className="flex items-center gap-4 mb-2">
-                {content.about.image && (
-                  <div className="relative w-32 h-32">
-                    <img src={content.about.image} alt="О нас" className="w-full h-full object-cover rounded-lg border" />
-                    <button
-                      type="button"
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
-                      onClick={() => handleChange('about', 'image', '')}
-                      title="Удалить картинку"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                )}
-                <div className="max-w-xs">
-                  <ImageUpload
-                    onUpload={path => handleChange('about', 'image', path)}
-                    currentImage={content.about.image}
-                  />
-                </div>
-              </div>
+              <label className="block text-sm font-medium mb-1">Price Title</label>
+              <input
+                type="text"
+                value={content.about.priceTitle}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  about: { ...prev.about, priceTitle: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Фоновое изображение "О нас" (опционально)</label>
-              <div className="flex items-center gap-4 mb-2">
+              <label className="block text-sm font-medium mb-1">Price Description</label>
+              <textarea
+                value={content.about.priceDescription}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  about: { ...prev.about, priceDescription: e.target.value }
+                } : null)}
+                rows={2}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Methods Title</label>
+              <input
+                type="text"
+                value={content.about.methodsTitle}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  about: { ...prev.about, methodsTitle: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Methods Description</label>
+              <textarea
+                value={content.about.methodsDescription}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  about: { ...prev.about, methodsDescription: e.target.value }
+                } : null)}
+                rows={2}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Background Image</label>
+              <div className="flex items-center gap-4">
                 {content.about.bg && (
                   <div className="relative w-32 h-32">
-                    <img src={content.about.bg} alt="Фон о нас" className="w-full h-full object-cover rounded-lg border" />
+                    <Image
+                      src={content.about.bg}
+                      alt="About background"
+                      fill
+                      className="object-cover rounded"
+                    />
                     <button
-                      type="button"
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
-                      onClick={() => handleChange('about', 'bg', '')}
-                      title="Удалить фон"
+                      onClick={() => setContent(prev => prev ? {
+                        ...prev,
+                        about: { ...prev.about, bg: '' }
+                      } : null)}
+                      className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
                     >
-                      &times;
+                      ×
                     </button>
                   </div>
                 )}
-                <div className="max-w-xs">
-                  <ImageUpload
-                    onUpload={path => handleChange('about', 'bg', path)}
-                    currentImage={content.about.bg}
+                <ImageUpload
+                  onUpload={url => setContent(prev => prev ? {
+                    ...prev,
+                    about: { ...prev.about, bg: url }
+                  } : null)}
+                  currentImage={content.about.bg}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Advantages Section */}
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Advantages</h2>
+          <div className="space-y-4">
+            {content.advantages.map((advantage, index) => (
+              <div key={index} className="space-y-2">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Title {index + 1}</label>
+                  <input
+                    type="text"
+                    value={advantage.title}
+                    onChange={e => {
+                      const newAdvantages = [...content.advantages];
+                      newAdvantages[index] = { ...advantage, title: e.target.value };
+                      setContent(prev => prev ? { ...prev, advantages: newAdvantages } : null);
+                    }}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description {index + 1}</label>
+                  <textarea
+                    value={advantage.description}
+                    onChange={e => {
+                      const newAdvantages = [...content.advantages];
+                      newAdvantages[index] = { ...advantage, description: e.target.value };
+                      setContent(prev => prev ? { ...prev, advantages: newAdvantages } : null);
+                    }}
+                    rows={2}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Statistics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Satisfied Clients</label>
+              <input
+                type="number"
+                value={content.stats.satisfiedClients}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  stats: { ...prev.stats, satisfiedClients: parseInt(e.target.value) }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="text"
+                value={content.stats.satisfiedClientsLabel}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  stats: { ...prev.stats, satisfiedClientsLabel: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded mt-2"
+                placeholder="Label"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Consultations</label>
+              <input
+                type="number"
+                value={content.stats.consultations}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  stats: { ...prev.stats, consultations: parseInt(e.target.value) }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="text"
+                value={content.stats.consultationsLabel}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  stats: { ...prev.stats, consultationsLabel: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded mt-2"
+                placeholder="Label"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Online Programs</label>
+              <input
+                type="number"
+                value={content.stats.onlinePrograms}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  stats: { ...prev.stats, onlinePrograms: parseInt(e.target.value) }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="text"
+                value={content.stats.onlineProgramsLabel}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  stats: { ...prev.stats, onlineProgramsLabel: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded mt-2"
+                placeholder="Label"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Experience</label>
+              <input
+                type="number"
+                value={content.stats.experience}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  stats: { ...prev.stats, experience: parseInt(e.target.value) }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="text"
+                value={content.stats.experienceLabel}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  stats: { ...prev.stats, experienceLabel: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded mt-2"
+                placeholder="Label"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Services Section */}
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Services</h2>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-1">Section Title</label>
+              <input
+                type="text"
+                value={content.services.title}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  services: { ...prev.services, title: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-medium mb-2">Consultations</h3>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={content.services.consultations.title}
+                    onChange={e => setContent(prev => prev ? {
+                      ...prev,
+                      services: {
+                        ...prev.services,
+                        consultations: { ...prev.services.consultations, title: e.target.value }
+                      }
+                    } : null)}
+                    className="w-full p-2 border rounded"
+                    placeholder="Title"
+                  />
+                  <textarea
+                    value={content.services.consultations.description}
+                    onChange={e => setContent(prev => prev ? {
+                      ...prev,
+                      services: {
+                        ...prev.services,
+                        consultations: { ...prev.services.consultations, description: e.target.value }
+                      }
+                    } : null)}
+                    rows={2}
+                    className="w-full p-2 border rounded"
+                    placeholder="Description"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium mb-2">Programs</h3>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={content.services.programs.title}
+                    onChange={e => setContent(prev => prev ? {
+                      ...prev,
+                      services: {
+                        ...prev.services,
+                        programs: { ...prev.services.programs, title: e.target.value }
+                      }
+                    } : null)}
+                    className="w-full p-2 border rounded"
+                    placeholder="Title"
+                  />
+                  <textarea
+                    value={content.services.programs.description}
+                    onChange={e => setContent(prev => prev ? {
+                      ...prev,
+                      services: {
+                        ...prev.services,
+                        programs: { ...prev.services.programs, description: e.target.value }
+                      }
+                    } : null)}
+                    rows={2}
+                    className="w-full p-2 border rounded"
+                    placeholder="Description"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium mb-2">Analysis</h3>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={content.services.analysis.title}
+                    onChange={e => setContent(prev => prev ? {
+                      ...prev,
+                      services: {
+                        ...prev.services,
+                        analysis: { ...prev.services.analysis, title: e.target.value }
+                      }
+                    } : null)}
+                    className="w-full p-2 border rounded"
+                    placeholder="Title"
+                  />
+                  <textarea
+                    value={content.services.analysis.description}
+                    onChange={e => setContent(prev => prev ? {
+                      ...prev,
+                      services: {
+                        ...prev.services,
+                        analysis: { ...prev.services.analysis, description: e.target.value }
+                      }
+                    } : null)}
+                    rows={2}
+                    className="w-full p-2 border rounded"
+                    placeholder="Description"
                   />
                 </div>
               </div>
             </div>
           </div>
-          <div className="mt-4">
-            <h2 className="text-xl font-semibold mb-4">Статистика</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Довольных клиентов</label>
-                <input type="number" value={content.stats.satisfiedClients} onChange={e => handleChange('stats', 'satisfiedClients', Number(e.target.value))} className="w-full px-3 py-2 border rounded-md" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Проведенных консультаций</label>
-                <input type="number" value={content.stats.consultations} onChange={e => handleChange('stats', 'consultations', Number(e.target.value))} className="w-full px-3 py-2 border rounded-md" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Онлайн-программ</label>
-                <input type="number" value={content.stats.onlinePrograms} onChange={e => handleChange('stats', 'onlinePrograms', Number(e.target.value))} className="w-full px-3 py-2 border rounded-md" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Лет опыта</label>
-                <input type="number" value={content.stats.experience} onChange={e => handleChange('stats', 'experience', Number(e.target.value))} className="w-full px-3 py-2 border rounded-md" />
-              </div>
-            </div>
-          </div>
         </section>
 
-        {/* Услуги */}
-        <section className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Услуги</h2>
+        {/* Help Section */}
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Help Section</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Заголовок секции</label>
-              <input type="text" value={content.services.title} onChange={e => handleChange('services', 'title', e.target.value)} className="w-full px-3 py-2 border rounded-md" />
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <input
+                type="text"
+                value={content.help.title}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  help: { ...prev.help, title: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Онлайн-консультации</label>
-              <input type="text" value={content.services.consultations.title} onChange={e => setContent((prev: any) => ({ ...prev, services: { ...prev.services, consultations: { ...prev.services.consultations, title: e.target.value } } }))} className="w-full px-3 py-2 border rounded-md mb-2" />
-              <textarea value={content.services.consultations.description} onChange={e => setContent((prev: any) => ({ ...prev, services: { ...prev.services, consultations: { ...prev.services.consultations, description: e.target.value } } }))} className="w-full px-3 py-2 border rounded-md" rows={2} />
+              <label className="block text-sm font-medium mb-1">Subtitle</label>
+              <input
+                type="text"
+                value={content.help.subtitle}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  help: { ...prev.help, subtitle: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Индивидуальные программы</label>
-              <input type="text" value={content.services.programs.title} onChange={e => setContent((prev: any) => ({ ...prev, services: { ...prev.services, programs: { ...prev.services.programs, title: e.target.value } } }))} className="w-full px-3 py-2 border rounded-md mb-2" />
-              <textarea value={content.services.programs.description} onChange={e => setContent((prev: any) => ({ ...prev, services: { ...prev.services, programs: { ...prev.services.programs, description: e.target.value } } }))} className="w-full px-3 py-2 border rounded-md" rows={2} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Анализ движения</label>
-              <input type="text" value={content.services.analysis.title} onChange={e => setContent((prev: any) => ({ ...prev, services: { ...prev.services, analysis: { ...prev.services.analysis, title: e.target.value } } }))} className="w-full px-3 py-2 border rounded-md mb-2" />
-              <textarea value={content.services.analysis.description} onChange={e => setContent((prev: any) => ({ ...prev, services: { ...prev.services, analysis: { ...prev.services.analysis, description: e.target.value } } }))} className="w-full px-3 py-2 border rounded-md" rows={2} />
-            </div>
-          </div>
-        </section>
 
-        {/* Изображения услуг */}
-        <section className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Изображения услуг (отображаются на главной)</h2>
-          <div className="space-y-4">
-            {content.services && Object.entries(content.services).map(([key, service]: [string, any], idx: number) => (
-              key !== 'title' && (
-                <div key={key} className="border-b pb-4 mb-4">
-                  <div className="font-semibold mb-2">{service.title || key}</div>
-                  <div className="flex items-center gap-4 mb-2">
-                    {service.image && (
-                      <div className="relative w-32 h-32">
-                        <img src={service.image} alt={service.title || key} className="w-full h-full object-cover rounded-lg border" />
-                        <button
-                          type="button"
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition"
-                          onClick={() => {
-                            const newServices = { ...content.services };
-                            newServices[key].image = '';
-                            setContent((prev: any) => ({ ...prev, services: newServices }));
-                          }}
-                          title="Удалить изображение"
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    )}
-                    <div className="max-w-xs">
-                      <ImageUpload
-                        onUpload={path => {
-                          const newServices = { ...content.services };
-                          newServices[key].image = path;
-                          setContent((prev: any) => ({ ...prev, services: newServices }));
-                        }}
-                        currentImage={service.image}
-                      />
-                    </div>
+            <div className="space-y-4">
+              {content.help.items.map((item, index) => (
+                <div key={index} className="space-y-2">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Item {index + 1} Title</label>
+                    <input
+                      type="text"
+                      value={item.title}
+                      onChange={e => {
+                        const newItems = [...content.help.items];
+                        newItems[index] = { ...item, title: e.target.value };
+                        setContent(prev => prev ? {
+                          ...prev,
+                          help: { ...prev.help, items: newItems }
+                        } : null);
+                      }}
+                      className="w-full p-2 border rounded"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Item {index + 1} Description</label>
+                    <textarea
+                      value={item.description}
+                      onChange={e => {
+                        const newItems = [...content.help.items];
+                        newItems[index] = { ...item, description: e.target.value };
+                        setContent(prev => prev ? {
+                          ...prev,
+                          help: { ...prev.help, items: newItems }
+                        } : null);
+                      }}
+                      rows={2}
+                      className="w-full p-2 border rounded"
+                    />
                   </div>
                 </div>
-              )
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* Когда нужна помощь */}
-        <section className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Когда нужна помощь</h2>
+        {/* CTA Section */}
+        <section className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Call to Action</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Заголовок</label>
-              <input type="text" value={content.help.title} onChange={e => handleChange('help', 'title', e.target.value)} className="w-full px-3 py-2 border rounded-md" />
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <input
+                type="text"
+                value={content.cta.title}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  cta: { ...prev.cta, title: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Подзаголовок</label>
-              <input type="text" value={content.help.subtitle} onChange={e => handleChange('help', 'subtitle', e.target.value)} className="w-full px-3 py-2 border rounded-md" />
-            </div>
-            {content.help.items.map((item: any, idx: number) => (
-              <div key={idx} className="border-b pb-4 mb-4">
-                <label className="block text-sm font-medium mb-1">Проблема</label>
-                <input type="text" value={item.title} onChange={e => {
-                  const newArr = [...content.help.items];
-                  newArr[idx].title = e.target.value;
-                  setContent((prev: any) => ({ ...prev, help: { ...prev.help, items: newArr } }));
-                }} className="w-full px-3 py-2 border rounded-md mb-2" />
-                <label className="block text-sm font-medium mb-1">Описание</label>
-                <textarea value={item.description} onChange={e => {
-                  const newArr = [...content.help.items];
-                  newArr[idx].description = e.target.value;
-                  setContent((prev: any) => ({ ...prev, help: { ...prev.help, items: newArr } }));
-                }} className="w-full px-3 py-2 border rounded-md" rows={2} />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">CTA</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Заголовок</label>
-              <input type="text" value={content.cta.title} onChange={e => handleChange('cta', 'title', e.target.value)} className="w-full px-3 py-2 border rounded-md" />
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <textarea
+                value={content.cta.description}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  cta: { ...prev.cta, description: e.target.value }
+                } : null)}
+                rows={3}
+                className="w-full p-2 border rounded"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Описание</label>
-              <textarea value={content.cta.description} onChange={e => handleChange('cta', 'description', e.target.value)} className="w-full px-3 py-2 border rounded-md" rows={3} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Текст кнопки</label>
-              <input type="text" value={content.cta.buttonText} onChange={e => handleChange('cta', 'buttonText', e.target.value)} className="w-full px-3 py-2 border rounded-md" />
+              <label className="block text-sm font-medium mb-1">Button Text</label>
+              <input
+                type="text"
+                value={content.cta.buttonText}
+                onChange={e => setContent(prev => prev ? {
+                  ...prev,
+                  cta: { ...prev.cta, buttonText: e.target.value }
+                } : null)}
+                className="w-full p-2 border rounded"
+              />
             </div>
           </div>
         </section>
 
-        {/* Кнопка сохранения */}
-        <div className="pt-6">
-          <button onClick={handleSave} disabled={saving} className="w-full bg-accent hover:bg-accent-dark text-white px-4 py-2 rounded-md transition-colors duration-300">
-            {saving ? 'Сохранение...' : 'Сохранить изменения'}
+        <div className="flex justify-end space-x-4">
+          <button
+            onClick={handleSave}
+            className="px-6 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors"
+          >
+            Save Changes
           </button>
-          {success && <div className="text-green-600 mt-2">Изменения сохранены!</div>}
-          {error && <div className="text-red-600 mt-2">{error}</div>}
         </div>
+
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mt-4 p-4 bg-green-50 text-green-700 rounded">
+            Changes saved successfully!
+          </div>
+        )}
       </div>
     </div>
   );

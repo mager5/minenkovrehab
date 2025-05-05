@@ -196,7 +196,7 @@ const placeholderAnimation3 = {
 
 export default function LottieExamplesPage() {
   // Список примеров анимаций
-  const animations: AnimationExample[] = [
+  const animations = React.useMemo<AnimationExample[]>(() => [
     {
       id: 1,
       title: 'Физиотерапия',
@@ -215,7 +215,7 @@ export default function LottieExamplesPage() {
       description: 'Иллюстрация анализа движений для диагностики',
       jsonData: placeholderAnimation3
     }
-  ];
+  ], []);
 
   // Состояние для хранения JSON-данных анимаций
   const [animationData, setAnimationData] = useState<AnimationExample[]>([]);
@@ -236,7 +236,7 @@ export default function LottieExamplesPage() {
     // Используем локальные заглушки вместо загрузки с сервера
     setAnimationData(animations);
     setLoading(false);
-  }, [isClient]);
+  }, [isClient, animations]);
 
   return (
     <div className="min-h-screen py-16 bg-gray-50">
