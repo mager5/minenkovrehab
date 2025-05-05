@@ -16,7 +16,7 @@ const BREADCRUMB_LABELS: Record<string, string> = {
 
 export default function AdminBreadcrumbs() {
   const pathname = usePathname();
-  const parts = pathname.split('/').filter(Boolean);
+  const parts = (pathname || '').split('/').filter(Boolean);
   const crumbs = parts.slice(0, parts[0] === 'admin' ? undefined : 1); // только путь внутри админки
 
   let path = '';
