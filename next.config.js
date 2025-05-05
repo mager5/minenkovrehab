@@ -40,6 +40,16 @@ const nextConfig = {
     appDir: true,
     serverComponentsExternalPackages: ['nodemailer'],
   },
+  rewrites: async () => {
+    return {
+      beforeFiles: [
+        {
+          source: '/api/:path*',
+          destination: '/404',
+        },
+      ],
+    }
+  },
 }
 
 module.exports = nextConfig 
