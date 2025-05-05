@@ -36,20 +36,7 @@ const nextConfig = {
   assetPrefix: '/minenkovrehab/',
   trailingSlash: true,
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
-  experimental: {
-    appDir: true,
-    serverComponentsExternalPackages: ['nodemailer'],
-  },
-  rewrites: async () => {
-    return {
-      beforeFiles: [
-        {
-          source: '/api/:path*',
-          destination: '/404',
-        },
-      ],
-    }
-  },
+  serverExternalPackages: ['nodemailer'],
 }
 
 module.exports = nextConfig 

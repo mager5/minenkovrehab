@@ -2,6 +2,7 @@
   "name": "minenkovrehab",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/prepare-build.js && next build",
