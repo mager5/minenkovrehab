@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   authors: [{ name: 'Вадим Миненков', url: 'https://minekovrehab.ru' }],
   creator: 'Вадим Миненков',
   publisher: 'Миненков Вадим',
+  manifest: '/manifest.json',
+  themeColor: '#19bd90',
   formatDetection: {
     telephone: true,
     email: true,
@@ -93,7 +95,6 @@ export const metadata: Metadata = {
       }
     ],
   },
-  manifest: '/favicons/site.webmanifest',
   alternates: {
     canonical: 'https://minekovrehab.ru',
   },

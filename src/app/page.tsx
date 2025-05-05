@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
 // Анимации для появления элементов
@@ -43,22 +43,120 @@ export default function Home() {
   const aboutImageScale = useTransform(aboutScroll, [0, 0.5], [0.9, 1]);
   const aboutContentY = useTransform(aboutScroll, [0, 0.5], [50, 0]);
   
+  // Загрузка данных с API
+  const [content, setContent] = useState({
+    hero: {
+      title: 'Физическая реабилитация',
+      description: 'Профессиональная помощь в восстановлении здоровья и физической формы'
+    },
+    about: {
+      title: 'Обо мне',
+      description: 'Опытный специалист по физической реабилитации',
+      experience: '10+ лет опыта',
+      priceTitle: 'Стоимость услуг',
+      priceDescription: 'Индивидуальный подход к ценообразованию',
+      methodsTitle: 'Методы работы',
+      methodsDescription: 'Современные методики реабилитации'
+    },
+    advantages: [
+      {
+        title: 'Экспертная Реабилитация',
+        description: 'Профессиональный подход к восстановлению здоровья'
+      },
+      {
+        title: 'Индивидуальный Подход',
+        description: 'Персональные программы для каждого клиента'
+      },
+      {
+        title: 'Удобный Формат',
+        description: 'Гибкий график и комфортные условия'
+      }
+    ],
+    stats: {
+      satisfiedClients: 100,
+      satisfiedClientsLabel: 'Довольных клиентов',
+      consultations: 500,
+      consultationsLabel: 'Проведенных консультаций',
+      onlinePrograms: 50,
+      onlineProgramsLabel: 'Онлайн-программ',
+      experience: 10,
+      experienceLabel: 'Лет опыта'
+    },
+    services: {
+      title: 'Наши услуги',
+      consultations: {
+        title: 'Онлайн-консультации',
+        description: 'Профессиональные консультации по вопросам реабилитации'
+      },
+      programs: {
+        title: 'Индивидуальные программы',
+        description: 'Разработка персональных программ восстановления'
+      },
+      analysis: {
+        title: 'Анализ движения',
+        description: 'Детальная оценка биомеханики движения'
+      }
+    },
+    help: {
+      title: 'Когда вам нужна помощь',
+      subtitle: 'Мы готовы помочь',
+      items: [
+        {
+          title: 'После травм',
+          description: 'Восстановление после травм и операций'
+        },
+        {
+          title: 'При хронических болях',
+          description: 'Устранение хронических болей в спине и суставах'
+        },
+        {
+          title: 'Для профилактики',
+          description: 'Предотвращение проблем с опорно-двигательным аппаратом'
+        }
+      ]
+    },
+    cta: {
+      title: 'Готовы начать восстановление?',
+      description: 'Запишитесь на консультацию и получите индивидуальную программу восстановления',
+      buttonText: 'Записаться на консультацию'
+    }
+  });
+
+  useEffect(() => {
+    fetch('/api/content-home')
+      .then(res => res.json())
+      .then(data => {
+        setContent(data);
+      });
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Hero секция с фоном и текстом */}
       <motion.section 
         ref={heroRef}
-        className="relative pt-16 pb-20 lg:pt-24 lg:pb-32 overflow-hidden bg-gradient-to-br from-primary to-primary-dark"
+        className="relative pt-32 sm:pt-16 pb-20 lg:pt-24 lg:pb-32 overflow-hidden bg-gradient-to-br from-primary to-primary-dark"
       >
         <motion.div 
-          className="absolute inset-0 opacity-15"
+          className="absolute inset-0 h-[320px] sm:h-[400px] md:h-[500px] lg:h-[600px]"
           style={{ y: heroImageY }}
         >
-          <Image 
-            src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1920&h=1080&auto=format&fit=crop" 
-            alt="Физическая реабилитация" 
+          {/* Десктоп/планшет */}
+          <Image
+            src={content.hero.bg || "/images/hero/hero-banner.jpg"}
+            alt="Физическая реабилитация"
             fill
-            className="object-cover"
+            className="object-cover w-full h-full hidden sm:block hero-image"
+            style={{ objectPosition: 'center 0%' }}
+            priority
+          />
+          {/* Мобильное фото */}
+          <Image
+            src="/images/hero/hero-banner-mobile.jpg"
+            alt="Физическая реабилитация"
+            fill
+            className="object-cover w-full h-full block sm:hidden hero-image"
+            style={{ objectPosition: 'center 0%' }}
             priority
           />
         </motion.div>
@@ -73,67 +171,31 @@ export default function Home() {
               custom={0}
             >
               <motion.h1 
-                className="text-4xl md:text-5xl font-bold mb-6 leading-tight" 
+                className="hero-title font-bold mb-6 leading-tight" 
                 style={{color: '#d1f3ea'}}
               >
-                Физическая Реабилитация и Восстановление
+                Физическая реабилитация и тренировки для здоровья
               </motion.h1>
               <motion.p 
-                className="text-lg opacity-95 mb-8 font-medium" 
-                style={{color: '#d1f3ea'}}
-                variants={fadeIn}
-                custom={1}
+                className="text-base sm:text-lg md:text-xl opacity-95 mb-8 font-medium leading-relaxed space-y-2"
+                style={{color: '#FFFFFF', opacity: 1, transform: 'none'}}
               >
-                Индивидуальный подход к реабилитации после травм и заболеваний. Профессиональная помощь в восстановлении движения и устранении боли.
+                <span className="block">• Индивидуальный подход в подборе тренировок с учетом состояния вашего здоровья</span>
+                <span className="block">• Регулярные тренировки в онлайн-группе</span>
+                <span className="block">• Готовые протоколы реабилитации после травм и операций</span>
               </motion.p>
               <motion.div 
-                className="flex flex-wrap gap-4"
+                className="flex flex-col sm:flex-row gap-4 w-full"
                 variants={fadeIn}
                 custom={2}
               >
-                <Link 
-                  href="/about"
-                  className="btn bg-accent hover:bg-accent-dark text-white px-6 py-3 rounded-md font-medium transition-all hover:-translate-y-1 hover:shadow-lg"
-                >
-                  Узнать больше
-                </Link>
+                <a className="btn bg-accent hover:bg-accent-dark text-white !text-white px-6 py-3 rounded-md font-medium transition-all hover:-translate-y-1 hover:shadow-lg w-full sm:w-auto" href="/about">Узнать больше</a>
                 <Link 
                   href="/contacts"
-                  className="btn bg-white text-primary hover:bg-gray-100 px-6 py-3 rounded-md font-medium transition-all hover:-translate-y-1 hover:shadow-lg"
+                  className="btn bg-white text-primary hover:bg-gray-100 px-6 py-3 rounded-md font-medium transition-all hover:-translate-y-1 hover:shadow-lg w-full sm:w-auto"
                 >
                   Записаться
                 </Link>
-              </motion.div>
-            </motion.div>
-            <motion.div 
-              className="md:w-1/2"
-              initial={{ opacity: 0, scale: 0.9, y: 30 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-            >
-              <motion.div 
-                className="relative"
-                whileHover={{ scale: 1.03 }}
-                transition={{ duration: 0.3 }}
-              >
-                <motion.div 
-                  className="absolute -inset-0.5 rounded-lg bg-accent/30 blur-md"
-                  animate={{ 
-                    boxShadow: ["0 0 20px 5px rgba(25, 189, 144, 0.3)", "0 0 30px 5px rgba(25, 189, 144, 0.5)", "0 0 20px 5px rgba(25, 189, 144, 0.3)"],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatType: "reverse"
-                  }}
-                ></motion.div>
-                <Image 
-                  src="/images/about/minenkov-main.jpg" 
-                  alt="Миненков Вадим - физический реабилитолог" 
-                  width={500}
-                  height={500}
-                  className="rounded-lg shadow-xl mx-auto relative z-10"
-                />
               </motion.div>
             </motion.div>
           </div>
@@ -171,7 +233,7 @@ export default function Home() {
               <div>
                 <h3 className="text-xl font-semibold text-primary mb-2">Экспертная Реабилитация</h3>
                 <p className="text-dark">
-                  Опыт работы более 8 лет с различными травмами и заболеваниями опорно-двигательного аппарата.
+                  {content.advantages[0].description}
                 </p>
               </div>
             </motion.div>
@@ -203,7 +265,7 @@ export default function Home() {
               <div>
                 <h3 className="text-xl font-semibold text-primary mb-2">Индивидуальный Подход</h3>
                 <p className="text-dark">
-                  Программы реабилитации разрабатываются с учетом ваших особенностей, целей и образа жизни.
+                  {content.advantages[1].description}
                 </p>
               </div>
             </motion.div>
@@ -235,7 +297,7 @@ export default function Home() {
               <div>
                 <h3 className="text-xl font-semibold text-primary mb-2">Удобный Формат</h3>
                 <p className="text-dark">
-                  Онлайн-консультации и программы позволяют получить помощь независимо от вашего местоположения.
+                  {content.advantages[2].description}
                 </p>
               </div>
             </motion.div>
@@ -272,7 +334,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Мы Предоставляем Качественную<br />Реабилитационную Помощь
+              {content.about.title}
             </motion.h2>
             <motion.div 
               className="h-1 w-20 bg-accent mx-auto"
@@ -293,7 +355,7 @@ export default function Home() {
                 transition={{ duration: 0.3 }}
               >
                 <Image 
-                  src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800&h=600&auto=format&fit=crop" 
+                  src={content.about.bg || "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800&h=600&auto=format&fit=crop"} 
                   alt="Реабилитационный процесс" 
                   width={600}
                   height={450}
@@ -306,7 +368,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.2 }}
                 >
-                  8+ лет опыта
+                  {content.about.experience}
                 </motion.div>
               </motion.div>
             </motion.div>
@@ -321,7 +383,7 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
               >
-                Существует множество вариаций травм и заболеваний, которые требуют профессионального подхода к реабилитации. Моя задача — помочь вам вернуться к полноценной жизни без боли и ограничений с помощью научно обоснованных методик и индивидуального подхода.
+                {content.about.description}
               </motion.p>
               
               <motion.div 
@@ -345,10 +407,10 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </motion.div>
-                  Доступные цены
+                  {content.about.priceTitle}
                 </h3>
                 <p className="text-dark">
-                  Качественная и профессиональная реабилитация по разумным ценам, с возможностью выбора формата работы под ваш бюджет.
+                  {content.about.priceDescription}
                 </p>
               </motion.div>
               
@@ -373,10 +435,10 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </motion.div>
-                  Проверенные методики
+                  {content.about.methodsTitle}
                 </h3>
                 <p className="text-dark">
-                  Все рекомендации и программы основаны на современных научных данных и подтвержденных практикой методиках.
+                  {content.about.methodsDescription}
                 </p>
               </motion.div>
             </motion.div>
@@ -384,10 +446,10 @@ export default function Home() {
           
           {/* Статистика */}
           <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <Counter value={200} label="Довольных клиентов" plus={true} delay={0} />
-            <Counter value={500} label="Проведенных консультаций" plus={true} delay={0.1} />
-            <Counter value={50} label="Онлайн-программ" plus={true} delay={0.2} />
-            <Counter value={8} label="Лет опыта" plus={true} delay={0.3} />
+            <Counter value={content.stats.satisfiedClients} label={content.stats.satisfiedClientsLabel} plus={true} delay={0} />
+            <Counter value={content.stats.consultations} label={content.stats.consultationsLabel} plus={true} delay={0.1} />
+            <Counter value={content.stats.onlinePrograms} label={content.stats.onlineProgramsLabel} plus={true} delay={0.2} />
+            <Counter value={content.stats.experience} label={content.stats.experienceLabel} plus={true} delay={0.3} />
           </div>
         </div>
       </motion.section>
@@ -416,7 +478,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              Что Мы <span className="text-accent">Предлагаем</span> Для Наших<br />Клиентов
+              {content.services.title}
             </motion.h2>
             <motion.div 
               className="h-1 w-20 bg-accent mx-auto"
@@ -457,7 +519,7 @@ export default function Home() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.3, delay: 0.2 }}
-                  >Консультации</motion.span>
+                  >{content.services.consultations.title}</motion.span>
                 </div>
               </div>
               <div className="p-6">
@@ -467,7 +529,7 @@ export default function Home() {
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: 0.3 }}
-                >Онлайн-консультации</motion.h3>
+                >{content.services.consultations.title}</motion.h3>
                 <motion.p 
                   className="text-dark mb-4"
                   initial={{ opacity: 0 }}
@@ -475,7 +537,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: 0.4 }}
                 >
-                  Детальный анализ вашей проблемы, рекомендации и план действий в удобном онлайн-формате.
+                  {content.services.consultations.description}
                 </motion.p>
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -523,7 +585,7 @@ export default function Home() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.3, delay: 0.3 }}
-                  >Программы</motion.span>
+                  >{content.services.programs.title}</motion.span>
                 </div>
               </div>
               <div className="p-6">
@@ -533,7 +595,7 @@ export default function Home() {
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: 0.4 }}
-                >Индивидуальные программы</motion.h3>
+                >{content.services.programs.title}</motion.h3>
                 <motion.p 
                   className="text-dark mb-4"
                   initial={{ opacity: 0 }}
@@ -541,7 +603,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: 0.5 }}
                 >
-                  Персональные программы реабилитации и восстановления с учетом ваших особенностей и целей.
+                  {content.services.programs.description}
                 </motion.p>
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -589,7 +651,7 @@ export default function Home() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.3, delay: 0.4 }}
-                  >Анализ</motion.span>
+                  >{content.services.analysis.title}</motion.span>
                 </div>
               </div>
               <div className="p-6">
@@ -599,7 +661,7 @@ export default function Home() {
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: 0.5 }}
-                >Анализ движения</motion.h3>
+                >{content.services.analysis.title}</motion.h3>
                 <motion.p 
                   className="text-dark mb-4"
                   initial={{ opacity: 0 }}
@@ -607,7 +669,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: 0.6 }}
                 >
-                  Детальная оценка биомеханики вашего движения для выявления и исправления проблемных зон.
+                  {content.services.analysis.description}
                 </motion.p>
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -647,35 +709,18 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
               >
-                Когда Вам Нужна<br/>Реабилитационная Помощь?<br />
+                {content.help.title}
                 <motion.span 
                   className="text-accent-light"
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                >Я Всегда Рядом</motion.span>
+                >{content.help.subtitle}</motion.span>
               </motion.h2>
               
               <div className="space-y-6">
-                {[
-                  {
-                    title: 'Боли в спине и шее',
-                    text: 'Профессиональная помощь при острых и хронических болях в спине, шее и суставах.'
-                  },
-                  {
-                    title: 'После травм и операций',
-                    text: 'Восстановление подвижности и функций после травм, переломов и хирургических вмешательств.'
-                  },
-                  {
-                    title: 'Нарушения осанки',
-                    text: 'Коррекция осанки, устранение мышечного дисбаланса и улучшение биомеханики движений.'
-                  },
-                  {
-                    title: 'Спортивные травмы',
-                    text: 'Восстановление после спортивных травм и разработка программ профилактики повторных повреждений.'
-                  }
-                ].map((item, index) => (
+                {content.help.items.map((item: any, index: number) => (
                   <motion.div 
                     key={index}
                     className="flex items-start bg-primary-dark/50 p-4 rounded-lg" 
@@ -703,7 +748,7 @@ export default function Home() {
                     <div>
                       <h3 className="text-xl font-medium mb-2" style={{color: '#d1f3ea'}}>{item.title}</h3>
                       <p className="text-gray-200" style={{color: '#d1f3ea'}}>
-                        {item.text}
+                        {item.description}
                       </p>
                     </div>
                   </motion.div>
@@ -756,7 +801,7 @@ export default function Home() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6 }}
           >
-            Готовы начать работу над своим здоровьем?
+            {content.cta.title}
           </motion.h2>
           <motion.p 
             className="text-lg text-dark mb-8 max-w-3xl mx-auto"
@@ -765,8 +810,7 @@ export default function Home() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            Выберите подходящий формат работы и начните путь к восстановлению и здоровью
-            уже сегодня. Я помогу вам достичь ваших целей.
+            {content.cta.description}
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -778,9 +822,9 @@ export default function Home() {
           >
             <Link 
               href="/contacts"
-              className="btn bg-accent hover:bg-accent-dark text-white px-8 py-3 rounded-md font-medium transition-all"
+              className="btn bg-accent hover:bg-accent-dark text-white !text-white px-8 py-3 rounded-md font-medium transition-all"
             >
-              Записаться на консультацию
+              {content.cta.buttonText}
             </Link>
           </motion.div>
         </div>

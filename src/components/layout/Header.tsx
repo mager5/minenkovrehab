@@ -150,35 +150,35 @@ export default function Header() {
             <nav className="hidden md:flex space-x-1 lg:space-x-2" aria-label="Основная навигация">
               <Link 
                 href="/" 
-                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 ${pathname === '/' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                 aria-current={pathname === '/' ? 'page' : undefined}
               >
                 Главная
               </Link>
               <Link 
                 href="/about" 
-                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 ${pathname === '/about' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/about' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                 aria-current={pathname === '/about' ? 'page' : undefined}
               >
                 Обо мне
               </Link>
               <Link 
                 href="/products" 
-                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 ${pathname === '/products' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/products' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                 aria-current={pathname === '/products' ? 'page' : undefined}
               >
                 Услуги
               </Link>
               <Link 
                 href="/reviews" 
-                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 ${pathname === '/reviews' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/reviews' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                 aria-current={pathname === '/reviews' ? 'page' : undefined}
               >
                 Отзывы
               </Link>
               <Link 
                 href="/contacts" 
-                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 ${pathname === '/contacts' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/contacts' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                 aria-current={pathname === '/contacts' ? 'page' : undefined}
               >
                 Контакты
@@ -201,7 +201,7 @@ export default function Header() {
             <div className="md:hidden">
               <button
                 type="button"
-                className="text-gray-800 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-300 p-2 rounded-md"
+                className="text-gray-800 hover:text-primary focus:outline-none transition-all duration-300 p-2 rounded-md"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label={isMenuOpen ? "Закрыть меню" : "Открыть меню"}
                 aria-expanded={isMenuOpen}
@@ -243,7 +243,7 @@ export default function Header() {
               <Link 
                 href="/" 
                 onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 pl-2 border-l-2 border-transparent hover:border-primary hover:pl-4 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:rounded-sm ${pathname === '/' ? 'text-primary font-semibold border-primary pl-4' : 'text-gray-800'}`}
+                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
                 aria-current={pathname === '/' ? 'page' : undefined}
               >
                   Главная
@@ -251,7 +251,7 @@ export default function Header() {
               <Link 
                 href="/about" 
                 onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 pl-2 border-l-2 border-transparent hover:border-primary hover:pl-4 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:rounded-sm ${pathname === '/about' ? 'text-primary font-semibold border-primary pl-4' : 'text-gray-800'}`}
+                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/about' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
                 aria-current={pathname === '/about' ? 'page' : undefined}
               >
                   Обо мне
@@ -259,7 +259,7 @@ export default function Header() {
               <Link 
                 href="/products" 
                 onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 pl-2 border-l-2 border-transparent hover:border-primary hover:pl-4 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:rounded-sm ${pathname === '/products' ? 'text-primary font-semibold border-primary pl-4' : 'text-gray-800'}`}
+                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/products' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
                 aria-current={pathname === '/products' ? 'page' : undefined}
               >
                   Услуги
@@ -267,7 +267,7 @@ export default function Header() {
               <Link 
                 href="/reviews" 
                 onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 pl-2 border-l-2 border-transparent hover:border-primary hover:pl-4 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:rounded-sm ${pathname === '/reviews' ? 'text-primary font-semibold border-primary pl-4' : 'text-gray-800'}`}
+                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/reviews' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
                 aria-current={pathname === '/reviews' ? 'page' : undefined}
               >
                   Отзывы
@@ -275,7 +275,7 @@ export default function Header() {
               <Link 
                 href="/contacts" 
                 onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 pl-2 border-l-2 border-transparent hover:border-primary hover:pl-4 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:rounded-sm ${pathname === '/contacts' ? 'text-primary font-semibold border-primary pl-4' : 'text-gray-800'}`}
+                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/contacts' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
                 aria-current={pathname === '/contacts' ? 'page' : undefined}
               >
                   Контакты

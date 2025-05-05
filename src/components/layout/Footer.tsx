@@ -15,7 +15,7 @@ const AboutColumn = () => {
 
   return (
     <div className="transform transition-all duration-500 hover:translate-y-[-5px]">
-      <h3 className="text-xl font-bold mb-6 text-white relative inline-block after:content-[''] after:absolute after:w-14 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]">Миненков<span className="text-accent">Rehab</span></h3>
+      <h3 className="text-xl font-bold mb-6 text-white relative inline-block after:content-[''] after:absolute after:w-14 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]">Миненков <span className="text-accent">Вадим</span></h3>
       <p className="text-white mb-4 font-semibold" style={{color: '#d1f3ea'}}>
         Профессиональная физическая реабилитация с индивидуальным подходом к каждому пациенту. Работаю с болями в спине, шее, суставах и помогаю восстановиться после травм.
       </p>
@@ -253,7 +253,7 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
     <div className="container mx-auto px-4">
       <div className="flex flex-col md:flex-row justify-between items-center">
         <p className="text-white text-center md:text-left font-semibold" style={{color: '#d1f3ea'}}>
-          © {currentYear} МиненковRehab. Все права защищены.
+          © {currentYear} Миненков Вадим. Все права защищены.
         </p>
         <div className="mt-4 md:mt-0 flex flex-wrap justify-center md:justify-end">
           <ul className="flex flex-wrap justify-center space-x-3 sm:space-x-6" role="menu" aria-label="Дополнительная информация">

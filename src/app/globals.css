@@ -348,3 +348,20 @@ html, body {
   position: relative;
   overflow-y: auto;
 }
+
+@media (max-width: 640px) {
+  .hero-image {
+    object-fit: contain !important;
+  }
+}
+
+@media (min-width: 390px) and (max-width: 640px) {
+  .hero-image {
+    object-fit: cover !important;
+  }
+}
+
+.hero-title {
+  font-size: clamp(1.5rem, 5vw + 1rem, 2.8rem);
+  line-height: 1.1;
+}

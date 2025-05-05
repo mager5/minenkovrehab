@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { AboutContent } from '@/types/content';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -20,6 +21,14 @@ const fadeIn = {
 };
 
 export default function AboutPage() {
+  const [content, setContent] = useState<AboutContent | null>(null);
+  
+  useEffect(() => {
+    fetch('/api/content-about')
+      .then(res => res.json())
+      .then(data => setContent(data));
+  }, []);
+
   // Рефы для секций с параллакс-эффектом
   const heroRef = useRef(null);
   
@@ -33,6 +42,8 @@ export default function AboutPage() {
   const heroContentY = useTransform(heroScroll, [0, 1], [0, -50]);
   const heroOpacity = useTransform(heroScroll, [0, 0.8], [1, 0.3]);
   
+  if (!content) return null;
+  
   return (
     <div className="flex flex-col">
       {/* Hero секция */}
@@ -45,7 +56,7 @@ export default function AboutPage() {
           style={{ y: heroImageY }}
         >
           <Image 
-            src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=1920&h=800&auto=format&fit=crop" 
+            src={content.heroBg} 
             alt="О реабилитологе" 
             fill
             className="object-cover"
@@ -72,7 +83,7 @@ export default function AboutPage() {
             animate="visible"
             custom={1}
           >
-            Профессиональный подход к физической реабилитации с научно обоснованными методиками и индивидуальным подходом.
+            {content.subtitle}
           </motion.p>
         </motion.div>
       </motion.section>
@@ -98,149 +109,97 @@ export default function AboutPage() {
               
               <motion.p 
                 className="text-dark text-lg mb-4"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-              >
-                <span className="font-semibold text-primary">Опыт работы более 8 лет</span> с различными травмами и заболеваниями опорно-двигательного аппарата.
-              </motion.p>
-              
-              <motion.p 
-                className="text-dark text-lg mb-6"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                Программы реабилитации разрабатываются с учетом ваших особенностей, целей и образа жизни.
+                {content.description}
               </motion.p>
-              
-              <motion.div 
-                className="border-l-4 border-accent pl-6 my-8"
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                <p className="text-dark text-lg italic">
-                  Существует множество вариаций травм и заболеваний, которые требуют профессионального подхода к реабилитации. Моя задача — помочь вам вернуться к полноценной жизни без боли и ограничений с помощью научно обоснованных методик и индивидуального подхода.
-                </p>
-              </motion.div>
-              
-              <motion.p 
-                className="text-dark text-lg mb-4"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                Качественная и профессиональная реабилитация по разумным ценам, с возможностью выбора формата работы под ваш бюджет.
-              </motion.p>
-              
-              <motion.p 
-                className="text-dark text-lg mb-6"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-              >
-                Детальный анализ вашей проблемы, рекомендации и план действий в удобном онлайн-формате.
-              </motion.p>
-              
-              <motion.div 
-                className="bg-gray-50 p-6 rounded-lg my-8"
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-              >
-                <p className="text-lg text-dark font-medium">
-                  Выберите подходящий формат работы и начните путь к восстановлению и здоровью уже сегодня. Я помогу вам достичь ваших целей.
-                </p>
-              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <div className="relative w-full h-96 rounded-xl overflow-hidden">
+                    <Image
+                      src={content.photo}
+                      alt="Вадим Миненков"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                >
+                  <h3 className="text-2xl font-bold text-primary mb-4">Преимущества</h3>
+                  <ul className="space-y-3">
+                    {content.advantages.map((advantage: string, idx: number) => (
+                      <motion.li
+                        key={idx}
+                        className="flex items-start"
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.3, delay: 0.5 + idx * 0.1 }}
+                      >
+                        <span className="text-primary mr-2">✓</span>
+                        {advantage}
+                      </motion.li>
+                    ))}
+                  </ul>
+                </motion.div>
+              </div>
             </motion.div>
-            
-            <motion.div 
+
+            {/* Сертификаты */}
+            <motion.div
               className="bg-white rounded-xl shadow-sm p-8"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: 0.3 }}
             >
-              <motion.h2 
-                className="text-3xl font-bold text-primary mb-6"
+              <motion.h2
+                className="text-3xl font-bold text-primary mb-8"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
-              >Доступные услуги</motion.h2>
-              
-              <ul className="space-y-4">
-                {[1, 2, 3, 4, 5].map((item, index) => (
-                  <motion.li 
-                    key={item}
-                    className="flex items-start"
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.1 * (index + 1) }}
-                  >
-                    <div className="bg-accent-light rounded-full p-1 mt-1 mr-3">
-                      <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div>
-                      {item === 1 && (
-                        <>
-                          <h3 className="text-xl font-semibold text-primary mb-2">Онлайн-консультации</h3>
-                          <p className="text-dark">Детальный анализ вашей проблемы, функциональное тестирование и разработка стратегии восстановления.</p>
-                        </>
-                      )}
-                      {item === 2 && (
-                        <>
-                          <h3 className="text-xl font-semibold text-primary mb-2">Программы реабилитации</h3>
-                          <p className="text-dark">Индивидуальные программы с учетом ваших особенностей, направленные на достижение конкретных результатов.</p>
-                        </>
-                      )}
-                      {item === 3 && (
-                        <>
-                          <h3 className="text-xl font-semibold text-primary mb-2">Личные тренировки</h3>
-                          <p className="text-dark">Персональные тренировки под руководством специалиста с контролем техники выполнения.</p>
-                        </>
-                      )}
-                      {item === 4 && (
-                        <>
-                          <h3 className="text-xl font-semibold text-primary mb-2">Анализ движения</h3>
-                          <p className="text-dark">Детальный анализ биомеханики движений для выявления причин боли и дискомфорта.</p>
-                        </>
-                      )}
-                      {item === 5 && (
-                        <>
-                          <h3 className="text-xl font-semibold text-primary mb-2">Курсы и вебинары</h3>
-                          <p className="text-dark">Образовательные материалы для самостоятельной работы над своим здоровьем.</p>
-                        </>
-                      )}
-                    </div>
-                  </motion.li>
-                ))}
-              </ul>
-              
-              <motion.div 
-                className="mt-10 text-center"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.7 }}
               >
-                <Link 
-                  href="/products" 
-                  className="inline-block bg-primary hover:bg-primary-dark text-white py-3 px-8 rounded-md transition-colors"
-                >
-                  Посмотреть все услуги
-                </Link>
-              </motion.div>
+                Сертификаты и квалификация
+              </motion.h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {content.certificates.map((cert, idx) => (
+                  <motion.div
+                    key={idx}
+                    className="bg-gray-50 rounded-lg p-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.4 + idx * 0.1 }}
+                  >
+                    <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
+                      <Image
+                        src={cert.image}
+                        alt={cert.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <h3 className="text-lg font-semibold text-primary">{cert.title}</h3>
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
           </div>
         </div>
