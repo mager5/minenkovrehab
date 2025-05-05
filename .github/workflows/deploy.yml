@@ -41,7 +41,7 @@ jobs:
         run: npm run build
       
       - name: Copy build output
-        run: cp -r .next/out/* out/
+        run: cp -r .next/static out/ && cp -r .next/standalone/* out/ || cp -r .next/server/app out/
       
       - name: Copy CNAME file
         run: |
