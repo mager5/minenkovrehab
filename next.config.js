@@ -35,6 +35,11 @@ const nextConfig = {
   basePath: '/minenkovrehab',
   assetPrefix: '/minenkovrehab/',
   trailingSlash: true,
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  experimental: {
+    appDir: true,
+    serverComponentsExternalPackages: ['nodemailer'],
+  },
 }
 
 module.exports = nextConfig 
