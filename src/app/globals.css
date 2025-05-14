@@ -1,0 +1,520 @@
+@import "tailwindcss";
+
+:root {
+  /* Цвета */
+  --background: #FFFFFF;
+  --foreground: #333333;
+  --foreground-dark: #1A1A1A;
+  --primary: #0063A5;
+  --primary-dark: #004D85;
+  --secondary: #E6F2F9;
+  --accent: #2baa7e;
+  --accent-light: #D1F3EA;
+  --accent-dark: #0E9673;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --dark: #222222;
+  
+  /* Добавляем переменную spacing */
+  --spacing: 0.25rem;
+  
+  /* Анимационные переменные */
+  --animation-duration-fast: 0.15s;
+  --animation-duration-base: 0.3s;
+  --animation-duration-slow: 0.5s;
+  --animation-duration-slower: 0.8s;
+  
+  /* Функции плавности */
+  --animation-ease-default: cubic-bezier(0.25, 0.1, 0.25, 1.0);
+  --animation-ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+  --animation-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --animation-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --animation-ease-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  
+  /* Задержки анимаций */
+  --animation-delay-none: 0s;
+  --animation-delay-short: 0.1s;
+  --animation-delay-medium: 0.2s;
+  --animation-delay-long: 0.3s;
+  
+  /* Параметры для hover эффектов */
+  --hover-lift-y: -5px;
+  --hover-scale: 1.05;
+  --hover-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-foreground-dark: var(--foreground-dark);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-accent-dark: var(--accent-dark);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: #FFFFFF;
+  color: var(--foreground-dark);
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 5rem;
+}
+
+/* Заголовки с повышенной контрастностью */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--foreground-dark);
+  font-weight: 700;
+}
+
+/* Улучшенная типография для всего сайта */
+p {
+  color: var(--dark);
+  font-weight: 450;
+  line-height: 1.7;
+}
+
+/* Текст для светлых фонов */
+.text-on-light {
+  color: var(--dark);
+  font-weight: 500;
+}
+
+/* Текст для темных фонов */
+.text-on-dark {
+  color: white;
+  font-weight: 600; 
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* Улучшение читаемости текста на темных фонах */
+.text-white {
+  color: white !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+}
+
+/* Более контрастный текст для кнопок */
+button, .btn {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Кнопки */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  transition: all var(--animation-duration-base) var(--animation-ease-default);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  transform: translateY(var(--hover-lift-y));
+  box-shadow: var(--hover-shadow);
+}
+
+/* Анимации */
+.hover-lift {
+  transition: transform var(--animation-duration-base) var(--animation-ease-default), box-shadow var(--animation-duration-base) var(--animation-ease-default);
+}
+
+.hover-lift:hover {
+  transform: translateY(var(--hover-lift-y));
+  box-shadow: var(--hover-shadow);
+}
+
+/* Утилиты */
+.text-accent-gradient {
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+/* Стилизованные заголовки секций */
+.section-title {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+  font-weight: 700;
+  color: var(--foreground-dark);
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background-color: var(--accent);
+}
+
+.section-title--center::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Карточки */
+.card {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all var(--animation-duration-base) var(--animation-ease-default);
+  background-color: white;
+}
+
+.card:hover {
+  box-shadow: var(--hover-shadow);
+  transform: translateY(var(--hover-lift-y));
+}
+
+/* Анимации для элементов */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(25, 189, 144, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(25, 189, 144, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(25, 189, 144, 0);
+  }
+}
+
+/* Классы анимации */
+.animate-fadeIn {
+  animation: fadeIn var(--animation-duration-slow) var(--animation-ease-out) forwards;
+}
+
+.animate-fadeInFromRight {
+  animation: fadeInFromRight var(--animation-duration-slow) var(--animation-ease-out) forwards;
+}
+
+.animate-fadeInFromLeft {
+  animation: fadeInFromLeft var(--animation-duration-slow) var(--animation-ease-out) forwards;
+}
+
+.animate-scaleUp {
+  animation: scaleUp var(--animation-duration-base) var(--animation-ease-out) forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Задержки анимации */
+.delay-100 {
+  animation-delay: var(--animation-delay-short);
+}
+
+.delay-200 {
+  animation-delay: var(--animation-delay-medium);
+}
+
+.delay-300 {
+  animation-delay: var(--animation-delay-long);
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+/* Стили для телефонного номера в шапке */
+a[href^="tel:"] {
+  color: #ffffff !important;
+  text-decoration: none;
+}
+
+/* Поддержка Retina изображений */
+.img-retina {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.bg-img {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Медиа-запрос для Retina дисплеев */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Классы для оптимизации изображений на Retina экранах */
+  .retina-ready img {
+    transform: translateZ(0); /* Включает GPU-акселерацию */
+  }
+}
+
+/* Классы для работы с фоновыми изображениями для Retina */
+.bg-retina {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* Это позволяет браузеру оптимизировать изображения на Retina дисплеях */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* Предотвращение горизонтального скролла на мобильных устройствах */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+  position: relative;
+  overflow-y: auto;
+}
+
+.hero-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-title {
+  font-size: clamp(1.5rem, 5vw + 1rem, 2.8rem);
+  line-height: 1.1;
+}
+
+.hero-section {
+  position: relative;
+  background-image: url('/images/hero/hero-banner.jpg');
+  background-size: cover;
+  background-position: 85% center;
+  background-repeat: no-repeat;
+  min-height: 800px;
+}
+
+/* Оверлей для hero секции */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1));
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Адаптивное масштабирование для десктопа */
+@media (max-width: 1400px) {
+  .hero-section {
+    background-position: 90% center;
+  }
+}
+
+@media (max-width: 1200px) {
+  .hero-section {
+    background-position: 95% center;
+  }
+}
+
+@media (max-width: 992px) {
+  .hero-section {
+    background-position: 100% center;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    background-image: url('/images/hero/hero-banner-mobile.jpg');
+    background-position: center;
+    min-height: 500px;
+  }
+
+  /* Усиленный оверлей для мобильных устройств */
+  .hero-section::before {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.15));
+  }
+
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Улучшение читаемости текста на мобильных устройствах */
+  .hero-title {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero-section p {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.hero-section > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Стили для чекбоксов */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #fff;
+  margin: 0;
+  position: relative;
+  border: 2px solid #E5E7EB;
+  border-radius: 0.25rem;
+  display: grid;
+  place-content: center;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+input[type="checkbox"]:checked::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(1);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em white;
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+input[type="checkbox"]:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(43, 170, 126, 0.2);
+}
+
+input[type="checkbox"]:hover {
+  border-color: var(--accent);
+}
+
+/* Стили для кнопок в hero секции */
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.hero-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.hero-button.primary {
+  background-color: var(--accent);
+  color: white;
+}
+
+.hero-button.secondary {
+  background-color: white;
+  color: var(--accent);
+}
+
+/* Адаптив для кнопок */
+@media (max-width: 832px) and (min-width: 769px) {
+  .hero-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .hero-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Контейнер с преимуществами */
+.container.overflow-x-hidden {
+  overflow: hidden;
+  margin-right: calc(-1 * (100vw - 100%));
+}
+
+/* Внутренний контейнер для преимуществ */
+.container.overflow-x-hidden > .flex {
+  margin-right: auto;
+  width: 100%;
+}
