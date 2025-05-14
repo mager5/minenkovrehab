@@ -1,15 +1,19 @@
 name: Deploy to GitHub Pages
 
+# Добавлен тестовый комментарий для проверки работы Actions
 on:
   push:
-    branches: ["master"]
+    branches: ["gh-pages"]
+  # Позволяет запускать workflow вручную из интерфейса Actions
   workflow_dispatch:
 
+# Устанавливаем права для GITHUB_TOKEN, чтобы он мог деплоить на GitHub Pages
 permissions:
   contents: write
   pages: write
   id-token: write
 
+# Позволяет запускать только один деплой и отменяет предыдущие деплои в процессе
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -33,10 +37,8 @@ jobs:
       - name: Build with Next.js
         run: npm run build
       
-      - name: Create out directory and .nojekyll file
-        run: |
-          mkdir -p out
-          touch out/.nojekyll
+      - name: Create .nojekyll file
+        run: touch out/.nojekyll
       
       - name: Copy CNAME file
         run: |
@@ -62,7 +64,11 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./out
+          # Не удалять существующие файлы в ветке gh-pages
           keep_files: false
+          # Принудительно запушить историю
           force_orphan: true
+          # Указать кастомизированное имя коммита
           commit_message: "Deploy to GitHub Pages [skip ci]"
+          # Включить детальные сообщения о выполнении
           full_commit_message: "Deploy to GitHub Pages from commit ${{ github.sha }} [skip ci]" 
