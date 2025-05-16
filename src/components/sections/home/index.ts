@@ -5,7 +5,8 @@
  */
 
 export { AboutSection } from './AboutSection';
-export { CTASection } from './CTASection';
 export { FeaturesSection } from './FeaturesSection';
+export { ServicesSection } from './ServicesSection';
 export { HelpSection } from './HelpSection';
-export { ServicesSection } from './ServicesSection'; 
+export { CTASection } from './CTASection';
+export { default as Hero } from './Hero'; 

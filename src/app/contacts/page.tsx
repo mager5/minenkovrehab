@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import BookingModal from '@/components/BookingModal';
-import ContactForm from '@/components/sections/contact/ContactForm';
+import { BookingModal } from '@/components/shared';
+import { ContactForm } from '@/components/sections/contact';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { getContactsContent } from '@/lib/content';
 

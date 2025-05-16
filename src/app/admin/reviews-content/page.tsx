@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import ImageUpload from '@/components/ImageUpload';
+import { useRouter } from 'next/navigation';
+import { ImageUpload } from '@/components/ui';
 
 interface Review {
   id: string;

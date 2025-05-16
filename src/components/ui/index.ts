@@ -1,8 +1,10 @@
 /**
- * Индексный файл UI-компонентов
+ * Индексный файл UI компонентов
  * 
- * Экспортирует все компоненты из директории UI для более удобного импорта
+ * Экспортирует базовые UI компоненты, используемые в приложении
  */
 
+export { Counter } from './Counter';
 export { Button } from './Button';
-export { Counter } from './Counter'; 
+export { default as AnimatedFeature } from './AnimatedFeature';
+export { default as ImageUpload } from './ImageUpload'; 

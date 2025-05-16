@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import AnimatedFeature from '@/components/AnimatedFeature';
+import { AnimatedFeature } from '@/components/ui';
 import { FiActivity, FiAward, FiClock, FiHeart, FiShield, FiSmile } from 'react-icons/fi';
 
 const AnimatedFeaturesSection = () => {

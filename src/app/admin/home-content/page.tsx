@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import ImageUpload from '@/components/ImageUpload';
+import { useRouter } from 'next/navigation';
+import { ImageUpload } from '@/components/ui';
 
 export default function HomeContentAdmin() {
   const [content, setContent] = useState<any>(null);
