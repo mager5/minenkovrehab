@@ -3,9 +3,10 @@
 // import Image from 'next/image'; // Удаляем или комментируем
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
-import { Counter } from '@/components/Counter';
+import { useRef, useState, useEffect } from 'react';
+import { Counter } from '@/components/ui/Counter';
 import { aboutContent } from '@/data/about-content';
+import { getAboutContent } from '@/lib/content';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -21,7 +22,60 @@ const fadeIn = {
   })
 };
 
+// Определение типа контента о нас
+interface AboutContentType {
+  hero: {
+    title: string;
+    subtitle: string;
+    description: string;
+  };
+  mission: {
+    title: string;
+    description: string;
+    values: {
+      title: string;
+      description: string;
+    }[];
+  };
+  experience: {
+    title: string;
+    description: string;
+    stats: {
+      value: number;
+      label: string;
+    }[];
+  };
+  approach: {
+    title: string;
+    steps: {
+      title: string;
+      description: string;
+    }[];
+  };
+  team: {
+    title: string;
+    description: string;
+  };
+}
+
 export default function About() {
+  // Состояние для данных страницы
+  const [content, setContent] = useState<AboutContentType>(aboutContent);
+  
+  // Загрузка контента при монтировании компонента
+  useEffect(() => {
+    async function loadAboutData() {
+      try {
+        const data = await getAboutContent<AboutContentType>();
+        setContent(data);
+      } catch (error) {
+        console.error('Ошибка загрузки данных о нас:', error);
+      }
+    }
+    
+    loadAboutData();
+  }, []);
+
   // Рефы для секций с параллакс-эффектом
   const heroRef = useRef(null);
   
@@ -66,7 +120,7 @@ export default function About() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {aboutContent.hero.title}
+            {content.hero.title}
           </motion.h1>
           <motion.h2 
             className="text-2xl md:text-3xl font-semibold mb-6 text-accent-light"
@@ -74,7 +128,7 @@ export default function About() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            {aboutContent.hero.subtitle}
+            {content.hero.subtitle}
           </motion.h2>
           <motion.p 
             className="text-lg opacity-90 text-white max-w-2xl mx-auto"
@@ -82,7 +136,7 @@ export default function About() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            {aboutContent.hero.description}
+            {content.hero.description}
           </motion.p>
         </motion.div>
       </motion.section>
@@ -97,12 +151,12 @@ export default function About() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-primary mb-6">{aboutContent.mission.title}</h2>
-            <p className="text-lg text-gray-600">{aboutContent.mission.description}</p>
+            <h2 className="text-3xl font-bold text-primary mb-6">{content.mission.title}</h2>
+            <p className="text-lg text-gray-600">{content.mission.description}</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {aboutContent.mission.values.map((value, index) => (
+            {content.mission.values.map((value, index) => (
               <motion.div 
                 key={index}
                 className="bg-gray-50 p-6 rounded-lg"
@@ -129,12 +183,12 @@ export default function About() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-primary mb-6">{aboutContent.experience.title}</h2>
-            <p className="text-lg text-gray-600">{aboutContent.experience.description}</p>
+            <h2 className="text-3xl font-bold text-primary mb-6">{content.experience.title}</h2>
+            <p className="text-lg text-gray-600">{content.experience.description}</p>
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {aboutContent.experience.stats.map((stat, index) => (
+            {content.experience.stats.map((stat, index) => (
               <Counter 
                 key={index}
                 value={stat.value}
@@ -157,11 +211,11 @@ export default function About() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-primary mb-6">{aboutContent.approach.title}</h2>
+            <h2 className="text-3xl font-bold text-primary mb-6">{content.approach.title}</h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {aboutContent.approach.steps.map((step, index) => (
+            {content.approach.steps.map((step, index) => (
               <motion.div 
                 key={index}
                 className="bg-gray-50 p-6 rounded-lg"
@@ -193,8 +247,8 @@ export default function About() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-primary mb-6">{aboutContent.team.title}</h2>
-            <p className="text-lg text-gray-600">{aboutContent.team.description}</p>
+            <h2 className="text-3xl font-bold text-primary mb-6">{content.team.title}</h2>
+            <p className="text-lg text-gray-600">{content.team.description}</p>
           </motion.div>
         </div>
       </section>

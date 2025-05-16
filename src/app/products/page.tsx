@@ -3,10 +3,44 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import productsContent from '@/../content-products.json';
-import { useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { getProductsContent } from '@/lib/content';
+
+// Интерфейс для типизации контента продуктов
+interface ProductContentType {
+  title: string;
+  description: string;
+  services: {
+    id: string;
+    title: string;
+    description: string;
+    price: string;
+    image: string;
+  }[];
+}
 
 export default function ProductsPage() {
+  // Состояние для данных страницы
+  const [productsContent, setProductsContent] = useState<ProductContentType>({
+    title: "Услуги",
+    description: "Выберите подходящую услугу для ваших потребностей в реабилитации",
+    services: []
+  });
+
+  // Загрузка контента при монтировании компонента
+  useEffect(() => {
+    async function loadProductsData() {
+      try {
+        const data = await getProductsContent<ProductContentType>();
+        setProductsContent(data);
+      } catch (error) {
+        console.error('Ошибка загрузки данных продуктов:', error);
+      }
+    }
+    
+    loadProductsData();
+  }, []);
+  
   // Рефы для секций с параллакс-эффектом
   const heroRef = useRef(null);
   

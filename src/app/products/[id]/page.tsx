@@ -2,6 +2,7 @@
 import { products } from '../data';
 import { Metadata } from 'next';
 import ProductPageProxy from './page-proxy';
+import { getAllProductIds, getProductById } from '../productAdapter';
 
 // Маркер для статической генерации
 export const dynamic = 'force-static';
@@ -9,7 +10,9 @@ export const dynamic = 'force-static';
 // Метаданные для страницы продукта
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const product = products.find(p => p.id === id);
+  
+  // Получаем продукт из централизованного хранилища
+  const product = await getProductById(id);
   
   if (!product) {
     return {
@@ -25,9 +28,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 // Функция для статической генерации страниц
-export function generateStaticParams() {
-  return products.map((product) => ({
-    id: product.id,
+export async function generateStaticParams() {
+  // Получаем все id продуктов из централизованного хранилища
+  const productIds = await getAllProductIds();
+  
+  return productIds.map((id) => ({
+    id,
   }));
 }
 
@@ -36,8 +42,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   // Получаем id из промиса params
   const { id } = await params;
   
-  // Эта часть будет рендериться на сервере
-  const product = products.find(p => p.id === id);
+  // Получаем продукт из централизованного хранилища
+  const product = await getProductById(id);
   const productExists = !!product;
   
   return <ProductPageProxy product={product} productExists={productExists} />;

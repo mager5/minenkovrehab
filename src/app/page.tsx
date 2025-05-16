@@ -7,6 +7,9 @@ import { ServicesSection } from '@/components/ServicesSection';
 import { HelpSection } from '@/components/HelpSection';
 import { CTASection } from '@/components/CTASection';
 import { FeaturesSection } from '@/components/FeaturesSection';
+import { useState, useEffect } from 'react';
+import { getHomeContent } from '@/lib/content';
+import { homeContent } from '@/data/home-content';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -23,6 +26,21 @@ const fadeIn = {
 };
 
 export default function Home() {
+  const [content, setContent] = useState(homeContent);
+
+  useEffect(() => {
+    async function loadContent() {
+      try {
+        const data = await getHomeContent();
+        setContent(data);
+      } catch (error) {
+        console.error('Ошибка загрузки контента главной:', error);
+      }
+    }
+    
+    loadContent();
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Hero секция с фоном и текстом */}

@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import BookingModal from '@/components/BookingModal';
-import ContactForm from '@/components/ContactForm';
+import ContactForm from '@/components/sections/contact/ContactForm';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { getContactsContent } from '@/lib/content';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -57,11 +58,8 @@ export default function ContactsPage() {
   useEffect(() => {
     async function loadContactData() {
       try {
-        const response = await fetch('/content-contacts.json');
-        if (response.ok) {
-          const data = await response.json();
-          setContactData(data);
-        }
+        const data = await getContactsContent<ContactData>();
+        setContactData(data);
       } catch (error) {
         console.error('Ошибка загрузки контактных данных:', error);
       }
