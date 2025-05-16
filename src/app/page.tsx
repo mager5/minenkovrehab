@@ -2,14 +2,56 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { AboutSection } from '@/components/AboutSection';
-import { ServicesSection } from '@/components/ServicesSection';
-import { HelpSection } from '@/components/HelpSection';
-import { CTASection } from '@/components/CTASection';
-import { FeaturesSection } from '@/components/FeaturesSection';
+import {
+  AboutSection,
+  ServicesSection,
+  HelpSection,
+  CTASection,
+  FeaturesSection
+} from '@/components/sections/home';
 import { useState, useEffect } from 'react';
 import { getHomeContent } from '@/lib/content';
 import { homeContent } from '@/data/home-content';
+
+// Интерфейс данных главной страницы
+interface HomeContent {
+  advantages: { description: string }[];
+  about: {
+    title: string;
+    experience: string;
+    description: string;
+    priceTitle: string;
+    priceDescription: string;
+    methodsTitle: string;
+    methodsDescription: string;
+  };
+  services: {
+    title: string;
+    consultations: { title: string; description: string };
+    programs: { title: string; description: string };
+    analysis: { title: string; description: string };
+  };
+  help: {
+    title: string;
+    subtitle: string;
+    items: { title: string; description: string }[];
+  };
+  stats: {
+    satisfiedClients: number;
+    satisfiedClientsLabel: string;
+    consultations: number;
+    consultationsLabel: string;
+    onlinePrograms: number;
+    onlineProgramsLabel: string;
+    experience: number;
+    experienceLabel: string;
+  };
+  cta: {
+    title: string;
+    description: string;
+    buttonText: string;
+  };
+}
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -26,12 +68,12 @@ const fadeIn = {
 };
 
 export default function Home() {
-  const [content, setContent] = useState(homeContent);
+  const [content, setContent] = useState<HomeContent>(homeContent);
 
   useEffect(() => {
     async function loadContent() {
       try {
-        const data = await getHomeContent();
+        const data = await getHomeContent<HomeContent>();
         setContent(data);
       } catch (error) {
         console.error('Ошибка загрузки контента главной:', error);
