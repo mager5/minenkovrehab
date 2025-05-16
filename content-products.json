@@ -4,24 +4,28 @@
   "heroBg": "https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=1920&h=800&auto=format&fit=crop",
   "services": [
     {
+      "id": "consultation",
       "title": "Онлайн-консультация",
       "description": "Персональная консультация по вопросам реабилитации и восстановления.",
       "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "price": "1500 ₽"
     },
     {
+      "id": "personal-program",
       "title": "Персональная программа",
       "description": "Разработка индивидуальной программы восстановления под ваши задачи.",
       "image": "/images/services/individual-programs.svg",
       "price": "3500 ₽"
     },
     {
+      "id": "movement-analysis",
       "title": "Анализ движения",
       "description": "Детальная оценка биомеханики вашего движения для выявления и исправления проблемных зон.",
       "image": "/images/services/movement-analysis.svg",
       "price": "2000 ₽"
     },
     {
+      "id": "online-support",
       "title": "Онлайн-сопровождение (1 месяц)",
       "description": "Ежедневная поддержка и корректировка программы через Telegram в течение 30 дней.",
       "image": "/images/products/online-support.jpg",

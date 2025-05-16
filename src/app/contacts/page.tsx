@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-// import Image from 'next/image'; // Удаляем этот импорт
 import BookingModal from '@/components/BookingModal';
 import ContactForm from '@/components/ContactForm';
 import { motion, useScroll, useTransform } from 'framer-motion';
@@ -21,11 +20,25 @@ const fadeIn = {
   })
 };
 
-// Примечание: метаданные для этой страницы находятся в отдельном файле,
-// так как страница использует директиву 'use client'
+interface ContactData {
+  phone: string;
+  email: string;
+  social: {
+    vk: string;
+    telegram: string;
+  };
+}
 
 export default function ContactsPage() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [contactData, setContactData] = useState<ContactData>({
+    phone: '+79283287052',
+    email: 'minenkov.rehab@yandex.ru',
+    social: {
+      vk: 'https://vk.com/minenkovrehab',
+      telegram: 'https://t.me/minenkov_rehab'
+    }
+  });
   
   // Рефы для секций с параллакс-эффектом
   const heroRef = useRef(null);
@@ -40,12 +53,34 @@ export default function ContactsPage() {
   const heroContentY = useTransform(heroScroll, [0, 1], [0, -50]);
   const heroOpacity = useTransform(heroScroll, [0, 0.8], [1, 0.3]);
 
+  // Попытка загрузить статический контент при рендере на клиенте
+  useEffect(() => {
+    async function loadContactData() {
+      try {
+        const response = await fetch('/content-contacts.json');
+        if (response.ok) {
+          const data = await response.json();
+          setContactData(data);
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки контактных данных:', error);
+      }
+    }
+    
+    loadContactData();
+  }, []);
+
+  // Форматирование телефона с префиксом +7
+  const formatPhone = (phone: string) => {
+    return phone.replace(/^\+7(\d{3})(\d{3})(\d{2})(\d{2})/, '+7 $1 $2-$3-$4');
+  };
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Hero секция */}
       <motion.section 
         ref={heroRef}
-        className="relative pt-16 pb-12 lg:pt-24 lg:pb-16 overflow-hidden bg-gradient-to-br from-primary to-primary-dark"
+        className="relative w-full pt-16 pb-12 lg:pt-24 lg:pb-16 bg-[#3A7CA5] overflow-hidden"
       >
         <motion.div 
           className="absolute inset-0 w-full h-full"
@@ -60,8 +95,9 @@ export default function ContactsPage() {
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#3A7CA5]/80 via-[#3A7CA5]/50 to-transparent"></div>
         </motion.div>
+        
         <motion.div 
-          className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center"
+          className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center z-10"
           style={{ y: heroContentY, opacity: heroOpacity }}
         >
           <motion.h1 
@@ -71,7 +107,7 @@ export default function ContactsPage() {
             variants={fadeIn}
             custom={0}
           >
-            <span className="text-white">Свяжитесь</span> со мной
+            <span className="text-accent-light">Свяжитесь</span> со мной
           </motion.h1>
           <motion.p 
             className="text-lg text-white opacity-95 mb-8 max-w-2xl mx-auto font-medium"
@@ -86,7 +122,7 @@ export default function ContactsPage() {
       </motion.section>
 
       {/* Основной контент */}
-      <section className="py-20 bg-white">
+      <div className="flex-grow py-12 lg:py-20 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -107,245 +143,99 @@ export default function ContactsPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7, delay: 0.3 }}
+                className="bg-white rounded-xl shadow p-8"
               >
-                <motion.div 
-                  className="bg-white rounded-xl shadow-lg p-8 mb-8 transform transition-all duration-500 hover:shadow-xl"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  whileHover={{ y: -5 }}
-                >
-                  <motion.h2 
-                    className="text-3xl font-bold text-primary mb-6 relative inline-block after:content-[''] after:absolute after:w-16 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                  >Контактная информация</motion.h2>
-                  
-                  <div className="space-y-6 mt-8">
-                    {[
-                      {
-                        icon: (
+                <h2 className="text-2xl font-bold mb-8 text-gray-800">Контактная информация</h2>
+                <div className="space-y-8">
+                  {/* Email */}
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 mr-5">
+                      <div className="bg-primary/10 p-3 rounded-full">
                         <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
-                        ),
-                        title: "Email",
-                        content: (
-                          <a href="mailto:minenkov.rehab@yandex.ru" className="text-dark hover:text-primary transition-colors">
-                            minenkov.rehab@yandex.ru
-                          </a>
-                        )
-                      },
-                      {
-                        icon: (
-                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
-                        ),
-                        title: "Телефон",
-                        content: (
-                          <a 
-                            href="tel:+79283287052"
-                            className="!text-primary"
-                            aria-label="Позвонить по телефону +7 928 328-70-52"
-                          >
-                            <span className="!text-primary">+7 928 328-70-52</span>
-                          </a>
-                        )
-                      },
-                      {
-                        icon: (
-                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                        </svg>
-                        ),
-                        title: "Мессенджеры",
-                        content: (
-                        <div className="flex space-x-4 mt-2">
-                            <a 
-                              href="https://t.me/MV_Rehab" 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="text-dark hover:text-primary transition-all duration-300"
-                            >
-                              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.652 6.654-1.02 8.83-.125.718-.373 1.034-.613 1.068-.523.068-1.039-.242-1.602-.554-1.048-.581-1.738-.909-2.768-1.48-1.234-.68-.388-1.049.285-1.654.177-.158 3.182-2.904 3.235-3.15.006-.024.004-.053-.006-.08a.183.183 0 0 0-.105-.04c-.074-.009-.168.022-.294.09-.365.18-2.234 1.407-3.026 1.903-.566.355-1.107.439-1.61.251-.524-.197-1.098-.414-1.547-.57-.626-.217-1.227-.435-1.227-.98 0-.265.24-.521.72-.764.85-.432 1.559-.788 2.145-1.055.04-.018 3.957-1.626 4.494-1.838.536-.212 1.19-.465 1.813-.466z"/>
-                              </svg>
-                            </a>
-                            <a 
-                              href="https://vk.com/minenkov_rehab" 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="text-dark hover:text-primary transition-all duration-300"
-                            >
-                              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 16.091h-1.367c-.518 0-.677-.217-1.6-1.14-.825-.776-1.177-.88-1.38-.88-.283 0-.365.073-.365.427v1.039c0 .3-.095.48-.9.48-1.333 0-2.805-.807-3.846-2.307C7.614 11.886 7.077 10.145 7.077 9.843c0-.17.073-.316.427-.316h1.367c.32 0 .44.145.563.486.613 1.785 1.636 3.348 2.056 3.348.156 0 .23-.073.23-.47v-1.81c-.05-.897-.523-1.058-.523-1.403 0-.17.145-.34.374-.34h2.15c.29 0 .4.145.4.486v2.442c0 .265.117.352.19.352.155 0 .288-.097.577-.386.893-1.004 1.53-2.55 1.53-2.55.085-.182.24-.352.575-.352h1.368c.41 0 .502.207.41.487-.17.524-1.806 3.132-1.806 3.132-.145.242-.2.35 0 .621.145.206.652.627.985 1.004.62.694 1.1 1.277 1.225 1.676.145.41-.073.622-.486.622z"/>
-                              </svg>
-                            </a>
-                        </div>
-                        )
-                      },
-                      {
-                        icon: (
-                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        ),
-                        title: "Время работы",
-                        content: (
-                        <p className="text-dark">
-                            Понедельник - Пятница: 10:00 - 19:00<br/>
-                            Суббота: 10:00 - 15:00<br/>
-                          Воскресенье: выходной
-                        </p>
-                        )
-                      }
-                    ].map((item, index) => (
-                      <motion.div 
-                        key={index}
-                        className="flex items-start hover:translate-x-1 transition-all duration-300"
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-                      >
-                        <div className="bg-primary-light p-3 rounded-full mr-4">
-                          {item.icon}
                       </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-primary mb-1">{item.title}</h3>
-                          {item.content}
                     </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-                
-                {/* Карточка записи */}
-                <motion.div 
-                  className="bg-white rounded-xl shadow-lg p-8 mb-8 transform transition-all duration-500 hover:shadow-xl animate-fadeIn"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  whileHover={{ y: -5 }}
-                >
-                  <motion.h2 
-                    className="text-3xl font-bold text-primary mb-6 relative inline-block after:content-[''] after:absolute after:w-16 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                  >Запись на приём</motion.h2>
-                  
-                  <div className="mt-8">
-                    <motion.p 
-                      className="text-dark mb-6"
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
-                    >
-                      Запишитесь на онлайн-консультацию или реабилитационную программу. Выберите удобное время и формат, и я помогу вам начать процесс восстановления.
-                    </motion.p>
-                    
-                    <motion.button 
-                      onClick={() => setIsBookingModalOpen(true)}
-                      className="w-full bg-accent hover:bg-accent-dark text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center"
-                      initial={{ opacity: 0, y: 10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      Записаться на консультацию
-                    </motion.button>
-                    </div>
-                </motion.div>
-                
-                <motion.div 
-                  className="bg-white rounded-xl shadow-lg p-8 transform transition-all duration-500 hover:shadow-xl"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.7, delay: 0.5 }}
-                  whileHover={{ y: -5 }}
-                >
-                  <motion.h2 
-                    className="text-3xl font-bold text-primary mb-6 relative inline-block after:content-[''] after:absolute after:w-16 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                  >Часто задаваемые вопросы</motion.h2>
-                  
-                  <div className="space-y-6 mt-8">
-                    {[
-                      {
-                        question: "Как проходит онлайн-консультация?",
-                        answer: "Консультация проводится через видеосвязь (Zoom, Skype или другой удобный для вас сервис). В ходе консультации мы обсудим вашу проблему, я проведу функциональное тестирование и составим план реабилитации."
-                      },
-                      {
-                        question: "Сколько времени занимает реабилитация?",
-                        answer: "Сроки реабилитации индивидуальны и зависят от тяжести травмы, длительности проблемы и вашей активности в процессе реабилитации. Обычно первые результаты становятся заметны через 2-4 недели регулярных занятий."
-                      },
-                      {
-                        question: "Нужно ли мне специальное оборудование?",
-                        answer: "Для большинства программ реабилитации достаточно минимального набора оборудования, которое можно найти дома или приобрести по доступной цене. Конкретный список я предоставлю после консультации, исходя из ваших индивидуальных потребностей."
-                      }
-                    ].map((faq, index) => (
-                      <motion.div 
-                        key={index}
-                        className="hover:translate-x-1 transition-all duration-300"
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-800 mb-1">Email</h3>
+                      <a 
+                        href={`mailto:${contactData.email}`} 
+                        className="text-lg font-medium text-primary hover:text-primary-dark transition-colors"
                       >
-                        <h3 className="text-lg font-semibold text-primary mb-2">{faq.question}</h3>
-                      <p className="text-dark">
-                          {faq.answer}
-                      </p>
-                      </motion.div>
-                    ))}
+                        {contactData.email}
+                      </a>
+                    </div>
                   </div>
-                  
-                  <motion.div 
-                    className="mt-8"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: 0.9 }}
-                  >
-                    <motion.div
-                      whileHover={{ x: 10 }}
-                      transition={{ type: 'spring', stiffness: 400 }}
-                    >
-                      <Link 
-                        href="/products" 
-                        className="inline-flex items-center text-primary hover:text-primary-dark font-medium transition-all duration-300"
-                    >
-                      Посмотреть все услуги
-                      <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </Link>
-                    </motion.div>
-                  </motion.div>
-                </motion.div>
+
+                  {/* Телефон */}
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 mr-5">
+                      <div className="bg-primary/10 p-3 rounded-full">
+                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-800 mb-1">Телефон</h3>
+                      <a 
+                        href={`tel:${contactData.phone}`}
+                        className="text-lg font-medium text-primary hover:text-primary-dark transition-colors"
+                        aria-label={`Позвонить по телефону ${contactData.phone}`}
+                      >
+                        {formatPhone(contactData.phone)}
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Социальные сети */}
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 mr-5">
+                      <div className="bg-primary/10 p-3 rounded-full">
+                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.5 11h.01M12 11h.01M15.5 11h.01M10 16h4" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-800 mb-3">Связаться со мной</h3>
+                      <div className="flex items-center space-x-6">
+                        {/* ВКонтакте */}
+                        <a 
+                          href={contactData.social.vk} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:text-primary-dark transition-colors" 
+                          aria-label="ВКонтакте"
+                        >
+                          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.915 13.028c-.388-.49-.277-.708 0-1.146.005-.005 3.208-4.431 3.538-5.932l.002-.001c.164-.547 0-.949-.793-.949h-2.624c-.668 0-.976.345-1.141.731 0 0-1.336 3.198-3.226 5.271-.61.599-.892.791-1.225.791-.164 0-.419-.192-.419-.739V5.949c0-.656-.187-.949-.74-.949H9.161c-.419 0-.668.306-.668.591 0 .622.945.765 1.043 2.515v3.797c0 .832-.151.985-.486.985-.892 0-3.057-3.211-4.34-6.886-.259-.713-.512-1.001-1.185-1.001H.9c-.749 0-.9.345-.9.731 0 .682.892 4.073 4.148 8.553C6.318 17.343 9.374 19 12.154 19c1.671 0 1.875-.368 1.875-1.001 0-2.922-.151-3.198.686-3.198.388 0 1.056.192 2.616 1.667C19.114 18.217 19.407 19 20.405 19h2.624c.748 0 1.127-.368.909-1.094-.499-1.527-3.871-4.668-4.023-4.878z"/>
+                          </svg>
+                        </a>
+                        
+                        {/* Telegram */}
+                        <a 
+                          href={contactData.social.telegram} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:text-primary-dark transition-colors" 
+                          aria-label="Telegram"
+                        >
+                          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.064-1.225-.48-1.9-.932-1.056-.721-1.653-1.172-2.678-1.877-1.185-.81-.417-1.265.26-2 .177-.19 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.211-.07-.06-.196-.04-.282-.024-.118.027-2.003 1.272-5.65 3.733-.532.359-1.016.54-1.453.542-.478.008-1.398-.177-2.075-.38-.840-.243-1.504-.374-1.449-.788.028-.215.336-.437.933-.663 3.66-1.6 6.104-2.646 7.335-3.141 3.494-1.406 4.218-1.652 4.681-1.66v-.002z"/>
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             </div>
           </div>
         </div>
-      </section>
-      
+      </div>
+
       {/* Модальное окно для записи */}
       <BookingModal 
         isOpen={isBookingModalOpen} 

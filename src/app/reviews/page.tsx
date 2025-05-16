@@ -162,7 +162,7 @@ export default function ReviewsPage() {
             animate="visible"
             variants={fadeIn}
             custom={0}
-          >Отзывы наших клиентов</motion.h1>
+          >Отзывы моих клиентов</motion.h1>
           <motion.p 
             className="max-w-2xl text-xl text-white mb-8"
             variants={fadeIn}
@@ -170,7 +170,7 @@ export default function ReviewsPage() {
             animate="visible"
             custom={1}
           >
-            Узнайте, как индивидуальные программы реабилитации помогли сотням людей вернуться к полноценной жизни.
+            Узнайте, как мои индивидуальные программы реабилитации помогли сотням людей вернуться к полноценной жизни.
           </motion.p>
         </motion.div>
       </motion.section>
