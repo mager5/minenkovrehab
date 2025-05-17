@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { products } from '../data';
+import { products } from './data';
 import { motion } from 'framer-motion';
 
 // Анимации для появления элементов
@@ -20,54 +20,15 @@ const fadeIn = {
 };
 
 export default function ConsultationPage() {
-  // Находим продукт по ID
-  const product = products.find(p => p.id === 'consultation');
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [contactInfo, setContactInfo] = useState({ name: '', email: '', phone: '' });
 
-  // Если продукт не найден, возвращаем сообщение об ошибке
-  if (!product) {
-    return (
-      <motion.div 
-        className="container mx-auto px-4 py-12 text-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <motion.h1 
-          className="text-2xl font-semibold text-primary mb-4"
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          Продукт не найден
-        </motion.h1>
-        <motion.p 
-          className="mb-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          Запрашиваемый продукт не существует или был удален.
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Link 
-            href="/products"
-            className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-          >
-            Вернуться к списку продуктов
-          </Link>
-        </motion.div>
-      </motion.div>
-    );
-  }
+  // Получаем выбранный продукт
+  const selectedProduct = selectedProductId 
+    ? products.find(p => p.id === selectedProductId) 
+    : null;
 
   // Обработчик изменения полей формы
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,6 +48,110 @@ export default function ConsultationPage() {
     }, 2000);
   };
 
+  // Если пользователь не выбрал продукт, отображаем список всех консультаций
+  if (!selectedProduct && !paymentSuccess) {
+    return (
+      <motion.div 
+        className="py-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Навигация */}
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Link href="/products" className="text-primary hover:underline inline-flex items-center">
+              <motion.span whileHover={{ x: -3 }} transition={{ duration: 0.2 }}>
+                ← 
+              </motion.span> Вернуться к продуктам
+            </Link>
+          </motion.div>
+
+          {/* Заголовок */}
+          <motion.h1 
+            className="text-3xl font-bold text-primary mb-8 text-center"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            Выберите тип консультации
+          </motion.h1>
+
+          {/* Список продуктов */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {products.map((product, index) => (
+              <motion.div 
+                key={product.id}
+                className={`bg-white rounded-lg shadow-md overflow-hidden border-2 transition-all duration-300 ${
+                  product.recommended ? 'border-accent' : 'border-transparent'
+                }`}
+                initial="hidden"
+                animate="visible"
+                variants={fadeIn}
+                custom={index}
+                whileHover={{ 
+                  y: -5, 
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                  borderColor: product.recommended ? 'var(--color-accent)' : 'var(--color-primary-light)',
+                }}
+              >
+                {product.recommended && (
+                  <div className="bg-accent text-white text-xs py-1 text-center font-medium">
+                    Рекомендуемый вариант
+                  </div>
+                )}
+                {product.popular && (
+                  <div className="bg-primary text-white text-xs py-1 text-center font-medium">
+                    Популярный выбор
+                  </div>
+                )}
+                <div className="p-6">
+                  <h2 className="text-xl font-bold text-primary mb-2">{product.title}</h2>
+                  {product.subtitle && (
+                    <p className="text-sm text-gray-600 mb-3">{product.subtitle}</p>
+                  )}
+                  <div className="text-2xl font-bold text-accent mb-4">
+                    {product.price.toLocaleString('ru-RU')} ₽
+                  </div>
+                  <p className="text-gray-600 mb-4">{product.description}</p>
+                  <div className="text-sm text-gray-500 mb-4">
+                    Длительность: {product.duration}
+                  </div>
+                  <div className="mb-5">
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">Включает:</h3>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      {product.features.map((feature, i) => (
+                        <li key={i} className="flex items-start">
+                          <svg className="h-5 w-5 text-accent flex-shrink-0 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <motion.button
+                    onClick={() => setSelectedProductId(product.id)}
+                    className="w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors font-medium"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Выбрать
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div 
       className="py-12"
@@ -102,11 +167,22 @@ export default function ConsultationPage() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Link href="/products" className="text-primary hover:underline inline-flex items-center">
-            <motion.span whileHover={{ x: -3 }} transition={{ duration: 0.2 }}>
-              ← 
-            </motion.span> Вернуться к продуктам
-          </Link>
+          {paymentSuccess ? (
+            <Link href="/products" className="text-primary hover:underline inline-flex items-center">
+              <motion.span whileHover={{ x: -3 }} transition={{ duration: 0.2 }}>
+                ← 
+              </motion.span> Вернуться к продуктам
+            </Link>
+          ) : (
+            <button 
+              onClick={() => setSelectedProductId(null)} 
+              className="text-primary hover:underline inline-flex items-center"
+            >
+              <motion.span whileHover={{ x: -3 }} transition={{ duration: 0.2 }}>
+                ← 
+              </motion.span> Назад к выбору консультации
+            </button>
+          )}
         </motion.div>
 
         {/* Содержимое страницы */}
@@ -175,7 +251,7 @@ export default function ConsultationPage() {
                 </a>
               </motion.div>
             </motion.div>
-          ) : (
+          ) : selectedProduct && (
             <div className="flex flex-col lg:flex-row">
               {/* Информация о продукте */}
               <motion.div 
@@ -190,7 +266,7 @@ export default function ConsultationPage() {
                   variants={fadeIn}
                   custom={1}
                 >
-                  {product.title}
+                  {selectedProduct.title}
                 </motion.h1>
                 <motion.div 
                   className="h-48 bg-secondary mb-6 relative flex items-center justify-center rounded-lg overflow-hidden"
@@ -205,7 +281,7 @@ export default function ConsultationPage() {
                     initial={{ opacity: 0.7 }}
                     whileHover={{ opacity: 0.9 }}
                   >
-                    {product.title}
+                    {selectedProduct.title}
                   </motion.div>
                 </motion.div>
                 <motion.div 
@@ -225,20 +301,23 @@ export default function ConsultationPage() {
                     variants={fadeIn}
                     custom={5}
                   >
-                    {product.shortDescription}
+                    {selectedProduct.description}
                   </motion.p>
-                  <ul className="list-disc pl-5 space-y-2">
-                    {product.fullDescription.map((item, index) => (
-                      <motion.li 
-                        key={index} 
-                        className="text-dark"
-                        variants={fadeIn}
-                        custom={6 + index * 0.5}
-                      >
-                        {item}
-                      </motion.li>
-                    ))}
-                  </ul>
+                  <div className="mt-6">
+                    <h3 className="text-lg font-medium mb-3">Что включено:</h3>
+                    <ul className="list-disc pl-5 space-y-2">
+                      {selectedProduct.features.map((feature, index) => (
+                        <motion.li 
+                          key={index} 
+                          className="text-dark"
+                          variants={fadeIn}
+                          custom={6 + index * 0.5}
+                        >
+                          {feature}
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </div>
                 </motion.div>
               </motion.div>
 
@@ -267,7 +346,7 @@ export default function ConsultationPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5, delay: 0.5 }}
                   >
-                    {product.price.toLocaleString('ru-RU')} ₽
+                    {selectedProduct.price.toLocaleString('ru-RU')} ₽
                   </motion.div>
 
                   <motion.form 

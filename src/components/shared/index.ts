@@ -7,3 +7,4 @@
 export { Favicons } from './Favicons';
 export { Header } from './Header';
 export { default as BookingModal } from './BookingModal'; 
+export { default as Footer } from './Footer'; 

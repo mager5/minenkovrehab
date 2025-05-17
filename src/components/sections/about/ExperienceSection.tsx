@@ -4,13 +4,13 @@ import { Counter } from '@/components/ui/Counter';
 interface ExperienceSectionProps {
   title: string;
   description: string;
-  stats: {
+  stats?: {
     value: number;
     label: string;
   }[];
 }
 
-export function ExperienceSection({ title, description, stats }: ExperienceSectionProps) {
+export function ExperienceSection({ title, description, stats = [] }: ExperienceSectionProps) {
   return (
     <section className="py-20 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,7 +26,7 @@ export function ExperienceSection({ title, description, stats }: ExperienceSecti
         </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((stat, index) => (
+          {stats && stats.length > 0 && stats.map((stat, index) => (
             <Counter 
               key={index}
               value={stat.value}

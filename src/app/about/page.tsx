@@ -33,6 +33,7 @@ interface AboutContentType {
       value: number;
       label: string;
     }[];
+    yearsText: string;
   };
   approach: {
     title: string;
@@ -45,6 +46,17 @@ interface AboutContentType {
     title: string;
     description: string;
   };
+  photo: string;
+  heroBg: string;
+  advantages: string[];
+  certificates: {
+    title: string;
+    image: string;
+  }[];
+  photos: {
+    title: string;
+    image: string;
+  }[];
 }
 
 export default function About() {
