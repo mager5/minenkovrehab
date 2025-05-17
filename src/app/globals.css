@@ -54,6 +54,49 @@ html, body {
   }
 }
 
+@media (min-width: 501px) {
+  /* Градиент для секций страниц на десктопных экранах */
+  .bg-\[\#3A7CA5\] .absolute.inset-0.bg-gradient-to-t {
+    background: linear-gradient(to bottom, 
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.2) 30%,
+      rgba(0, 0, 0, 0.4) 60%,
+      rgba(0, 0, 0, 0.5)
+    ) !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .hero-section {
+    background-image: url('/images/hero/section-banner.jpg');
+  }
+  
+  /* Более тёмный оверлей для мобильных устройств */
+  .hero-section::before {
+    background: linear-gradient(to bottom, 
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.2) 30%,
+      rgba(0, 0, 0, 0.4) 60%,
+      rgba(0, 0, 0, 0.5)
+    );
+  }
+  
+  /* Переопределение padding-top для мобильных устройств */
+  .pt-32 {
+    padding-top: 6rem !important;
+  }
+  
+  /* Градиент для секций страниц (кроме главной) */
+  .bg-\[\#3A7CA5\] .absolute.inset-0.bg-gradient-to-t {
+    background: linear-gradient(to bottom, 
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.2) 30%,
+      rgba(0, 0, 0, 0.4) 60%,
+      rgba(0, 0, 0, 0.5)
+    ) !important;
+  }
+}
+
 .hero-section > * {
   position: relative;
   z-index: 2;

@@ -87,7 +87,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Hero секция с фоном и текстом */}
       <motion.section 
-        className="hero-section pt-32 sm:pt-16 pb-20 lg:pt-24 lg:pb-32 overflow-hidden"
+        className="hero-section pt-32 sm:pt-16 pb-20 lg:pt-40 lg:pb-32 overflow-hidden"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">

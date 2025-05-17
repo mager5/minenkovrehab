@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { BookingModal } from '@/components/shared';
+import BookingModal from '../BookingModal';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
