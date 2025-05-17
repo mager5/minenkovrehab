@@ -17,27 +17,41 @@ export function ContactForm() {
 
   const formatPhoneNumber = (value: string): string => {
     if (!value) return value;
-    const phoneNumber = value.replace(/\D/g, '');
-    const phoneNumberLength = phoneNumber.length;
-
-    if (phoneNumberLength < 1) return '+7';
     
+    // Удаляем все нецифровые символы
+    const phoneNumber = value.replace(/\D/g, '');
+    
+    // Если первая цифра 8 или 7, удаляем ее и добавляем +7
+    let normalisedPhone = phoneNumber;
+    if (phoneNumber.startsWith('8') || phoneNumber.startsWith('7')) {
+      normalisedPhone = phoneNumber.substring(1);
+    }
+    
+    const phoneNumberLength = normalisedPhone.length;
+    
+    // Начинаем всегда с +7
     let formattedNumber = '+7';
-    if (phoneNumberLength === 1 && phoneNumber !== '7') {
-      formattedNumber = `+7 (${phoneNumber}`;
-    } else if (phoneNumberLength > 1) {
-      formattedNumber = `+7 (${phoneNumber.substring(1, 4)}`;
+    
+    // Добавляем скобку и первые цифры кода
+    if (phoneNumberLength > 0) {
+      formattedNumber += ` (${normalisedPhone.substring(0, Math.min(3, phoneNumberLength))}`;
     }
-
-    if (phoneNumberLength > 4) {
-      formattedNumber += `) ${phoneNumber.substring(4, 7)}`;
+    
+    // Закрываем скобку и добавляем следующие цифры
+    if (phoneNumberLength > 3) {
+      formattedNumber += `) ${normalisedPhone.substring(3, Math.min(6, phoneNumberLength))}`;
     }
-    if (phoneNumberLength > 7) {
-      formattedNumber += `-${phoneNumber.substring(7, 9)}`;
+    
+    // Добавляем первое тире
+    if (phoneNumberLength > 6) {
+      formattedNumber += `-${normalisedPhone.substring(6, Math.min(8, phoneNumberLength))}`;
     }
-    if (phoneNumberLength > 9) {
-      formattedNumber += `-${phoneNumber.substring(9, 11)}`;
+    
+    // Добавляем второе тире
+    if (phoneNumberLength > 8) {
+      formattedNumber += `-${normalisedPhone.substring(8, Math.min(10, phoneNumberLength))}`;
     }
+    
     return formattedNumber;
   };
 

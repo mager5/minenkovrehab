@@ -71,10 +71,58 @@ export default function ProductPageWrapper({ product }: ProductPageWrapperProps)
     );
   }
 
-  // Обработчик изменения полей формы
+  // Форматирование номера телефона в формате +7 (XXX) XXX-XX-XX
+  const formatPhoneNumber = (value: string): string => {
+    if (!value) return value;
+    
+    // Удаляем все нецифровые символы
+    const phoneNumber = value.replace(/\D/g, '');
+    
+    // Если первая цифра 8 или 7, удаляем ее и добавляем +7
+    let normalisedPhone = phoneNumber;
+    if (phoneNumber.startsWith('8') || phoneNumber.startsWith('7')) {
+      normalisedPhone = phoneNumber.substring(1);
+    }
+    
+    const phoneNumberLength = normalisedPhone.length;
+    
+    // Начинаем всегда с +7
+    let formattedNumber = '+7';
+    
+    // Добавляем скобку и первые цифры кода
+    if (phoneNumberLength > 0) {
+      formattedNumber += ` (${normalisedPhone.substring(0, Math.min(3, phoneNumberLength))}`;
+    }
+    
+    // Закрываем скобку и добавляем следующие цифры
+    if (phoneNumberLength > 3) {
+      formattedNumber += `) ${normalisedPhone.substring(3, Math.min(6, phoneNumberLength))}`;
+    }
+    
+    // Добавляем первое тире
+    if (phoneNumberLength > 6) {
+      formattedNumber += `-${normalisedPhone.substring(6, Math.min(8, phoneNumberLength))}`;
+    }
+    
+    // Добавляем второе тире
+    if (phoneNumberLength > 8) {
+      formattedNumber += `-${normalisedPhone.substring(8, Math.min(10, phoneNumberLength))}`;
+    }
+    
+    return formattedNumber;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setContactInfo(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'phone') {
+      const formattedValue = formatPhoneNumber(value);
+      // Ограничиваем максимальную длину номера (+7 (XXX) XXX-XX-XX)
+      if (formattedValue.length > 18) return;
+      setContactInfo(prev => ({ ...prev, [name]: formattedValue }));
+    } else {
+      setContactInfo(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   // Имитация процесса оплаты
@@ -284,7 +332,7 @@ export default function ProductPageWrapper({ product }: ProductPageWrapperProps)
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.4, delay: 0.7 }}
                     >
-                      <label htmlFor="name" className="text-dark mb-2">Ваше имя</label>
+                      <label htmlFor="name" className="block text-dark mb-2">Ваше имя</label>
                       <motion.input
                         type="text"
                         id="name"
@@ -302,7 +350,7 @@ export default function ProductPageWrapper({ product }: ProductPageWrapperProps)
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.4, delay: 0.8 }}
                     >
-                      <label htmlFor="email" className="text-dark mb-2">Email</label>
+                      <label htmlFor="email" className="block text-dark mb-2">Email</label>
                       <motion.input
                         type="email"
                         id="email"
@@ -320,7 +368,7 @@ export default function ProductPageWrapper({ product }: ProductPageWrapperProps)
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.4, delay: 0.9 }}
                     >
-                      <label htmlFor="phone" className="text-dark mb-2">Телефон</label>
+                      <label htmlFor="phone" className="block text-dark mb-2">Телефон</label>
                       <motion.input
                         type="tel"
                         id="phone"
@@ -329,6 +377,7 @@ export default function ProductPageWrapper({ product }: ProductPageWrapperProps)
                         onChange={handleInputChange}
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                         required
+                        placeholder="+7 (___) ___-__-__"
                         whileFocus={{ boxShadow: "0 0 0 2px rgba(58, 124, 165, 0.3)" }}
                       />
                     </motion.div>
