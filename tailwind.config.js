@@ -31,6 +31,12 @@ module.exports = {
       boxShadow: {
         card: '0 4px 15px rgba(0, 0, 0, 0.05)',
         'card-hover': '0 10px 30px rgba(0, 0, 0, 0.1)',
+        glow: '0 0 15px rgba(43, 170, 126, 0.5)',
+        'glow-primary': '0 0 15px rgba(0, 99, 165, 0.5)',
+      },
+      dropShadow: {
+        'glow': '0 0 8px rgba(43, 170, 126, 0.6)',
+        'glow-white': '0 0 8px rgba(255, 255, 255, 0.6)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -46,6 +52,9 @@ module.exports = {
         '3xl': '1.875rem',
         '4xl': '2.25rem',
         '5xl': '3rem',
+      },
+      animation: {
+        pulse: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
     },
   },

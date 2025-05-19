@@ -14,7 +14,7 @@ export function AboutSection() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6 }}
         >
-          <motion.span 
+          {/* <motion.span 
             className="text-accent font-semibold text-base uppercase tracking-wider"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -22,7 +22,7 @@ export function AboutSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             ОБО МНЕ
-          </motion.span>
+          </motion.span> */}
           <motion.h2 
             className="text-3xl md:text-4xl font-bold text-primary mt-2 mb-3"
             initial={{ opacity: 0 }}
