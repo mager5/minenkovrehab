@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import PaymentModal from '@/components/shared/PaymentModal';
 
 export default function ClubPage() {
   const [activeTab, setActiveTab] = useState('rutube');
@@ -60,12 +61,47 @@ export default function ClubPage() {
     }
   };
 
+  // Генерируем order-id только на клиенте
+  const [orderId, setOrderId] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [debugInfo, setDebugInfo] = useState<{amount: number, receipt?: any} | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  useEffect(() => {
+    setOrderId('ORD-' + Date.now());
+  }, []);
+
+  useEffect(() => {
+    if (!document.getElementById('tbank-tinkoff-v2')) {
+      const script = document.createElement('script');
+      script.id = 'tbank-tinkoff-v2';
+      script.src = 'https://securepay.tinkoff.ru/html/payForm/js/tinkoff_v2.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  // Функция для очистки и стандартизации телефона
+  function cleanPhone(raw: string) {
+    let digits = raw.replace(/[^\d]/g, '');
+    if (digits.startsWith('8')) {
+      digits = '7' + digits.slice(1);
+    }
+    if (!digits.startsWith('7')) {
+      digits = '7' + digits;
+    }
+    return '+' + digits;
+  }
+
   return (
     <div className="min-h-screen overflow-x-hidden">
       {/* Hero (Главный экран) */}
       <section className="relative w-full pt-32 pb-20 lg:pt-20 lg:pb-28 overflow-hidden bg-gradient-to-br from-primary/90 via-primary/80 to-accent/70">
         <div className="absolute inset-0 w-full h-full -z-10">
-          <div className="absolute inset-0 bg-[url('/images/about/hero-bg.jpg')] bg-cover bg-center opacity-30 mix-blend-overlay"></div>
+          <div className="absolute inset-0 bg-[url('/images/about/minenkov-main.jpg')] bg-cover bg-center opacity-30 mix-blend-overlay"></div>
         </div>
         <div className="container mx-auto px-4 flex flex-col items-center text-center z-10">
           <h1 className="text-2xl md:text-6xl font-bold text-white mb-6 max-w-3xl">Вы хотите чувствовать себя энергично, легко и свободно в своём теле?</h1>
@@ -173,7 +209,13 @@ export default function ClubPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Стоимость абонемента</h2>
           <p className="text-base md:text-lg text-gray-700 mb-6">Всего 2950 ₽/мес. Это дешевле, чем тренер в зале, и удобнее, чем ездить на тренировки!</p>
-          <a href="#" className="inline-block bg-accent text-white font-bold py-3 px-6 md:py-4 md:px-10 rounded-full text-base md:text-lg shadow-lg hover:bg-accent-dark transition">Оформить абонемент</a>
+          <button
+            className="inline-block bg-accent text-white font-bold py-3 px-6 md:py-4 md:px-10 rounded-full text-base md:text-lg shadow-lg hover:bg-accent-dark transition"
+            onClick={() => setIsPaymentModalOpen(true)}
+          >
+            Купить абонемент
+          </button>
+          <PaymentModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} />
         </div>
       </section>
 
