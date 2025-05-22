@@ -137,7 +137,7 @@ export async function getContent<T>(contentType: string): Promise<T> {
     return {
       title: "Контакты",
       email: "info@minenkovrehab.ru",
-      phone: "+7 (901) 347-87-67",
+      phone: "+7 928 328 70 52",
       address: "Москва",
       social: {
         vk: "https://vk.com/minenkovrehab",

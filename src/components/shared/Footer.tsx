@@ -103,16 +103,6 @@ const ServicesColumn = () => (
           href="/products" 
           className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
           style={{color: '#d1f3ea'}} 
-          aria-label="Онлайн-ведение"
-        >
-          Онлайн-ведение
-        </Link>
-      </li>
-      <li role="menuitem">
-        <Link 
-          href="/products" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
           aria-label="Клуб «ФОРМУЛА ДВИЖЕНИЯ»"
         >
           Клуб «ФОРМУЛА ДВИЖЕНИЯ»
@@ -126,16 +116,6 @@ const ServicesColumn = () => (
           aria-label="Реабилитационные протоколы"
         >
           Реабилитационные протоколы
-        </Link>
-      </li>
-      <li role="menuitem">
-        <Link 
-          href="/products" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
-          aria-label="Курсы и вебинары"
-        >
-          Курсы и вебинары
         </Link>
       </li>
     </ul>

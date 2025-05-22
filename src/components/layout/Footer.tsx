@@ -17,7 +17,7 @@ const AboutColumn = () => {
     <div className="transform transition-all duration-500 hover:translate-y-[-5px]">
       <h3 className="text-xl font-bold mb-6 text-white relative inline-block after:content-[''] after:absolute after:w-14 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]">Миненков <span className="text-accent">Вадим</span></h3>
       <p className="text-white mb-4 font-semibold" style={{color: '#d1f3ea'}}>
-        Профессиональная физическая реабилитация с индивидуальным подходом к каждому пациенту. Работаю с болями в спине, шее, суставах и помогаю восстановиться после травм.
+      Профессиональный подход к тренировочному процессу с учетом индивидуальных особенностей. Помогаю восстановить подвижность, снизить дискомфорт и вернуть телу уверенность в движении.
       </p>
       <div className="flex space-x-4 mt-6">
         <a 
@@ -111,16 +111,6 @@ const ServicesColumn = () => (
           href="/products" 
           className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
           style={{color: '#d1f3ea'}} 
-          aria-label="Онлайн-ведение"
-        >
-          Онлайн-ведение
-        </Link>
-      </li>
-      <li role="menuitem">
-        <Link 
-          href="/products" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
           aria-label="Клуб «ФОРМУЛА ДВИЖЕНИЯ»"
         >
           Клуб «ФОРМУЛА ДВИЖЕНИЯ»
@@ -134,16 +124,6 @@ const ServicesColumn = () => (
           aria-label="Реабилитационные протоколы"
         >
           Реабилитационные протоколы
-        </Link>
-      </li>
-      <li role="menuitem">
-        <Link 
-          href="/products" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
-          aria-label="Курсы и вебинары"
-        >
-          Курсы и вебинары
         </Link>
       </li>
     </ul>
