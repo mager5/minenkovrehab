@@ -243,6 +243,35 @@ export default function ReviewsPage() {
               </motion.div>
             ))}
           </div>
+          
+          {/* Кнопка "Показать больше отзывов" */}
+          <motion.div 
+            className="flex justify-center mt-12"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <motion.button
+              className="px-8 py-4 bg-[#3A7CA5] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:bg-[#3A7CA5]/90 focus:outline-none focus:ring-4 focus:ring-[#3A7CA5]/30"
+              whileHover={{ 
+                scale: 1.05,
+                y: -2,
+                boxShadow: "0 10px 25px rgba(58, 124, 165, 0.3)"
+              }}
+              whileTap={{ 
+                scale: 0.98,
+                y: 0
+              }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 300, 
+                damping: 20 
+              }}
+            >
+              Показать больше отзывов
+            </motion.button>
+          </motion.div>
         </div>
       </section>
 
@@ -410,4 +439,4 @@ export default function ReviewsPage() {
       </motion.section>
     </div>
   );
-} 
+}
