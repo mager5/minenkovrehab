@@ -23,7 +23,7 @@ export default function ProductsPage() {
   // Состояние для данных страницы
   const [productsContent, setProductsContent] = useState<ProductContentType>({
     title: "Услуги",
-    description: "Выберите подходящую услугу для ваших потребностей в реабилитации",
+    description: "Выберите подходящую услугу для ваших потребностей",
     services: []
   });
 

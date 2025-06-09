@@ -125,7 +125,7 @@ export default function Home() {
                 </Link>
                 <Link 
                   href="/contacts"
-                  className="btn bg-white text-primary hover:bg-gray-100 px-6 py-3 rounded-md font-medium transition-all hover:-translate-y-1 hover:shadow-lg w-full sm:w-auto text-center"
+                  className="btn bg-white/90 text-primary hover:bg-white/95 px-6 py-3 rounded-md font-medium transition-all hover:-translate-y-1 hover:shadow-lg w-full sm:w-auto text-center"
                 >
                   Записаться
                 </Link>

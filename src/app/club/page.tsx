@@ -245,19 +245,19 @@ export default function ClubPage() {
       {/* --- Кнопки переключения видео --- */}
       <div className="container mx-auto px-4 py-6 md:py-8 flex flex-wrap justify-center gap-3 md:gap-4">
         <button
-          className={`px-4 py-2 md:px-6 md:py-3 rounded-lg font-medium transition-all duration-300 transform text-base md:text-lg ${activeTab === 'rutube' ? 'bg-accent text-white scale-105 shadow-lg' : 'bg-white/90 text-primary hover:scale-105 hover:bg-white hover:shadow-md'}`}
+          className={`px-4 py-2 md:px-6 md:py-3 rounded-lg font-medium transition-all duration-300 transform text-base md:text-lg ${activeTab === 'rutube' ? 'bg-accent text-white scale-105 shadow-lg' : 'bg-white/60 text-primary hover:scale-105 hover:bg-white/70 hover:shadow-md'}`}
           onClick={() => setActiveTab('rutube')}
         >
           Rutube
         </button>
         <button
-          className={`px-4 py-2 md:px-6 md:py-3 rounded-lg font-medium transition-all duration-300 transform text-base md:text-lg ${activeTab === 'youtube' ? 'bg-accent text-white scale-105 shadow-lg' : 'bg-white/90 text-primary hover:scale-105 hover:bg-white hover:shadow-md'}`}
+          className={`px-4 py-2 md:px-6 md:py-3 rounded-lg font-medium transition-all duration-300 transform text-base md:text-lg ${activeTab === 'youtube' ? 'bg-accent text-white scale-105 shadow-lg' : 'bg-white/60 text-primary hover:scale-105 hover:bg-white/70 hover:shadow-md'}`}
           onClick={() => setActiveTab('youtube')}
         >
           YouTube
         </button>
         <button
-          className={`px-4 py-2 md:px-6 md:py-3 rounded-lg font-medium transition-all duration-300 transform text-base md:text-lg ${activeTab === 'dzen' ? 'bg-accent text-white scale-105 shadow-lg' : 'bg-white/90 text-primary hover:scale-105 hover:bg-white hover:shadow-md'}`}
+          className={`px-4 py-2 md:px-6 md:py-3 rounded-lg font-medium transition-all duration-300 transform text-base md:text-lg ${activeTab === 'dzen' ? 'bg-accent text-white scale-105 shadow-lg' : 'bg-white/60 text-primary hover:scale-105 hover:bg-white/70 hover:shadow-md'}`}
           onClick={() => setActiveTab('dzen')}
         >
           Дзен
@@ -1049,4 +1049,4 @@ export default function ClubPage() {
       </div>
     </div>
   );
-} 
+}

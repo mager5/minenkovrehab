@@ -44,7 +44,7 @@ export function HelpSection() {
                   whileHover={{ 
                     y: -5, 
                     boxShadow: "0 10px 25px rgba(209, 243, 234, 0.2)",
-                    backgroundColor: "#DCF5ED"
+                    backgroundColor: "rgba(209, 243, 234, 0.15)"
                   }}
                 >
                   <motion.div 
@@ -106,4 +106,4 @@ export function HelpSection() {
       </div>
     </section>
   );
-} 
+}
