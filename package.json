@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "export": "next export"
+    "export": "next build && next export",
+    "check": "node scripts/pre-commit-check.js",
+    "check:full": "node scripts/pre-commit-check.js --e2e",
+    "check:fast": "node scripts/pre-commit-check.js --skip-build",
+    "test:e2e": "node scripts/e2e-tests.js",
+    "precommit": "npm run check"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
