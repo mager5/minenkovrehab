@@ -50,4 +50,6 @@ if (!fs.existsSync('out/404.html') && fs.existsSync('out/index.html')) {
   fs.copyFileSync('out/index.html', 'out/404.html');
 }
 
-console.log('🎉 Процесс сборки завершен! Проверьте директорию out для результатов.'); 
+console.log(
+  '🎉 Процесс сборки завершен! Проверьте директорию out для результатов.'
+);

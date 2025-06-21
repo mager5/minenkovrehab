@@ -1,3 +1,5 @@
+'use client';
+
 import { motion } from 'framer-motion';
 
 interface CounterProps {
@@ -7,40 +9,41 @@ interface CounterProps {
   delay?: number;
 }
 
-export function Counter({ 
-  value, 
-  label, 
-  plus = false, 
-  delay = 0 
+export function Counter({
+  value,
+  label,
+  plus = false,
+  delay = 0,
 }: CounterProps) {
   return (
-    <motion.div 
-      className="bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow"
+    <motion.div
+      className='bg-white p-6 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow'
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.6, delay }}
-      whileHover={{ 
-        y: -5, 
-        boxShadow: "0 15px 30px rgba(0,0,0,0.1)"
+      whileHover={{
+        y: -5,
+        boxShadow: '0 15px 30px rgba(0,0,0,0.1)',
       }}
     >
-      <motion.div 
-        className="text-4xl font-bold text-primary mb-2"
+      <motion.div
+        className='text-4xl font-bold text-primary mb-2'
         initial={{ opacity: 0, scale: 0.5 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, amount: 0.3 }}
-        transition={{ 
-          duration: 0.8, 
+        transition={{
+          duration: 0.8,
           delay: delay + 0.2,
-          type: "spring",
-          stiffness: 150
+          type: 'spring',
+          stiffness: 150,
         }}
       >
-        {value}{plus && '+'}
+        {value}
+        {plus && '+'}
       </motion.div>
-      <motion.p 
-        className="text-accent font-semibold"
+      <motion.p
+        className='text-accent font-semibold'
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, amount: 0.3 }}
@@ -50,4 +53,4 @@ export function Counter({
       </motion.p>
     </motion.div>
   );
-} 
+}

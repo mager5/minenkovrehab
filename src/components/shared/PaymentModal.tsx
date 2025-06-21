@@ -1,3 +1,5 @@
+'use client';
+
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useRef, useState, useEffect } from 'react';
 import { IoMdClose } from 'react-icons/io';
@@ -64,7 +66,11 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
       const response = await fetch('/api/pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, phone: formData.phone, amount }),
+        body: JSON.stringify({
+          email: formData.email,
+          phone: formData.phone,
+          amount,
+        }),
       });
       const data = await response.json();
       if (data.PaymentURL) {
@@ -81,52 +87,69 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
 
   return (
     <Transition show={isOpen} as={Fragment}>
-      <Dialog as="div" className="fixed z-50 inset-0 overflow-y-auto" onClose={onClose} initialFocus={initialFocusRef}>
+      <Dialog
+        as='div'
+        className='fixed z-50 inset-0 overflow-y-auto'
+        onClose={onClose}
+        initialFocus={initialFocusRef}
+      >
         <Transition.Child
           as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+          enter='ease-out duration-300'
+          enterFrom='opacity-0'
+          enterTo='opacity-100'
+          leave='ease-in duration-200'
+          leaveFrom='opacity-100'
+          leaveTo='opacity-0'
         >
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
+          <div
+            className='fixed inset-0 bg-black/50 backdrop-blur-sm'
+            aria-hidden='true'
+          />
         </Transition.Child>
-        <div className="flex items-center justify-center min-h-screen px-4 text-center">
+        <div className='flex items-center justify-center min-h-screen px-4 text-center'>
           <Transition.Child
             as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
+            enter='ease-out duration-300'
+            enterFrom='opacity-0 scale-95'
+            enterTo='opacity-100 scale-100'
+            leave='ease-in duration-200'
+            leaveFrom='opacity-100 scale-100'
+            leaveTo='opacity-0 scale-95'
           >
-            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-8 shadow-lg transition-all duration-500 border border-gray-100 relative">
+            <Dialog.Panel className='w-full max-w-md transform overflow-hidden rounded-xl bg-white p-8 shadow-lg transition-all duration-500 border border-gray-100 relative'>
               <button
-                type="button"
-                className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300 z-10"
+                type='button'
+                className='absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300 z-10'
                 onClick={onClose}
-                aria-label="Закрыть"
+                aria-label='Закрыть'
               >
-                <IoMdClose className="h-5 w-5 text-gray-700" />
+                <IoMdClose className='h-5 w-5 text-gray-700' />
               </button>
               <Dialog.Title
-                as="h2"
-                className="text-2xl font-bold text-primary mb-8 relative inline-block"
-                id="payment-modal-title"
+                as='h2'
+                className='text-2xl font-bold text-primary mb-8 relative inline-block'
+                id='payment-modal-title'
               >
                 Оплата абонемента
-                <span className="block h-1.5 w-24 bg-accent mt-2 rounded-full" aria-hidden="true"></span>
+                <span
+                  className='block h-1.5 w-24 bg-accent mt-2 rounded-full'
+                  aria-hidden='true'
+                ></span>
               </Dialog.Title>
-              <form onSubmit={handleSubmit} className="space-y-6" aria-labelledby="payment-modal-title">
-                <div className="form-group relative overflow-hidden">
-                  <label htmlFor="email" className="sr-only">E-mail</label>
+              <form
+                onSubmit={handleSubmit}
+                className='space-y-6'
+                aria-labelledby='payment-modal-title'
+              >
+                <div className='form-group relative overflow-hidden'>
+                  <label htmlFor='email' className='sr-only'>
+                    E-mail
+                  </label>
                   <input
-                    type="email"
-                    id="email"
-                    name="email"
+                    type='email'
+                    id='email'
+                    name='email'
                     value={formData.email}
                     onChange={handleChange}
                     onFocus={() => handleFocus('email')}
@@ -134,19 +157,24 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
                     className={`w-full bg-gray-50 border-0 border-b-2 rounded-t-lg px-4 py-3.5 text-gray-800 transition-all duration-300 focus:outline-none 
                       ${focusedField === 'email' ? 'border-accent shadow-sm' : 'border-gray-200'}`}
                     required
-                    placeholder="E-mail"
-                    aria-required="true"
+                    placeholder='E-mail'
+                    aria-required='true'
                     ref={initialFocusRef}
                   />
-                  <div className={`absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-500 
-                    ${focusedField === 'email' ? 'w-full' : ''}`} aria-hidden="true"></div>
+                  <div
+                    className={`absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-500 
+                    ${focusedField === 'email' ? 'w-full' : ''}`}
+                    aria-hidden='true'
+                  ></div>
                 </div>
-                <div className="form-group relative overflow-hidden">
-                  <label htmlFor="phone" className="sr-only">Контактный телефон</label>
+                <div className='form-group relative overflow-hidden'>
+                  <label htmlFor='phone' className='sr-only'>
+                    Контактный телефон
+                  </label>
                   <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
+                    type='tel'
+                    id='phone'
+                    name='phone'
                     value={formData.phone}
                     onChange={handleChange}
                     onFocus={() => handleFocus('phone')}
@@ -154,69 +182,109 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
                     className={`w-full bg-gray-50 border-0 border-b-2 rounded-t-lg px-4 py-3.5 text-gray-800 transition-all duration-300 focus:outline-none 
                       ${focusedField === 'phone' ? 'border-accent shadow-sm' : 'border-gray-200'}`}
                     required
-                    placeholder="Контактный телефон"
-                    aria-required="true"
+                    placeholder='Контактный телефон'
+                    aria-required='true'
                   />
-                  <div className={`absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-500 
-                    ${focusedField === 'phone' ? 'w-full' : ''}`} aria-hidden="true"></div>
+                  <div
+                    className={`absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-500 
+                    ${focusedField === 'phone' ? 'w-full' : ''}`}
+                    aria-hidden='true'
+                  ></div>
                 </div>
-                <div className="form-group mb-2">
-                  <label 
-                    className="flex items-center cursor-pointer group" 
-                    htmlFor="payment-consent" 
+                <div className='form-group mb-2'>
+                  <label
+                    className='flex items-center cursor-pointer group'
+                    htmlFor='payment-consent'
                   >
-                    <div className="relative flex items-center mr-3">
-                      <input 
-                        id="payment-consent"
-                        className="absolute opacity-0 w-5 h-5 cursor-pointer" 
+                    <div className='relative flex items-center mr-3'>
+                      <input
+                        id='payment-consent'
+                        className='absolute opacity-0 w-5 h-5 cursor-pointer'
                         required
-                        aria-required="true"
-                        type="checkbox"
+                        aria-required='true'
+                        type='checkbox'
                         checked={consentChecked}
                         onChange={handleConsentChange}
                       />
-                      <div 
+                      <div
                         className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-all duration-300 flex-shrink-0 
                         ${consentChecked ? 'bg-accent border-accent' : 'bg-white border-gray-300 group-hover:border-accent'}`}
-                        aria-hidden="true"
+                        aria-hidden='true'
                       >
                         {consentChecked && (
-                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                          <svg
+                            className='w-3 h-3 text-white'
+                            fill='none'
+                            stroke='currentColor'
+                            viewBox='0 0 24 24'
+                            aria-hidden='true'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth='3'
+                              d='M5 13l4 4L19 7'
+                            ></path>
                           </svg>
                         )}
                       </div>
                     </div>
-                    <span className="text-sm text-gray-700 pt-0.5 text-left">
-                      Я даю согласие на обработку персональных данных в соответствии с <a href="/policy" className="text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2" target="_blank" rel="noopener noreferrer">политикой конфиденциальности</a>
+                    <span className='text-sm text-gray-700 pt-0.5 text-left'>
+                      Я даю согласие на обработку персональных данных в
+                      соответствии с{' '}
+                      <a
+                        href='/policy'
+                        className='text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        политикой конфиденциальности
+                      </a>
                     </span>
                   </label>
                 </div>
                 {submitError && (
-                  <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm" role="alert" aria-live="assertive">
-                    <div className="flex items-center mb-2">
-                      <svg className="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                  <div
+                    className='bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm'
+                    role='alert'
+                    aria-live='assertive'
+                  >
+                    <div className='flex items-center mb-2'>
+                      <svg
+                        className='w-5 h-5 mr-2 text-red-600'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                        aria-hidden='true'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth='2'
+                          d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
+                        ></path>
                       </svg>
-                      <p className="font-bold text-red-800">Произошла ошибка!</p>
+                      <p className='font-bold text-red-800'>
+                        Произошла ошибка!
+                      </p>
                     </div>
-                    <p className="text-red-700">{submitError}</p>
+                    <p className='text-red-700'>{submitError}</p>
                   </div>
                 )}
                 <button
-                  type="submit"
+                  type='submit'
                   className={`w-full py-4 rounded-lg transition-all duration-500 font-semibold text-lg relative overflow-hidden ${
                     isSubmitting
                       ? 'bg-gray-200 cursor-not-allowed text-gray-500'
                       : !consentChecked
-                      ? 'bg-white text-accent border-2 border-accent cursor-not-allowed'
-                      : 'bg-accent text-white hover:bg-accent-dark active:opacity-70'
+                        ? 'bg-white text-accent border-2 border-accent cursor-not-allowed'
+                        : 'bg-accent text-white hover:bg-accent-dark active:opacity-70'
                   }`}
                   disabled={isSubmitting || !consentChecked}
                   aria-disabled={isSubmitting || !consentChecked}
                   aria-busy={isSubmitting}
                 >
-                  <span className="relative z-10 flex items-center justify-center">
+                  <span className='relative z-10 flex items-center justify-center'>
                     {isSubmitting ? 'Перенаправление...' : 'Купить абонемент'}
                   </span>
                 </button>
@@ -229,4 +297,4 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
   );
 };
 
-export default PaymentModal; 
+export default PaymentModal;

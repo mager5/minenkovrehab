@@ -31,12 +31,8 @@ const nextConfig = {
     ],
     domains: ['images.unsplash.com', '*.unsplash.com', '*.googleusercontent.com', '*.cloudinary.com'],
   },
-  typescript: {
-    ignoreBuildErrors: true
-  },
-  eslint: {
-    ignoreDuringBuilds: true
-  }
-}
+  // TypeScript и ESLint проверки включены для безопасности
+  // Заголовки безопасности добавляются через middleware.ts
+ }
 
-module.exports = nextConfig 
+module.exports = nextConfig

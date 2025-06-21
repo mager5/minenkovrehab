@@ -5,7 +5,7 @@
 /**
  * Для корректной работы этого скрипта установите:
  * npm install --save-dev sharp fs-extra
- * 
+ *
  * Затем выполните скрипт с помощью Node.js:
  * node scripts/convert-favicon.js
  */
@@ -63,4 +63,6 @@ async function generateFavicons() {
 generateFavicons();
 */
 
-console.log('Этот скрипт является заглушкой. В реальном проекте используйте Node.js с sharp и fs-extra для конвертации SVG в PNG/ICO файлы.'); 
+console.log(
+  'Этот скрипт является заглушкой. В реальном проекте используйте Node.js с sharp и fs-extra для конвертации SVG в PNG/ICO файлы.'
+);

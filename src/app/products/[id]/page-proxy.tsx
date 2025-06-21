@@ -5,16 +5,16 @@ import ProductClient from './client';
 import ProductNotFound from './not-found';
 
 // Прокси-компонент для решения проблемы с типами
-export default function ProductPageProxy({ 
-  product, 
-  productExists 
-}: { 
-  product?: Product, 
-  productExists: boolean
+export default function ProductPageProxy({
+  product,
+  productExists,
+}: {
+  product: Product | undefined;
+  productExists: boolean;
 }) {
   if (!productExists || !product) {
     return <ProductNotFound />;
   }
-  
+
   return <ProductClient product={product} />;
-} 
+}

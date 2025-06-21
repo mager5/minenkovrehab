@@ -7,12 +7,23 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "export": "next build && next export",
     "check": "node scripts/pre-commit-check.js",
     "check:full": "node scripts/pre-commit-check.js --e2e",
     "check:fast": "node scripts/pre-commit-check.js --skip-build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "test:e2e": "node scripts/e2e-tests.js",
-    "precommit": "npm run check"
+    "analyze:complexity": "npx eslint src --ext .ts,.tsx,.js,.jsx --format json > reports/complexity.json || true",
+    "analyze:duplicates": "npx jscpd src",
+    "analyze:all": "npm run analyze:complexity && npm run analyze:duplicates",
+    "quality:check": "node scripts/code-quality-analysis.js",
+    "precommit": "npm run check",
+    "prepare": "husky"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
@@ -20,7 +31,7 @@
     "axios": "^1.9.0",
     "framer-motion": "^10.16.4",
     "lottie-react": "^2.4.0",
-    "next": "13.5.4",
+    "next": "^13.5.11",
     "nodemailer": "^7.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -28,14 +39,38 @@
     "react-icons": "^4.11.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.8.2",
     "@types/react": "^18.2.24",
     "@types/react-dom": "^18.2.8",
+    "@typescript-eslint/eslint-plugin": "^8.34.1",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.50.0",
     "eslint-config-next": "13.5.4",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "husky": "^9.1.7",
+    "jest": "^30.0.2",
+    "jest-environment-jsdom": "^30.0.2",
+    "lint-staged": "^16.1.2",
     "postcss": "^8.4.31",
+    "prettier": "^3.5.3",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.2.2"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   }
 }

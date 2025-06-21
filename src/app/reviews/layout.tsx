@@ -9,4 +9,4 @@ export default function ReviewsLayout({
   children: React.ReactNode;
 }) {
   return <>{children}</>;
-} 
+}

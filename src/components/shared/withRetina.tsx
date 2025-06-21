@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { ComponentType } from 'react';
 import { useRetina } from '@/hooks/useRetina';
@@ -7,7 +7,7 @@ interface WithRetinaProps {
   [key: string]: unknown;
 }
 
-type TransformFunction = (value: unknown) => unknown;
+type TransformFunction = (_value: unknown) => unknown;
 
 /**
  * HOC, который добавляет поддержку Retina к компоненту
@@ -21,39 +21,44 @@ export const withRetina = <P extends WithRetinaProps>(
 ) => {
   const WithRetinaComponent = (props: P) => {
     const isRetina = useRetina();
-    
+
     // Модифицируем пропы для Retina дисплеев
     const enhancedProps = { ...props } as P;
-    
+
     if (isRetina) {
       Object.keys(retinaProps).forEach(propName => {
         if (Object.prototype.hasOwnProperty.call(props, propName)) {
-          enhancedProps[propName as keyof P] = retinaProps[propName](props[propName as keyof P]) as P[keyof P];
+          const transformFn = retinaProps[propName];
+          if (transformFn) {
+            enhancedProps[propName as keyof P] = transformFn(
+              props[propName as keyof P]
+            ) as P[keyof P];
+          }
         }
       });
     }
-    
+
     return <WrappedComponent {...enhancedProps} />;
   };
-  
+
   WithRetinaComponent.displayName = `WithRetina(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
-  
+
   return WithRetinaComponent;
 };
 
 /**
  * Пример использования:
- * 
+ *
  * // Создаем компонент с поддержкой Retina
  * const RetinaBackgroundImage = withRetina(
  *   ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => (
- *     <div 
+ *     <div
  *       style={{ backgroundImage: `url(${src})` }}
  *       aria-label={alt}
- *       {...props} 
+ *       {...props}
  *     />
  *   ),
- *   { 
+ *   {
  *     // Преобразование src для Retina (например, добавление @2x)
  *     src: (normalSrc: unknown) => {
  *       if (typeof normalSrc === 'string') {
@@ -63,9 +68,9 @@ export const withRetina = <P extends WithRetinaProps>(
  *     }
  *   }
  * );
- * 
+ *
  * // Использование
  * <RetinaBackgroundImage src="/images/banner.jpg" alt="Banner" className="..." />
  */
 
-export default withRetina; 
+export default withRetina;

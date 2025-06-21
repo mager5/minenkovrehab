@@ -92,102 +92,126 @@ const AboutColumn = () => {
 };
 
 // Компонент с услугами
-const ServicesColumn = () => (
-  <div className="transform transition-all duration-500 hover:translate-y-[-5px]">
-    <h3 className="text-lg font-bold mb-6 text-white relative inline-block after:content-[''] after:absolute after:w-10 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]" id="services-heading">Услуги</h3>
-    <ul className="space-y-3" role="menu" aria-labelledby="services-heading">
-      <li role="menuitem">
-        <Link 
-          href="/products" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
-          aria-label="Онлайн-консультации"
-        >
-          Онлайн-консультации
-        </Link>
-      </li>
-      <li role="menuitem">
-        <Link 
-          href="/products" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
-          aria-label="Клуб «ФОРМУЛА ДВИЖЕНИЯ»"
-        >
-          Клуб «ФОРМУЛА ДВИЖЕНИЯ»
-        </Link>
-      </li>
-      <li role="menuitem">
-        <Link 
-          href="/products" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
-          aria-label="Реабилитационные протоколы"
-        >
-          Реабилитационные протоколы
-        </Link>
-      </li>
-    </ul>
-  </div>
-);
+const ServicesColumn = () => {
+  return (
+    <div className="transform transition-all duration-500 hover:translate-y-[-5px]">
+      <h3 className="text-xl font-bold mb-6 text-white relative inline-block after:content-[''] after:absolute after:w-14 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]">Услуги</h3>
+      <ul className="space-y-3" role="list">
+        <li role="listitem">
+          <Link 
+            href="/products" 
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
+            style={{color: '#d1f3ea'}} 
+            aria-label="Персональные тренировки"
+          >
+            Персональные тренировки
+          </Link>
+        </li>
+        <li role="listitem">
+          <Link 
+            href="/products" 
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
+            style={{color: '#d1f3ea'}} 
+            aria-label="Реабилитация после травм"
+          >
+            Реабилитация после травм
+          </Link>
+        </li>
+        <li role="listitem">
+          <Link 
+            href="/products" 
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
+            style={{color: '#d1f3ea'}} 
+            aria-label="Коррекция осанки"
+          >
+            Коррекция осанки
+          </Link>
+        </li>
+        <li role="listitem">
+          <Link 
+            href="/products" 
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
+            style={{color: '#d1f3ea'}} 
+            aria-label="Работа с болевыми синдромами"
+          >
+            Работа с болевыми синдромами
+          </Link>
+        </li>
+        <li role="listitem">
+          <Link 
+            href="/products" 
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
+            style={{color: '#d1f3ea'}} 
+            aria-label="Онлайн консультации"
+          >
+            Онлайн консультации
+          </Link>
+        </li>
+      </ul>
+    </div>
+  );
+};
 
 // Компонент с навигацией
-const NavigationColumn = () => (
-  <div className="transform transition-all duration-500 hover:translate-y-[-5px]">
-    <h3 className="text-lg font-bold mb-6 text-white relative inline-block after:content-[''] after:absolute after:w-10 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]" id="navigation-heading">Навигация</h3>
-    <ul className="space-y-3" role="menu" aria-labelledby="navigation-heading">
-      <li role="menuitem">
-        <Link 
-          href="/" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
-          aria-label="Главная страница"
-        >
-          Главная
-        </Link>
-      </li>
-      <li role="menuitem">
-        <Link 
-          href="/about" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
-          aria-label="Страница обо мне"
-        >
-          Обо мне
-        </Link>
-      </li>
-      <li role="menuitem">
-        <Link 
-          href="/products" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
-          aria-label="Страница услуг"
-        >
-          Услуги
-        </Link>
-      </li>
-      <li role="menuitem">
-        <Link 
-          href="/reviews" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
-          aria-label="Страница отзывов"
-        >
-          Отзывы
-        </Link>
-      </li>
-      <li role="menuitem">
-        <Link 
-          href="/contacts" 
-          className="text-white hover:text-accent transition-all duration-300 flex items-center font-semibold group focus:outline-none focus:underline" 
-          style={{color: '#d1f3ea'}} 
-          aria-label="Страница контактов"
-        >
-          Контакты
-        </Link>
-      </li>
-    </ul>
-  </div>
-);
+const NavigationColumn = () => {
+  return (
+    <div className="transform transition-all duration-500 hover:translate-y-[-5px]">
+      <h3 className="text-xl font-bold mb-6 text-white relative inline-block after:content-[''] after:absolute after:w-14 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]">Навигация</h3>
+      <ul className="space-y-3" role="list">
+        <li role="listitem">
+          <Link 
+            href="/" 
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
+            style={{color: '#d1f3ea'}} 
+            aria-label="Главная страница"
+          >
+            Главная
+          </Link>
+        </li>
+        <li role="listitem">
+          <Link 
+            href="/about" 
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
+            style={{color: '#d1f3ea'}} 
+            aria-label="Обо мне"
+          >
+            Обо мне
+          </Link>
+        </li>
+        <li role="listitem">
+          <Link 
+            href="/products" 
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
+            style={{color: '#d1f3ea'}} 
+            aria-label="Услуги"
+          >
+            Услуги
+          </Link>
+        </li>
+        <li role="listitem">
+          <Link 
+            href="/reviews" 
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
+            style={{color: '#d1f3ea'}} 
+            aria-label="Отзывы"
+          >
+            Отзывы
+          </Link>
+        </li>
+        <li role="listitem">
+          <Link 
+            href="/contacts" 
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
+            style={{color: '#d1f3ea'}} 
+            aria-label="Контакты"
+          >
+            Контакты
+          </Link>
+        </li>
+      </ul>
+    </div>
+  );
+};
 
 // Компонент с контактами
 const ContactsColumn = () => {
@@ -201,52 +225,101 @@ const ContactsColumn = () => {
 
   return (
     <div className="transform transition-all duration-500 hover:translate-y-[-5px]">
-      <h3 className="text-lg font-bold mb-6 text-white relative inline-block after:content-[''] after:absolute after:w-10 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]" id="contacts-heading">Контакты</h3>
-      <ul className="space-y-4" aria-labelledby="contacts-heading">
-        <li className="flex items-start hover:translate-x-1 transition-all duration-300">
-          <svg className="w-5 h-5 mt-0.5 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      <h3 className="text-xl font-bold mb-6 text-white relative inline-block after:content-[''] after:absolute after:w-14 after:h-0.5 after:bg-accent after:left-0 after:bottom-[-10px]">Контакты</h3>
+      <div className="space-y-4">
+        <div className="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" focusable="false">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
           </svg>
-          <span className="text-white font-semibold" style={{color: '#d1f3ea'}}>Онлайн-консультации</span>
-        </li>
-        <li className="flex items-start hover:translate-x-1 transition-all duration-300">
-          <svg className="w-5 h-5 mt-0.5 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-          </svg>
-          <a 
+          <a
             href="tel:+79283287052"
-            className="text-white hover:text-accent-light transition-colors"
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline"
+            style={{color: '#d1f3ea'}}
             aria-label="Позвонить по телефону +7 928 328-70-52"
+            onKeyDown={(e) => handleKeyDown(e, () => window.location.href = 'tel:+79283287052')}
           >
-            <span>+7 928 328-70-52</span>
+            +7 928 328-70-52
           </a>
-        </li>
-        <li className="flex items-start hover:translate-x-1 transition-all duration-300">
-          <svg className="w-5 h-5 mt-0.5 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+        </div>
+        <div className="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" focusable="false">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
-          <a 
-            href="mailto:minenkov.rehab@yandex.ru" 
-            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline" 
-            style={{color: '#d1f3ea'}} 
-            aria-label="Написать на email minenkov.rehab@yandex.ru"
-            onKeyDown={(e) => handleKeyDown(e, () => window.location.href = 'mailto:minenkov.rehab@yandex.ru')}
+          <a
+            href="mailto:minenkov.vadim@gmail.com"
+            className="text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline"
+            style={{color: '#d1f3ea'}}
+            aria-label="Написать на email minenkov.vadim@gmail.com"
+            onKeyDown={(e) => handleKeyDown(e, () => window.location.href = 'mailto:minenkov.vadim@gmail.com')}
           >
-            minenkov.rehab@yandex.ru
+            minenkov.vadim@gmail.com
           </a>
-        </li>
-        <li className="flex items-start hover:translate-x-1 transition-all duration-300">
-          <svg className="w-5 h-5 mt-0.5 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </div>
+        <div className="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" focusable="false">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <div className="text-white font-semibold" style={{color: '#d1f3ea'}}>
-            <p style={{color: '#d1f3ea'}}>Пн - Пт: 10:00 - 19:00</p>
-            <p style={{color: '#d1f3ea'}}>Сб: 10:00 - 15:00</p>
-            <p style={{color: '#d1f3ea'}}>Вс: Выходной</p>
-          </div>
-        </li>
-      </ul>
+          <span className="text-white font-semibold" style={{color: '#d1f3ea'}}>Пн-Сб: 10:00-19:00</span>
+        </div>
+        <div className="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" focusable="false">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span className="text-white font-semibold" style={{color: '#d1f3ea'}}>Ростов-на-Дону</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Компонент кнопки "Наверх"
+const ScrollToTop = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleVisibility = () => {
+    if (window.pageYOffset > 300) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      scrollToTop();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', toggleVisibility);
+    return () => {
+      window.removeEventListener('scroll', toggleVisibility);
+    };
+  }, []);
+
+  return (
+    <div className="fixed bottom-8 right-8 z-50">
+      {isVisible && (
+        <button
+          onClick={scrollToTop}
+          onKeyDown={handleKeyDown}
+          className="bg-accent hover:bg-accent-dark text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+          aria-label="Прокрутить наверх"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" focusable="false">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
@@ -281,84 +354,12 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
                 Договор-оферта
               </Link>
             </li>
-            <li className="mt-2 sm:mt-0" role="menuitem">
-              <Link 
-                href="/requisites" 
-                className="text-white hover:text-accent transition-all duration-300 text-sm font-semibold focus:outline-none focus:underline" 
-                style={{color: '#d1f3ea'}} 
-                aria-label="Реквизиты"
-              >
-                Реквизиты
-              </Link>
-            </li>
           </ul>
         </div>
       </div>
     </div>
   </div>
 );
-
-// Анимированный скролл-апп кнопка
-const ScrollToTop = () => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
-  // Обработка нажатия клавиш для кнопки прокрутки
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      scrollToTop();
-    }
-  };
-
-  return (
-    <button
-      onClick={scrollToTop}
-      onKeyDown={handleKeyDown}
-      className={`fixed bottom-6 right-6 p-3 rounded-full bg-accent text-white shadow-lg z-50 transition-all duration-500 cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
-      }`}
-      aria-label="Прокрутить наверх"
-      tabIndex={isVisible ? 0 : -1}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M5 10l7-7m0 0l7 7m-7-7v18"
-        />
-      </svg>
-    </button>
-  );
-};
 
 // Основной компонент футера
 export default function Footer() {
@@ -390,4 +391,4 @@ export default function Footer() {
       <ScrollToTop />
     </footer>
   );
-} 
+}

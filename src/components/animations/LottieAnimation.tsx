@@ -39,8 +39,13 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
 }) => {
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(containerRef, { once: !loop && playOnView, amount: 0.3 });
-  const [isPaused, setIsPaused] = useState(!autoplay || playOnHover || (playOnView && !isInView));
+  const isInView = useInView(containerRef, {
+    once: !loop && playOnView,
+    amount: 0.3,
+  });
+  const [isPaused, setIsPaused] = useState(
+    !autoplay || playOnHover || (playOnView && !isInView)
+  );
 
   // Управление анимацией при появлении в поле зрения
   useEffect(() => {
@@ -93,7 +98,7 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`lottie-animation-container ${className}`}
       style={style}
@@ -106,12 +111,12 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
         animationData={animationData}
         loop={loop}
         autoplay={!isPaused}
-        className="w-full h-full"
-        onComplete={onComplete}
-        onLoopComplete={onLoopComplete}
+        className='w-full h-full'
+        {...(onComplete && { onComplete })}
+        {...(onLoopComplete && { onLoopComplete })}
       />
     </div>
   );
 };
 
-export default LottieAnimation; 
+export default LottieAnimation;
