@@ -28,8 +28,8 @@ npm start
 Убедитесь, что в файле `.env` установлены:
 ```env
 ROBOKASSA_LOGIN=ваш_логин
-ROBOKASSA_TEST_PASSWORD1=тестовый_пароль_1
-ROBOKASSA_TEST_PASSWORD2=тестовый_пароль_2
+ROBOKASSA_TEST_PASSWORD1=Eld5Xljk2GBN4D6TJo3N
+ROBOKASSA_TEST_PASSWORD2=gWtiI5Li9nqojQcc1f60
 ROBOKASSA_TEST_MODE=true
 RAILWAY_API_URL=https://minenkovrehab-production-15cc.up.railway.app
 ```
