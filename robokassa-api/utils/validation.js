@@ -106,37 +106,46 @@ function validateResultParams(params) {
  */
 function validateEnvironment() {
   const errors = [];
-  const requiredVars = [
-    'ROBOKASSA_LOGIN',
-    'ROBOKASSA_PASSWORD1',
-    'ROBOKASSA_PASSWORD2'
-  ];
+  const warnings = [];
   
-  // Проверка обязательных переменных
-  requiredVars.forEach(varName => {
-    if (!process.env[varName]) {
-      errors.push(`Переменная окружения ${varName} не установлена`);
-    }
-  });
+  // Проверка логина (обязательно)
+  if (!process.env.ROBOKASSA_LOGIN) {
+    errors.push('Переменная окружения ROBOKASSA_LOGIN не установлена');
+  }
+  
+  // Проверка паролей (для тестирования можно работать без них, но с предупреждениями)
+  if (!process.env.ROBOKASSA_PASSWORD1) {
+    warnings.push('Переменная окружения ROBOKASSA_PASSWORD1 не установлена - генерация платежных ссылок может не работать');
+  }
+  
+  if (!process.env.ROBOKASSA_PASSWORD2) {
+    warnings.push('Переменная окружения ROBOKASSA_PASSWORD2 не установлена - проверка подписей Result URL может не работать');
+  }
   
   // Проверка тестовых переменных в тестовом режиме
   if (process.env.ROBOKASSA_TEST_MODE === 'true') {
-    const testVars = ['ROBOKASSA_TEST_PASSWORD1', 'ROBOKASSA_TEST_PASSWORD2'];
-    testVars.forEach(varName => {
-      if (!process.env[varName]) {
-        errors.push(`Тестовая переменная ${varName} не установлена`);
-      }
-    });
+    if (!process.env.ROBOKASSA_TEST_PASSWORD1) {
+      warnings.push('Тестовая переменная ROBOKASSA_TEST_PASSWORD1 не установлена - генерация тестовых платежных ссылок может не работать');
+    }
+    if (!process.env.ROBOKASSA_TEST_PASSWORD2) {
+      warnings.push('Тестовая переменная ROBOKASSA_TEST_PASSWORD2 не установлена - проверка тестовых подписей Result URL может не работать');
+    }
   }
   
   // Проверка URL фронтенда
   if (!process.env.FRONTEND_URL) {
-    console.warn('FRONTEND_URL не установлен, будет использован localhost');
+    warnings.push('FRONTEND_URL не установлен, будет использован localhost');
+  }
+  
+  // Выводим предупреждения в консоль
+  if (warnings.length > 0) {
+    console.warn('⚠️ Предупреждения конфигурации:', warnings);
   }
   
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
+    warnings
   };
 }
 

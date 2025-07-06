@@ -18,7 +18,11 @@ const {
 // Проверка переменных окружения при загрузке модуля
 const envValidation = validateEnvironment();
 if (!envValidation.isValid) {
-  console.error('❌ Ошибки в переменных окружения:', envValidation.errors);
+  console.error('❌ Критические ошибки в переменных окружения:', envValidation.errors);
+  console.log('ℹ️ API может работать в ограниченном режиме для тестирования');
+}
+if (envValidation.warnings && envValidation.warnings.length > 0) {
+  console.warn('⚠️ Предупреждения конфигурации:', envValidation.warnings);
 }
 
 /**
@@ -55,10 +59,22 @@ router.post('/generate-payment-url', async (req, res) => {
       ? process.env.ROBOKASSA_TEST_PASSWORD1 
       : process.env.ROBOKASSA_PASSWORD1;
     
-    if (!login || !password1) {
+    if (!login) {
       return res.status(500).json({
         success: false,
-        error: 'Настройки Robokassa не сконфигурированы'
+        error: 'ROBOKASSA_LOGIN не установлен - обратитесь к администратору'
+      });
+    }
+    
+    if (!password1) {
+      return res.status(500).json({
+        success: false,
+        error: `Пароль #1 для ${isTestMode ? 'тестового' : 'боевого'} режима не установлен`,
+        details: {
+          testMode: isTestMode,
+          requiredVar: isTestMode ? 'ROBOKASSA_TEST_PASSWORD1' : 'ROBOKASSA_PASSWORD1',
+          message: 'Для генерации платежных ссылок необходимо установить соответствующие переменные окружения'
+        }
       });
     }
     
@@ -165,8 +181,10 @@ const handleResult = async (req, res) => {
       : process.env.ROBOKASSA_PASSWORD2;
     
     if (!password2) {
-      console.error('❌ Пароль #2 не сконфигурирован');
-      return res.status(500).send('Configuration Error');
+      const requiredVar = isTestMode ? 'ROBOKASSA_TEST_PASSWORD2' : 'ROBOKASSA_PASSWORD2';
+      console.error(`❌ Пароль #2 не сконфигурирован: ${requiredVar} не установлен`);
+      console.error('ℹ️ Без пароля #2 невозможно проверить подпись Result URL от Robokassa');
+      return res.status(500).send('Configuration Error: Password #2 not configured');
     }
     
     // Генерация ожидаемой подписи
