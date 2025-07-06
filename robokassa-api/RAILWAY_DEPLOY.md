@@ -76,7 +76,7 @@ ALLOWED_ORIGINS=https://minenkovrehab.github.io,http://localhost:3000
 ### 5. Настройка Result URL в Robokassa
 
 1. В панели Robokassa перейдите в "Технические настройки"
-2. Установите Result URL: `https://ваш-домен.railway.app/api/robokassa/result`
+2. Установите Result URL: `https://minenkovrehab-production.up.railway.app/api/robokassa/result`
 3. Установите Success URL: `https://minenkovrehab.github.io/payment/success`
 4. Установите Fail URL: `https://minenkovrehab.github.io/payment/fail`
 5. Выберите метод отправки данных: POST
@@ -86,24 +86,24 @@ ALLOWED_ORIGINS=https://minenkovrehab.github.io,http://localhost:3000
 1. После деплоя Railway предоставит URL вашего приложения
 2. Проверьте работоспособность:
    ```bash
-   curl https://ваш-домен.railway.app/health
+   curl https://minenkovrehab-production.up.railway.app/health
    ```
 
 3. Проверьте конфигурацию:
    ```bash
-   curl https://ваш-домен.railway.app/api/robokassa/config
+   curl https://minenkovrehab-production.up.railway.app/api/robokassa/config
    ```
 
 ### 7. Обновление фронтенда
 
 1. Создайте `.env.local` в корне фронтенда:
    ```
-   NEXT_PUBLIC_ROBOKASSA_API_URL=https://ваш-домен.railway.app
+   NEXT_PUBLIC_ROBOKASSA_API_URL=https://minenkovrehab-production.up.railway.app
    ```
 
 2. Для GitHub Pages добавьте переменную в Actions secrets:
    - Имя: `NEXT_PUBLIC_ROBOKASSA_API_URL`
-   - Значение: `https://ваш-домен.railway.app`
+   - Значение: `https://minenkovrehab-production.up.railway.app`
 
 ### 8. Тестирование интеграции
 
@@ -145,7 +145,7 @@ railway run npm run dev
 
 ### Проверка переменных окружения:
 ```bash
-curl https://ваш-домен.railway.app/api/robokassa/config
+curl https://minenkovrehab-production.up.railway.app/api/robokassa/config
 ```
 
 ## 🔐 Безопасность
