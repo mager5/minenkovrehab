@@ -8,6 +8,8 @@
 - ✅ Код отправлен в GitHub
 - ✅ Файлы конфигурации созданы
 - ✅ ESLint настроен для Node.js
+- ✅ Docker конфигурация добавлена для стабильного деплоя
+- ✅ Nixpacks конфигурация исправлена
 
 ## 🚀 Шаги деплоя на Railway
 
@@ -29,7 +31,7 @@
 
 ```bash
 # Основные настройки Robokassa
-ROBOKASSA_LOGIN=demo
+ROBOKASSA_LOGIN=Minenkov-2
 ROBOKASSA_PASSWORD1=password_1
 ROBOKASSA_PASSWORD2=password_2
 ROBOKASSA_TEST_PASSWORD1=Eld5Xljk2GBN4D6TJo3N
@@ -117,6 +119,14 @@ NEXT_PUBLIC_ROBOKASSA_API_URL=https://minenkovrehab-production-15cc.up.railway.a
 ```
 
 ## 🔧 Troubleshooting
+
+### Проблема: "nix-env did not complete successfully: exit code: 1"
+**Решение:** Используйте Docker вместо Nixpacks:
+1. Railway автоматически обнаружит `Dockerfile` и `railway.json`
+2. Если проблема сохраняется, в настройках проекта Railway:
+   - Перейдите в Settings → Deploy
+   - Выберите "Docker" как Builder
+   - Укажите путь к Dockerfile: `Dockerfile`
 
 ### Проблема: "next start does not work with output: export"
 **Решение:** Убедитесь, что Root Directory установлен как `robokassa-api`
