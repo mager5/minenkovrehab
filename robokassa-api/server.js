@@ -50,6 +50,17 @@ app.use((req, res, next) => {
 app.use('/api/robokassa', robokassaRoutes);
 app.use('/payment', paymentRoutes);
 
+// Статический файл для перехватчика редиректов
+app.get('/redirect-interceptor', (req, res) => {
+  res.sendFile(path.join(__dirname, 'redirect-interceptor.html'));
+});
+
+// JavaScript-файл перехватчика для встраивания
+app.get('/robokassa-redirect-interceptor.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'robokassa-redirect-interceptor.js'));
+});
+
 
 
 // Health check endpoint
@@ -70,11 +81,13 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/health',
       generatePaymentUrl: 'POST /api/robokassa/generate-payment-url',
+      createPayment: 'POST /api/robokassa/create-payment',
       resultCallback: 'POST /api/robokassa/result',
       verifySignature: 'GET /api/robokassa/verify-signature',
+      trackRedirect: 'GET /api/robokassa/track-redirect',
+      redirectInterceptor: 'GET /redirect-interceptor',
       successPage: 'GET /payment/success',
-      failPage: 'GET /payment/fail',
-
+      failPage: 'GET /payment/fail'
     }
   });
 });

@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { Product } from '../data';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { PaymentModal } from '@/components/shared';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -20,6 +22,8 @@ const fadeIn = {
 
 // Клиентский компонент для страницы продукта
 export default function ProductClient({ product }: { product: Product }) {
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
   return (
     <motion.div
       className='py-12'
@@ -144,21 +148,38 @@ export default function ProductClient({ product }: { product: Product }) {
                   {product.price.toLocaleString('ru-RU')} ₽
                 </motion.div>
 
+                {/* Кнопка покупки */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.6 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className='mb-4'
+                >
+                  <button
+                    onClick={() => setIsPaymentModalOpen(true)}
+                    className='block w-full bg-accent text-white text-center px-6 py-3 rounded-md font-medium transition-all hover:bg-accent/90 shadow-lg hover:shadow-xl'
+                  >
+                    💳 Купить онлайн
+                  </button>
+                </motion.div>
+
+                {/* Кнопка связи в Telegram */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.7 }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className='mt-4'
                 >
                   <Link
                     href='https://t.me/MV_Rehab'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='block w-full bg-primary text-white text-center px-6 py-3 rounded-md font-medium transition-all hover:bg-primary-dark'
+                    className='block w-full bg-primary text-white text-center px-6 py-3 rounded-md font-medium transition-all hover:bg-primary-dark border-2 border-transparent hover:border-primary/20'
                   >
-                    Связаться в Telegram
+                    📱 Связаться в Telegram
                   </Link>
                 </motion.div>
               </motion.div>
@@ -166,6 +187,13 @@ export default function ProductClient({ product }: { product: Product }) {
           </div>
         </motion.div>
       </div>
+      
+      {/* Модальное окно оплаты */}
+      <PaymentModal 
+        isOpen={isPaymentModalOpen} 
+        onClose={() => setIsPaymentModalOpen(false)}
+        product={product}
+      />
     </motion.div>
   );
 }

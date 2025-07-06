@@ -41,11 +41,13 @@ router.post('/generate-payment-url', async (req, res) => {
         error: 'Ошибка валидации',
         details: validation.errors
       });
+
+// Эндпоинт track-redirect удален как ненужный
     }
     
     // Извлечение и санитизация данных
-    const email = req.body.email ? sanitizeString(req.body.email) : '';
-    const phone = req.body.phone ? normalizePhone(req.body.phone) : '';
+    const email = req.body.email ? sanitizeString(req.body.email) : undefined;
+    const phone = req.body.phone ? normalizePhone(req.body.phone) : undefined;
     const amount = parseFloat(req.body.amount);
     const description = sanitizeString(req.body.description || 'Оплата абонемента minenkovrehab.ru');
     
@@ -89,45 +91,53 @@ router.post('/generate-payment-url', async (req, res) => {
     const successUrl = `${apiUrl}/api/robokassa/success`;
     const failUrl = `${apiUrl}/api/robokassa/fail`;
     
-    // Формирование URL для оплаты
-    const baseUrl = isTestMode 
-      ? 'https://auth.robokassa.ru/Merchant/Index.aspx'
-      : 'https://auth.robokassa.ru/Merchant/Index.aspx';
+    // Формирование URL для оплаты согласно официальной документации Robokassa
+    // Базовый URL одинаковый для тестового и боевого режима
+    const baseUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx';
     
-    // Формирование параметров в алфавитном порядке согласно требованиям Robokassa
-    const paymentParams = {
-      Culture: 'ru',
-      Description: description,
-      Encoding: 'utf-8',
-      FailURL: failUrl,
-      InvId: invId,
-      IsTest: isTestMode ? '1' : '0',
-      MerchantLogin: login,
-      OutSum: amount.toString(),
-      ResultURL: `${apiUrl}/api/robokassa/result`,
-      SignatureValue: signature,
-      SuccessURL: successUrl
-    };
+    // Параметры в алфавитном порядке (как требует Robokassa)
+    const paymentParams = {};
     
-    // Добавляем email и phone только если они переданы
+    // Добавляем параметры в алфавитном порядке
+    paymentParams.Culture = 'en';
+    paymentParams.Description = description;
     if (email) {
       paymentParams.Email = email;
     }
+    paymentParams.Encoding = 'utf-8';
+    paymentParams.FailURL = failUrl;
+    paymentParams.InvId = invId;
+    if (isTestMode) {
+      paymentParams.IsTest = '1';
+    }
+    paymentParams.Locale = 'en';
+    paymentParams.MerchantLogin = login;
+    paymentParams.OutSum = amount.toString();
     if (phone) {
       paymentParams.Phone = phone;
     }
+    paymentParams.ResultURL = `${apiUrl}/api/robokassa/result`;
+    paymentParams.SignatureValue = signature;
+    paymentParams.SuccessURL = successUrl;
     
     const paymentParamsUrl = new URLSearchParams(paymentParams);
     
     const paymentUrl = `${baseUrl}?${paymentParamsUrl.toString()}`;
     
-    console.log('✅ Платежный URL сгенерирован:', {
+    console.log('✅ Платежный URL сгенерирован согласно документации Robokassa:', {
       invId,
       amount,
       email,
       phone,
-      testMode: isTestMode
+      testMode: isTestMode,
+      culture: 'en',
+      locale: 'en',
+      url: paymentUrl
     });
+    
+    // Формат URL с параметрами в алфавитном порядке (обязательно для Robokassa):
+    // https://auth.robokassa.ru/Merchant/Index.aspx?Culture=ru&Description=Покупка&Encoding=utf-8&InvId=123&Locale=ru-RU&MerchantLogin=demo&OutSum=11&SignatureValue=xxx
+    // Порядок параметров критически важен для корректной работы
     
     // Возврат результата
     res.json({
