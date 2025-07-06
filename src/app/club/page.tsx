@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { PaymentModal } from '@/components';
+// Удален импорт PaymentModal - теперь прямой переход на оплату
 
 export default function ClubPage() {
   const [activeTab, setActiveTab] = useState('rutube');
@@ -72,11 +72,51 @@ export default function ClubPage() {
   const [orderId, setOrderId] = useState('');
 
 
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  // Удалено состояние модального окна - теперь прямой переход на оплату
 
   useEffect(() => {
     setOrderId('ORD-' + Date.now());
   }, []);
+
+  // Функция для прямого перехода на оплату без модального окна
+  const handleDirectPayment = async () => {
+    try {
+      const amount = 2950; // Стоимость абонемента
+      const description = 'Оплата абонемента minenkovrehab.ru';
+      
+      // URL Robokassa API - всегда используем Railway для стабильности
+      const apiUrl = 'https://minenkovrehab-production-15cc.up.railway.app';
+      
+      const response = await fetch(`${apiUrl}/api/robokassa/generate-payment-url`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: '', // Пустой email - не требуется
+          phone: '', // Пустой телефон - не требуется
+          amount,
+          description,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.data?.paymentUrl) {
+        // Перенаправляем пользователя на страницу оплаты Robokassa
+        window.location.href = data.data.paymentUrl;
+      } else {
+        alert('Не удалось создать платежную ссылку. Попробуйте позже.');
+      }
+    } catch (err: any) {
+      console.error('Ошибка при создании платежа:', err);
+      alert('Произошла ошибка при создании платежа. Попробуйте позже.');
+    }
+  };
 
   // useEffect(() => {
   //   if (!document.getElementById('tbank-tinkoff-v2')) {
@@ -302,14 +342,10 @@ export default function ClubPage() {
           </p>
           <button
             className='inline-block bg-accent text-white font-bold py-3 px-6 md:py-4 md:px-10 rounded-full text-base md:text-lg shadow-lg hover:bg-accent-dark transition'
-            onClick={() => setIsPaymentModalOpen(true)}
+            onClick={handleDirectPayment}
           >
             Купить абонемент
           </button>
-          <PaymentModal
-            isOpen={isPaymentModalOpen}
-            onClose={() => setIsPaymentModalOpen(false)}
-          />
         </div>
       </section>
 
