@@ -3,6 +3,7 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "robokassa-api/Dockerfile",
+    "dockerContext": "robokassa-api",
     "watchPatterns": ["robokassa-api/**"]
   },
   "deploy": {
