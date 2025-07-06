@@ -130,9 +130,71 @@ router.post('/generate-payment-url', async (req, res) => {
 });
 
 /**
- * POST /api/robokassa/result
+ * POST/GET /api/robokassa/result
  * Обработка Result URL от Robokassa
  */
+const handleResult = async (req, res) => {
+  // Получаем параметры из body (POST) или query (GET)
+  const params = req.method === 'POST' ? req.body : req.query;
+  
+  try {
+    console.log(`🔔 Получен Result URL от Robokassa (${req.method}):`, params);
+    
+    // Валидация параметров
+    const validation = validateResultParams(params);
+    if (!validation.isValid) {
+      console.error('❌ Ошибка валидации Result URL:', validation.errors);
+      return res.status(400).send('Bad Request');
+    }
+    
+    const { OutSum, InvId, SignatureValue } = params;
+    const outSum = parseFloat(OutSum);
+    
+    // Получение пароля #2
+    const isTestMode = process.env.ROBOKASSA_TEST_MODE === 'true';
+    const password2 = isTestMode 
+      ? process.env.ROBOKASSA_TEST_PASSWORD2 
+      : process.env.ROBOKASSA_PASSWORD2;
+    
+    if (!password2) {
+      console.error('❌ Пароль #2 не сконфигурирован');
+      return res.status(500).send('Configuration Error');
+    }
+    
+    // Генерация ожидаемой подписи
+    const expectedSignature = generateResultSignature(outSum, InvId, password2);
+    
+    // Проверка подписи
+    if (!verifySignature(SignatureValue, expectedSignature)) {
+      console.error('❌ Неверная подпись Result URL');
+      return res.status(400).send('Invalid Signature');
+    }
+    
+    console.log('✅ Платеж подтвержден:', {
+      invoiceId: InvId,
+      amount: outSum,
+      testMode: isTestMode
+    });
+    
+    // TODO: Здесь должна быть логика обновления статуса заказа в базе данных
+    // Например:
+    // await updateOrderStatus(InvId, 'paid', outSum);
+    // await sendConfirmationEmail(email);
+    
+    // Robokassa ожидает ответ "OK{InvId}"
+    res.send(`OK${InvId}`);
+    
+  } catch (error) {
+    console.error('❌ Ошибка обработки Result URL:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+router.post('/result', handleResult);
+router.get('/result', handleResult);
+
+// Старая версия только для POST (закомментирована)
+/*
 router.post('/result', async (req, res) => {
   try {
     console.log('🔔 Получен Result URL от Robokassa:', req.body);
@@ -186,6 +248,7 @@ router.post('/result', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+*/
 
 /**
  * GET /api/robokassa/verify-signature

@@ -66,10 +66,11 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
       const amount = 2950; // Стоимость абонемента
       const description = 'Оплата абонемента minenkovrehab.ru';
       
-      // URL Robokassa API
-      const apiUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://minenkovrehab-production-15cc.up.railway.app'
-        : process.env.NEXT_PUBLIC_ROBOKASSA_API_URL || 'http://localhost:3001';
+      // URL Robokassa API - всегда используем Railway для стабильности
+      const apiUrl = 'https://minenkovrehab-production-15cc.up.railway.app';
+      // const apiUrl = process.env.NODE_ENV === 'production' 
+      //   ? 'https://minenkovrehab-production-15cc.up.railway.app'
+      //   : process.env.NEXT_PUBLIC_ROBOKASSA_API_URL || 'http://localhost:3001';
       
       const response = await fetch(`${apiUrl}/api/robokassa/generate-payment-url`, {
         method: 'POST',
