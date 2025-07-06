@@ -65,29 +65,36 @@ router.post('/generate-payment-url', async (req, res) => {
     // Генерация подписи
     const signature = generatePaymentSignature(login, amount, invId, password1);
     
-    // URL для Success и Fail страниц (используем Railway API)
-    const apiUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
+    // URL для Success и Fail страниц (используем Railway для UI)
+    const railwayUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
       ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
       : process.env.RAILWAY_API_URL || 'https://minenkovrehab-production.up.railway.app';
-    const successUrl = `${apiUrl}/payment/success`;
-    const failUrl = `${apiUrl}/payment/fail`;
+    const successUrl = `${railwayUrl}/payment/success`;
+    const failUrl = `${railwayUrl}/payment/fail`;
+    
+    // ResultURL указывает на локальный API (так как Railway API не развернут)
+    const localApiUrl = process.env.FRONTEND_URL?.replace(':3000', ':3001') || 'http://localhost:3001';
     
     // Формирование URL для оплаты
     const baseUrl = isTestMode 
       ? 'https://auth.robokassa.ru/Merchant/Index.aspx'
       : 'https://auth.robokassa.ru/Merchant/Index.aspx';
     
+    // Формирование параметров в алфавитном порядке согласно требованиям Robokassa
     const paymentParams = new URLSearchParams({
+      Culture: 'ru',
+      Description: description,
+      Email: email,
+      Encoding: 'utf-8',
+      FailURL: failUrl,
+      InvId: invId,
+      IsTest: isTestMode ? '1' : '0',
       MerchantLogin: login,
       OutSum: amount.toString(),
-      InvId: invId,
-      Description: description,
-      SignatureValue: signature,
-      SuccURL: successUrl,
-      FailURL: failUrl,
-      Email: email,
       Phone: phone,
-      IsTest: isTestMode ? '1' : '0'
+      ResultURL: `${localApiUrl}/api/robokassa/result`,
+      SignatureValue: signature,
+      SuccessURL: successUrl
     });
     
     const paymentUrl = `${baseUrl}?${paymentParams.toString()}`;
