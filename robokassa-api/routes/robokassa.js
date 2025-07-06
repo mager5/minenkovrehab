@@ -81,15 +81,13 @@ router.post('/generate-payment-url', async (req, res) => {
     // Генерация подписи
     const signature = generatePaymentSignature(login, amount, invId, password1);
     
-    // URL для Success и Fail страниц (используем GitHub Pages)
-    const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
-    const successUrl = `${frontendUrl}/payment/success`;
-    const failUrl = `${frontendUrl}/payment/fail`;
-    
-    // ResultURL указывает на Railway API
+    // Все URL должны указывать на Railway API
     const apiUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
       ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
       : 'http://localhost:3001';
+    
+    const successUrl = `${apiUrl}/api/robokassa/success`;
+    const failUrl = `${apiUrl}/api/robokassa/fail`;
     
     // Формирование URL для оплаты
     const baseUrl = isTestMode 
@@ -218,6 +216,106 @@ const handleResult = async (req, res) => {
 
 router.post('/result', handleResult);
 router.get('/result', handleResult);
+
+/**
+ * GET/POST /api/robokassa/success
+ * Обработка Success URL от Robokassa
+ */
+const handleSuccess = async (req, res) => {
+  // Получаем параметры из body (POST) или query (GET)
+  const params = req.method === 'POST' ? req.body : req.query;
+  
+  try {
+    console.log(`✅ Получен Success URL от Robokassa (${req.method}):`, params);
+    
+    // Валидация параметров
+    const validation = validateSuccessParams(params);
+    if (!validation.isValid) {
+      console.error('❌ Ошибка валидации Success URL:', validation.errors);
+      // Перенаправляем на фронтенд с ошибкой
+      const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
+      return res.redirect(`${frontendUrl}/payment/error?message=Invalid+parameters`);
+    }
+    
+    const { OutSum, InvId, SignatureValue } = params;
+    const outSum = parseFloat(OutSum);
+    
+    // Получение пароля #1
+    const isTestMode = process.env.ROBOKASSA_TEST_MODE === 'true';
+    const password1 = isTestMode 
+      ? process.env.ROBOKASSA_TEST_PASSWORD1 
+      : process.env.ROBOKASSA_PASSWORD1;
+    
+    if (!password1) {
+      console.error('❌ Пароль #1 не сконфигурирован для проверки Success URL');
+      const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
+      return res.redirect(`${frontendUrl}/payment/error?message=Configuration+error`);
+    }
+    
+    // Генерация ожидаемой подписи
+    const expectedSignature = generateSuccessSignature(outSum, InvId, password1);
+    
+    // Проверка подписи
+    if (!verifySignature(SignatureValue, expectedSignature)) {
+      console.error('❌ Неверная подпись Success URL');
+      const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
+      return res.redirect(`${frontendUrl}/payment/error?message=Invalid+signature`);
+    }
+    
+    console.log('✅ Успешный платеж подтвержден:', {
+      invoiceId: InvId,
+      amount: outSum,
+      testMode: isTestMode
+    });
+    
+    // Перенаправляем на страницу успеха
+    const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
+    res.redirect(`${frontendUrl}/payment/success?invId=${InvId}&amount=${outSum}`);
+    
+  } catch (error) {
+    console.error('❌ Ошибка обработки Success URL:', error);
+    const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
+    res.redirect(`${frontendUrl}/payment/error?message=Internal+error`);
+  }
+};
+
+/**
+ * GET/POST /api/robokassa/fail
+ * Обработка Fail URL от Robokassa
+ */
+const handleFail = async (req, res) => {
+  // Получаем параметры из body (POST) или query (GET)
+  const params = req.method === 'POST' ? req.body : req.query;
+  
+  try {
+    console.log(`❌ Получен Fail URL от Robokassa (${req.method}):`, params);
+    
+    const { InvId, OutSum } = params;
+    
+    console.log('❌ Неуспешный платеж:', {
+      invoiceId: InvId || 'неизвестно',
+      amount: OutSum || 'неизвестно'
+    });
+    
+    // Перенаправляем на страницу ошибки
+    const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
+    const redirectUrl = InvId 
+      ? `${frontendUrl}/payment/fail?invId=${InvId}${OutSum ? `&amount=${OutSum}` : ''}`
+      : `${frontendUrl}/payment/fail`;
+    
+    res.redirect(redirectUrl);
+    
+  } catch (error) {
+    console.error('❌ Ошибка обработки Fail URL:', error);
+    const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
+    res.redirect(`${frontendUrl}/payment/fail`);
+  }
+};
+
+router.post('/success', handleSuccess);
+router.get('/success', handleSuccess);
+router.post('/fail', handleFail);
+router.get('/fail', handleFail);
 
 // Старая версия только для POST (закомментирована)
 /*
