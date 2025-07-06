@@ -30,7 +30,10 @@
 3. Нажмите "New Project"
 4. Выберите "Deploy from GitHub repo"
 5. Выберите ваш репозиторий с кодом
-6. Railway автоматически определит Node.js проект
+6. **ВАЖНО:** Railway должен использовать папку `robokassa-api` как корневую
+7. Если Railway пытается запустить основной Next.js проект, настройте:
+   - Root Directory: `robokassa-api`
+   - Или используйте файлы `railway.json` и `nixpacks.toml` из папки API
 
 ### 3. Настройка переменных окружения
 
