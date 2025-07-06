@@ -61,10 +61,10 @@ export default function ClientHomePage({ content }: ClientHomePageProps) {
       </section>
 
       {/* Секции */}
-      <AboutSection content={content} />
-      <ServicesSection content={content} />
-      <HelpSection content={content} />
-      <CTASection content={content} />
+      <AboutSection />
+      <ServicesSection />
+      <HelpSection />
+      <CTASection />
     </div>
   );
-} 
+}

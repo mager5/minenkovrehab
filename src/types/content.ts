@@ -86,8 +86,25 @@ export interface ProductContentType {
 }
 
 // Типы для главной страницы
-export interface HomeAdvantage {
+export interface HomeHeroContent {
+  title: string;
   description: string;
+  image: string;
+  cta1: {
+    text: string;
+    link: string;
+  };
+  cta2: {
+    text: string;
+    link: string;
+  };
+  bg: string;
+}
+
+export interface HomeAdvantage {
+  title: string;
+  description: string;
+  icon: string;
 }
 
 export interface HomeAboutContent {
@@ -140,6 +157,7 @@ export interface HomeCtaContent {
 }
 
 export interface HomeContent {
+  hero: HomeHeroContent;
   advantages: HomeAdvantage[];
   about: HomeAboutContent;
   services: HomeServicesContent;

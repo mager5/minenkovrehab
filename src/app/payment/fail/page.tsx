@@ -22,9 +22,9 @@ export default function PaymentFailPage() {
     const culture = searchParams.get('Culture');
 
     setPaymentData({ 
-      outSum: outSum || undefined, 
-      invId: invId || undefined, 
-      culture: culture || undefined 
+      ...(outSum && { outSum }), 
+      ...(invId && { invId }), 
+      ...(culture && { culture }) 
     });
   }, [searchParams]);
 

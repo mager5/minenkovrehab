@@ -91,7 +91,7 @@ export const sanitizeInput = (input: string): string => {
         "'": '&#x27;',
         '&': '&amp;',
       };
-      return entityMap[match];
+      return entityMap[match] || match;
     })
     .trim();
 };

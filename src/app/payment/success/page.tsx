@@ -24,9 +24,9 @@ export default function PaymentSuccessPage() {
     const signatureValue = searchParams.get('SignatureValue');
 
     setPaymentData({ 
-      outSum: outSum || undefined, 
-      invId: invId || undefined, 
-      signatureValue: signatureValue || undefined 
+      ...(outSum && { outSum }), 
+      ...(invId && { invId }), 
+      ...(signatureValue && { signatureValue }) 
     });
 
     // Проверяем подпись (опционально)

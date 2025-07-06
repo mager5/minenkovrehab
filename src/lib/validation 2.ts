@@ -165,7 +165,18 @@ export const validateTime = (
     return { isValid: false, error: 'Неверный формат времени (HH:MM)' };
   }
 
-  const [hours, minutes] = sanitized.split(':').map(Number);
+  const timeParts = sanitized.split(':');
+  if (timeParts.length !== 2) {
+    return { isValid: false, error: 'Неверный формат времени' };
+  }
+
+  const hours = Number(timeParts[0]);
+  const minutes = Number(timeParts[1]);
+
+  // Проверяем, что часы и минуты корректно распарсились
+  if (isNaN(hours) || isNaN(minutes)) {
+    return { isValid: false, error: 'Неверный формат времени' };
+  }
 
   // Рабочие часы: 9:00 - 18:00
   if (hours < 9 || hours > 18 || (hours === 18 && minutes > 0)) {
