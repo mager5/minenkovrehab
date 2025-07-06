@@ -4,6 +4,7 @@ const helmet = require('helmet');
 require('dotenv').config();
 
 const robokassaRoutes = require('./routes/robokassa');
+const paymentRoutes = require('./routes/payment');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,6 +40,7 @@ app.use((req, res, next) => {
 
 // Основные роуты
 app.use('/api/robokassa', robokassaRoutes);
+app.use('/payment', paymentRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -59,7 +61,9 @@ app.get('/', (req, res) => {
       health: '/health',
       generatePaymentUrl: 'POST /api/robokassa/generate-payment-url',
       resultCallback: 'POST /api/robokassa/result',
-      verifySignature: 'GET /api/robokassa/verify-signature'
+      verifySignature: 'GET /api/robokassa/verify-signature',
+      successPage: 'GET /payment/success',
+      failPage: 'GET /payment/fail'
     }
   });
 });

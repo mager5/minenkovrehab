@@ -77,8 +77,8 @@ ALLOWED_ORIGINS=https://minenkovrehab.github.io,http://localhost:3000
 
 1. В панели Robokassa перейдите в "Технические настройки"
 2. Установите Result URL: `https://minenkovrehab-production.up.railway.app/api/robokassa/result`
-3. Установите Success URL: `https://minenkovrehab.github.io/payment/success`
-4. Установите Fail URL: `https://minenkovrehab.github.io/payment/fail`
+3. Установите Success URL: `https://minenkovrehab-production.up.railway.app/payment/success`
+4. Установите Fail URL: `https://minenkovrehab-production.up.railway.app/payment/fail`
 5. Выберите метод отправки данных: POST
 
 ### 6. Проверка деплоя

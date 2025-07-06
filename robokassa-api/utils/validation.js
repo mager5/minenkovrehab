@@ -171,9 +171,49 @@ function normalizePhone(phone) {
   return normalized;
 }
 
+/**
+ * Валидация параметров Success URL от Robokassa
+ * 
+ * @param {Object} params - Параметры от Robokassa
+ * @param {number} params.OutSum - Сумма платежа
+ * @param {string} params.InvId - ID заказа
+ * @param {string} params.SignatureValue - Подпись
+ * @returns {Object} Результат валидации
+ */
+function validateSuccessParams(params) {
+  const errors = [];
+  
+  // Проверка суммы
+  if (!params.OutSum) {
+    errors.push('OutSum обязателен');
+  } else if (isNaN(parseFloat(params.OutSum))) {
+    errors.push('OutSum должен быть числом');
+  }
+  
+  // Проверка ID заказа
+  if (!params.InvId) {
+    errors.push('InvId обязателен');
+  } else if (typeof params.InvId !== 'string' || params.InvId.trim().length === 0) {
+    errors.push('InvId должен быть непустой строкой');
+  }
+  
+  // Проверка подписи
+  if (!params.SignatureValue) {
+    errors.push('SignatureValue обязателен');
+  } else if (typeof params.SignatureValue !== 'string' || params.SignatureValue.length !== 32) {
+    errors.push('SignatureValue должен быть MD5 хешем (32 символа)');
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
 module.exports = {
   validatePaymentParams,
   validateResultParams,
+  validateSuccessParams,
   validateEnvironment,
   sanitizeString,
   normalizePhone

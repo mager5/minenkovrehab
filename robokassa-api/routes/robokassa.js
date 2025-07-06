@@ -65,10 +65,10 @@ router.post('/generate-payment-url', async (req, res) => {
     // Генерация подписи
     const signature = generatePaymentSignature(login, amount, invId, password1);
     
-    // URL для Success и Fail страниц
-    const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
-    const successUrl = `${frontendUrl}/payment/success`;
-    const failUrl = `${frontendUrl}/payment/fail`;
+    // URL для Success и Fail страниц (используем Railway API)
+    const apiUrl = process.env.RAILWAY_API_URL || 'https://minenkovrehab-production.up.railway.app';
+    const successUrl = `${apiUrl}/payment/success`;
+    const failUrl = `${apiUrl}/payment/fail`;
     
     // Формирование URL для оплаты
     const baseUrl = isTestMode 
