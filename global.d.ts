@@ -1,4 +1,4 @@
 interface Window {
-  TinkoffPay?: any;
-  TBankPayWidget?: any;
+  // TinkoffPay?: any; // Удалено - больше не используется T-банк
+  // TBankPayWidget?: any; // Удалено - больше не используется T-банк
 }

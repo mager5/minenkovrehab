@@ -78,15 +78,15 @@ export default function ClubPage() {
     setOrderId('ORD-' + Date.now());
   }, []);
 
-  useEffect(() => {
-    if (!document.getElementById('tbank-tinkoff-v2')) {
-      const script = document.createElement('script');
-      script.id = 'tbank-tinkoff-v2';
-      script.src = 'https://securepay.tinkoff.ru/html/payForm/js/tinkoff_v2.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!document.getElementById('tbank-tinkoff-v2')) {
+  //     const script = document.createElement('script');
+  //     script.id = 'tbank-tinkoff-v2';
+  //     script.src = 'https://securepay.tinkoff.ru/html/payForm/js/tinkoff_v2.js';
+  //     script.async = true;
+  //     document.body.appendChild(script);
+  //   }
+  // }, []); // Удалено - больше не используется T-банк
 
 
 

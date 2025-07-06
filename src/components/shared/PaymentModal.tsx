@@ -61,25 +61,46 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
     if (!consentChecked) return;
     setIsSubmitting(true);
     setSubmitError(null);
+    
     try {
-      const amount = 2950;
-      const response = await fetch('/api/pay', {
+      const amount = 2950; // Стоимость абонемента
+      const description = 'Оплата абонемента minenkovrehab.ru';
+      
+      // URL вашего Robokassa API на Railway
+      const apiUrl = process.env.NEXT_PUBLIC_ROBOKASSA_API_URL || 'https://your-app.railway.app';
+      
+      const response = await fetch(`${apiUrl}/api/robokassa/generate-payment-url`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           email: formData.email,
           phone: formData.phone,
           amount,
+          description,
         }),
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      if (data.PaymentURL) {
-        window.location.href = data.PaymentURL;
+      
+      if (data.success && data.data?.paymentUrl) {
+        // Перенаправляем пользователя на страницу оплаты Robokassa
+        window.location.href = data.data.paymentUrl;
       } else {
-        setSubmitError(data.error?.Message || data.error || 'Ошибка оплаты');
+        setSubmitError(data.error || 'Не удалось создать платежную ссылку');
       }
     } catch (err: any) {
-      setSubmitError(err.message || 'Ошибка оплаты');
+      console.error('Ошибка при создании платежа:', err);
+      setSubmitError(
+        err.message === 'Failed to fetch' 
+          ? 'Не удается подключиться к серверу оплаты. Проверьте подключение к интернету.'
+          : err.message || 'Произошла ошибка при создании платежа'
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -66,7 +66,9 @@ router.post('/generate-payment-url', async (req, res) => {
     const signature = generatePaymentSignature(login, amount, invId, password1);
     
     // URL для Success и Fail страниц (используем Railway API)
-    const apiUrl = process.env.RAILWAY_API_URL || 'https://minenkovrehab-production.up.railway.app';
+    const apiUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
+      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
+      : process.env.RAILWAY_API_URL || 'https://minenkovrehab-production.up.railway.app';
     const successUrl = `${apiUrl}/payment/success`;
     const failUrl = `${apiUrl}/payment/fail`;
     

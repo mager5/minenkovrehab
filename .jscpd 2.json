@@ -1,0 +1,29 @@
+{
+  "threshold": 5,
+  "reporters": ["html", "console", "badge"],
+  "ignore": [
+    "**/__tests__/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/out/**",
+    "**/coverage/**",
+    "**/public/**",
+    "**/*.config.*",
+    "**/package*.json"
+  ],
+  "gitignore": true,
+  "output": "./reports/jscpd",
+  "format": [
+    "typescript",
+    "javascript",
+    "jsx",
+    "tsx"
+  ],
+  "min-lines": 5,
+  "min-tokens": 50,
+  "max-lines": 500,
+  "max-size": "30kb",
+  "blame": true
+}

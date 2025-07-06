@@ -5,12 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "npx serve@latest out",
+    "start:dev": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "export": "next build && next export",
+    "export": "next build",
     "check": "node scripts/pre-commit-check.js",
     "check:full": "node scripts/pre-commit-check.js --e2e",
     "check:fast": "node scripts/pre-commit-check.js --skip-build",
@@ -61,6 +62,7 @@
     "lint-staged": "^16.1.2",
     "postcss": "^8.4.31",
     "prettier": "^3.5.3",
+    "serve": "^14.2.1",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.2.2"
   },

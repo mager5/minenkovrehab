@@ -14,12 +14,19 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet());
 
 // CORS настройки
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:3000',
+  'https://minenkovrehab.github.io',
+  'https://minenkovrehab.ru'
+];
+
+// Добавляем Railway домен если он есть
+if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+  allowedOrigins.push(`https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
+}
+
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:3000',
-    'https://minenkovrehab.github.io',
-    'https://minenkovrehab.ru'
-  ],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -98,7 +105,11 @@ app.listen(PORT, () => {
   console.log(`🚀 Robokassa API запущен на порту ${PORT}`);
   console.log(`📊 Режим: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🧪 Тестовый режим Robokassa: ${process.env.ROBOKASSA_TEST_MODE === 'true' ? 'ВКЛ' : 'ВЫКЛ'}`);
-  console.log(`🌐 CORS разрешен для: ${process.env.FRONTEND_URL || 'localhost'}`);
+  const corsOrigins = allowedOrigins.join(', ');
+  console.log(`🌐 CORS разрешен для: ${corsOrigins}`);
+  if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+    console.log(`🚂 Railway домен: https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
+  }
 });
 
 module.exports = app;
