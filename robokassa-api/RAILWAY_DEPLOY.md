@@ -30,10 +30,11 @@
 3. Нажмите "New Project"
 4. Выберите "Deploy from GitHub repo"
 5. Выберите ваш репозиторий с кодом
-6. **ВАЖНО:** Railway должен использовать папку `robokassa-api` как корневую
-7. Если Railway пытается запустить основной Next.js проект, настройте:
-   - Root Directory: `robokassa-api`
-   - Или используйте файлы `railway.json` и `nixpacks.toml` из папки API
+6. **КРИТИЧЕСКИ ВАЖНО:** Railway должен использовать папку `robokassa-api` как корневую
+   - В настройках проекта Railway найдите "Root Directory"
+   - Установите значение: `robokassa-api`
+   - Это предотвратит ошибку "next start does not work with output: export"
+   - Railway должен видеть только содержимое папки `robokassa-api`, а не основной Next.js проект
 
 ### 3. Настройка переменных окружения
 
@@ -115,6 +116,43 @@ ALLOWED_ORIGINS=https://minenkovrehab.github.io,http://localhost:3000
    - После оплаты возврат на Success/Fail страницы
 
 ## 🔧 Troubleshooting
+
+### Проблема: "next start does not work with output: export" configuration
+
+**Симптомы:**
+```
+Error: "next start" does not work with "output: export" configuration. Use "npx serve@latest out" instead.
+```
+
+**Причина:**
+Railway пытается запустить основной Next.js проект вместо Robokassa API.
+
+**Решение:**
+1. **Установите Root Directory в Railway:**
+   - Зайдите в настройки проекта Railway
+   - Найдите "Root Directory" или "Source Directory"
+   - Установите значение: `robokassa-api`
+   - Сохраните изменения
+
+2. **Проверьте файлы конфигурации:**
+   - `railway.json` должен быть в папке `robokassa-api`
+   - `nixpacks.toml` должен быть в папке `robokassa-api`
+   - `package.json` должен быть в папке `robokassa-api`
+
+3. **Пересоздайте деплой:**
+   - Нажмите "Redeploy" в Railway
+   - Или сделайте новый коммит в репозиторий
+
+### Проблема: Railway не находит файлы API
+
+**Симптомы:**
+- Railway показывает ошибки связанные с Next.js
+- Не находит файлы API
+
+**Решение:**
+1. Убедитесь что Root Directory установлен как `robokassa-api`
+2. Проверьте что файлы `railway.json` и `nixpacks.toml` находятся в папке `robokassa-api`
+3. Пересоздайте проект на Railway если необходимо
 
 ### Проблема: 500 Internal Server Error
 **Решение:** Проверьте логи в Railway и переменные окружения

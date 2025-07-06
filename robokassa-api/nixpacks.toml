@@ -1,14 +1,16 @@
+[variables]
+NODE_ENV = "production"
+
 [phases.setup]
-nixPkgs = ['nodejs', 'npm']
+nixPkgs = ["nodejs", "npm"]
+apt = []
 
 [phases.install]
-cmds = ['npm install']
+cmds = ["npm install"]
 
 [phases.build]
-cmds = ['echo "No build step required"']
+# No build step needed for Express API
 
 [start]
-cmd = 'npm start'
-
-[variables]
-NODE_ENV = 'production'
+cmd = "npm start"
+runImage = "node:18-alpine"
