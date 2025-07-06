@@ -2,7 +2,8 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "Dockerfile"
+    "dockerfilePath": "robokassa-api/Dockerfile",
+    "watchPatterns": ["robokassa-api/**"]
   },
   "deploy": {
     "healthcheckPath": "/health",

@@ -6,14 +6,14 @@ FROM node:18-alpine
 # Установка рабочей директории
 WORKDIR /app
 
-# Копирование package.json и package-lock.json
-COPY package*.json ./
+# Копирование package.json и package-lock.json из robokassa-api
+COPY robokassa-api/package*.json ./
 
 # Установка зависимостей
 RUN npm ci --only=production && npm cache clean --force
 
-# Копирование исходного кода
-COPY . .
+# Копирование исходного кода из robokassa-api
+COPY robokassa-api/ .
 
 # Создание пользователя для безопасности
 RUN addgroup -g 1001 -S nodejs
