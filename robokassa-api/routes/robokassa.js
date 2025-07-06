@@ -65,15 +65,15 @@ router.post('/generate-payment-url', async (req, res) => {
     // Генерация подписи
     const signature = generatePaymentSignature(login, amount, invId, password1);
     
-    // URL для Success и Fail страниц (используем Railway для UI)
-    const railwayUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
-      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
-      : process.env.RAILWAY_API_URL || 'https://minenkovrehab-production.up.railway.app';
-    const successUrl = `${railwayUrl}/payment/success`;
-    const failUrl = `${railwayUrl}/payment/fail`;
+    // URL для Success и Fail страниц (используем GitHub Pages)
+    const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
+    const successUrl = `${frontendUrl}/payment/success`;
+    const failUrl = `${frontendUrl}/payment/fail`;
     
-    // ResultURL указывает на локальный API (так как Railway API не развернут)
-    const localApiUrl = process.env.FRONTEND_URL?.replace(':3000', ':3001') || 'http://localhost:3001';
+    // ResultURL указывает на Railway API
+    const apiUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
+      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
+      : 'http://localhost:3001';
     
     // Формирование URL для оплаты
     const baseUrl = isTestMode 
@@ -92,7 +92,7 @@ router.post('/generate-payment-url', async (req, res) => {
       MerchantLogin: login,
       OutSum: amount.toString(),
       Phone: phone,
-      ResultURL: `${localApiUrl}/api/robokassa/result`,
+      ResultURL: `${apiUrl}/api/robokassa/result`,
       SignatureValue: signature,
       SuccessURL: successUrl
     });

@@ -66,8 +66,8 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
       const amount = 2950; // Стоимость абонемента
       const description = 'Оплата абонемента minenkovrehab.ru';
       
-      // URL вашего Robokassa API на Railway
-      const apiUrl = process.env.NEXT_PUBLIC_ROBOKASSA_API_URL || 'https://your-app.railway.app';
+      // URL Robokassa API
+      const apiUrl = process.env.NEXT_PUBLIC_ROBOKASSA_API_URL || 'http://localhost:3001';
       
       const response = await fetch(`${apiUrl}/api/robokassa/generate-payment-url`, {
         method: 'POST',

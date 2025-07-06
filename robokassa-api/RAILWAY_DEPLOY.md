@@ -42,7 +42,7 @@ ROBOKASSA_TEST_MODE=true
 NODE_ENV=production
 
 # CORS домены
-ALLOWED_ORIGINS=https://minenkovrehab-production.up.railway.app,https://minenkovrehab.github.io,https://minenkovrehab.ru,http://localhost:3000
+ALLOWED_ORIGINS=https://minenkovrehab.github.io,https://minenkovrehab.ru,http://localhost:3000
 ```
 
 **Примечание:** Railway автоматически установит `PORT` и `RAILWAY_PUBLIC_DOMAIN`
@@ -66,8 +66,8 @@ ALLOWED_ORIGINS=https://minenkovrehab-production.up.railway.app,https://minenkov
 
 В панели Robokassa установите:
 - **Result URL:** `https://ваш-railway-url.up.railway.app/api/robokassa/result`
-- **Success URL:** `https://minenkovrehab-production.up.railway.app/payment/success`
-- **Fail URL:** `https://minenkovrehab-production.up.railway.app/payment/fail`
+- **Success URL:** `https://minenkovrehab.github.io/payment/success`
+- **Fail URL:** `https://minenkovrehab.github.io/payment/fail`
 - **Метод:** POST
 
 ### 5. Проверка деплоя
