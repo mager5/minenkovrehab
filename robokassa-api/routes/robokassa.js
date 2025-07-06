@@ -40,8 +40,8 @@ router.post('/generate-payment-url', async (req, res) => {
     }
     
     // Извлечение и санитизация данных
-    const email = sanitizeString(req.body.email);
-    const phone = normalizePhone(req.body.phone);
+    const email = req.body.email ? sanitizeString(req.body.email) : '';
+    const phone = req.body.phone ? normalizePhone(req.body.phone) : '';
     const amount = parseFloat(req.body.amount);
     const description = sanitizeString(req.body.description || 'Оплата абонемента minenkovrehab.ru');
     
@@ -81,23 +81,31 @@ router.post('/generate-payment-url', async (req, res) => {
       : 'https://auth.robokassa.ru/Merchant/Index.aspx';
     
     // Формирование параметров в алфавитном порядке согласно требованиям Robokassa
-    const paymentParams = new URLSearchParams({
+    const paymentParams = {
       Culture: 'ru',
       Description: description,
-      Email: email,
       Encoding: 'utf-8',
       FailURL: failUrl,
       InvId: invId,
       IsTest: isTestMode ? '1' : '0',
       MerchantLogin: login,
       OutSum: amount.toString(),
-      Phone: phone,
       ResultURL: `${apiUrl}/api/robokassa/result`,
       SignatureValue: signature,
       SuccessURL: successUrl
-    });
+    };
     
-    const paymentUrl = `${baseUrl}?${paymentParams.toString()}`;
+    // Добавляем email и phone только если они переданы
+    if (email) {
+      paymentParams.Email = email;
+    }
+    if (phone) {
+      paymentParams.Phone = phone;
+    }
+    
+    const paymentParamsUrl = new URLSearchParams(paymentParams);
+    
+    const paymentUrl = `${baseUrl}?${paymentParamsUrl.toString()}`;
     
     console.log('✅ Платежный URL сгенерирован:', {
       invId,

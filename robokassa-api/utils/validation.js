@@ -11,6 +11,18 @@
 function validatePaymentParams(params) {
   const errors = [];
   
+  // Проверка email (необязательно)
+  if (params.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email)) {
+    errors.push('Некорректный формат email');
+  }
+  
+  // Проверка телефона (необязательно)
+  if (params.phone && !/^\+?[1-9]\d{1,14}$/.test(params.phone.replace(/[\s\-\(\)]/g, ''))) {
+    errors.push('Некорректный формат телефона');
+  }
+  
+  // Старая валидация (закомментирована)
+  /*
   // Проверка email
   if (!params.email) {
     errors.push('Email обязателен');
@@ -24,6 +36,7 @@ function validatePaymentParams(params) {
   } else if (!/^\+?[1-9]\d{1,14}$/.test(params.phone.replace(/[\s\-\(\)]/g, ''))) {
     errors.push('Некорректный формат телефона');
   }
+  */
   
   // Проверка суммы
   if (!params.amount) {
