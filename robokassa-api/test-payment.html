@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест генерации платежных ссылок Robokassa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            word-break: break-all;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .payment-link {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+            margin-top: 10px;
+        }
+        .payment-link a {
+            color: #0056b3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .payment-link a:hover {
+            text-decoration: underline;
+        }
+        .config-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Тест генерации платежных ссылок Robokassa</h1>
+        
+        <div id="configInfo" class="result config-info" style="display: none;">
+            <strong>Конфигурация API:</strong>
+            <div id="configDetails"></div>
+        </div>
+        
+        <form id="paymentForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="test@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Телефон:</label>
+                <input type="tel" id="phone" name="phone" value="+79001234567" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">Сумма (руб.):</label>
+                <input type="number" id="amount" name="amount" value="1000" min="1" step="0.01" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Описание платежа:</label>
+                <textarea id="description" name="description" rows="3">Тестовый платеж через Robokassa</textarea>
+            </div>
+            
+            <button type="button" onclick="loadConfig()">📋 Загрузить конфигурацию</button>
+            <button type="submit">💳 Сгенерировать платежную ссылку</button>
+        </form>
+        
+        <div id="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+        
+        // Загрузка конфигурации API
+        async function loadConfig() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/robokassa/config`);
+                const data = await response.json();
+                
+                const configDiv = document.getElementById('configInfo');
+                const configDetails = document.getElementById('configDetails');
+                
+                if (data.success) {
+                    configDetails.innerHTML = `
+                        <br>• Логин: ${data.data.login}<br>
+                        • Тестовый режим: ${data.data.testMode ? '✅ Да' : '❌ Нет'}<br>
+                        • Пароль #1: ${data.data.hasPassword1 ? '✅ Установлен' : '❌ Не установлен'}<br>
+                        • Пароль #2: ${data.data.hasPassword2 ? '✅ Установлен' : '❌ Не установлен'}<br>
+                        • Окружение: ${data.data.environment}
+                    `;
+                    configDiv.className = 'result config-info';
+                } else {
+                    configDetails.innerHTML = '<br>Ошибка загрузки конфигурации';
+                    configDiv.className = 'result error';
+                }
+                
+                configDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Ошибка загрузки конфигурации:', error);
+                const configDiv = document.getElementById('configInfo');
+                document.getElementById('configDetails').innerHTML = '<br>Ошибка подключения к API';
+                configDiv.className = 'result error';
+                configDiv.style.display = 'block';
+            }
+        }
+        
+        // Обработка формы
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const resultDiv = document.getElementById('result');
+            
+            // Блокируем кнопку
+            submitButton.disabled = true;
+            submitButton.textContent = '⏳ Генерация...';
+            
+            // Собираем данные формы
+            const formData = {
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                description: document.getElementById('description').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/robokassa/generate-payment-url`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <strong>✅ Платежная ссылка успешно сгенерирована!</strong><br><br>
+                            <strong>ID заказа:</strong> ${data.data.invoiceId}<br>
+                            <strong>Сумма:</strong> ${data.data.amount} руб.<br>
+                            <strong>Тестовый режим:</strong> ${data.data.testMode ? 'Да' : 'Нет'}<br>
+                            <strong>Описание:</strong> ${data.data.description}
+                        </div>
+                        <div class="result payment-link">
+                            <strong>🔗 Ссылка для оплаты:</strong><br>
+                            <a href="${data.data.paymentUrl}" target="_blank">Перейти к оплате</a><br><br>
+                            <small>Полная ссылка: ${data.data.paymentUrl}</small>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <strong>❌ Ошибка генерации ссылки:</strong><br>
+                            ${data.error}<br>
+                            ${data.details ? '<br><strong>Детали:</strong><br>' + JSON.stringify(data.details, null, 2) : ''}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Ошибка запроса:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>❌ Ошибка подключения к API:</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            } finally {
+                // Разблокируем кнопку
+                submitButton.disabled = false;
+                submitButton.textContent = '💳 Сгенерировать платежную ссылку';
+                resultDiv.style.display = 'block';
+            }
+        });
+        
+        // Автоматически загружаем конфигурацию при загрузке страницы
+        window.addEventListener('load', loadConfig);
+    </script>
+</body>
+</html>

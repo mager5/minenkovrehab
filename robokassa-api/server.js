@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const path = require('path');
 require('dotenv').config();
 
 const robokassaRoutes = require('./routes/robokassa');
@@ -42,6 +43,11 @@ app.use((req, res, next) => {
 app.use('/api/robokassa', robokassaRoutes);
 app.use('/payment', paymentRoutes);
 
+// Тестовая страница для генерации платежных ссылок
+app.get('/test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'test-payment.html'));
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
@@ -63,7 +69,8 @@ app.get('/', (req, res) => {
       resultCallback: 'POST /api/robokassa/result',
       verifySignature: 'GET /api/robokassa/verify-signature',
       successPage: 'GET /payment/success',
-      failPage: 'GET /payment/fail'
+      failPage: 'GET /payment/fail',
+      testPage: 'GET /test'
     }
   });
 });
