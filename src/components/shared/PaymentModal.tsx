@@ -67,7 +67,9 @@ const PaymentModal = ({ isOpen, onClose }: PaymentModalProps) => {
       const description = 'Оплата абонемента minenkovrehab.ru';
       
       // URL Robokassa API
-      const apiUrl = process.env.NEXT_PUBLIC_ROBOKASSA_API_URL || 'http://localhost:3001';
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://minenkovrehab-production-15cc.up.railway.app'
+        : process.env.NEXT_PUBLIC_ROBOKASSA_API_URL || 'http://localhost:3001';
       
       const response = await fetch(`${apiUrl}/api/robokassa/generate-payment-url`, {
         method: 'POST',
