@@ -31,7 +31,7 @@ ROBOKASSA_LOGIN=ваш_логин
 ROBOKASSA_TEST_PASSWORD1=тестовый_пароль_1
 ROBOKASSA_TEST_PASSWORD2=тестовый_пароль_2
 ROBOKASSA_TEST_MODE=true
-RAILWAY_API_URL=https://ваш-домен.up.railway.app
+RAILWAY_API_URL=https://minenkovrehab-production-15cc.up.railway.app
 ```
 
 ### API Endpoints для ручного тестирования

@@ -62,10 +62,10 @@ ALLOWED_ORIGINS=https://minenkovrehab.github.io,https://minenkovrehab.ru,http://
 
 ### 4. Настройка URL в Robokassa
 
-После деплоя Railway предоставит URL (например: `https://robokassa-api-production.up.railway.app`)
+После деплоя Railway предоставит URL: `https://minenkovrehab-production-15cc.up.railway.app`
 
 В панели Robokassa установите:
-- **Result URL:** `https://ваш-railway-url.up.railway.app/api/robokassa/result`
+- **Result URL:** `https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/result`
 - **Success URL:** `https://minenkovrehab.github.io/payment/success`
 - **Fail URL:** `https://minenkovrehab.github.io/payment/fail`
 - **Метод:** POST
@@ -76,13 +76,13 @@ ALLOWED_ORIGINS=https://minenkovrehab.github.io,https://minenkovrehab.ru,http://
 
 ```bash
 # Health check
-curl https://ваш-railway-url.up.railway.app/health
+curl https://minenkovrehab-production-15cc.up.railway.app/health
 
 # Информация об API
-curl https://ваш-railway-url.up.railway.app/
+curl https://minenkovrehab-production-15cc.up.railway.app/
 
 # Тест генерации платежа
-curl -X POST https://ваш-railway-url.up.railway.app/api/robokassa/generate-payment-url \
+curl -X POST https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url \
   -H "Content-Type: application/json" \
   -d '{
     "amount": 1000,
@@ -101,7 +101,7 @@ curl -X POST https://ваш-railway-url.up.railway.app/api/robokassa/generate-pa
 3. Замените на Railway URL:
 
 ```javascript
-ResultURL: `https://ваш-railway-url.up.railway.app/api/robokassa/result`,
+ResultURL: `https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/result`,
 ```
 
 ### 7. Обновление фронтенда
@@ -110,10 +110,10 @@ ResultURL: `https://ваш-railway-url.up.railway.app/api/robokassa/result`,
 
 ```bash
 # В .env.local
-NEXT_PUBLIC_ROBOKASSA_API_URL=https://ваш-railway-url.up.railway.app
+NEXT_PUBLIC_ROBOKASSA_API_URL=https://minenkovrehab-production-15cc.up.railway.app
 
 # В GitHub Actions secrets
-NEXT_PUBLIC_ROBOKASSA_API_URL=https://ваш-railway-url.up.railway.app
+NEXT_PUBLIC_ROBOKASSA_API_URL=https://minenkovrehab-production-15cc.up.railway.app
 ```
 
 ## 🔧 Troubleshooting

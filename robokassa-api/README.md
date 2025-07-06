@@ -140,7 +140,7 @@ curl "http://localhost:3000/api/robokassa/config"
 1. Подключите репозиторий к Railway
 2. Установите переменные окружения в панели Railway
 3. Railway автоматически развернет приложение
-4. Настройте Result URL в панели Robokassa: `https://your-app.railway.app/api/robokassa/result`
+4. Настройте Result URL в панели Robokassa: `https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/result`
 
 ## 📝 Логи
 
@@ -157,7 +157,7 @@ curl "http://localhost:3000/api/robokassa/config"
 ```javascript
 const handlePayment = async (paymentData) => {
   try {
-    const response = await fetch('https://your-api.railway.app/api/robokassa/generate-payment-url', {
+    const response = await fetch('https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

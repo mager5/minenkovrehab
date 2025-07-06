@@ -31,19 +31,19 @@ ALLOWED_ORIGINS=https://minenkovrehab.github.io,https://minenkovrehab.ru,http://
 
 ### 3. Получение Railway URL (1 минута)
 
-После деплоя скопируйте URL (например: `https://robokassa-api-production.up.railway.app`)
+После деплоя скопируйте URL: `https://minenkovrehab-production-15cc.up.railway.app`
 
 ### 4. Настройка Robokassa (2 минуты)
 
 В панели Robokassa установите:
-- **Result URL:** `https://ваш-railway-url/api/robokassa/result`
+- **Result URL:** `https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/result`
 - **Success URL:** `https://minenkovrehab.github.io/payment/success`
 - **Fail URL:** `https://minenkovrehab.github.io/payment/fail`
 
 ### 5. Проверка (1 минута)
 
 ```bash
-curl https://ваш-railway-url/health
+curl https://minenkovrehab-production-15cc.up.railway.app/health
 ```
 
 ## 🎯 Итого: ~12 минут до полной работы!
