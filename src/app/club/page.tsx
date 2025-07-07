@@ -79,65 +79,66 @@ export default function ClubPage() {
     setOrderId('ORD-' + Date.now());
   }, []);
 
-  // Функция для прямого перехода на оплату без модального окна
-  const handleDirectPayment = () => {
+  // Функция для прямого перехода на оплату через Railway API
+  const handleDirectPayment = async () => {
     const amount = '2950.00'; // Стоимость абонемента
     const description = 'Абонемент клуба формула движения';
-    const merchantLogin = 'Minenkov-2'; // ID магазина
-    const password1 = 'Eld5Xljk2GBN4D6TJo3N'; // Тестовый пароль #1
-    const invoiceID = '837984789'; // Фиксированный номер счета как в примере
     
-    // Формируем строку для подписи: MerchantLogin:OutSum:InvoiceID:Password1
-    const signatureString = `${merchantLogin}:${amount}:${invoiceID}:${password1}`;
+    try {
+      const apiUrl = 'https://minenkovrehab-production-15cc.up.railway.app';
+      
+      const response = await fetch(`${apiUrl}/api/robokassa/generate-payment-url`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: '', // Пустой email - не требуется
+          phone: '', // Пустой телефон - не требуется
+          amount,
+          description,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.data?.paymentUrl) {
+        // Перенаправляем пользователя на страницу оплаты Robokassa
+        window.location.href = data.data.paymentUrl;
+      } else {
+        alert('Не удалось создать платежную ссылку. Попробуйте позже.');
+      }
+    } catch (err: any) {
+      console.error('Ошибка при создании платежа:', err);
+      alert('Произошла ошибка при создании платежа. Попробуйте позже.');
+    }
     
-    // Вычисляем MD5 хэш с помощью crypto-js
-    const signature = CryptoJS.MD5(signatureString).toString().toUpperCase();
-    
-    // Формируем URL для оплаты Robokassa
-    const paymentUrl = `https://auth.robokassa.ru/Merchant/Index.aspx?` +
-      `MerchantLogin=${encodeURIComponent(merchantLogin)}&` +
-      `OutSum=${amount}&` +
-      `invoiceID=${encodeURIComponent(invoiceID)}&` +
-      `Description=${encodeURIComponent(description)}&` +
-      `SignatureValue=${signature}&` +
-      `IsTest=1`;
-    
-    // Перенаправляем пользователя на страницу оплаты Robokassa
-    window.location.href = paymentUrl;
-    
-    // Закомментированный старый код с API вызовом
-    // try {
-    //   const apiUrl = 'https://minenkovrehab-production-15cc.up.railway.app';
-    //   
-    //   const response = await fetch(`${apiUrl}/api/robokassa/generate-payment-url`, {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({
-    //       email: '', // Пустой email - не требуется
-    //       phone: '', // Пустой телефон - не требуется
-    //       amount,
-    //       description,
-    //     }),
-    //   });
-    //   
-    //   if (!response.ok) {
-    //     throw new Error(`HTTP error! status: ${response.status}`);
-    //   }
-    //   
-    //   const data = await response.json();
-    //   
-    //   if (data.success && data.data?.paymentUrl) {
-    //     // Перенаправляем пользователя на страницу оплаты Robokassa
-    //     window.location.href = data.data.paymentUrl;
-    //   } else {
-    //     alert('Не удалось создать платежную ссылку. Попробуйте позже.');
-    //   }
-    // } catch (err: any) {
-    //   console.error('Ошибка при создании платежа:', err);
-    //   alert('Произошла ошибка при создании платежа. Попробуйте позже.');
-    // }
+    // Закомментированный старый код с локальной генерацией ссылки
+    // const merchantLogin = 'Minenkov-2'; // ID магазина
+    // const password1 = 'Eld5Xljk2GBN4D6TJo3N'; // Тестовый пароль #1
+    // const invoiceID = '837984789'; // Фиксированный номер счета как в примере
+    // 
+    // // Формируем строку для подписи: MerchantLogin:OutSum:InvoiceID:Password1
+    // const signatureString = `${merchantLogin}:${amount}:${invoiceID}:${password1}`;
+    // 
+    // // Вычисляем MD5 хэш с помощью crypto-js
+    // const signature = CryptoJS.MD5(signatureString).toString().toUpperCase();
+    // 
+    // // Формируем URL для оплаты Robokassa
+    // const paymentUrl = `https://auth.robokassa.ru/Merchant/Index.aspx?` +
+    //   `MerchantLogin=${encodeURIComponent(merchantLogin)}&` +
+    //   `OutSum=${amount}&` +
+    //   `invoiceID=${encodeURIComponent(invoiceID)}&` +
+    //   `Description=${encodeURIComponent(description)}&` +
+    //   `SignatureValue=${signature}&` +
+    //   `IsTest=1`;
+    // 
+    // // Перенаправляем пользователя на страницу оплаты Robokassa
+    // window.location.href = paymentUrl;
   };
 
   // useEffect(() => {
