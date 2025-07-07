@@ -108,44 +108,47 @@ router.post('/generate-payment-url', async (req, res) => {
     // Базовый URL одинаковый для тестового и боевого режима
     const baseUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx';
     
-    // Формирование параметров платежа в правильном порядке
+    // Формирование МИНИМАЛЬНЫХ параметров платежа (только обязательные)
     const paymentParams = {};
     
-    // Обязательные параметры
+    // Только обязательные параметры для короткой ссылки
     paymentParams.MerchantLogin = login;
     paymentParams.OutSum = amount.toFixed(2);
     paymentParams.InvId = invId;
     paymentParams.SignatureValue = signature;
     
-    // Опциональные параметры
-    if (description && description !== 'Оплата абонемента minenkovrehab.ru') {
-      paymentParams.Description = description;
-    }
-    
-    // URL для обработки результатов
-    paymentParams.ResultURL = `${apiUrl}/api/robokassa/result`;
-    paymentParams.SuccessURL = successUrl;
-    paymentParams.FailURL = failUrl;
-    
-    // Контактные данные
-    if (email) {
-      paymentParams.Email = email;
-    }
-    if (phone) {
-      paymentParams.Phone = phone;
-    }
-    
-    // Добавляем shp_ параметры в алфавитном порядке
-    Object.keys(shpParams).sort().forEach(key => {
-      paymentParams[key] = shpParams[key];
-    });
-    
-    // Технические параметры
-    paymentParams.Culture = 'ru';
-    paymentParams.Encoding = 'utf-8';
+    // Добавляем только критически важные параметры
     if (isTestMode) {
       paymentParams.IsTest = '1';
     }
+    
+    // Комментируем старый код с дополнительными параметрами
+    // // Опциональные параметры
+    // if (description && description !== 'Оплата абонемента minenkovrehab.ru') {
+    //   paymentParams.Description = description;
+    // }
+    // 
+    // // URL для обработки результатов
+    // paymentParams.ResultURL = `${apiUrl}/api/robokassa/result`;
+    // paymentParams.SuccessURL = successUrl;
+    // paymentParams.FailURL = failUrl;
+    // 
+    // // Контактные данные
+    // if (email) {
+    //   paymentParams.Email = email;
+    // }
+    // if (phone) {
+    //   paymentParams.Phone = phone;
+    // }
+    // 
+    // // Добавляем shp_ параметры в алфавитном порядке
+    // Object.keys(shpParams).sort().forEach(key => {
+    //   paymentParams[key] = shpParams[key];
+    // });
+    // 
+    // // Технические параметры
+    // paymentParams.Culture = 'ru';
+    // paymentParams.Encoding = 'utf-8';
     
     const paymentParamsUrl = new URLSearchParams(paymentParams);
     

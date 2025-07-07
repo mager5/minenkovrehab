@@ -1,18 +1,18 @@
 const https = require('https');
 
-const data = JSON.stringify({
+const postData = JSON.stringify({
   amount: 5000,
-  description: 'Тестовая оплата абонемента minenkovrehab.ru'
+  description: 'Test subscription payment minenkovrehab.ru'
 });
 
 const options = {
-  hostname: 'robokassa-api-production.up.railway.app',
+  hostname: 'minenkovrehab-production-15cc.up.railway.app',
   port: 443,
   path: '/api/robokassa/generate-payment-url',
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Content-Length': data.length
+    'Content-Length': postData.length
   }
 };
 
@@ -45,8 +45,8 @@ req.on('error', (e) => {
   console.error(`Ошибка запроса: ${e.message}`);
 });
 
-req.write(data);
+req.write(postData);
 req.end();
 
 console.log('Отправляем запрос к Railway API...');
-console.log('Данные:', data);
+console.log('Данные:', postData);
