@@ -95,30 +95,33 @@ router.post('/generate-payment-url', async (req, res) => {
     // Базовый URL одинаковый для тестового и боевого режима
     const baseUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx';
     
-    // Параметры в алфавитном порядке (как требует Robokassa)
+    // Минимальные обязательные параметры (как в примере)
     const paymentParams = {};
     
-    // Добавляем параметры в алфавитном порядке
-    paymentParams.Culture = 'en';
-    paymentParams.Description = description;
-    if (email) {
-      paymentParams.Email = email;
-    }
+    // Добавляем только обязательные параметры
+    paymentParams.Culture = 'ru';
     paymentParams.Encoding = 'utf-8';
-    paymentParams.FailURL = failUrl;
     paymentParams.InvId = invId;
     if (isTestMode) {
       paymentParams.IsTest = '1';
     }
-    paymentParams.Locale = 'en';
     paymentParams.MerchantLogin = login;
-    paymentParams.OutSum = amount.toString();
-    if (phone) {
-      paymentParams.Phone = phone;
-    }
-    paymentParams.ResultURL = `${apiUrl}/api/robokassa/result`;
+    paymentParams.OutSum = amount.toFixed(2);
     paymentParams.SignatureValue = signature;
-    paymentParams.SuccessURL = successUrl;
+    
+    // Опциональные параметры (только если нужны)
+    // if (description && description !== 'Оплата абонемента minenkovrehab.ru') {
+    //   paymentParams.Description = description;
+    // }
+    // if (email) {
+    //   paymentParams.Email = email;
+    // }
+    // if (phone) {
+    //   paymentParams.Phone = phone;
+    // }
+    // paymentParams.FailURL = failUrl;
+    // paymentParams.ResultURL = `${apiUrl}/api/robokassa/result`;
+    // paymentParams.SuccessURL = successUrl;
     
     const paymentParamsUrl = new URLSearchParams(paymentParams);
     
