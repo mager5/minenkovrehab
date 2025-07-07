@@ -81,22 +81,21 @@ export default function ClubPage() {
 
   // Функция для прямого перехода на оплату через Railway API
   const handleDirectPayment = async () => {
-    const amount = '2950.00'; // Стоимость абонемента
+    const amount = 2950; // Стоимость абонемента (число, а не строка)
     const description = 'Абонемент клуба формула движения';
     
     try {
       const apiUrl = 'https://minenkovrehab-production-15cc.up.railway.app';
       
-      const response = await fetch(`${apiUrl}/api/robokassa/generate-payment-url`, {
+      const response = await fetch(`${apiUrl}/api/robokassa-sdk/generate-payment-url`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: '', // Пустой email - не требуется
-          phone: '', // Пустой телефон - не требуется
           amount,
           description,
+          email: '', // Опциональный email
         }),
       });
       
