@@ -108,51 +108,54 @@ router.post('/generate-payment-url', async (req, res) => {
     // Базовый URL одинаковый для тестового и боевого режима
     const baseUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx';
     
-    // Формирование МИНИМАЛЬНЫХ параметров платежа (только обязательные)
-    const paymentParams = {};
+    // Формирование МИНИМАЛЬНЫХ параметров платежа согласно документации Robokassa
+    // ВАЖНО: Параметры должны быть в алфавитном порядке для корректной работы
+    const paymentParams = new Map();
     
-    // Только обязательные параметры для короткой ссылки
-    paymentParams.MerchantLogin = login;
-    paymentParams.OutSum = amount.toFixed(2);
-    paymentParams.InvId = invId;
-    paymentParams.SignatureValue = signature;
-    
-    // Добавляем только критически важные параметры
+    // Добавляем параметры в алфавитном порядке согласно документации
+    paymentParams.set('InvId', invId);
     if (isTestMode) {
-      paymentParams.IsTest = '1';
+      paymentParams.set('IsTest', '1');
     }
+    paymentParams.set('MerchantLogin', login);
+    paymentParams.set('OutSum', amount.toFixed(2));
+    paymentParams.set('SignatureValue', signature);
     
     // Комментируем старый код с дополнительными параметрами
     // // Опциональные параметры
     // if (description && description !== 'Оплата абонемента minenkovrehab.ru') {
-    //   paymentParams.Description = description;
+    //   paymentParams.set('Description', description);
     // }
     // 
     // // URL для обработки результатов
-    // paymentParams.ResultURL = `${apiUrl}/api/robokassa/result`;
-    // paymentParams.SuccessURL = successUrl;
-    // paymentParams.FailURL = failUrl;
+    // paymentParams.set('ResultURL', `${apiUrl}/api/robokassa/result`);
+    // paymentParams.set('SuccessURL', successUrl);
+    // paymentParams.set('FailURL', failUrl);
     // 
     // // Контактные данные
     // if (email) {
-    //   paymentParams.Email = email;
+    //   paymentParams.set('Email', email);
     // }
     // if (phone) {
-    //   paymentParams.Phone = phone;
+    //   paymentParams.set('Phone', phone);
     // }
     // 
     // // Добавляем shp_ параметры в алфавитном порядке
     // Object.keys(shpParams).sort().forEach(key => {
-    //   paymentParams[key] = shpParams[key];
+    //   paymentParams.set(key, shpParams[key]);
     // });
     // 
     // // Технические параметры
-    // paymentParams.Culture = 'ru';
-    // paymentParams.Encoding = 'utf-8';
+    // paymentParams.set('Culture', 'ru');
+    // paymentParams.set('Encoding', 'utf-8');
     
-    const paymentParamsUrl = new URLSearchParams(paymentParams);
+    // Формируем URL с параметрами в правильном порядке
+    const urlParams = new URLSearchParams();
+    for (const [key, value] of paymentParams) {
+      urlParams.append(key, value);
+    }
     
-    const paymentUrl = `${baseUrl}?${paymentParamsUrl.toString()}`;
+    const paymentUrl = `${baseUrl}?${urlParams.toString()}`;
     
     console.log('✅ Платежный URL сгенерирован согласно документации Robokassa:', {
       invId,
