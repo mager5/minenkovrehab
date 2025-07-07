@@ -1,17 +1,46 @@
 const crypto = require('crypto');
 
 /**
+ * Сортировка shp_ параметров в алфавитном порядке (обязательно для Robokassa)
+ * @param {Object} shpParams - Объект с shp_ параметрами
+ * @returns {string} Строка с отсортированными shp_ параметрами в формате key=value:key=value
+ */
+function formatShpParams(shpParams) {
+  if (!shpParams || Object.keys(shpParams).length === 0) {
+    return '';
+  }
+  
+  // Сортируем ключи в алфавитном порядке
+  const sortedKeys = Object.keys(shpParams).sort();
+  return sortedKeys.map(key => `${key}=${shpParams[key]}`).join(':');
+}
+
+/**
  * Генерация MD5 подписи для инициализации платежа
- * Формула: MD5(MerchantLogin:OutSum:InvId:MerchantPass)
+ * Формула: MD5(MerchantLogin:OutSum:InvId[:shp_params]:MerchantPass)
  * 
  * @param {string} login - ID магазина (Shop ID)
  * @param {number} outSum - Сумма платежа
  * @param {number} invId - ID заказа (числовой)
  * @param {string} password - Пароль #1
+ * @param {Object} [shpParams] - Дополнительные shp_ параметры
  * @returns {string} MD5 подпись в верхнем регистре
  */
-function generatePaymentSignature(login, outSum, invId, password) {
-  const signatureString = `${login}:${outSum}:${invId}:${password}`;
+function generatePaymentSignature(login, outSum, invId, password, shpParams = null) {
+  // КРИТИЧЕСКИ ВАЖНО: сумма должна быть отформатирована с 2 знаками после запятой
+  // как в URL параметрах, так и в подписи для избежания ошибки 29
+  const formattedSum = parseFloat(outSum).toFixed(2);
+  
+  let signatureString = `${login}:${formattedSum}:${invId}`;
+  
+  // Добавляем shp_ параметры в алфавитном порядке, если они есть
+  if (shpParams && Object.keys(shpParams).length > 0) {
+    const shpString = formatShpParams(shpParams);
+    signatureString += `:${shpString}`;
+  }
+  
+  signatureString += `:${password}`;
+  
   console.log('Генерация подписи для платежа:', signatureString.replace(password, '***'));
   
   return crypto
@@ -23,15 +52,28 @@ function generatePaymentSignature(login, outSum, invId, password) {
 
 /**
  * Проверка подписи Result URL от Robokassa
- * Формула: MD5(OutSum:InvId:MerchantPass2)
+ * Формула: MD5(OutSum:InvId[:shp_params]:MerchantPass2)
  * 
  * @param {number} outSum - Сумма платежа
  * @param {number} invId - ID заказа (числовой)
  * @param {string} password2 - Пароль #2
+ * @param {Object} [shpParams] - Дополнительные shp_ параметры
  * @returns {string} MD5 подпись в верхнем регистре
  */
-function generateResultSignature(outSum, invId, password2) {
-  const signatureString = `${outSum}:${invId}:${password2}`;
+function generateResultSignature(outSum, invId, password2, shpParams = null) {
+  // Форматируем сумму с 2 знаками после запятой для консистентности
+  const formattedSum = parseFloat(outSum).toFixed(2);
+  
+  let signatureString = `${formattedSum}:${invId}`;
+  
+  // Добавляем shp_ параметры в алфавитном порядке, если они есть
+  if (shpParams && Object.keys(shpParams).length > 0) {
+    const shpString = formatShpParams(shpParams);
+    signatureString += `:${shpString}`;
+  }
+  
+  signatureString += `:${password2}`;
+  
   console.log('Генерация подписи для Result URL:', signatureString.replace(password2, '***'));
   
   return crypto
@@ -43,15 +85,28 @@ function generateResultSignature(outSum, invId, password2) {
 
 /**
  * Проверка подписи Success URL от Robokassa
- * Формула: MD5(OutSum:InvId:MerchantPass1)
+ * Формула: MD5(OutSum:InvId[:shp_params]:MerchantPass1)
  * 
  * @param {number} outSum - Сумма платежа
  * @param {number} invId - ID заказа (числовой)
  * @param {string} password1 - Пароль #1
+ * @param {Object} [shpParams] - Дополнительные shp_ параметры
  * @returns {string} MD5 подпись в верхнем регистре
  */
-function generateSuccessSignature(outSum, invId, password1) {
-  const signatureString = `${outSum}:${invId}:${password1}`;
+function generateSuccessSignature(outSum, invId, password1, shpParams = null) {
+  // Форматируем сумму с 2 знаками после запятой для консистентности
+  const formattedSum = parseFloat(outSum).toFixed(2);
+  
+  let signatureString = `${formattedSum}:${invId}`;
+  
+  // Добавляем shp_ параметры в алфавитном порядке, если они есть
+  if (shpParams && Object.keys(shpParams).length > 0) {
+    const shpString = formatShpParams(shpParams);
+    signatureString += `:${shpString}`;
+  }
+  
+  signatureString += `:${password1}`;
+  
   console.log('Генерация подписи для Success URL:', signatureString.replace(password1, '***'));
   
   return crypto
@@ -117,5 +172,6 @@ module.exports = {
   generateResultSignature,
   generateSuccessSignature,
   verifySignature,
-  generateInvoiceId
+  generateInvoiceId,
+  formatShpParams
 };

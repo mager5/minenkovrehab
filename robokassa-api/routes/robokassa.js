@@ -5,11 +5,13 @@ const {
   generateResultSignature, 
   generateSuccessSignature,
   verifySignature, 
-  generateInvoiceId 
+  generateInvoiceId,
+  formatShpParams 
 } = require('../utils/signature');
 const { 
   validatePaymentParams, 
   validateResultParams, 
+  validateSuccessParams,
   validateEnvironment,
   sanitizeString,
   normalizePhone
@@ -54,6 +56,17 @@ router.post('/generate-payment-url', async (req, res) => {
     // Генерация уникального ID заказа
     const invId = generateInvoiceId();
     
+    // Подготовка shp_ параметров для передачи дополнительных данных
+    const shpParams = {};
+    if (email) {
+      shpParams.shp_email = email;
+    }
+    if (phone) {
+      shpParams.shp_phone = phone;
+    }
+    // Добавляем timestamp для уникальности
+    shpParams.shp_timestamp = Date.now().toString();
+    
     // Получение настроек Robokassa
     const isTestMode = process.env.ROBOKASSA_TEST_MODE === 'true';
     const login = process.env.ROBOKASSA_LOGIN;
@@ -80,8 +93,8 @@ router.post('/generate-payment-url', async (req, res) => {
       });
     }
     
-    // Генерация подписи
-    const signature = generatePaymentSignature(login, amount, invId, password1);
+    // Генерация подписи с учетом shp_ параметров
+    const signature = generatePaymentSignature(login, amount, invId, password1, shpParams);
     
     // Все URL должны указывать на Railway API
     const apiUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
@@ -95,33 +108,44 @@ router.post('/generate-payment-url', async (req, res) => {
     // Базовый URL одинаковый для тестового и боевого режима
     const baseUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx';
     
-    // Минимальные обязательные параметры (как в примере)
+    // Формирование параметров платежа в правильном порядке
     const paymentParams = {};
     
-    // Добавляем только обязательные параметры
+    // Обязательные параметры
+    paymentParams.MerchantLogin = login;
+    paymentParams.OutSum = amount.toFixed(2);
+    paymentParams.InvId = invId;
+    paymentParams.SignatureValue = signature;
+    
+    // Опциональные параметры
+    if (description && description !== 'Оплата абонемента minenkovrehab.ru') {
+      paymentParams.Description = description;
+    }
+    
+    // URL для обработки результатов
+    paymentParams.ResultURL = `${apiUrl}/api/robokassa/result`;
+    paymentParams.SuccessURL = successUrl;
+    paymentParams.FailURL = failUrl;
+    
+    // Контактные данные
+    if (email) {
+      paymentParams.Email = email;
+    }
+    if (phone) {
+      paymentParams.Phone = phone;
+    }
+    
+    // Добавляем shp_ параметры в алфавитном порядке
+    Object.keys(shpParams).sort().forEach(key => {
+      paymentParams[key] = shpParams[key];
+    });
+    
+    // Технические параметры
     paymentParams.Culture = 'ru';
     paymentParams.Encoding = 'utf-8';
-    paymentParams.InvId = invId;
     if (isTestMode) {
       paymentParams.IsTest = '1';
     }
-    paymentParams.MerchantLogin = login;
-    paymentParams.OutSum = amount.toFixed(2);
-    paymentParams.SignatureValue = signature;
-    
-    // Опциональные параметры (только если нужны)
-    // if (description && description !== 'Оплата абонемента minenkovrehab.ru') {
-    //   paymentParams.Description = description;
-    // }
-    // if (email) {
-    //   paymentParams.Email = email;
-    // }
-    // if (phone) {
-    //   paymentParams.Phone = phone;
-    // }
-    // paymentParams.FailURL = failUrl;
-    // paymentParams.ResultURL = `${apiUrl}/api/robokassa/result`;
-    // paymentParams.SuccessURL = successUrl;
     
     const paymentParamsUrl = new URLSearchParams(paymentParams);
     
@@ -185,6 +209,14 @@ const handleResult = async (req, res) => {
     const { OutSum, InvId, SignatureValue } = params;
     const outSum = parseFloat(OutSum);
     
+    // Извлечение shp_ параметров из запроса
+    const shpParams = {};
+    Object.keys(params).forEach(key => {
+      if (key.startsWith('shp_')) {
+        shpParams[key] = params[key];
+      }
+    });
+    
     // Получение пароля #2
     const isTestMode = process.env.ROBOKASSA_TEST_MODE === 'true';
     const password2 = isTestMode 
@@ -198,8 +230,8 @@ const handleResult = async (req, res) => {
       return res.status(500).send('Configuration Error: Password #2 not configured');
     }
     
-    // Генерация ожидаемой подписи
-    const expectedSignature = generateResultSignature(outSum, InvId, password2);
+    // Генерация ожидаемой подписи с учетом shp_ параметров
+    const expectedSignature = generateResultSignature(outSum, InvId, password2, shpParams);
     
     // Проверка подписи
     if (!verifySignature(SignatureValue, expectedSignature)) {
@@ -253,6 +285,14 @@ const handleSuccess = async (req, res) => {
     const { OutSum, InvId, SignatureValue } = params;
     const outSum = parseFloat(OutSum);
     
+    // Извлечение shp_ параметров из запроса
+    const shpParams = {};
+    Object.keys(params).forEach(key => {
+      if (key.startsWith('shp_')) {
+        shpParams[key] = params[key];
+      }
+    });
+    
     // Получение пароля #1
     const isTestMode = process.env.ROBOKASSA_TEST_MODE === 'true';
     const password1 = isTestMode 
@@ -265,8 +305,8 @@ const handleSuccess = async (req, res) => {
       return res.redirect(`${frontendUrl}/payment/error?message=Configuration+error`);
     }
     
-    // Генерация ожидаемой подписи
-    const expectedSignature = generateSuccessSignature(outSum, InvId, password1);
+    // Генерация ожидаемой подписи с учетом shp_ параметров
+    const expectedSignature = generateSuccessSignature(outSum, InvId, password1, shpParams);
     
     // Проверка подписи
     if (!verifySignature(SignatureValue, expectedSignature)) {
