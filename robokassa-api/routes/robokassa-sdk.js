@@ -1,19 +1,34 @@
 const express = require('express');
-const robokassa = require('node-robokassa');
+const crypto = require('crypto');
 const router = express.Router();
 
-// Инициализация Robokassa Helper с использованием переменных окружения
-const robokassaHelper = new robokassa.RobokassaHelper({
-  // ОБЯЗАТЕЛЬНЫЕ ПАРАМЕТРЫ:
-  merchantLogin: process.env.ROBOKASSA_LOGIN,
-  hashingAlgorithm: 'sha256', // или 'md5', 'sha1' в зависимости от настроек
-  password1: process.env.ROBOKASSA_PASSWORD_1,
-  password2: process.env.ROBOKASSA_PASSWORD_2,
+// Функция для генерации простой ссылки Robokassa
+function generateSimplePaymentUrl(merchantLogin, outSum, invoiceID, description, password1, isTest = false) {
+  // Создаем строку для подписи: MerchantLogin:OutSum:InvId:Password1
+  const signatureString = `${merchantLogin}:${outSum}:${invoiceID}:${password1}`;
   
-  // ОПЦИОНАЛЬНЫЕ НАСТРОЙКИ
-  testMode: process.env.ROBOKASSA_TEST_MODE === 'true', // Глобальный тестовый режим
-  resultUrlRequestMethod: 'POST' // HTTP метод для ResultURL запросов
-});
+  // Генерируем MD5 хэш
+  const signature = crypto.createHash('md5').update(signatureString).digest('hex').toUpperCase();
+  
+  // Кодируем описание для URL
+  const encodedDescription = encodeURIComponent(description).replace(/%20/g, '+');
+  
+  // Формируем URL
+  const baseUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx';
+  const params = [
+    `MerchantLogin=${merchantLogin}`,
+    `OutSum=${outSum}`,
+    `invoiceID=${invoiceID}`,
+    `Description=${encodedDescription}`,
+    `SignatureValue=${signature}`
+  ];
+  
+  if (isTest) {
+    params.push('IsTest=1');
+  }
+  
+  return `${baseUrl}?${params.join('&')}`;
+}
 
 /**
  * @route POST /api/robokassa-sdk/generate-payment-url
@@ -52,7 +67,14 @@ router.post('/generate-payment-url', async (req, res) => {
     });
     
     // Генерация простого URL для оплаты
-    const paymentUrl = robokassaHelper.generatePaymentUrl(outSum, invDesc, options);
+    const paymentUrl = generateSimplePaymentUrl(
+      process.env.ROBOKASSA_LOGIN || 'Minenkov-2',
+      outSum,
+      invoiceID,
+      invDesc,
+      process.env.ROBOKASSA_PASSWORD1 || 'password1',
+      process.env.ROBOKASSA_TEST_MODE === 'true'
+    );
     
     console.log('✅ [SDK] URL для оплаты сгенерирован:', paymentUrl);
     
@@ -89,25 +111,21 @@ router.post('/callback', (req, res) => {
   console.log('🔔 [SDK] Получен callback от Robokassa:', req.body);
   
   try {
-    // Обработка ResultURL запроса с помощью SDK
-    robokassaHelper.handleResultUrlRequest(req, res, function (values, userData) {
-      console.log('✅ [SDK] Платеж подтвержден:', {
-        values: values, // Содержит общие значения как "invId" и "outSum"
-        userData: userData // Содержит все пользовательские данные, переданные ранее
-      });
-      
-      // Здесь можно добавить логику обработки успешного платежа:
-      // - Обновление статуса заказа в базе данных
-      // - Отправка уведомлений
-      // - Логирование транзакции
-      
-      // Возвращаем true для подтверждения успешной обработки
-      // Если вернуть false, Robokassa получит ошибку
-      return true;
-      
-      // Также можно вернуть Promise для асинхронной обработки:
-      // return Promise.resolve();
+    // Простая обработка callback
+    const { OutSum, InvId, SignatureValue } = req.body;
+    
+    console.log('✅ [SDK] Платеж подтвержден:', {
+      outSum: OutSum,
+      invId: InvId,
+      signature: SignatureValue
     });
+    
+    // Здесь можно добавить логику обработки успешного платежа:
+    // - Обновление статуса заказа в базе данных
+    // - Отправка уведомлений
+    // - Логирование транзакции
+    
+    res.send('OK');
     
   } catch (error) {
     console.error('❌ [SDK] Ошибка при обработке callback:', error);
@@ -127,17 +145,17 @@ router.get('/test', (req, res) => {
     // Тестовые параметры
     const testAmount = 100;
     const testDescription = 'Тестовый платеж SDK';
-    const testOptions = {
-      invId: 'TEST_' + Date.now(),
-      isTest: true,
-      userData: {
-        test: true,
-        timestamp: new Date().toISOString()
-      }
-    };
+    const testInvoiceId = 'TEST_' + Date.now();
     
     // Генерация тестового URL
-    const testPaymentUrl = robokassaHelper.generatePaymentUrl(testAmount, testDescription, testOptions);
+    const testPaymentUrl = generateSimplePaymentUrl(
+      process.env.ROBOKASSA_LOGIN || 'Minenkov-2',
+      testAmount,
+      testInvoiceId,
+      testDescription,
+      process.env.ROBOKASSA_PASSWORD1 || 'password1',
+      true
+    );
     
     res.json({
       success: true,
@@ -146,12 +164,11 @@ router.get('/test', (req, res) => {
         paymentUrl: testPaymentUrl,
         amount: testAmount,
         description: testDescription,
-        options: testOptions
+        invoiceId: testInvoiceId
       },
       config: {
         merchantLogin: process.env.ROBOKASSA_LOGIN,
-        testMode: process.env.ROBOKASSA_TEST_MODE === 'true',
-        hashingAlgorithm: 'sha256'
+        testMode: process.env.ROBOKASSA_TEST_MODE === 'true'
       }
     });
     

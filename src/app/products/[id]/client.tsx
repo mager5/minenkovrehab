@@ -20,10 +20,44 @@ const fadeIn = {
 
 // Клиентский компонент для страницы продукта
 export default function ProductClient({ product }: { product: Product }) {
-  // Прямая ссылка на оплату Robokassa
-  const handlePayment = () => {
-    const paymentUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=Minenkov-2&OutSum=2950.00&invoiceID=837984789&Description=Абонемент+клуба+формула+движения&SignatureValue=8E86A9B01122AA2175F5405AE1532FAE&IsTest=1';
-    window.location.href = paymentUrl;
+  // Динамическая генерация ссылки на оплату через Railway API
+  const handlePayment = async () => {
+    try {
+      console.log('🔄 Создание платежа для продукта:', product.title);
+      
+      // Прямое обращение к Railway API
+      const response = await fetch('https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: product.price,
+          description: product.title,
+          email: 'customer@example.com', // Можно добавить форму для email
+          phone: '+79001234567' // Корректный формат телефона
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка создания платежа');
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.data?.paymentUrl) {
+        console.log('✅ Платежная ссылка получена:', result.data.paymentUrl);
+        // Проверяем, что в URL нет лишних кавычек (оставляем для совместимости)
+        const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
+        console.log('🔍 Очищенная ссылка:', cleanUrl);
+        window.location.href = cleanUrl;
+      } else {
+        throw new Error('Не удалось получить ссылку для оплаты');
+      }
+    } catch (error) {
+      console.error('❌ Ошибка при создании платежа:', error);
+      alert('Произошла ошибка при создании платежа. Попробуйте еще раз.');
+    }
   };
 
   return (
