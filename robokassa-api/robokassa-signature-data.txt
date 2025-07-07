@@ -1,0 +1,42 @@
+ДАННЫЕ ДЛЯ ROBOKASSA - SignatureValue до хеширования
+================================================================
+
+Магазин: Minenkov-2
+Тестовый режим: ВКЛ
+
+1. ДАННЫЕ ДЛЯ СОЗДАНИЯ ПЛАТЕЖА:
+   MerchantLogin: Minenkov-2
+   OutSum: 100.00
+   InvoiceID: 12345
+   Description: Тестовый платеж
+   Password#1 (тестовый): Eld5Xljk2GBN4D6TJo3N
+
+   СТРОКА ДО ХЕШИРОВАНИЯ (SignatureValue):
+   Minenkov-2:100.00:12345:Eld5Xljk2GBN4D6TJo3N
+
+   ПОСЛЕ MD5 ХЕШИРОВАНИЯ:
+   5721aa1dfd7076b556a6bc43cecc65c3
+
+2. ДАННЫЕ ДЛЯ ПРОВЕРКИ РЕЗУЛЬТАТА:
+   OutSum: 100.00
+   InvoiceID: 12345
+   Password#2 (тестовый): gWtiI5Li9nqojQcc1f60
+
+   СТРОКА ДО ХЕШИРОВАНИЯ (для проверки результата):
+   100.00:12345:gWtiI5Li9nqojQcc1f60
+
+   ПОСЛЕ MD5 ХЕШИРОВАНИЯ:
+   187c87f22f9d2ecd466b27155ef24518
+
+3. ПОЛНАЯ ССЫЛКА ДЛЯ ТЕСТОВОЙ ОПЛАТЫ:
+   https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=Minenkov-2&OutSum=100.00&InvoiceID=12345&Description=%D0%A2%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20%D0%BF%D0%BB%D0%B0%D1%82%D0%B5%D0%B6&SignatureValue=5721aa1dfd7076b556a6bc43cecc65c3
+
+================================================================
+ОТПРАВИТЬ В ROBOKASSA:
+
+📤 Строка до хеширования для создания платежа:
+Minenkov-2:100.00:12345:Eld5Xljk2GBN4D6TJo3N
+
+📥 Строка до хеширования для проверки результата:
+100.00:12345:gWtiI5Li9nqojQcc1f60
+================================================================

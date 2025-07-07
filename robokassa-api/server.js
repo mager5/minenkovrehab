@@ -172,7 +172,7 @@ app.use((err, req, res, next) => {
 });
 
 // Запуск сервера
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Robokassa API запущен на порту ${PORT}`);
   console.log(`📊 Режим: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🧪 Тестовый режим Robokassa: ${process.env.ROBOKASSA_TEST_MODE === 'true' ? 'ВКЛ' : 'ВЫКЛ'}`);
