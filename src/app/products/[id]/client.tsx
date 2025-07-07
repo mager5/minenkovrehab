@@ -3,8 +3,6 @@
 import Link from 'next/link';
 import { Product } from '../data';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { PaymentModal } from '@/components/shared';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -22,7 +20,11 @@ const fadeIn = {
 
 // Клиентский компонент для страницы продукта
 export default function ProductClient({ product }: { product: Product }) {
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  // Прямая ссылка на оплату Robokassa
+  const handlePayment = () => {
+    const paymentUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=Minenkov-2&OutSum=2950.00&invoiceID=837984789&Description=Абонемент+клуба+формула+движения&SignatureValue=8E86A9B01122AA2175F5405AE1532FAE&IsTest=1';
+    window.location.href = paymentUrl;
+  };
 
   return (
     <motion.div
@@ -158,7 +160,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   className='mb-4'
                 >
                   <button
-                    onClick={() => setIsPaymentModalOpen(true)}
+                    onClick={handlePayment}
                     className='block w-full bg-accent text-white text-center px-6 py-3 rounded-md font-medium transition-all hover:bg-accent/90 shadow-lg hover:shadow-xl'
                   >
                     💳 Купить онлайн
@@ -187,13 +189,7 @@ export default function ProductClient({ product }: { product: Product }) {
           </div>
         </motion.div>
       </div>
-      
-      {/* Модальное окно оплаты */}
-      <PaymentModal 
-        isOpen={isPaymentModalOpen} 
-        onClose={() => setIsPaymentModalOpen(false)}
-        product={product}
-      />
+
     </motion.div>
   );
 }

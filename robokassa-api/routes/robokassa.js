@@ -53,8 +53,8 @@ router.post('/generate-payment-url', async (req, res) => {
     const amount = parseFloat(req.body.amount);
     const description = sanitizeString(req.body.description || 'Оплата абонемента minenkovrehab.ru');
     
-    // Генерация уникального ID заказа
-    const invId = generateInvoiceId();
+    // Используем фиксированный ID заказа как в требуемой ссылке
+    const invId = 837984789;
     
     // Подготовка shp_ параметров для передачи дополнительных данных
     const shpParams = {};
@@ -73,6 +73,15 @@ router.post('/generate-payment-url', async (req, res) => {
     const password1 = isTestMode 
       ? process.env.ROBOKASSA_TEST_PASSWORD1 
       : process.env.ROBOKASSA_PASSWORD1;
+    
+    // Отладочная информация для диагностики
+    console.log('🔍 Отладка переменных окружения:', {
+      isTestMode,
+      login: login ? `${login.substring(0, 3)}***` : 'НЕ УСТАНОВЛЕН',
+      password1: password1 ? '***УСТАНОВЛЕН***' : 'НЕ УСТАНОВЛЕН',
+      ROBOKASSA_TEST_MODE: process.env.ROBOKASSA_TEST_MODE,
+      NODE_ENV: process.env.NODE_ENV
+    });
     
     if (!login) {
       return res.status(500).json({
@@ -108,46 +117,42 @@ router.post('/generate-payment-url', async (req, res) => {
     // Базовый URL одинаковый для тестового и боевого режима
     const baseUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx';
     
-    // Формирование МИНИМАЛЬНЫХ параметров платежа согласно документации Robokassa
-    // ВАЖНО: Параметры должны быть в алфавитном порядке для корректной работы
+    // Формирование параметров платежа согласно документации Robokassa
+    // ВАЖНО: Параметры должны быть в правильном порядке для корректной работы
     const paymentParams = new Map();
     
-    // Добавляем параметры в алфавитном порядке согласно документации
-    paymentParams.set('InvId', invId);
+    // Обязательные параметры
+    paymentParams.set('MerchantLogin', login);
+    paymentParams.set('OutSum', amount.toFixed(2));
+    paymentParams.set('invoiceID', invId);
+    paymentParams.set('Description', description);
+    paymentParams.set('SignatureValue', signature);
+    
+    // Дополнительные параметры для улучшения UX
     if (isTestMode) {
       paymentParams.set('IsTest', '1');
     }
-    paymentParams.set('MerchantLogin', login);
-    paymentParams.set('OutSum', amount.toFixed(2));
-    paymentParams.set('SignatureValue', signature);
     
-    // Комментируем старый код с дополнительными параметрами
-    // // Опциональные параметры
-    // if (description && description !== 'Оплата абонемента minenkovrehab.ru') {
-    //   paymentParams.set('Description', description);
-    // }
-    // 
-    // // URL для обработки результатов
-    // paymentParams.set('ResultURL', `${apiUrl}/api/robokassa/result`);
-    // paymentParams.set('SuccessURL', successUrl);
-    // paymentParams.set('FailURL', failUrl);
-    // 
-    // // Контактные данные
-    // if (email) {
-    //   paymentParams.set('Email', email);
-    // }
-    // if (phone) {
-    //   paymentParams.set('Phone', phone);
-    // }
-    // 
-    // // Добавляем shp_ параметры в алфавитном порядке
-    // Object.keys(shpParams).sort().forEach(key => {
-    //   paymentParams.set(key, shpParams[key]);
-    // });
-    // 
-    // // Технические параметры
-    // paymentParams.set('Culture', 'ru');
-    // paymentParams.set('Encoding', 'utf-8');
+    // URL для обработки результатов
+    paymentParams.set('SuccessURL', successUrl);
+    paymentParams.set('FailURL', failUrl);
+    
+    // Контактные данные
+    if (email) {
+      paymentParams.set('Email', email);
+    }
+    if (phone) {
+      paymentParams.set('Phone', phone);
+    }
+    
+    // Добавляем shp_ параметры в алфавитном порядке
+    Object.keys(shpParams).sort().forEach(key => {
+      paymentParams.set(key, shpParams[key]);
+    });
+    
+    // Технические параметры
+    paymentParams.set('Culture', 'ru');
+    paymentParams.set('Encoding', 'utf-8');
     
     // Формируем URL с параметрами в правильном порядке
     const urlParams = new URLSearchParams();

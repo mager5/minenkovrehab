@@ -6,4 +6,4 @@
 
 export { Favicons } from './Favicons';
 export { default as BookingModal } from './BookingModal';
-export { default as PaymentModal } from './PaymentModal';
+// PaymentModal удален - теперь используется прямая ссылка на Robokassa

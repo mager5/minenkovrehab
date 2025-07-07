@@ -5,7 +5,7 @@ const router = express.Router();
 // Инициализация Robokassa Helper с использованием переменных окружения
 const robokassaHelper = new robokassa.RobokassaHelper({
   // ОБЯЗАТЕЛЬНЫЕ ПАРАМЕТРЫ:
-  merchantLogin: process.env.ROBOKASSA_MERCHANT_LOGIN,
+  merchantLogin: process.env.ROBOKASSA_LOGIN,
   hashingAlgorithm: 'sha256', // или 'md5', 'sha1' в зависимости от настроек
   password1: process.env.ROBOKASSA_PASSWORD_1,
   password2: process.env.ROBOKASSA_PASSWORD_2,
@@ -155,7 +155,7 @@ router.get('/test', (req, res) => {
         options: testOptions
       },
       config: {
-        merchantLogin: process.env.ROBOKASSA_MERCHANT_LOGIN,
+        merchantLogin: process.env.ROBOKASSA_LOGIN,
         testMode: process.env.ROBOKASSA_TEST_MODE === 'true',
         hashingAlgorithm: 'sha256'
       }
