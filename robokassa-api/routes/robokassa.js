@@ -51,21 +51,10 @@ router.post('/generate-payment-url', async (req, res) => {
     const email = req.body.email ? sanitizeString(req.body.email) : undefined;
     const phone = req.body.phone ? normalizePhone(req.body.phone) : undefined;
     const amount = parseFloat(req.body.amount);
-    const description = sanitizeString(req.body.description || 'Оплата абонемента minenkovrehab.ru');
+    const description = sanitizeString(req.body.description || 'Абонемент клуба формула движения');
     
-    // Используем фиксированный ID заказа как в требуемой ссылке
-    const invId = 837984789;
-    
-    // Подготовка shp_ параметров для передачи дополнительных данных
-    const shpParams = {};
-    if (email) {
-      shpParams.shp_email = email;
-    }
-    if (phone) {
-      shpParams.shp_phone = phone;
-    }
-    // Добавляем timestamp для уникальности
-    shpParams.shp_timestamp = Date.now().toString();
+    // Генерируем уникальный ID заказа (числовой, требование Robokassa)
+    const invId = generateInvoiceId();
     
     // Получение настроек Robokassa
     const isTestMode = process.env.ROBOKASSA_TEST_MODE === 'true';
@@ -102,62 +91,23 @@ router.post('/generate-payment-url', async (req, res) => {
       });
     }
     
-    // Генерация подписи с учетом shp_ параметров
-    const signature = generatePaymentSignature(login, amount, invId, password1, shpParams);
+    // Генерация подписи БЕЗ дополнительных параметров (как в правильной ссылке)
+    const signature = generatePaymentSignature(login, amount, invId, password1, {});
     
-    // Все URL должны указывать на Railway API
-    const apiUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
-      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
-      : 'http://localhost:3001';
-    
-    const successUrl = `${apiUrl}/api/robokassa/success`;
-    const failUrl = `${apiUrl}/api/robokassa/fail`;
-    
-    // Формирование URL для оплаты согласно официальной документации Robokassa
-    // Базовый URL одинаковый для тестового и боевого режима
+    // Формирование URL для оплаты в точном соответствии с правильной ссылкой
     const baseUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx';
     
-    // Формирование параметров платежа согласно документации Robokassa
-    // ВАЖНО: Параметры должны быть в правильном порядке для корректной работы
-    const paymentParams = new Map();
-    
-    // Обязательные параметры
-    paymentParams.set('MerchantLogin', login);
-    paymentParams.set('OutSum', amount.toFixed(2));
-    paymentParams.set('invoiceID', invId);
-    paymentParams.set('Description', description);
-    paymentParams.set('SignatureValue', signature);
-    
-    // Дополнительные параметры для улучшения UX
-    if (isTestMode) {
-      paymentParams.set('IsTest', '1');
-    }
-    
-    // URL для обработки результатов
-    paymentParams.set('SuccessURL', successUrl);
-    paymentParams.set('FailURL', failUrl);
-    
-    // Контактные данные
-    if (email) {
-      paymentParams.set('Email', email);
-    }
-    if (phone) {
-      paymentParams.set('Phone', phone);
-    }
-    
-    // Добавляем shp_ параметры в алфавитном порядке
-    Object.keys(shpParams).sort().forEach(key => {
-      paymentParams.set(key, shpParams[key]);
-    });
-    
-    // Технические параметры
-    paymentParams.set('Culture', 'ru');
-    paymentParams.set('Encoding', 'utf-8');
-    
-    // Формируем URL с параметрами в правильном порядке
+    // Формируем ТОЛЬКО обязательные параметры как в правильной ссылке
     const urlParams = new URLSearchParams();
-    for (const [key, value] of paymentParams) {
-      urlParams.append(key, value);
+    urlParams.append('MerchantLogin', login);
+    urlParams.append('OutSum', amount.toFixed(2));
+    urlParams.append('invoiceID', invId);
+    urlParams.append('Description', description);
+    urlParams.append('SignatureValue', signature);
+    
+    // Добавляем IsTest только в тестовом режиме
+    if (isTestMode) {
+      urlParams.append('IsTest', '1');
     }
     
     const paymentUrl = `${baseUrl}?${urlParams.toString()}`;
