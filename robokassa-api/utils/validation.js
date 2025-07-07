@@ -79,11 +79,20 @@ function validateResultParams(params) {
     errors.push('OutSum должен быть числом');
   }
   
-  // Проверка ID заказа
+  // Проверка InvId
   if (!params.InvId) {
     errors.push('InvId обязателен');
-  } else if (typeof params.InvId !== 'string' || params.InvId.trim().length === 0) {
-    errors.push('InvId должен быть непустой строкой');
+  } else {
+    // Старая валидация для строкового InvId (закомментирована)
+    // if (typeof params.InvId !== 'string' || params.InvId.trim().length === 0) {
+    //   errors.push('InvId должен быть непустой строкой');
+    // }
+    
+    // Новая валидация для числового InvId (требование Robokassa)
+    const invIdNum = parseInt(params.InvId);
+    if (isNaN(invIdNum) || invIdNum < 1 || invIdNum > 2147483647) {
+      errors.push('InvId должен быть числом от 1 до 2147483647');
+    }
   }
   
   // Проверка подписи
@@ -212,11 +221,20 @@ function validateSuccessParams(params) {
     errors.push('OutSum должен быть числом');
   }
   
-  // Проверка ID заказа
+  // Проверка InvId
   if (!params.InvId) {
     errors.push('InvId обязателен');
-  } else if (typeof params.InvId !== 'string' || params.InvId.trim().length === 0) {
-    errors.push('InvId должен быть непустой строкой');
+  } else {
+    // Старая валидация для строкового InvId (закомментирована)
+    // if (typeof params.InvId !== 'string' || params.InvId.trim().length === 0) {
+    //   errors.push('InvId должен быть непустой строкой');
+    // }
+    
+    // Новая валидация для числового InvId (требование Robokassa)
+    const invIdNum = parseInt(params.InvId);
+    if (isNaN(invIdNum) || invIdNum < 1 || invIdNum > 2147483647) {
+      errors.push('InvId должен быть числом от 1 до 2147483647');
+    }
   }
   
   // Проверка подписи

@@ -1,0 +1,235 @@
+🚀 Robokassa API запущен на порту 3002
+📊 Режим: development
+🧪 Тестовый режим Robokassa: ВКЛ
+🌐 CORS разрешен для: https://minenkovrehab.github.io, https://minenkovrehab.github.io, https://minenkovrehab.ru
+2025-07-07T09:29:48.804Z - GET /health
+Headers: {
+  accept: 'application/json, text/plain, */*',
+  'user-agent': 'axios/1.10.0',
+  'accept-encoding': 'gzip, compress, deflate, br',
+  host: 'localhost:3002',
+  connection: 'keep-alive'
+}
+2025-07-07T09:29:48.820Z - GET /api/robokassa-sdk/test
+Headers: {
+  accept: 'application/json, text/plain, */*',
+  'user-agent': 'axios/1.10.0',
+  'accept-encoding': 'gzip, compress, deflate, br',
+  host: 'localhost:3002',
+  connection: 'keep-alive'
+}
+2025-07-07T09:29:48.841Z - POST /api/robokassa-sdk/generate-payment-url
+Headers: {
+  accept: 'application/json, text/plain, */*',
+  'content-type': 'application/json',
+  'user-agent': 'axios/1.10.0',
+  'content-length': '201',
+  'accept-encoding': 'gzip, compress, deflate, br',
+  host: 'localhost:3002',
+  connection: 'keep-alive'
+}
+Body: {
+  amount: 1500,
+  description: 'Тестовый платеж через SDK - Реабилитация Миненкова',
+  orderId: 'SDK_TEST_1751880588824',
+  email: 'test@example.com',
+  currency: 'RUB'
+}
+🔄 [SDK] Получен запрос на создание платежа: {
+  amount: 1500,
+  description: 'Тестовый платеж через SDK - Реабилитация Миненкова',
+  orderId: 'SDK_TEST_1751880588824',
+  email: 'test@example.com',
+  currency: 'RUB'
+}
+📊 [SDK] Параметры платежа: {
+  outSum: 1500,
+  invDesc: 'Тестовый платеж через SDK - Реабилитация Миненкова',
+  options: {
+    invId: 'SDK_TEST_1751880588824',
+    email: 'test@example.com',
+    outSumCurrency: 'RUB',
+    isTest: true,
+    userData: {
+      timestamp: '2025-07-07T09:29:48.842Z',
+      source: 'minenkov-rehab-api'
+    }
+  }
+}
+✅ [SDK] URL для оплаты сгенерирован: https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=&OutSum=1500&Description=%D0%A2%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9%20%D0%BF%D0%BB%D0%B0%D1%82%D0%B5%D0%B6%20%D1%87%D0%B5%D1%80%D0%B5%D0%B7%20SDK%20-%20%D0%A0%D0%B5%D0%B0%D0%B1%D0%B8%D0%BB%D0%B8%D1%82%D0%B0%D1%86%D0%B8%D1%8F%20%D0%9C%D0%B8%D0%BD%D0%B5%D0%BD%D0%BA%D0%BE%D0%B2%D0%B0&SignatureValue=3c1ea5b95dfbcda32113018d2b3b9f19674dca0ebfe57e028c49c256e1fd6e9d&Encoding=UTF-8&InvId=SDK_TEST_1751880588824&Email=test%40example.com&OutSumCurrency=RUB&IsTest=1&Shp_timestamp=2025-07-07T09%3A29%3A48.842Z&Shp_source=minenkov-rehab-api
+2025-07-07T09:30:01.981Z - GET /
+Headers: {
+  host: 'localhost:3002',
+  connection: 'keep-alive',
+  'upgrade-insecure-requests': '1',
+  'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.100.3 Chrome/132.0.6834.210 Electron/34.5.1 Safari/537.36',
+  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+  'sec-fetch-site': 'none',
+  'sec-fetch-mode': 'navigate',
+  'sec-fetch-user': '?1',
+  'sec-fetch-dest': 'document',
+  'accept-encoding': 'gzip, deflate, br, zstd',
+  'accept-language': 'ru'
+}
+2025-07-07T09:31:13.677Z - GET /
+Headers: {
+  host: 'localhost:3002',
+  connection: 'keep-alive',
+  'upgrade-insecure-requests': '1',
+  'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.100.3 Chrome/132.0.6834.210 Electron/34.5.1 Safari/537.36',
+  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+  'sec-fetch-site': 'none',
+  'sec-fetch-mode': 'navigate',
+  'sec-fetch-user': '?1',
+  'sec-fetch-dest': 'document',
+  'accept-encoding': 'gzip, deflate, br, zstd',
+  'accept-language': 'ru',
+  'if-none-match': 'W/"28b-nCotbUE82V2O2j4vpISgbwRtJ5Y"'
+}
+2025-07-07T09:31:13.700Z - GET /
+Headers: {
+  host: 'localhost:3002',
+  connection: 'keep-alive',
+  'upgrade-insecure-requests': '1',
+  'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.100.3 Chrome/132.0.6834.210 Electron/34.5.1 Safari/537.36',
+  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+  'sec-fetch-site': 'none',
+  'sec-fetch-mode': 'navigate',
+  'sec-fetch-user': '?1',
+  'sec-fetch-dest': 'document',
+  'accept-encoding': 'gzip, deflate, br, zstd',
+  'accept-language': 'ru',
+  'if-none-match': 'W/"28b-nCotbUE82V2O2j4vpISgbwRtJ5Y"'
+}
+2025-07-07T09:31:15.685Z - GET /
+Headers: {
+  host: 'localhost:3002',
+  connection: 'keep-alive',
+  'upgrade-insecure-requests': '1',
+  'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.100.3 Chrome/132.0.6834.210 Electron/34.5.1 Safari/537.36',
+  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+  'sec-fetch-site': 'none',
+  'sec-fetch-mode': 'navigate',
+  'sec-fetch-user': '?1',
+  'sec-fetch-dest': 'document',
+  'accept-encoding': 'gzip, deflate, br, zstd',
+  'accept-language': 'ru',
+  'if-none-match': 'W/"28b-nCotbUE82V2O2j4vpISgbwRtJ5Y"'
+}
+2025-07-07T09:31:15.742Z - GET /
+Headers: {
+  host: 'localhost:3002',
+  connection: 'keep-alive',
+  'upgrade-insecure-requests': '1',
+  'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.100.3 Chrome/132.0.6834.210 Electron/34.5.1 Safari/537.36',
+  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+  'sec-fetch-site': 'none',
+  'sec-fetch-mode': 'navigate',
+  'sec-fetch-user': '?1',
+  'sec-fetch-dest': 'document',
+  'accept-encoding': 'gzip, deflate, br, zstd',
+  'accept-language': 'ru',
+  'if-none-match': 'W/"28b-nCotbUE82V2O2j4vpISgbwRtJ5Y"'
+}
+2025-07-07T09:32:11.433Z - POST /api/robokassa/generate-payment-url
+Headers: {
+  host: 'localhost:3002',
+  'user-agent': 'curl/8.7.1',
+  accept: '*/*',
+  'content-type': 'application/json',
+  'content-length': '96'
+}
+Body: {
+  email: '',
+  phone: '',
+  amount: 2950,
+  description: 'Тест оплаты абонемента'
+}
+🔄 Запрос на генерацию платежного URL: {
+  email: '',
+  phone: '',
+  amount: 2950,
+  description: 'Тест оплаты абонемента'
+}
+Генерация подписи для платежа: Minenkov-2:2950:1751880731434_779em8:***
+✅ Платежный URL сгенерирован согласно документации Robokassa: {
+  invId: '1751880731434_779em8',
+  amount: 2950,
+  email: undefined,
+  phone: undefined,
+  testMode: true,
+  culture: 'en',
+  locale: 'en',
+  url: 'https://auth.robokassa.ru/Merchant/Index.aspx?Culture=en&Description=%D0%A2%D0%B5%D1%81%D1%82+%D0%BE%D0%BF%D0%BB%D0%B0%D1%82%D1%8B+%D0%B0%D0%B1%D0%BE%D0%BD%D0%B5%D0%BC%D0%B5%D0%BD%D1%82%D0%B0&Encoding=utf-8&FailURL=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Frobokassa%2Ffail&InvId=1751880731434_779em8&IsTest=1&Locale=en&MerchantLogin=Minenkov-2&OutSum=2950&ResultURL=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Frobokassa%2Fresult&SignatureValue=3B0C6BCA7188EEF22EAEB5726D25109C&SuccessURL=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Frobokassa%2Fsuccess'
+}
+2025-07-07T09:33:09.170Z - POST /api/robokassa/generate-payment-url
+Headers: {
+  'content-type': 'application/json',
+  'content-length': '96',
+  host: 'localhost:3002',
+  connection: 'keep-alive'
+}
+Body: {
+  email: '',
+  phone: '',
+  amount: 2950,
+  description: 'Тест оплаты абонемента'
+}
+🔄 Запрос на генерацию платежного URL: {
+  email: '',
+  phone: '',
+  amount: 2950,
+  description: 'Тест оплаты абонемента'
+}
+Генерация подписи для платежа: Minenkov-2:2950:1751880789172_yryd53:***
+✅ Платежный URL сгенерирован согласно документации Robokassa: {
+  invId: '1751880789172_yryd53',
+  amount: 2950,
+  email: undefined,
+  phone: undefined,
+  testMode: true,
+  culture: 'en',
+  locale: 'en',
+  url: 'https://auth.robokassa.ru/Merchant/Index.aspx?Culture=en&Description=%D0%A2%D0%B5%D1%81%D1%82+%D0%BE%D0%BF%D0%BB%D0%B0%D1%82%D1%8B+%D0%B0%D0%B1%D0%BE%D0%BD%D0%B5%D0%BC%D0%B5%D0%BD%D1%82%D0%B0&Encoding=utf-8&FailURL=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Frobokassa%2Ffail&InvId=1751880789172_yryd53&IsTest=1&Locale=en&MerchantLogin=Minenkov-2&OutSum=2950&ResultURL=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Frobokassa%2Fresult&SignatureValue=5810B78AB572BA8F2894DE64628F7074&SuccessURL=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Frobokassa%2Fsuccess'
+}
+2025-07-07T10:10:31.180Z - GET /health
+Headers: {
+  accept: 'application/json, text/plain, */*',
+  'user-agent': 'axios/1.10.0',
+  'accept-encoding': 'gzip, compress, deflate, br',
+  host: 'localhost:3002',
+  connection: 'keep-alive'
+}
+2025-07-07T10:10:31.190Z - POST /api/robokassa/generate-payment-url
+Headers: {
+  accept: 'application/json, text/plain, */*',
+  'content-type': 'application/json',
+  'user-agent': 'axios/1.10.0',
+  'content-length': '141',
+  'accept-encoding': 'gzip, compress, deflate, br',
+  host: 'localhost:3002',
+  connection: 'keep-alive'
+}
+Body: {
+  amount: 1000,
+  email: 'test@example.com',
+  phone: '+79123456789',
+  description: 'Тестовый платеж для диагностики'
+}
+🔄 Запрос на генерацию платежного URL: {
+  amount: 1000,
+  email: 'test@example.com',
+  phone: '+79123456789',
+  description: 'Тестовый платеж для диагностики'
+}
+Генерация подписи для платежа: Minenkov-2:1000:1751883031191_585s7r:***
+✅ Платежный URL сгенерирован согласно документации Robokassa: {
+  invId: '1751883031191_585s7r',
+  amount: 1000,
+  email: 'test@example.com',
+  phone: '+79123456789',
+  testMode: true,
+  culture: 'en',
+  locale: 'en',
+  url: 'https://auth.robokassa.ru/Merchant/Index.aspx?Culture=en&Description=%D0%A2%D0%B5%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9+%D0%BF%D0%BB%D0%B0%D1%82%D0%B5%D0%B6+%D0%B4%D0%BB%D1%8F+%D0%B4%D0%B8%D0%B0%D0%B3%D0%BD%D0%BE%D1%81%D1%82%D0%B8%D0%BA%D0%B8&Email=test%40example.com&Encoding=utf-8&FailURL=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Frobokassa%2Ffail&InvId=1751883031191_585s7r&IsTest=1&Locale=en&MerchantLogin=Minenkov-2&OutSum=1000&Phone=%2B79123456789&ResultURL=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Frobokassa%2Fresult&SignatureValue=866BC13E7A6EB94AB89D17C19CF3F6CD&SuccessURL=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Frobokassa%2Fsuccess'
+}

@@ -6,7 +6,7 @@ const crypto = require('crypto');
  * 
  * @param {string} login - ID магазина (Shop ID)
  * @param {number} outSum - Сумма платежа
- * @param {string} invId - ID заказа
+ * @param {number} invId - ID заказа (числовой)
  * @param {string} password - Пароль #1
  * @returns {string} MD5 подпись в верхнем регистре
  */
@@ -26,7 +26,7 @@ function generatePaymentSignature(login, outSum, invId, password) {
  * Формула: MD5(OutSum:InvId:MerchantPass2)
  * 
  * @param {number} outSum - Сумма платежа
- * @param {string} invId - ID заказа
+ * @param {number} invId - ID заказа (числовой)
  * @param {string} password2 - Пароль #2
  * @returns {string} MD5 подпись в верхнем регистре
  */
@@ -46,7 +46,7 @@ function generateResultSignature(outSum, invId, password2) {
  * Формула: MD5(OutSum:InvId:MerchantPass1)
  * 
  * @param {number} outSum - Сумма платежа
- * @param {string} invId - ID заказа
+ * @param {number} invId - ID заказа (числовой)
  * @param {string} password1 - Пароль #1
  * @returns {string} MD5 подпись в верхнем регистре
  */
@@ -81,15 +81,35 @@ function verifySignature(receivedSignature, expectedSignature) {
 }
 
 /**
- * Генерация уникального ID заказа
- * Формат: timestamp + случайные символы
- * 
- * @returns {string} Уникальный ID заказа
+ * Генерирует уникальный ID заказа (числовой, требование Robokassa)
+ * @returns {number} Уникальный ID заказа в диапазоне от 1 до 2147483647
  */
 function generateInvoiceId() {
+  // Старый код с строковым ID (закомментирован)
+  // const timestamp = Date.now();
+  // const random = Math.random().toString(36).substring(2, 8);
+  // return `${timestamp}_${random}`;
+  
+  // Новый код: генерируем числовой ID в допустимом диапазоне Robokassa (1-2147483647)
   const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 8);
-  return `${timestamp}_${random}`;
+  const random = Math.floor(Math.random() * 1000); // добавляем случайность
+  
+  // Комбинируем timestamp и случайное число, обрезаем до допустимого диапазона
+  let invoiceId = parseInt(`${timestamp}${random}`);
+  
+  // Убеждаемся, что ID в допустимом диапазоне (1-2147483647)
+  if (invoiceId > 2147483647) {
+    // Если слишком большой, берем остаток от деления на максимальное значение
+    invoiceId = (invoiceId % 2147483647) + 1;
+  }
+  
+  // Убеждаемся, что ID больше 0
+  if (invoiceId <= 0) {
+    invoiceId = Math.floor(Math.random() * 2147483647) + 1;
+  }
+  
+  console.log('Сгенерирован числовой InvId для Robokassa:', invoiceId);
+  return invoiceId;
 }
 
 module.exports = {
