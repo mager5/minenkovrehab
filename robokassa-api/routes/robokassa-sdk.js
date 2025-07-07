@@ -17,7 +17,7 @@ const robokassaHelper = new robokassa.RobokassaHelper({
 
 /**
  * @route POST /api/robokassa-sdk/generate-payment-url
- * @desc Генерация URL для оплаты с использованием node-robokassa SDK
+ * @desc Генерация простой URL для оплаты без лишних параметров
  * @access Public
  */
 router.post('/generate-payment-url', async (req, res) => {
@@ -37,17 +37,12 @@ router.post('/generate-payment-url', async (req, res) => {
     // Параметры для генерации платежа
     const outSum = parseFloat(amount);
     const invDesc = description;
+    const invoiceID = orderId || Math.floor(Math.random() * 1000000000); // Генерируем случайный ID
     
-    // Опциональные параметры
+    // Простые опции без лишних параметров
     const options = {
-      invId: orderId || Date.now(), // ID заказа (если не указан, используем timestamp)
-      email: email || undefined, // Email плательщика
-      outSumCurrency: currency || 'RUB', // Валюта транзакции
-      isTest: process.env.ROBOKASSA_TEST_MODE === 'true', // Тестовый режим для конкретной транзакции
-      userData: { // Дополнительные данные, которые вернутся в callback
-        timestamp: new Date().toISOString(),
-        source: 'minenkov-rehab-api'
-      }
+      invId: invoiceID,
+      isTest: process.env.ROBOKASSA_TEST_MODE === 'true'
     };
     
     console.log('📊 [SDK] Параметры платежа:', {
@@ -56,7 +51,7 @@ router.post('/generate-payment-url', async (req, res) => {
       options
     });
     
-    // Генерация URL для оплаты
+    // Генерация простого URL для оплаты
     const paymentUrl = robokassaHelper.generatePaymentUrl(outSum, invDesc, options);
     
     console.log('✅ [SDK] URL для оплаты сгенерирован:', paymentUrl);
@@ -66,9 +61,8 @@ router.post('/generate-payment-url', async (req, res) => {
       success: true,
       data: {
         paymentUrl: paymentUrl,
-        invoiceId: options.invId,
+        invoiceId: invoiceID,
         amount: outSum,
-        currency: options.outSumCurrency,
         description: invDesc,
         testMode: options.isTest,
         timestamp: new Date().toISOString()
