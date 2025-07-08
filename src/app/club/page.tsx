@@ -95,7 +95,8 @@ export default function ClubPage() {
         body: JSON.stringify({
           amount,
           description,
-          email: '', // Опциональный email
+          email: 'customer@example.com', // Опциональный email
+          phone: '+79001234567' // Корректный формат телефона
         }),
       });
       
