@@ -87,7 +87,7 @@ export default function ClubPage() {
     try {
       const apiUrl = 'https://minenkovrehab-production-15cc.up.railway.app';
       
-      const response = await fetch(`${apiUrl}/api/robokassa-sdk/generate-payment-url`, {
+      const response = await fetch(`${apiUrl}/api/robokassa/generate-payment-url`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
