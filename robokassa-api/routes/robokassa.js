@@ -94,23 +94,24 @@ router.post('/generate-payment-url', async (req, res) => {
     // Генерация подписи БЕЗ дополнительных параметров (как в правильной ссылке)
     const signature = generatePaymentSignature(login, amount, invId, password1, {});
     
-    // Формирование URL для оплаты в точном соответствии с правильной ссылкой
+    // Формирование URL для оплаты в точном соответствии с образцом ссылки
     const baseUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx';
     
-    // Формируем ТОЛЬКО обязательные параметры как в правильной ссылке
-    const urlParams = new URLSearchParams();
-    urlParams.append('MerchantLogin', login);
-    urlParams.append('OutSum', amount.toFixed(2));
-    urlParams.append('invoiceID', invId);
-    urlParams.append('Description', description);
-    urlParams.append('SignatureValue', signature);
+    // Формируем параметры в том же порядке как в образце
+    const params = [
+      `MerchantLogin=${encodeURIComponent(login)}`,
+      `OutSum=${amount.toFixed(2)}`,
+      `invoiceID=${invId}`,
+      `Description=${encodeURIComponent(description)}`,
+      `SignatureValue=${signature}`
+    ];
     
     // Добавляем IsTest только в тестовом режиме
     if (isTestMode) {
-      urlParams.append('IsTest', '1');
+      params.push('IsTest=1');
     }
     
-    const paymentUrl = `${baseUrl}?${urlParams.toString()}`;
+    const paymentUrl = `${baseUrl}?${params.join('&')}`;
     
     console.log('✅ Платежный URL сгенерирован согласно документации Robokassa:', {
       invId,
