@@ -37,22 +37,22 @@ export default function ClubPage() {
     {
       question: 'Что такое клуб «ФОРМУЛА ДВИЖЕНИЯ»?',
       answer:
-        'Это закрытое сообщество для тех, кто заботится о своём здоровье, хочет улучшить подвижность суставов и избавиться от болей. В клубе вы получаете доступ к эксклюзивным материалам, видеоурокам и консультациям.',
+        'Это закрытое сообщество для тех, кто хочет развить гибкость, улучшить растяжку и обрести лёгкость в движениях. В клубе вы получаете доступ к эксклюзивным программам стрейчинга, видеоурокам и персональной поддержке.',
     },
     {
       question: 'Какие материалы доступны в клубе?',
       answer:
-        'В клубе вы найдёте видеоуроки с упражнениями для различных частей тела, обучающие материалы по анатомии, рекомендации по восстановлению после травм, записи вебинаров и прямых эфиров.',
+        'В клубе вы найдёте видеоуроки по стрейчингу для всех групп мышц, техники глубокой растяжки, программы для развития гибкости, записи занятий и обучающие материалы по правильному выполнению упражнений.',
     },
     {
       question: 'Как часто добавляются новые материалы?',
       answer:
-        'Новые материалы добавляются еженедельно. Это могут быть новые комплексы упражнений, разборы частых проблем, ответы на вопросы участников клуба.',
+        'Новые материалы добавляются еженедельно. Это могут быть новые комплексы растяжки, техники стрейчинга для разных уровней подготовки, ответы на вопросы участников клуба.',
     },
     {
       question: 'Подходит ли клуб новичкам?',
       answer:
-        'Да, клуб подходит людям с любым уровнем подготовки. Все упражнения имеют различные варианты выполнения, которые можно адаптировать под свой уровень.',
+        'Да, клуб подходит людям с любым уровнем гибкости. Все упражнения стрейчинга имеют различные варианты выполнения - от базового до продвинутого уровня.',
     },
     {
       question: 'Как получить доступ к клубу?',
@@ -162,10 +162,10 @@ export default function ClubPage() {
         </div>
         <div className='container mx-auto px-4 flex flex-col items-center text-center z-10'>
           <h1 className='text-2xl md:text-6xl font-bold text-white mb-6 max-w-3xl'>
-            Вы хотите чувствовать себя энергично, легко и свободно в своём теле?
+            Хотите обрести гибкость, лёгкость и грацию в движениях?
           </h1>
           <p className='text-base md:text-2xl text-white/90 mb-8 max-w-2xl'>
-            Преодолейте усталость, дискомфорт в спине и суставах вместе с
+            Развивайте гибкость, улучшайте растяжку и наслаждайтесь свободой движений с
             «Формулой Движения»
           </p>
           <a
@@ -180,19 +180,18 @@ export default function ClubPage() {
       {/* Проблема и решение */}
       <section className='container mx-auto px-4 py-12 md:py-16'>
         <h2 className='text-2xl md:text-3xl font-bold text-primary mb-6 text-center'>
-          Что вас сдерживает?
+          Что мешает вашей гибкости?
         </h2>
         <p className='text-base md:text-lg text-gray-700 text-center mb-8 max-w-2xl mx-auto'>
-          Постоянная усталость, дискомфорт в спине и суставах мешают жить на
-          полную.
+          Скованность мышц, ограниченная подвижность и отсутствие грации в движениях
+          мешают чувствовать себя свободно.
         </p>
         <h3 className='text-lg md:text-2xl font-bold text-accent mb-4 text-center'>
           Наш ответ – «Формула Движения»
         </h3>
         <p className='text-base md:text-lg text-gray-700 text-center max-w-2xl mx-auto'>
-          Это не просто тренировки – это система, которая мягко и эффективно
-          приводит ваше тело в тонус, а главное, делает движение привычкой, от
-          которой невозможно отказаться!
+          Это не просто растяжка – это система стрейчинга, которая мягко и эффективно
+          развивает гибкость, делая ваши движения плавными и грациозными!
         </p>
       </section>
 
@@ -200,19 +199,18 @@ export default function ClubPage() {
       <section className='bg-blue-50 py-12 md:py-16'>
         <div className='container mx-auto px-4'>
           <h2 className='text-2xl md:text-3xl font-bold text-primary mb-8 md:mb-10 text-center'>
-            Что вас ждёт в «Формуле Движения»?
-          </h2>
+          Что вас ждёт в «Формуле Движения»?
+        </h2>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8'>
             <div className='flex items-start gap-3 md:gap-4'>
               <span className='text-2xl md:text-3xl'>⭐️</span>
               <div>
                 <h4 className='font-bold text-base md:text-lg mb-1'>
-                  Продуманные тренировки
+                  Продуманные программы стрейчинга
                 </h4>
                 <p className='text-gray-700 text-sm'>
-                  Укрепляем спину, улучшаем осанку, развиваем гибкость,
-                  заботимся о суставах и избавляемся от зажимов. Все программы
-                  подходят даже 50+.
+                  Развиваем гибкость всего тела, улучшаем растяжку ног и спины,
+                  работаем над грацией движений. Все программы подходят даже 50+.
                 </p>
               </div>
             </div>
@@ -223,7 +221,7 @@ export default function ClubPage() {
                   Оптимальный ритм
                 </h4>
                 <p className='text-gray-700 text-sm'>
-                  25–30 минут, 3 раза в неделю (пн, ср, пт). Начало в 7:00
+                  25–30 минут стрейчинга, 3 раза в неделю (пн, ср, пт). Начало в 7:00
                   (МСК), но все занятия остаются в записи.
                 </p>
               </div>
@@ -232,11 +230,11 @@ export default function ClubPage() {
               <span className='text-2xl md:text-3xl'>✅</span>
               <div>
                 <h4 className='font-bold text-base md:text-lg mb-1'>
-                  Идеально для любого уровня
+                  Идеально для любого уровня гибкости
                 </h4>
                 <p className='text-gray-700 text-sm'>
-                  Комфортно новичкам и прогрессивно опытным: двигаемся от
-                  простого к сложному.
+                  Комфортно новичкам в стрейчинге и прогрессивно опытным: двигаемся от
+                  простых растяжек к глубокому стрейчингу.
                 </p>
               </div>
             </div>
@@ -247,8 +245,8 @@ export default function ClubPage() {
                   Минимальный инвентарь
                 </h4>
                 <p className='text-gray-700 text-sm'>
-                  На старте нужен только коврик, дальше постепенно добавляем
-                  оборудование.
+                  Для стрейчинга нужен только коврик, дальше постепенно добавляем
+                  блоки и ремни для углубления растяжки.
                 </p>
               </div>
             </div>
@@ -287,25 +285,25 @@ export default function ClubPage() {
           <div className='flex items-start gap-2 md:gap-3'>
             <span className='text-xl md:text-2xl'>✅</span>{' '}
             <span className='text-base md:text-lg'>
-              Если вы хотите начать, но не знаете, с чего.
+              Если хотите развить гибкость, но не знаете, с чего начать.
             </span>
           </div>
           <div className='flex items-start gap-2 md:gap-3'>
             <span className='text-xl md:text-2xl'>✅</span>{' '}
             <span className='text-base md:text-lg'>
-              Если сложно найти мотивацию и систему.
+              Если нужна система стрейчинга и мотивация.
             </span>
           </div>
           <div className='flex items-start gap-2 md:gap-3'>
             <span className='text-xl md:text-2xl'>✅</span>{' '}
             <span className='text-base md:text-lg'>
-              Если есть ограничения, но есть желание двигаться.
+              Если есть ограничения, но хочется стать гибче.
             </span>
           </div>
           <div className='flex items-start gap-2 md:gap-3'>
             <span className='text-xl md:text-2xl'>✅</span>{' '}
             <span className='text-base md:text-lg'>
-              Если нужны простые, но эффективные упражнения.
+              Если нужны безопасные и эффективные растяжки.
             </span>
           </div>
         </div>
@@ -318,21 +316,21 @@ export default function ClubPage() {
             Наш принцип
           </h2>
           <p className='text-base md:text-lg text-gray-700 text-center mb-6 max-w-2xl mx-auto'>
-            Формула Движения – это не про изнуряющие тренировки, а про
-            комфортное и безопасное движение к здоровью!
+            Формула Движения – это не про болезненные растяжки, а про
+            комфортное и безопасное развитие гибкости!
           </p>
           <div className='flex flex-wrap justify-center gap-4 md:gap-6 text-sm md:text-base text-gray-700'>
             <div className='flex items-center gap-1 md:gap-2'>
-              <span className='text-lg md:text-xl'>☀️</span> Лёгкие, но
-              эффективные упражнения
+              <span className='text-lg md:text-xl'>☀️</span> Мягкие, но
+              эффективные растяжки
             </div>
             <div className='flex items-center gap-1 md:gap-2'>
-              <span className='text-lg md:text-xl'>➡️</span> Мягкий подход без
-              перегрузок
+              <span className='text-lg md:text-xl'>➡️</span> Постепенное развитие
+              гибкости без травм
             </div>
             <div className='flex items-center gap-1 md:gap-2'>
               <span className='text-lg md:text-xl'>✳️</span> Подходит для любого
-              возраста и уровня подготовки
+              возраста и уровня гибкости
             </div>
           </div>
         </div>
@@ -360,8 +358,8 @@ export default function ClubPage() {
             Стоимость абонемента
           </h2>
           <p className='text-base md:text-lg text-gray-700 mb-6'>
-            Всего 2950 ₽/мес. Это дешевле, чем тренер в зале, и удобнее, чем
-            ездить на тренировки!
+            Всего 2950 ₽/мес. Это дешевле, чем персональный тренер по стрейчингу, и удобнее, чем
+            ездить на занятия!
           </p>
           <button
             className='inline-block bg-accent text-white font-bold py-3 px-6 md:py-4 md:px-10 rounded-full text-base md:text-lg shadow-lg hover:bg-accent-dark transition'
@@ -386,11 +384,11 @@ export default function ClubPage() {
       <section className='bg-blue-50 py-12 md:py-16'>
         <div className='container mx-auto px-4 text-center'>
           <h2 className='text-2xl md:text-3xl font-bold text-primary mb-6'>
-            Это не просто тренировки
+            Это не просто растяжка
           </h2>
           <p className='text-base md:text-lg text-gray-700 max-w-2xl mx-auto'>
-            ©️Это не просто тренировки – это новый стиль жизни, доступный
-            каждому, независимо от возраста и физических возможностей.
+            ©️Это не просто растяжка – это новый стиль жизни с гибкостью и свободой движений, доступный
+            каждому, независимо от возраста и текущего уровня подвижности.
           </p>
         </div>
       </section>
@@ -398,10 +396,10 @@ export default function ClubPage() {
       {/* Финальный CTA */}
       <section className='container mx-auto px-4 py-12 md:py-16 text-center'>
         <h2 className='text-2xl md:text-3xl font-bold text-primary mb-4'>
-          Готовы изменить жизнь?
+          Готовы стать гибче?
         </h2>
         <p className='text-base md:text-lg text-gray-700 mb-8'>
-          Присоединяйтесь к «Формуле Движения» и начните двигаться легко уже
+          Присоединяйтесь к «Формуле Движения» и начните развивать гибкость уже
           сегодня!
         </p>
         <a
