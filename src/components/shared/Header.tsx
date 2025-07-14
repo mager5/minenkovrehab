@@ -269,46 +269,17 @@ export function Header() {
             aria-label='Мобильная навигация'
           >
             <div className='flex flex-col space-y-4'>
-              <Link
-                href='/'
-                onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                aria-current={pathname === '/' ? 'page' : undefined}
-              >
-                Главная
-              </Link>
-              <Link
-                href='/about'
-                onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/about' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                aria-current={pathname === '/about' ? 'page' : undefined}
-              >
-                Обо мне
-              </Link>
-              <Link
-                href='/products'
-                onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/products' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                aria-current={pathname === '/products' ? 'page' : undefined}
-              >
-                Услуги
-              </Link>
-              <Link
-                href='/reviews'
-                onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/reviews' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                aria-current={pathname === '/reviews' ? 'page' : undefined}
-              >
-                Отзывы
-              </Link>
-              <Link
-                href='/contacts'
-                onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/contacts' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                aria-current={pathname === '/contacts' ? 'page' : undefined}
-              >
-                Контакты
-              </Link>
+              {navigationItems.map(item => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === item.href ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
+                  aria-current={pathname === item.href ? 'page' : undefined}
+                >
+                  {item.label}
+                </Link>
+              ))}
               <button
                 onClick={openBookingModal}
                 className='bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
