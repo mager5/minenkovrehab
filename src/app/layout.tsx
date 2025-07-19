@@ -3,6 +3,7 @@ import './globals.css';
 import { Header } from '@/components/shared/Header';
 import Footer from '@/components/shared/Footer';
 import CookieBanner from '@/components/CookieBanner';
+import HeyGenWidget from '@/components/shared/HeyGenWidget';
 import type { Metadata } from 'next';
 
 const inter = Inter({
@@ -185,6 +186,7 @@ export default function RootLayout({
           </main>
           <Footer />
           <CookieBanner />
+          <HeyGenWidget />
         </div>
       </body>
     </html>

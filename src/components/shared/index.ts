@@ -6,4 +6,5 @@
 
 export { Favicons } from './Favicons';
 export { default as BookingModal } from './BookingModal';
+export { default as HeyGenWidget } from './HeyGenWidget';
 // PaymentModal удален - теперь используется прямая ссылка на Robokassa
