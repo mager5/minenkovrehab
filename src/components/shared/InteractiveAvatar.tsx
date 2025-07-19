@@ -125,7 +125,7 @@ export default function InteractiveAvatar() {
         await streamingAvatar.closeVoiceChat();
         setIsListening(false);
       } else {
-        await avatar.startVoiceChat({});
+        await streamingAvatar.startVoiceChat({});
         setIsListening(true);
       }
     } catch (error) {
