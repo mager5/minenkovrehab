@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Product } from './data';
+import { Product, formatPrice } from './data';
 import { motion } from 'framer-motion';
 
 // Анимации для появления элементов
@@ -339,7 +339,7 @@ export default function ProductPageWrapper({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5, delay: 0.5 }}
                   >
-                    {product.price.toLocaleString('ru-RU')} ₽
+                    {formatPrice(product.id, product.price)}
                   </motion.div>
 
                   <motion.form

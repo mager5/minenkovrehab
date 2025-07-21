@@ -352,18 +352,18 @@ const ContactsColumn = () => {
             />
           </svg>
           <a
-            href='mailto:minenkov.vadim@gmail.com'
+            href='mailto:minenkov.rehab@yandex.ru'
             className='text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline'
             style={{ color: '#d1f3ea' }}
-            aria-label='Написать на email minenkov.vadim@gmail.com'
+            aria-label='Написать на email minenkov.rehab@yandex.ru'
             onKeyDown={e =>
               handleKeyDown(
                 e,
-                () => (window.location.href = 'mailto:minenkov.vadim@gmail.com')
+                () => (window.location.href = 'mailto:minenkov.rehab@yandex.ru')
               )
             }
           >
-            minenkov.vadim@gmail.com
+            minenkov.rehab@yandex.ru
           </a>
         </div>
         <div className='flex items-center'>

@@ -6,6 +6,10 @@
  * так и старой (файлы в корне проекта).
  */
 
+import { promises as fs } from 'fs';
+import path from 'path';
+import { formatPrice } from '@/app/products/data';
+
 /**
  * Загружает JSON-контент из файлов
  * @param contentType Тип контента (home, about, products, contacts)
@@ -20,26 +24,50 @@ export async function getContent<T>(contentType: string): Promise<T> {
       services: [
         {
           id: 'consultation',
-          title: 'Консультация',
+          title: 'Онлайн-консультация',
           description:
             'Индивидуальный разбор вашей ситуации с подбором эффективных решений',
-          price: '3000₽/60мин.',
+          price: formatPrice('consultation', 5000),
           image: '/images/services/consultation.jpg',
         },
         {
-          id: 'movement-analysis',
-          title: 'Анализ движения',
-          description: 'Клуб Формула Движения',
-          price: '950₽/мес.',
-          image: '/images/services/movement.jpg',
-        },
-        {
           id: 'personal-program',
-          title: 'Протокол реабилитации коленного сустава после операции',
-          description: 'Пошаговый алгоритм действий после резекции мениска',
-          price: '8000₽/7 мес.',
+          title: 'Резекция мениска. Протокол реабилитации.',
+          description:
+            'Пошаговый алгоритм действий после операции коленного сустава (резекция мениска)',
+          price: formatPrice('personal-program', 10000),
           image: '/images/services/program.jpg',
         },
+        {
+          id: 'formula-movement',
+          title: 'Программа тренировок "Формула Движения"',
+          description:
+            'Авторская программа тренировок для всего тела. Занимайтесь по готовым комплексам — улучшайте подвижность суставов, развивайте силу и укрепляйте контроль движений. Всего 30 МИН. в удобное для вас время.',
+          price: formatPrice('formula-movement', 6000),
+          image: '/images/services/movement.jpg',
+        },
+        // {
+        //   id: 'movement-analysis', // Удален продукт
+        //   title: 'Анализ движения',
+        //   description: 'Детальный анализ биомеханики движений с рекомендациями по коррекции',
+        //   price: formatPrice('movement-analysis', 7500),
+        //   image: '/images/services/analysis.jpg',
+        // },
+        {
+          id: 'online-training',
+          title: 'Онлайн-тренировка',
+          description:
+            'Индивидуальная онлайн-тренировка в формате видеозвонка проводится по предварительному согласованию времени и даты.',
+          price: formatPrice('online-training', 5000),
+          image: '/images/products/online-training.jpg',
+        },
+        // {
+        //   id: 'online-support', // Удален продукт
+        //   title: 'Онлайн-сопровождение (1 месяц)',
+        //   description: 'Ежедневная поддержка и корректировка программы через Telegram в течение 30 дней.',
+        //   price: formatPrice('online-support', 5000),
+        //   image: '/images/products/online-support.jpg',
+        // },
       ],
     } as T;
   }

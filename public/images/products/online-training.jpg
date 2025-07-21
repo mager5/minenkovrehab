@@ -1,0 +1,60 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="#f8fafc"/>
+  
+  <!-- Video call screen -->
+  <rect x="50" y="40" width="300" height="200" rx="12" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+  
+  <!-- Video call interface -->
+  <rect x="60" y="50" width="280" height="160" rx="8" fill="#0f172a"/>
+  
+  <!-- Person in video call -->
+  <circle cx="200" cy="120" r="30" fill="#fbbf24"/>
+  <circle cx="190" cy="110" r="3" fill="#1f2937"/>
+  <circle cx="210" cy="110" r="3" fill="#1f2937"/>
+  <path d="M185 125 Q200 135 215 125" stroke="#1f2937" stroke-width="2" fill="none"/>
+  
+  <!-- Exercise equipment icons -->
+  <!-- Dumbbell -->
+  <g transform="translate(80,80)">
+    <rect x="0" y="8" width="20" height="4" rx="2" fill="#6b7280"/>
+    <circle cx="2" cy="10" r="4" fill="#374151"/>
+    <circle cx="18" cy="10" r="4" fill="#374151"/>
+  </g>
+  
+  <!-- Yoga mat -->
+  <g transform="translate(300,160)">
+    <rect x="0" y="0" width="25" height="8" rx="4" fill="#10b981"/>
+  </g>
+  
+  <!-- Video call controls -->
+  <g transform="translate(150,220)">
+    <!-- Mute button -->
+    <circle cx="20" cy="10" r="8" fill="#ef4444"/>
+    <path d="M16 6 L24 14 M24 6 L16 14" stroke="white" stroke-width="2"/>
+    
+    <!-- Video button -->
+    <circle cx="50" cy="10" r="8" fill="#10b981"/>
+    <polygon points="46,6 46,14 54,10" fill="white"/>
+    
+    <!-- End call button -->
+    <circle cx="80" cy="10" r="8" fill="#dc2626"/>
+    <rect x="76" y="8" width="8" height="4" rx="2" fill="white"/>
+  </g>
+  
+  <!-- Exercise arrows/movement indicators -->
+  <g transform="translate(120,180)">
+    <path d="M0 0 Q10 -10 20 0" stroke="#3b82f6" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+    <path d="M30 0 Q40 10 50 0" stroke="#3b82f6" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6"/>
+    </marker>
+  </defs>
+  
+  <!-- Title text -->
+  <text x="200" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1f2937">Онлайн-тренировка</text>
+</svg>

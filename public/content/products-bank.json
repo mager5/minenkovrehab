@@ -8,28 +8,21 @@
       "title": "Персональная тренировка",
       "description": "Индивидуальное занятие по стрейчингу с оценкой уровня гибкости и составлением программы.",
       "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "price": "1500 ₽"
+      "price": "1 500 ₽"
     },
     {
       "id": "personal-program",
       "title": "Программа растяжки",
       "description": "Индивидуальная программа упражнений на растяжку, составленная под ваши цели и уровень подготовки.",
       "image": "/images/services/individual-programs.svg",
-      "price": "3500 ₽"
+      "price": "3 500 ₽"
     },
     {
       "id": "movement-analysis",
       "title": "Оценка гибкости",
       "description": "Детальный анализ вашей подвижности и гибкости для составления эффективной программы растяжки.",
       "image": "/images/services/movement-analysis.svg",
-      "price": "2000 ₽"
-    },
-    {
-      "id": "online-support",
-      "title": "Онлайн-сопровождение (1 месяц)",
-      "description": "Ежедневная поддержка и корректировка программы растяжки через Telegram в течение 30 дней.",
-      "image": "/images/products/online-support.jpg",
-      "price": "5000 ₽"
+      "price": "2 000 ₽"
     }
   ]
-} 
+}

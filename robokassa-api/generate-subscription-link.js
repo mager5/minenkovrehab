@@ -1,4 +1,7 @@
-const { generatePaymentSignature, generateInvoiceId } = require('./utils/signature');
+const {
+  generatePaymentSignature,
+  generateInvoiceId,
+} = require('./utils/signature');
 
 // Конфигурация Robokassa (тестовый режим)
 const ROBOKASSA_CONFIG = {
@@ -6,14 +9,14 @@ const ROBOKASSA_CONFIG = {
   password1: 'Eld5Xljk2GBN4D6TJo3N',
   password2: 'gWtiI5Li9nqojQcc1f60',
   testMode: true,
-  baseUrl: 'https://auth.robokassa.ru/Merchant/Index.aspx'
+  baseUrl: 'https://auth.robokassa.ru/Merchant/Index.aspx',
 };
 
 // Данные для оплаты абонемента (реальная стоимость)
 const paymentData = {
-  amount: 2950.00, // Реальная стоимость абонемента - 2950 ₽/мес
+  amount: 2950.0, // Реальная стоимость абонемента - 2 950 ₽ / МЕС.
   description: 'Абонемент клуба формула движения',
-  email: 'client@example.com'
+  email: 'client@example.com',
 };
 
 console.log('🧪 Генерация ссылки для оплаты абонемента...');
@@ -48,16 +51,16 @@ const urlParams = new URLSearchParams({
   invoiceID: invoiceId, // Используем invoiceID как в правильной ссылке
   Description: paymentData.description, // Добавляем описание платежа
   SignatureValue: signature,
-  IsTest: ROBOKASSA_CONFIG.testMode ? '1' : '0'
+  IsTest: ROBOKASSA_CONFIG.testMode ? '1' : '0',
 });
 
 // Формируем полную ссылку
 const paymentUrl = `${ROBOKASSA_CONFIG.baseUrl}?${urlParams.toString()}`;
 
 console.log('\n🌐 ССЫЛКА ДЛЯ ОПЛАТЫ АБОНЕМЕНТА:');
-console.log('=' .repeat(80));
+console.log('='.repeat(80));
 console.log(paymentUrl);
-console.log('=' .repeat(80));
+console.log('='.repeat(80));
 
 console.log('\n✅ Ссылка готова к использованию!');
 console.log('💡 Это тестовая ссылка - реальные деньги списаны не будут');

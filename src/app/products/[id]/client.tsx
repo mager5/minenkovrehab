@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Product } from '../data';
+import { products, formatPrice } from '../data';
 import { motion } from 'framer-motion';
 
 // Анимации для появления элементов
@@ -24,27 +24,30 @@ export default function ProductClient({ product }: { product: Product }) {
   const handlePayment = async () => {
     try {
       console.log('🔄 Создание платежа для продукта:', product.title);
-      
+
       // Прямое обращение к Railway API
-      const response = await fetch('https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: product.price,
-          description: product.title,
-          email: 'customer@example.com', // Можно добавить форму для email
-          phone: '+79001234567' // Корректный формат телефона
-        }),
-      });
+      const response = await fetch(
+        'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: product.price,
+            description: product.title,
+            email: 'customer@example.com', // Можно добавить форму для email
+            phone: '+79001234567', // Корректный формат телефона
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Ошибка создания платежа');
       }
 
       const result = await response.json();
-      
+
       if (result.success && result.data?.paymentUrl) {
         console.log('✅ Платежная ссылка получена:', result.data.paymentUrl);
         // Проверяем, что в URL нет лишних кавычек (оставляем для совместимости)
@@ -181,7 +184,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.5 }}
                 >
-                  {product.price.toLocaleString('ru-RU')} ₽
+                  {formatPrice(product.id, product.price)}
                 </motion.div>
 
                 {/* Кнопка покупки */}
@@ -223,7 +226,6 @@ export default function ProductClient({ product }: { product: Product }) {
           </div>
         </motion.div>
       </div>
-
     </motion.div>
   );
 }

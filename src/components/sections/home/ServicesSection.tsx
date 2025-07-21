@@ -49,7 +49,15 @@ export function ServicesSection() {
               key={service.title}
               title={service.title}
               description={service.description}
-              image={service.icon === 'consultation' ? '/images/hero/online-consultation.jpg' : service.icon === 'rehabilitation' ? '/images/hero/formula-m.jpg' : service.icon === 'online' ? '/images/hero/protocols.jpg' : `/images/services/${service.icon}.svg`}
+              image={
+                service.icon === 'consultation'
+                  ? '/images/hero/online-consultation.jpg'
+                  : service.icon === 'rehabilitation'
+                    ? '/images/hero/formula-m.jpg'
+                    : service.icon === 'online'
+                      ? '/images/hero/protocols.jpg'
+                      : `/images/services/${service.icon}.svg`
+              }
               delay={0.1 * (index + 1)}
             />
           ))}
@@ -67,6 +75,20 @@ interface ServiceCardProps {
 }
 
 function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
+  // Определяем ссылку на основе названия услуги
+  const getServiceLink = (serviceTitle: string) => {
+    if (serviceTitle.includes('Формула Движения')) {
+      return '/products/formula-movement';
+    }
+    if (serviceTitle.includes('Протокол')) {
+      return '/products/personal-program';
+    }
+    if (serviceTitle.includes('консультаци')) {
+      return '/products/consultation';
+    }
+    return '/products';
+  };
+
   return (
     <motion.div
       className='bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100'
@@ -123,7 +145,7 @@ function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
           whileHover={{ x: 5 }}
         >
           <Link
-            href='/products'
+            href={getServiceLink(title)}
             className='inline-block text-accent hover:text-accent-dark transition-colors font-medium'
           >
             Подробнее
