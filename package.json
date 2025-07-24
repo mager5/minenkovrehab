@@ -11,7 +11,7 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "export": "next build && next export",
+    "export": "NODE_ENV=production GITHUB_ACTIONS=true next build",
     "check": "node scripts/pre-commit-check.js",
     "check:full": "node scripts/pre-commit-check.js --e2e",
     "check:fast": "node scripts/pre-commit-check.js --skip-build",

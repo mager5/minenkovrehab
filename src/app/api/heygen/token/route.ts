@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Явно указываем что роут должен быть динамическим
-export const dynamic = 'force-dynamic';
+// Явно указываем что роут должен быть динамическим только если не статический экспорт
+export const dynamic =
+  process.env.GITHUB_ACTIONS && process.env.NODE_ENV === 'production'
+    ? undefined
+    : 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
