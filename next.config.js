@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: 'export', // Отключено для поддержки API роутов
+  // Включаем статический экспорт для GitHub Pages
+  // Для локальной разработки с API роутами используйте: npm run dev
+  // Для деплоя на GitHub Pages используйте: npm run export
+  output: process.env.NODE_ENV === 'production' && process.env.GITHUB_ACTIONS ? 'export' : undefined,
   images: {
     unoptimized: true,
     remotePatterns: [
