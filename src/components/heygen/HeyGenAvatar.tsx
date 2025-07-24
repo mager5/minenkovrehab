@@ -59,6 +59,13 @@ export default function HeyGenAvatar({
         }
       };
     }
+
+    // Возвращаем пустую функцию очистки, если iframe не найден
+    return () => {
+      if (onSessionEnd) {
+        onSessionEnd();
+      }
+    };
   }, [onSessionStart, onSessionEnd]);
 
   if (error) {
