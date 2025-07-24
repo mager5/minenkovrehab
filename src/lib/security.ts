@@ -10,6 +10,7 @@ export const cspDirectives = {
   'script-src': [
     "'self'",
     "'unsafe-inline'", // Временно для Next.js, в production лучше использовать nonce
+    "'unsafe-eval'", // Необходимо для Next.js в режиме разработки
     'https://vercel.live',
     'https://www.googletagmanager.com',
   ],
@@ -27,7 +28,7 @@ export const cspDirectives = {
     'https://*.cloudinary.com',
   ],
   'font-src': ["'self'", 'https://fonts.gstatic.com'],
-  'connect-src': ["'self'", 'https://api.telegram.org', 'https://vercel.live'],
+  'connect-src': ["'self'", 'https://api.telegram.org', 'https://vercel.live', 'https://api.heygen.com'],
   'frame-src': ["'none'"],
   'object-src': ["'none'"],
   'base-uri': ["'self'"],

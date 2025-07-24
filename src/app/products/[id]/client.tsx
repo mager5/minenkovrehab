@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { products, formatPrice } from '../data';
+import { products, formatPrice, Product } from '../data';
 import { motion } from 'framer-motion';
+import ImageCarousel from '@/components/ui/ImageCarousel';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -97,7 +98,7 @@ export default function ProductClient({ product }: { product: Product }) {
           transition={{ duration: 0.5, delay: 0.1 }}
           whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.07)' }}
         >
-          <div className='flex flex-col lg:flex-row'>
+          <div className='flex flex-col lg:flex-row lg:items-start'>
             {/* Информация о продукте */}
             <motion.div
               className='lg:w-2/3 lg:pr-8'
@@ -113,44 +114,71 @@ export default function ProductClient({ product }: { product: Product }) {
               >
                 {product.title}
               </motion.h1>
-              <motion.div
-                className='h-48 bg-secondary mb-6 relative flex items-center justify-center rounded-lg overflow-hidden'
-                variants={fadeIn}
-                custom={2}
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-              >
-                {/* Заглушка для изображения продукта */}
+              
+              {/* Карусель изображений для протокола реабилитации */}
+              {(product.id === 'rehabilitation-protocols' || product.id === 'personal-program') && (
                 <motion.div
-                  className='absolute inset-0 bg-primary/10 flex items-center justify-center text-primary font-bold rounded-lg'
-                  initial={{ opacity: 0.7 }}
-                  whileHover={{ opacity: 0.9 }}
+                  className='mb-6 lg:self-start'
+                  variants={fadeIn}
+                  custom={2}
                 >
-                  {product.title}
+                  <motion.h2
+                    className='text-xl font-semibold text-dark mb-4'
+                    variants={fadeIn}
+                    custom={3}
+                  >
+                    Этапы реабилитации
+                  </motion.h2>
+                  <ImageCarousel
+                    images={[
+                      {
+                        src: '/images/products/IMAGE 2025-07-22 23:23:43.jpg',
+                        alt: 'Этап 1: Острый период (0-2 недели)',
+                        title: 'Острый период'
+                      },
+                      {
+                        src: '/images/products/IMAGE 2025-07-22 23:23:54.jpg',
+                        alt: 'Этап 2: Подострый период (2-6 недель)',
+                        title: 'Подострый период'
+                      },
+                      {
+                        src: '/images/products/IMAGE 2025-07-22 23:24:03.jpg',
+                        alt: 'Этап 3: Функциональное восстановление (6-12 недель)',
+                        title: 'Функциональное восстановление'
+                      },
+                      {
+                        src: '/images/products/IMAGE 2025-07-22 23:24:15.jpg',
+                        alt: 'Этап 4: Возвращение к спорту (12+ недель)',
+                        title: 'Возвращение к спорту'
+                      }
+                    ]}
+                  />
                 </motion.div>
-              </motion.div>
-              <motion.div className='mb-6' variants={fadeIn} custom={3}>
+              )}
+              
+
+              <motion.div className='mb-6' variants={fadeIn} custom={5}>
                 <motion.h2
                   className='text-xl font-semibold text-dark mb-4'
                   variants={fadeIn}
-                  custom={4}
+                  custom={6}
                 >
                   Описание
                 </motion.h2>
                 <motion.p
                   className='text-dark mb-4'
                   variants={fadeIn}
-                  custom={5}
+                  custom={7}
                 >
                   {product.shortDescription}
                 </motion.p>
                 <ul className='list-disc pl-5 space-y-2'>
-                  {product.fullDescription.map((item, index) => (
+                  {product.fullDescription.map((item: string, index: number) => (
                     <motion.li
                       key={index}
                       className='text-dark'
                       variants={fadeIn}
-                      custom={6 + index * 0.5}
+                      custom={8 + index * 0.5}
                     >
                       {item}
                     </motion.li>
@@ -161,7 +189,9 @@ export default function ProductClient({ product }: { product: Product }) {
 
             {/* Блок цены и контактов */}
             <motion.div
-              className='lg:w-1/3 mt-8 lg:mt-0'
+              className={`lg:w-1/3 mt-8 lg:mt-0 lg:self-start ${
+                product.id === 'personal-program' ? 'lg:pt-16' : ''
+              }`}
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}

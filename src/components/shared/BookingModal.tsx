@@ -36,6 +36,12 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
       setSubmitSuccess(false);
       setSubmitError(false);
       setConsentChecked(false);
+    }
+  }, [isOpen]);
+
+  // Обновление URL только на клиенте
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
       // Добавляем случайный параметр к URL при открытии модального окна
       const timestamp = new Date().getTime();
       window.history.replaceState(

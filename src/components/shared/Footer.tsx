@@ -535,7 +535,12 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
 
 // Основной компонент футера
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(2024); // Значение по умолчанию
+
+  useEffect(() => {
+    // Устанавливаем текущий год только на клиенте
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   return (
     <footer

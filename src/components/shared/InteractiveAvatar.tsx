@@ -1,31 +1,83 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import StreamingAvatar, {
-  AvatarQuality,
-  StreamingEvents,
-  TaskType,
-} from '@heygen/streaming-avatar';
+// Dynamic import will be used in useEffect
 
 /**
  * Компонент Interactive Avatar от HeyGen
  * Использует современный SDK для интерактивного общения с AI аватаром
  */
 export default function InteractiveAvatar() {
-  const [streamingAvatar, setStreamingAvatar] =
-    useState<StreamingAvatar | null>(null);
+  const [streamingAvatar, setStreamingAvatar] = useState<any>(null);
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputText, setInputText] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [StreamingAvatarClass, setStreamingAvatarClass] = useState<any>(null);
+  const [constants, setConstants] = useState<any>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
 
-  // Токен доступа (в реальном проекте должен быть получен с сервера)
-  const ACCESS_TOKEN =
-    'MWI0YzBhMjExYTRlNDBjM2E1YzU1NTVjNjhiYmY5MjUtMTc1MjI3MDU0NQ==';
+  // Получение токена с сервера
+  const getAccessToken = async () => {
+    try {
+      const response = await fetch('/api/heygen/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          avatarId: process.env.NEXT_PUBLIC_HEYGEN_AVATAR_ID || 'd3eaed1ea1dd4766952e2fdbeb6bd0d4',
+          voiceId: process.env.NEXT_PUBLIC_HEYGEN_VOICE_ID || 'bae2d9c6057d4c85a9ac8b4b76a9e874'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get access token');
+      }
+
+      const data = await response.json();
+      
+      // Проверяем что data не null и не undefined
+      if (!data) {
+        console.error('Token response is null or undefined:', data);
+        throw new Error('Token response is null or undefined');
+      }
+      
+      // Проверяем наличие токена в ответе
+      if (!data.token) {
+        console.error('Token not found in response:', data);
+        throw new Error('Token not found in API response');
+      }
+      
+      return data.token;
+    } catch (error) {
+      console.error('Error getting access token:', error);
+      throw error;
+    }
+  };
+
+  // Получение списка доступных аватаров
+  const getAvailableAvatars = async () => {
+    try {
+      const response = await fetch('/api/heygen/avatars');
+      if (!response.ok) {
+        throw new Error('Failed to fetch avatars');
+      }
+      const data = await response.json();
+      return data.avatars || [];
+    } catch (error) {
+      console.error('Error fetching avatars:', error);
+      // Возвращаем список известных рабочих аватаров как fallback
+      return [
+        { avatar_id: 'Tyler-insuit-20220721', pose_name: 'Tyler' },
+        { avatar_id: 'Anna_public_3_20240108', pose_name: 'Anna' },
+        { avatar_id: 'Kristin_public_3_20240108', pose_name: 'Kristin' }
+      ];
+    }
+  };
 
   // Инициализация аватара
   const initializeAvatar = async () => {
@@ -34,18 +86,57 @@ export default function InteractiveAvatar() {
     setIsLoading(true);
 
     try {
-      const avatar = new StreamingAvatar({ token: ACCESS_TOKEN });
+      // Динамический импорт HeyGen SDK
+      let currentStreamingAvatarClass = StreamingAvatarClass;
+      let currentConstants = constants;
+      
+      if (!currentStreamingAvatarClass) {
+        const { default: StreamingAvatar, StreamingEvents, AvatarQuality, VoiceEmotion, TaskType, TaskMode } = await import('@heygen/streaming-avatar');
+        currentStreamingAvatarClass = StreamingAvatar;
+        currentConstants = { StreamingEvents, AvatarQuality, VoiceEmotion, TaskType, TaskMode };
+        setStreamingAvatarClass(currentStreamingAvatarClass);
+        setConstants(currentConstants);
+      }
+
+      // Получаем список доступных аватаров
+      const availableAvatars = await getAvailableAvatars();
+      console.log('📋 Available avatars:', availableAvatars);
+      
+      // Выбираем первый доступный аватар
+      const selectedAvatar = availableAvatars[0];
+      if (!selectedAvatar) {
+        throw new Error('No avatars available');
+      }
+      
+      console.log('🎭 Selected avatar:', selectedAvatar);
+
+      // Получаем токен с сервера
+      const accessToken = await getAccessToken();
+      
+      // Проверяем валидность токена
+      if (!accessToken || accessToken === null || accessToken === undefined || accessToken === '') {
+        console.error('Invalid access token received:', accessToken);
+        throw new Error('Failed to get valid access token');
+      }
+      
+      console.log('Creating avatar with access token:', accessToken);
+      
+      // Создаем экземпляр StreamingAvatar с токеном
+      const avatar = new currentStreamingAvatarClass({
+        token: accessToken,
+        debug: true, // 💡 включаем лог всех запросов
+      });
 
       // Настройка событий
-      avatar.on(StreamingEvents.AVATAR_START_TALKING, () => {
+      avatar.on(currentConstants.StreamingEvents.AVATAR_START_TALKING, () => {
         console.log('Avatar started talking');
       });
 
-      avatar.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
+      avatar.on(currentConstants.StreamingEvents.AVATAR_STOP_TALKING, () => {
         console.log('Avatar stopped talking');
       });
 
-      avatar.on(StreamingEvents.STREAM_READY, event => {
+      avatar.on(currentConstants.StreamingEvents.STREAM_READY, (event: any) => {
         console.log('Stream ready:', event);
         if (videoRef.current && event.detail.stream) {
           videoRef.current.srcObject = event.detail.stream;
@@ -53,31 +144,59 @@ export default function InteractiveAvatar() {
         }
       });
 
-      avatar.on(StreamingEvents.STREAM_DISCONNECTED, () => {
+      avatar.on(currentConstants.StreamingEvents.STREAM_DISCONNECTED, () => {
         console.log('Stream disconnected');
         setIsSessionActive(false);
         setIsExpanded(false);
       });
 
-      // Создание сессии
+      // 🔧 МИНИМАЛЬНАЯ ВЕРСИЯ для изоляции проблемы
+      console.log('👉 Sending to createStartAvatar:', {
+        avatarName: 'd3eaed1ea1dd4766952e2fdbeb6bd0d4',
+        voiceId: 'bae2d9c6057d4c85a9ac8b4b76a9e874'
+      });
+      
+      // ✅ Используем первый доступный аватар из списка
       const sessionInfo = await avatar.createStartAvatar({
-        quality: AvatarQuality.Low,
-        avatarName: 'd3eaed1ea1dd476695e2fdbeb6bd0d4', // ID аватара из старого виджета
-        knowledgeId: 'effb97816c314abaae7c8e667363d07', // ID базы знаний из старого виджета
-        voice: {
-          voiceId: 'default',
-          rate: 1.0,
-        },
-        language: 'ru',
-        activityIdleTimeout: 300, // 5 минут
+        avatarName: selectedAvatar.avatar_id,
+        quality: currentConstants.AvatarQuality.Low
       });
 
-      console.log('Session created:', sessionInfo);
+      console.log('✅ Session created successfully:', sessionInfo);
       setStreamingAvatar(avatar);
       setIsSessionActive(true);
       setIsExpanded(true);
-    } catch (error) {
-      console.error('Failed to initialize avatar:', error);
+    } catch (error: any) {
+      console.error('❌ Failed to initialize avatar:', error);
+      
+      // 💡 ДИАГНОСТИКА: Детальный анализ ошибки
+      if (error?.response) {
+        console.error('📊 Response status:', error.response.status);
+        console.error('📊 Response headers:', error.response.headers);
+        
+        // Пытаемся получить тело ответа
+        try {
+          const responseBody = await error.response.json();
+          console.error('📊 Response body:', responseBody);
+          
+          if (responseBody?.message) {
+            console.error('💬 API Error message:', responseBody.message);
+          }
+        } catch (jsonError) {
+          console.error('📊 Could not parse response body as JSON:', jsonError);
+          console.error('📊 Raw response:', error.response);
+        }
+      }
+      
+      // Проверяем специфичные ошибки
+      if (error?.message?.includes('400')) {
+        console.error('🚨 HTTP 400 Error - возможные причины:');
+        console.error('  - Неверный avatar_id или voice_id');
+        console.error('  - Несовместимость голоса с аватаром');
+        console.error('  - Проблемы с токеном или правами доступа');
+      }
+      
+      console.error('🔍 Full error object:', JSON.stringify(error, null, 2));
     } finally {
       setIsLoading(false);
     }
@@ -103,11 +222,11 @@ export default function InteractiveAvatar() {
 
   // Отправка текстового сообщения
   const sendMessage = async () => {
-    if (streamingAvatar && inputText.trim()) {
+    if (streamingAvatar && inputText.trim() && constants) {
       try {
         await streamingAvatar.speak({
           text: inputText.trim(),
-          task_type: TaskType.TALK,
+          task_type: constants.TaskType.TALK,
         });
         setInputText('');
       } catch (error) {

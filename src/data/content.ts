@@ -261,6 +261,14 @@ export const productsContent: ProductContentType = {
   description: 'Выберите подходящую услугу для ваших потребностей',
   services: [
     {
+      id: 'consultation',
+      title: 'Консультация',
+      description:
+        'Индивидуальный разбор вашей ситуации с подбором эффективных решений',
+      price: '5 000 ₽ / 60 МИН.',
+      image: '/images/services/consultation.jpg',
+    },
+    {
       id: 'online-consultation',
       title: 'Онлайн консультации',
       description:
@@ -305,6 +313,7 @@ export const contactsContent = {
  * Данные для модального окна записи
  */
 export const bookingServices = [
+  { id: 'consultation', name: 'Консультация' },
   { id: 'online-consultation', name: 'Онлайн-консультация' },
   // { id: 'online-support', name: 'Онлайн-ведение' }, // Удален продукт
   // { id: 'movement-club', name: 'Программа «ФОРМУЛА ДВИЖЕНИЯ»' }, // Удалено: клуб

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
-import AvatarPage from './AvatarPage';
+import { default as AvatarPage } from './AvatarPage';
 
 export const metadata: Metadata = {
   title: 'AI Консультант | Центр Миненкова',

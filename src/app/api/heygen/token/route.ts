@@ -1,11 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Явно указываем что роут должен быть динамическим
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
-    const { avatarId, voiceId } = await request.json();
+    // Делаем парсинг JSON опциональным, так как новый код может отправлять пустое тело
+    let avatarId, voiceId;
+    try {
+      const body = await request.json();
+      avatarId = body.avatarId;
+      voiceId = body.voiceId;
+    } catch (e) {
+      // Если тело запроса пустое или невалидное, используем значения по умолчанию
+      avatarId = undefined;
+      voiceId = undefined;
+    }
 
     const apiKey = process.env.HEYGEN_API_KEY;
+    
     if (!apiKey) {
+      console.error('HeyGen API key not configured');
       return NextResponse.json(
         { error: 'HeyGen API key not configured' },
         { status: 500 }
@@ -38,7 +53,40 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+    
+    // Логируем ответ от HeyGen API для диагностики
+    console.log('HeyGen API response:', JSON.stringify(data, null, 2));
+    
+    // Проверяем структуру ответа
+    if (!data || typeof data !== 'object') {
+      console.error('Invalid response format from HeyGen API');
+      return NextResponse.json(
+        { error: 'Invalid response format from HeyGen API' },
+        { status: 500 }
+      );
+    }
+    
+    // HeyGen API возвращает данные в структуре { data: { token: ... } }
+    // Нормализуем ответ для клиента, который ожидает { data: { token: ... } }
+    // Добавляем дополнительную проверку на null для data
+    const token = (data && data.data && data.data.token) || (data && data.access_token) || (data && data.token);
+    
+    // Проверяем что токен действительно получен
+    if (!token || token === null || token === undefined || token === '') {
+      console.error('No valid token received from HeyGen API:', data);
+      return NextResponse.json(
+        { error: 'No valid token received from HeyGen API' },
+        { status: 500 }
+      );
+    }
+    
+    // Возвращаем токен в простой структуре, как ожидает фронтенд (исправлено)
+    const normalizedResponse = {
+      token: token
+    };
+    
+    console.log('Sending normalized response:', normalizedResponse);
+    return NextResponse.json(normalizedResponse);
   } catch (error) {
     console.error('Token generation error:', error);
     return NextResponse.json(

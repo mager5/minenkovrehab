@@ -2,15 +2,15 @@
 
 import React, { useState, useCallback } from 'react';
 import { HeyGenAvatar, AvatarControls, AvatarVideo } from '@/components/heygen';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ArrowLeft, MessageCircle, Phone, Calendar } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AvatarPage() {
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(
-    'anna_public_3_20240108'
+    'd3eaed1ea1dd4766952e2fdbeb6bd0d4'
   );
   const [selectedVoice, setSelectedVoice] = useState(
     'bae2d9c6057d4c85a9ac8b4b76a9e874'
@@ -41,7 +41,7 @@ export default function AvatarPage() {
             <div className='flex items-center gap-4'>
               <Link href='/'>
                 <Button
-                  variant='ghost'
+                  variant='outline'
                   size='sm'
                   className='flex items-center gap-2'
                 >

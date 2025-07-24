@@ -84,11 +84,11 @@ export function middleware(request: NextRequest) {
   // CSP заголовок
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://vercel.live https://www.googletagmanager.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://www.googletagmanager.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https://images.unsplash.com https://*.unsplash.com https://*.googleusercontent.com https://*.cloudinary.com",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://api.telegram.org https://vercel.live",
+    "connect-src 'self' https://api.telegram.org https://vercel.live https://api.heygen.com",
     "frame-src 'none'",
     "object-src 'none'",
     "base-uri 'self'",

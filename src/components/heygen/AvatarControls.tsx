@@ -1,17 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import {
   Select,
-  SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Settings, Volume2, VolumeX } from 'lucide-react';
+} from '@/components/ui/Select';
+import { Volume2, VolumeX, Settings, Info } from 'lucide-react';
 
 interface AvatarControlsProps {
   onAvatarChange?: (avatarId: string) => void;
@@ -22,7 +19,7 @@ interface AvatarControlsProps {
 
 // Предустановленные аватары и голоса
 const AVATARS = [
-  { id: 'anna_public_3_20240108', name: 'Анна - Консультант' },
+  { id: 'd3eaed1ea1dd4766952e2fdbeb6bd0d4', name: 'Анна - Консультант' },
   { id: 'josh_lite3_20230714', name: 'Джош - Специалист' },
   { id: 'susan_public_2_20240328', name: 'Сьюзан - Эксперт' },
 ];
@@ -39,8 +36,8 @@ export default function AvatarControls({
   onVolumeChange,
   className = '',
 }: AvatarControlsProps) {
-  const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0].id);
-  const [selectedVoice, setSelectedVoice] = useState(VOICES[0].id);
+  const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0]?.id || '');
+  const [selectedVoice, setSelectedVoice] = useState(VOICES[0]?.id || '');
   const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -73,7 +70,7 @@ export default function AvatarControls({
           <CardTitle className='flex items-center justify-between text-lg'>
             <span>Настройки аватара</span>
             <Button
-              variant='ghost'
+              variant='outline'
               size='sm'
               onClick={() => setShowSettings(!showSettings)}
               className='p-2'
@@ -89,7 +86,7 @@ export default function AvatarControls({
             <span className='text-sm font-medium'>Громкость</span>
             <div className='flex items-center gap-2'>
               <Button
-                variant='ghost'
+                variant='outline'
                 size='sm'
                 onClick={toggleMute}
                 className='p-2'
@@ -105,7 +102,7 @@ export default function AvatarControls({
                 min='0'
                 max='100'
                 value={volume}
-                onChange={e => handleVolumeChange(Number(e.target.value))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleVolumeChange(Number(e.target.value))}
                 className='w-20'
                 disabled={isMuted}
               />
@@ -120,38 +117,31 @@ export default function AvatarControls({
             <div className='space-y-4 pt-4 border-t'>
               {/* Выбор аватара */}
               <div className='space-y-2'>
-                <label className='text-sm font-medium'>Аватар</label>
                 <Select
+                  label='Аватар'
                   value={selectedAvatar}
-                  onValueChange={handleAvatarChange}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleAvatarChange(e.target.value)}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder='Выберите аватара' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {AVATARS.map(avatar => (
-                      <SelectItem key={avatar.id} value={avatar.id}>
-                        {avatar.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  {AVATARS.map(avatar => (
+                    <SelectItem key={avatar.id} value={avatar.id}>
+                      {avatar.name}
+                    </SelectItem>
+                  ))}
                 </Select>
               </div>
 
               {/* Выбор голоса */}
               <div className='space-y-2'>
-                <label className='text-sm font-medium'>Голос</label>
-                <Select value={selectedVoice} onValueChange={handleVoiceChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Выберите голос' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {VOICES.map(voice => (
-                      <SelectItem key={voice.id} value={voice.id}>
-                        {voice.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                <Select
+                  label='Голос'
+                  value={selectedVoice}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleVoiceChange(e.target.value)}
+                >
+                  {VOICES.map(voice => (
+                    <SelectItem key={voice.id} value={voice.id}>
+                      {voice.name}
+                    </SelectItem>
+                  ))}
                 </Select>
               </div>
 
