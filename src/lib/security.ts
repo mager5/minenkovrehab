@@ -28,7 +28,12 @@ export const cspDirectives = {
     'https://*.cloudinary.com',
   ],
   'font-src': ["'self'", 'https://fonts.gstatic.com'],
-  'connect-src': ["'self'", 'https://api.telegram.org', 'https://vercel.live', 'https://api.heygen.com'],
+  'connect-src': [
+    "'self'",
+    'https://api.telegram.org',
+    'https://vercel.live',
+    'https://api.heygen.com',
+  ],
   'frame-src': ["'none'"],
   'object-src': ["'none'"],
   'base-uri': ["'self'"],

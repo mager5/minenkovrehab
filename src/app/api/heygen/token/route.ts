@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     const apiKey = process.env.HEYGEN_API_KEY;
-    
+
     if (!apiKey) {
       console.error('HeyGen API key not configured');
       return NextResponse.json(
@@ -53,10 +53,10 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    
+
     // Логируем ответ от HeyGen API для диагностики
     console.log('HeyGen API response:', JSON.stringify(data, null, 2));
-    
+
     // Проверяем структуру ответа
     if (!data || typeof data !== 'object') {
       console.error('Invalid response format from HeyGen API');
@@ -65,12 +65,15 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-    
+
     // HeyGen API возвращает данные в структуре { data: { token: ... } }
     // Нормализуем ответ для клиента, который ожидает { data: { token: ... } }
     // Добавляем дополнительную проверку на null для data
-    const token = (data && data.data && data.data.token) || (data && data.access_token) || (data && data.token);
-    
+    const token =
+      (data && data.data && data.data.token) ||
+      (data && data.access_token) ||
+      (data && data.token);
+
     // Проверяем что токен действительно получен
     if (!token || token === null || token === undefined || token === '') {
       console.error('No valid token received from HeyGen API:', data);
@@ -79,12 +82,12 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-    
+
     // Возвращаем токен в простой структуре, как ожидает фронтенд (исправлено)
     const normalizedResponse = {
-      token: token
+      token: token,
     };
-    
+
     console.log('Sending normalized response:', normalizedResponse);
     return NextResponse.json(normalizedResponse);
   } catch (error) {

@@ -1,11 +1,11 @@
-import HeyGenAvatar from './HeyGenAvatar'
+import HeyGenAvatar from './HeyGenAvatar';
 
 function App() {
   return (
-    <div className="App">
+    <div className='App'>
       <HeyGenAvatar />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

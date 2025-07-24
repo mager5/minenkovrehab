@@ -114,9 +114,10 @@ export default function ProductClient({ product }: { product: Product }) {
               >
                 {product.title}
               </motion.h1>
-              
+
               {/* Карусель изображений для протокола реабилитации */}
-              {(product.id === 'rehabilitation-protocols' || product.id === 'personal-program') && (
+              {(product.id === 'rehabilitation-protocols' ||
+                product.id === 'personal-program') && (
                 <motion.div
                   className='mb-6 lg:self-start'
                   variants={fadeIn}
@@ -134,28 +135,27 @@ export default function ProductClient({ product }: { product: Product }) {
                       {
                         src: '/images/products/IMAGE 2025-07-22 23:23:43.jpg',
                         alt: 'Этап 1: Острый период (0-2 недели)',
-                        title: 'Острый период'
+                        title: 'Острый период',
                       },
                       {
                         src: '/images/products/IMAGE 2025-07-22 23:23:54.jpg',
                         alt: 'Этап 2: Подострый период (2-6 недель)',
-                        title: 'Подострый период'
+                        title: 'Подострый период',
                       },
                       {
                         src: '/images/products/IMAGE 2025-07-22 23:24:03.jpg',
                         alt: 'Этап 3: Функциональное восстановление (6-12 недель)',
-                        title: 'Функциональное восстановление'
+                        title: 'Функциональное восстановление',
                       },
                       {
                         src: '/images/products/IMAGE 2025-07-22 23:24:15.jpg',
                         alt: 'Этап 4: Возвращение к спорту (12+ недель)',
-                        title: 'Возвращение к спорту'
-                      }
+                        title: 'Возвращение к спорту',
+                      },
                     ]}
                   />
                 </motion.div>
               )}
-              
 
               <motion.div className='mb-6' variants={fadeIn} custom={5}>
                 <motion.h2
@@ -173,16 +173,18 @@ export default function ProductClient({ product }: { product: Product }) {
                   {product.shortDescription}
                 </motion.p>
                 <ul className='list-disc pl-5 space-y-2'>
-                  {product.fullDescription.map((item: string, index: number) => (
-                    <motion.li
-                      key={index}
-                      className='text-dark'
-                      variants={fadeIn}
-                      custom={8 + index * 0.5}
-                    >
-                      {item}
-                    </motion.li>
-                  ))}
+                  {product.fullDescription.map(
+                    (item: string, index: number) => (
+                      <motion.li
+                        key={index}
+                        className='text-dark'
+                        variants={fadeIn}
+                        custom={8 + index * 0.5}
+                      >
+                        {item}
+                      </motion.li>
+                    )
+                  )}
                 </ul>
               </motion.div>
             </motion.div>

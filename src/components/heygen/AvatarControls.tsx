@@ -4,10 +4,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import {
-  Select,
-  SelectItem,
-} from '@/components/ui/Select';
+import { Select, SelectItem } from '@/components/ui/Select';
 import { Volume2, VolumeX, Settings, Info } from 'lucide-react';
 
 interface AvatarControlsProps {
@@ -102,7 +99,9 @@ export default function AvatarControls({
                 min='0'
                 max='100'
                 value={volume}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleVolumeChange(Number(e.target.value))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleVolumeChange(Number(e.target.value))
+                }
                 className='w-20'
                 disabled={isMuted}
               />
@@ -120,7 +119,9 @@ export default function AvatarControls({
                 <Select
                   label='Аватар'
                   value={selectedAvatar}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleAvatarChange(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    handleAvatarChange(e.target.value)
+                  }
                 >
                   {AVATARS.map(avatar => (
                     <SelectItem key={avatar.id} value={avatar.id}>
@@ -135,7 +136,9 @@ export default function AvatarControls({
                 <Select
                   label='Голос'
                   value={selectedVoice}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleVoiceChange(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    handleVoiceChange(e.target.value)
+                  }
                 >
                   {VOICES.map(voice => (
                     <SelectItem key={voice.id} value={voice.id}>

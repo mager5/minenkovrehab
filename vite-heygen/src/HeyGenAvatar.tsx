@@ -32,42 +32,49 @@ export default function HeyGenAvatar() {
   const [message, setMessage] = useState<string>('Привет! Как дела?');
 
   // Конфигурация из переменных окружения
-  const avatarId = import.meta.env.VITE_HEYGEN_AVATAR_ID || 'd3eaed1ea1dd4766952e2fdbeb6bd0d4';
-  const voiceId = import.meta.env.VITE_HEYGEN_VOICE_ID || 'bae2d9c6057d4c85a9ac8b4b76a9e874';
-  
+  const avatarId =
+    import.meta.env.VITE_HEYGEN_AVATAR_ID || 'd3eaed1ea1dd4766952e2fdbeb6bd0d4';
+  const voiceId =
+    import.meta.env.VITE_HEYGEN_VOICE_ID || 'bae2d9c6057d4c85a9ac8b4b76a9e874';
+
   // Функция для получения токена напрямую от HeyGen API
   const getHeyGenToken = async (): Promise<string> => {
     // В реальном приложении API ключ должен быть на бэкенде!
     // Это только для демонстрации в Vite
     const apiKey = import.meta.env.VITE_HEYGEN_API_KEY;
-    
+
     if (!apiKey) {
       throw new Error('VITE_HEYGEN_API_KEY не настроен в .env файле');
     }
-    
+
     try {
       console.log('🔑 Получение токена HeyGen...');
-      
-      const response = await fetch('https://api.heygen.com/v1/streaming.create_token', {
-        method: 'POST',
-        headers: {
-          'X-Api-Key': apiKey,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({})
-      });
-      
+
+      const response = await fetch(
+        'https://api.heygen.com/v1/streaming.create_token',
+        {
+          method: 'POST',
+          headers: {
+            'X-Api-Key': apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      );
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         console.error('❌ HeyGen API Error:', data);
-        throw new Error(`HeyGen API Error (${response.status}): ${data.message || 'Unknown error'}`);
+        throw new Error(
+          `HeyGen API Error (${response.status}): ${data.message || 'Unknown error'}`
+        );
       }
-      
+
       if (!data.data || !data.data.token) {
         throw new Error('Токен не найден в ответе API');
       }
-      
+
       console.log('✅ Токен получен успешно');
       return data.data.token;
     } catch (error: any) {
@@ -81,14 +88,16 @@ export default function HeyGenAvatar() {
       try {
         setStatus('Connecting...');
         setError('');
-        
+
         // Получаем токен
         const token = await getHeyGenToken();
-        
+
         if (!token) {
-          throw new Error('Не удалось получить токен HeyGen. Проверьте API ключ.');
+          throw new Error(
+            'Не удалось получить токен HeyGen. Проверьте API ключ.'
+          );
         }
-        
+
         // Проверяем video element
         if (!videoRef.current) {
           console.error('Video element not ready');
@@ -100,7 +109,12 @@ export default function HeyGenAvatar() {
         console.log('Voice ID:', voiceId);
 
         // Динамический импорт HeyGen SDK
-        const { default: StreamingAvatar, StreamingEvents, AvatarQuality, TaskType } = await import('@heygen/streaming-avatar');
+        const {
+          default: StreamingAvatar,
+          StreamingEvents,
+          AvatarQuality,
+          TaskType,
+        } = await import('@heygen/streaming-avatar');
 
         // Создаем StreamingAvatar
         const avatar = new StreamingAvatar({
@@ -142,19 +156,18 @@ export default function HeyGenAvatar() {
             voiceId: voiceId,
             rate: 1.0,
           },
-          language: 'ru'
+          language: 'ru',
         };
-        
+
         console.log('Creating avatar with config:', avatarConfig);
-        
+
         // Создаем и запускаем аватар
         await avatar.createStartAvatar(avatarConfig);
         console.log('✅ Avatar created successfully!');
-        
+
         setStreamingAvatar(avatar);
         setIsConnected(true);
         setStatus('Connected');
-        
       } catch (error: any) {
         console.error('🚨 Error creating avatar:', error);
         setError(error.message || 'Ошибка при создании аватара');
@@ -173,18 +186,18 @@ export default function HeyGenAvatar() {
 
   const handleSend = async () => {
     if (!streamingAvatar || !message.trim()) return;
-    
+
     try {
       setRecording(true);
-      
+
       // Импортируем константы для использования в методе speak
       const { TaskType } = await import('@heygen/streaming-avatar');
-      
+
       await streamingAvatar.speak({
         text: message,
-        task_type: TaskType.TALK
+        task_type: TaskType.TALK,
       } as SpeakConfig);
-      
+
       console.log('✅ Message sent:', message);
     } catch (error: any) {
       console.error('❌ Failed to send message:', error);
@@ -194,7 +207,7 @@ export default function HeyGenAvatar() {
 
   const handleStop = async () => {
     if (!streamingAvatar) return;
-    
+
     try {
       await streamingAvatar.interrupt();
       setRecording(false);
@@ -206,72 +219,75 @@ export default function HeyGenAvatar() {
 
   const getStatusClass = () => {
     switch (status) {
-      case 'Connected': return 'status connected';
-      case 'Connecting...': return 'status connecting';
-      case 'Error': return 'status disconnected';
-      default: return 'status disconnected';
+      case 'Connected':
+        return 'status connected';
+      case 'Connecting...':
+        return 'status connecting';
+      case 'Error':
+        return 'status disconnected';
+      default:
+        return 'status disconnected';
     }
   };
 
   return (
-    <div className="container">
-      <div className="avatar-container">
+    <div className='container'>
+      <div className='avatar-container'>
         <h1>HeyGen Avatar - Vite Version</h1>
-        
-        <div className={getStatusClass()}>
-          Статус: {status}
+
+        <div className={getStatusClass()}>Статус: {status}</div>
+
+        {error && <div className='error'>Ошибка: {error}</div>}
+
+        <div className='video-container'>
+          <video ref={videoRef} autoPlay muted playsInline />
         </div>
-        
-        {error && (
-          <div className="error">
-            Ошибка: {error}
-          </div>
-        )}
-        
-        <div className="video-container">
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-          />
-        </div>
-        
-        <div className="controls">
-          <div className="input-group">
-            <label htmlFor="message">Сообщение для аватара:</label>
+
+        <div className='controls'>
+          <div className='input-group'>
+            <label htmlFor='message'>Сообщение для аватара:</label>
             <textarea
-              id="message"
+              id='message'
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Введите текст для произношения..."
+              onChange={e => setMessage(e.target.value)}
+              placeholder='Введите текст для произношения...'
               disabled={!isConnected}
             />
           </div>
-          
+
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
               onClick={handleSend}
               disabled={!isConnected || recording || !message.trim()}
-              className="button"
+              className='button'
             >
               {recording ? 'Говорит...' : 'Отправить'}
             </button>
-            
+
             {recording && (
-              <button
-                onClick={handleStop}
-                className="button danger"
-              >
+              <button onClick={handleStop} className='button danger'>
                 Остановить
               </button>
             )}
           </div>
         </div>
-        
-        <div style={{ fontSize: '12px', color: '#666', textAlign: 'center', marginTop: '20px' }}>
-          <p><strong>Примечание:</strong> Для работы требуется настроить API ключ HeyGen в коде.</p>
-          <p>В production версии API ключ должен быть на бэкенде, а не в клиентском коде!</p>
+
+        <div
+          style={{
+            fontSize: '12px',
+            color: '#666',
+            textAlign: 'center',
+            marginTop: '20px',
+          }}
+        >
+          <p>
+            <strong>Примечание:</strong> Для работы требуется настроить API ключ
+            HeyGen в коде.
+          </p>
+          <p>
+            В production версии API ключ должен быть на бэкенде, а не в
+            клиентском коде!
+          </p>
         </div>
       </div>
     </div>

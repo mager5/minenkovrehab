@@ -29,8 +29,12 @@ export default function InteractiveAvatar() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          avatarId: process.env.NEXT_PUBLIC_HEYGEN_AVATAR_ID || 'd3eaed1ea1dd4766952e2fdbeb6bd0d4',
-          voiceId: process.env.NEXT_PUBLIC_HEYGEN_VOICE_ID || 'bae2d9c6057d4c85a9ac8b4b76a9e874'
+          avatarId:
+            process.env.NEXT_PUBLIC_HEYGEN_AVATAR_ID ||
+            'd3eaed1ea1dd4766952e2fdbeb6bd0d4',
+          voiceId:
+            process.env.NEXT_PUBLIC_HEYGEN_VOICE_ID ||
+            'bae2d9c6057d4c85a9ac8b4b76a9e874',
         }),
       });
 
@@ -39,19 +43,19 @@ export default function InteractiveAvatar() {
       }
 
       const data = await response.json();
-      
+
       // Проверяем что data не null и не undefined
       if (!data) {
         console.error('Token response is null or undefined:', data);
         throw new Error('Token response is null or undefined');
       }
-      
+
       // Проверяем наличие токена в ответе
       if (!data.token) {
         console.error('Token not found in response:', data);
         throw new Error('Token not found in API response');
       }
-      
+
       return data.token;
     } catch (error) {
       console.error('Error getting access token:', error);
@@ -74,7 +78,7 @@ export default function InteractiveAvatar() {
       return [
         { avatar_id: 'Tyler-insuit-20220721', pose_name: 'Tyler' },
         { avatar_id: 'Anna_public_3_20240108', pose_name: 'Anna' },
-        { avatar_id: 'Kristin_public_3_20240108', pose_name: 'Kristin' }
+        { avatar_id: 'Kristin_public_3_20240108', pose_name: 'Kristin' },
       ];
     }
   };
@@ -89,11 +93,24 @@ export default function InteractiveAvatar() {
       // Динамический импорт HeyGen SDK
       let currentStreamingAvatarClass = StreamingAvatarClass;
       let currentConstants = constants;
-      
+
       if (!currentStreamingAvatarClass) {
-        const { default: StreamingAvatar, StreamingEvents, AvatarQuality, VoiceEmotion, TaskType, TaskMode } = await import('@heygen/streaming-avatar');
+        const {
+          default: StreamingAvatar,
+          StreamingEvents,
+          AvatarQuality,
+          VoiceEmotion,
+          TaskType,
+          TaskMode,
+        } = await import('@heygen/streaming-avatar');
         currentStreamingAvatarClass = StreamingAvatar;
-        currentConstants = { StreamingEvents, AvatarQuality, VoiceEmotion, TaskType, TaskMode };
+        currentConstants = {
+          StreamingEvents,
+          AvatarQuality,
+          VoiceEmotion,
+          TaskType,
+          TaskMode,
+        };
         setStreamingAvatarClass(currentStreamingAvatarClass);
         setConstants(currentConstants);
       }
@@ -101,26 +118,31 @@ export default function InteractiveAvatar() {
       // Получаем список доступных аватаров
       const availableAvatars = await getAvailableAvatars();
       console.log('📋 Available avatars:', availableAvatars);
-      
+
       // Выбираем первый доступный аватар
       const selectedAvatar = availableAvatars[0];
       if (!selectedAvatar) {
         throw new Error('No avatars available');
       }
-      
+
       console.log('🎭 Selected avatar:', selectedAvatar);
 
       // Получаем токен с сервера
       const accessToken = await getAccessToken();
-      
+
       // Проверяем валидность токена
-      if (!accessToken || accessToken === null || accessToken === undefined || accessToken === '') {
+      if (
+        !accessToken ||
+        accessToken === null ||
+        accessToken === undefined ||
+        accessToken === ''
+      ) {
         console.error('Invalid access token received:', accessToken);
         throw new Error('Failed to get valid access token');
       }
-      
+
       console.log('Creating avatar with access token:', accessToken);
-      
+
       // Создаем экземпляр StreamingAvatar с токеном
       const avatar = new currentStreamingAvatarClass({
         token: accessToken,
@@ -153,13 +175,13 @@ export default function InteractiveAvatar() {
       // 🔧 МИНИМАЛЬНАЯ ВЕРСИЯ для изоляции проблемы
       console.log('👉 Sending to createStartAvatar:', {
         avatarName: 'd3eaed1ea1dd4766952e2fdbeb6bd0d4',
-        voiceId: 'bae2d9c6057d4c85a9ac8b4b76a9e874'
+        voiceId: 'bae2d9c6057d4c85a9ac8b4b76a9e874',
       });
-      
+
       // ✅ Используем первый доступный аватар из списка
       const sessionInfo = await avatar.createStartAvatar({
         avatarName: selectedAvatar.avatar_id,
-        quality: currentConstants.AvatarQuality.Low
+        quality: currentConstants.AvatarQuality.Low,
       });
 
       console.log('✅ Session created successfully:', sessionInfo);
@@ -168,17 +190,17 @@ export default function InteractiveAvatar() {
       setIsExpanded(true);
     } catch (error: any) {
       console.error('❌ Failed to initialize avatar:', error);
-      
+
       // 💡 ДИАГНОСТИКА: Детальный анализ ошибки
       if (error?.response) {
         console.error('📊 Response status:', error.response.status);
         console.error('📊 Response headers:', error.response.headers);
-        
+
         // Пытаемся получить тело ответа
         try {
           const responseBody = await error.response.json();
           console.error('📊 Response body:', responseBody);
-          
+
           if (responseBody?.message) {
             console.error('💬 API Error message:', responseBody.message);
           }
@@ -187,7 +209,7 @@ export default function InteractiveAvatar() {
           console.error('📊 Raw response:', error.response);
         }
       }
-      
+
       // Проверяем специфичные ошибки
       if (error?.message?.includes('400')) {
         console.error('🚨 HTTP 400 Error - возможные причины:');
@@ -195,7 +217,7 @@ export default function InteractiveAvatar() {
         console.error('  - Несовместимость голоса с аватаром');
         console.error('  - Проблемы с токеном или правами доступа');
       }
-      
+
       console.error('🔍 Full error object:', JSON.stringify(error, null, 2));
     } finally {
       setIsLoading(false);

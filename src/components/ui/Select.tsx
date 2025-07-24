@@ -39,9 +39,9 @@ export function Select({
   return (
     <div className={`space-y-2 ${className}`}>
       {label && (
-        <label 
+        <label
           htmlFor={selectId}
-          className="block text-sm font-medium text-gray-700"
+          className='block text-sm font-medium text-gray-700'
         >
           {label}
         </label>
@@ -58,9 +58,7 @@ export function Select({
       >
         {children}
       </select>
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className='text-sm text-red-600'>{error}</p>}
     </div>
   );
 }
@@ -74,18 +72,13 @@ export function SelectItem({ value, children }: SelectItemProps) {
   return <option value={value}>{children}</option>;
 }
 
-export function SelectTrigger({ children, className = '' }: SelectTriggerProps) {
-  return (
-    <div className={`relative ${className}`}>
-      {children}
-    </div>
-  );
+export function SelectTrigger({
+  children,
+  className = '',
+}: SelectTriggerProps) {
+  return <div className={`relative ${className}`}>{children}</div>;
 }
 
 export function SelectValue({ placeholder }: SelectValueProps) {
-  return (
-    <span className="text-gray-500">
-      {placeholder}
-    </span>
-  );
+  return <span className='text-gray-500'>{placeholder}</span>;
 }

@@ -19,9 +19,9 @@ export function Input({
   return (
     <div className={`space-y-2 ${className}`}>
       {label && (
-        <label 
+        <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-gray-700"
+          className='block text-sm font-medium text-gray-700'
         >
           {label}
         </label>
@@ -36,9 +36,7 @@ export function Input({
         `}
         {...props}
       />
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className='text-sm text-red-600'>{error}</p>}
     </div>
   );
 }
