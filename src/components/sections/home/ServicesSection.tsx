@@ -43,7 +43,7 @@ export function ServicesSection() {
           ></motion.div>
         </motion.div>
 
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+        <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8'>
           {homeContent.services.items.map((service, index) => (
             <ServiceCard
               key={service.title}
@@ -56,7 +56,9 @@ export function ServicesSection() {
                     ? '/images/hero/formula-m.jpg'
                     : service.icon === 'online'
                       ? '/images/hero/protocols.jpg'
-                      : `/images/services/${service.icon}.svg`
+                      : service.icon === 'training'
+                        ? '/images/hero/online-consultation.jpg'
+                        : `/images/services/${service.icon}.svg`
               }
               delay={0.1 * (index + 1)}
             />
@@ -86,72 +88,74 @@ function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
     if (serviceTitle.includes('консультаци')) {
       return '/products/consultation';
     }
+    if (serviceTitle.includes('тренировк')) {
+      return '/products/online-training';
+    }
     return '/products';
   };
 
   return (
-    <motion.div
-      className='bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100'
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{
-        duration: 0.5,
-        delay,
-        type: 'spring',
-        stiffness: 50,
-      }}
-      whileHover={{ y: -10, transition: { duration: 0.3 } }}
-    >
-      <div className='relative h-52'>
-        <Image src={image} alt={title} fill className='object-cover' />
-        <div className='absolute inset-0 bg-gradient-to-t from-primary/70 to-transparent'></div>
-        <div className='absolute bottom-0 left-0 p-4 text-white'>
-          <motion.span
-            className='font-semibold text-accent-light'
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+    <Link href={getServiceLink(title)} className='block cursor-pointer'>
+      <motion.div
+        className='bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100 h-full'
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{
+          duration: 0.5,
+          delay,
+          type: 'spring',
+          stiffness: 50,
+        }}
+        whileHover={{ y: -10, transition: { duration: 0.3 } }}
+      >
+        <div className='relative h-52'>
+          <Image src={image} alt={title} fill className='object-cover' />
+          <div className='absolute inset-0 bg-gradient-to-t from-primary/70 to-transparent'></div>
+          <div className='absolute bottom-0 left-0 p-4 text-white'>
+            <motion.span
+              className='font-semibold text-accent-light'
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: delay + 0.1 }}
+            >
+              {title}
+            </motion.span>
+          </div>
+        </div>
+        <div className='p-6'>
+          <motion.h3
+            className='text-xl font-semibold text-primary mb-3'
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.3, delay: delay + 0.1 }}
+            transition={{ duration: 0.3, delay: delay + 0.2 }}
           >
             {title}
-          </motion.span>
-        </div>
-      </div>
-      <div className='p-6'>
-        <motion.h3
-          className='text-xl font-semibold text-primary mb-3'
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.3, delay: delay + 0.2 }}
-        >
-          {title}
-        </motion.h3>
-        <motion.p
-          className='text-dark mb-4'
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.3, delay: delay + 0.3 }}
-        >
-          {description}
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.3, delay: delay + 0.4 }}
-          whileHover={{ x: 5 }}
-        >
-          <Link
-            href={getServiceLink(title)}
-            className='inline-block text-accent hover:text-accent-dark transition-colors font-medium'
+          </motion.h3>
+          <motion.p
+            className='text-dark mb-4'
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.3, delay: delay + 0.3 }}
           >
-            Подробнее
-          </Link>
-        </motion.div>
-      </div>
-    </motion.div>
+            {description}
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.3, delay: delay + 0.4 }}
+            whileHover={{ x: 5 }}
+          >
+            <span className='inline-block text-accent hover:text-accent-dark transition-colors font-medium'>
+              Подробнее
+            </span>
+          </motion.div>
+        </div>
+      </motion.div>
+    </Link>
   );
 }

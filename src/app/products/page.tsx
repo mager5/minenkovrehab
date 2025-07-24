@@ -97,7 +97,7 @@ export default function ProductsPage() {
           {productsContent.services.map((service, index) => (
             <motion.div
               key={service.title}
-              className='bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-[1.02]'
+              className='bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-[1.02] flex flex-col h-full'
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -110,14 +110,16 @@ export default function ProductsPage() {
                   className='object-cover'
                 />
               </div>
-              <div className='p-8'>
-                <h3 className='text-2xl font-semibold text-primary mb-3'>
-                  {service.title}
-                </h3>
-                <p className='text-gray-600 mb-6 text-lg'>
-                  {service.description}
-                </p>
-                <div className='flex justify-between items-center'>
+              <div className='p-8 flex flex-col flex-grow'>
+                <div className='flex-grow'>
+                  <h3 className='text-2xl font-semibold text-primary mb-3'>
+                    {service.title}
+                  </h3>
+                  <p className='text-gray-600 mb-6 text-lg'>
+                    {service.description}
+                  </p>
+                </div>
+                <div className='flex justify-between items-center mt-auto'>
                   <span className='text-accent font-bold text-2xl'>
                     {service.price}
                   </span>

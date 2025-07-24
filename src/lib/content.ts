@@ -28,7 +28,7 @@ export async function getContent<T>(contentType: string): Promise<T> {
           description:
             'Индивидуальный разбор вашей ситуации с подбором эффективных решений',
           price: formatPrice('consultation', 5000),
-          image: '/images/services/consultation.jpg',
+          image: '/images/products/consultation.jpg',
         },
         {
           id: 'personal-program',
@@ -36,7 +36,7 @@ export async function getContent<T>(contentType: string): Promise<T> {
           description:
             'Пошаговый алгоритм действий после операции коленного сустава (резекция мениска)',
           price: formatPrice('personal-program', 10000),
-          image: '/images/services/program.jpg',
+          image: '/images/products/personal-program.jpg',
         },
         {
           id: 'formula-movement',
@@ -44,7 +44,7 @@ export async function getContent<T>(contentType: string): Promise<T> {
           description:
             'Авторская программа тренировок для всего тела. Занимайтесь по готовым комплексам — улучшайте подвижность суставов, развивайте силу и укрепляйте контроль движений. Всего 30 МИН. в удобное для вас время.',
           price: formatPrice('formula-movement', 6000),
-          image: '/images/services/movement.jpg',
+          image: '/images/products/formula-movement.jpg',
         },
         // {
         //   id: 'movement-analysis', // Удален продукт
