@@ -170,52 +170,42 @@ const ServicesColumn = () => {
       <ul className='space-y-3' role='list'>
         <li role='listitem'>
           <Link
-            href='/products'
+            href='/products/consultation'
             className='text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline'
             style={{ color: '#d1f3ea' }}
-            aria-label='Персональные тренировки'
+            aria-label='Онлайн-консультация'
           >
-            Персональные тренировки
+            Онлайн-консультация
           </Link>
         </li>
         <li role='listitem'>
           <Link
-            href='/products'
+            href='/products/formula-movement'
             className='text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline'
             style={{ color: '#d1f3ea' }}
-            aria-label='Реабилитация после травм'
+            aria-label='Программа тренировок Формула Движения'
           >
-            Реабилитация после травм
+            Программа тренировок "Формула Движения"
           </Link>
         </li>
         <li role='listitem'>
           <Link
-            href='/products'
+            href='/products/personal-program'
             className='text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline'
             style={{ color: '#d1f3ea' }}
-            aria-label='Коррекция осанки'
+            aria-label='Протоколы реабилитации'
           >
-            Коррекция осанки
+            Протоколы реабилитации
           </Link>
         </li>
         <li role='listitem'>
           <Link
-            href='/products'
+            href='/products/online-training'
             className='text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline'
             style={{ color: '#d1f3ea' }}
-            aria-label='Работа с болевыми синдромами'
+            aria-label='Онлайн-тренировки'
           >
-            Работа с болевыми синдромами
-          </Link>
-        </li>
-        <li role='listitem'>
-          <Link
-            href='/products'
-            className='text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline'
-            style={{ color: '#d1f3ea' }}
-            aria-label='Онлайн консультации'
-          >
-            Онлайн консультации
+            Онлайн-тренировки
           </Link>
         </li>
       </ul>
@@ -388,36 +378,6 @@ const ContactsColumn = () => {
             style={{ color: '#d1f3ea' }}
           >
             Пн-Сб: 10:00-19:00
-          </span>
-        </div>
-        <div className='flex items-center'>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            className='h-5 w-5 mr-3 text-accent'
-            fill='none'
-            viewBox='0 0 24 24'
-            stroke='currentColor'
-            aria-hidden='true'
-            focusable='false'
-          >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={2}
-              d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
-            />
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={2}
-              d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'
-            />
-          </svg>
-          <span
-            className='text-white font-semibold'
-            style={{ color: '#d1f3ea' }}
-          >
-            Ростов-на-Дону
           </span>
         </div>
       </div>
