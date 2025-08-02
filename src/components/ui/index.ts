@@ -17,3 +17,5 @@ export {
 } from './Select';
 export { default as AnimatedFeature } from './AnimatedFeature';
 export { default as ImageUpload } from './ImageUpload';
+export { default as ImageCarousel } from './ImageCarousel';
+export { default as ImageLightbox } from './ImageLightbox';
