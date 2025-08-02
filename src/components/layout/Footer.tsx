@@ -518,7 +518,9 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
             </li>
             <li className='mt-2 sm:mt-0' role='menuitem'>
               <Link
-                href='/terms'
+                href='/oferta-consultation-training.pdf'
+                target='_blank'
+                rel='noopener noreferrer'
                 className='text-white hover:text-accent transition-all duration-300 text-sm font-semibold focus:outline-none focus:underline'
                 style={{ color: '#d1f3ea' }}
                 aria-label='Договор-оферта'

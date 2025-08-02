@@ -441,7 +441,9 @@ export default function ProductPageWrapper({
                     >
                       Нажимая кнопку, вы соглашаетесь с условиями{' '}
                       <Link
-                        href='/terms'
+                        href='/oferta-consultation-training.pdf'
+                        target='_blank'
+                        rel='noopener noreferrer'
                         className='text-primary hover:underline'
                       >
                         оферты
