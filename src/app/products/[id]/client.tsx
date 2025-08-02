@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { products, formatPrice, Product } from '../data';
 import { motion } from 'framer-motion';
 import ImageCarousel from '@/components/ui/ImageCarousel';
+import { useState } from 'react';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -21,8 +22,34 @@ const fadeIn = {
 
 // Клиентский компонент для страницы продукта
 export default function ProductClient({ product }: { product: Product }) {
+  // Состояние для чекбокса согласия
+  const [isConsentChecked, setIsConsentChecked] = useState(false);
+  const [showConsentError, setShowConsentError] = useState(false);
+
+  // Проверка согласия перед действием
+  const checkConsent = () => {
+    if (!isConsentChecked) {
+      setShowConsentError(true);
+      setTimeout(() => setShowConsentError(false), 3000);
+      return false;
+    }
+    setShowConsentError(false);
+    return true;
+  };
+
+  // Обработчик для Telegram
+  const handleTelegramClick = (e: React.MouseEvent) => {
+    if (!checkConsent()) {
+      e.preventDefault();
+      return;
+    }
+  };
+
   // Динамическая генерация ссылки на оплату через Railway API
   const handlePayment = async () => {
+    if (!checkConsent()) {
+      return;
+    }
     try {
       console.log('🔄 Создание платежа для продукта:', product.title);
 
@@ -219,18 +246,101 @@ export default function ProductClient({ product }: { product: Product }) {
                   {formatPrice(product.id, product.price)}
                 </motion.div>
 
-                {/* Кнопка покупки */}
+                {/* Чекбокс согласия */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.6 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className={`mb-4 p-3 rounded-md transition-all ${
+                    showConsentError
+                      ? 'bg-red-50 border border-red-200'
+                      : 'bg-gray-50'
+                  }`}
+                >
+                  <label className='flex items-start space-x-3 cursor-pointer group'>
+                    <div className='relative mt-1'>
+                      <input
+                        type='checkbox'
+                        checked={isConsentChecked}
+                        onChange={e => {
+                          setIsConsentChecked(e.target.checked);
+                          if (e.target.checked) setShowConsentError(false);
+                        }}
+                        className='sr-only'
+                      />
+                      <div
+                        className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                          isConsentChecked
+                            ? 'bg-primary border-primary shadow-md'
+                            : 'bg-white border-gray-300 group-hover:border-primary/50'
+                        }`}
+                      >
+                        {isConsentChecked && (
+                          <svg
+                            className='w-3 h-3 text-white'
+                            fill='currentColor'
+                            viewBox='0 0 20 20'
+                          >
+                            <path
+                              fillRule='evenodd'
+                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                              clipRule='evenodd'
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span className='text-xs text-gray-600 leading-relaxed'>
+                      Я даю согласие на обработку персональных данных в
+                      соответствии с{' '}
+                      <Link
+                        href='/policy'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        политикой конфиденциальности
+                      </Link>{' '}
+                      и согласен с условиями{' '}
+                      <Link
+                        href='/oferta.pdf'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        договора оферты
+                      </Link>
+                      .
+                    </span>
+                  </label>
+                  {showConsentError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className='mt-2 text-xs text-red-600 font-medium'
+                    >
+                      ⚠️ Пожалуйста, отметьте согласие на обработку персональных
+                      данных для продолжения
+                    </motion.div>
+                  )}
+                </motion.div>
+
+                {/* Кнопка покупки */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.7 }}
+                  whileHover={{ scale: isConsentChecked ? 1.05 : 1 }}
+                  whileTap={{ scale: isConsentChecked ? 0.95 : 1 }}
                   className='mb-4'
                 >
                   <button
                     onClick={handlePayment}
-                    className='block w-full bg-accent text-white text-center px-6 py-3 rounded-md font-medium transition-all hover:bg-accent/90 shadow-lg hover:shadow-xl'
+                    className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg ${
+                      isConsentChecked
+                        ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
+                        : 'bg-gray-400 cursor-not-allowed'
+                    }`}
                   >
                     💳 Купить онлайн
                   </button>
@@ -240,48 +350,28 @@ export default function ProductClient({ product }: { product: Product }) {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.7 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.5, delay: 0.8 }}
+                  whileHover={{ scale: isConsentChecked ? 1.05 : 1 }}
+                  whileTap={{ scale: isConsentChecked ? 0.95 : 1 }}
                   className='mb-4'
                 >
-                  <Link
-                    href='https://t.me/MV_Rehab'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='block w-full bg-primary text-white text-center px-6 py-3 rounded-md font-medium transition-all hover:bg-primary-dark border-2 border-transparent hover:border-primary/20'
-                  >
-                    📱 Связаться в Telegram
-                  </Link>
-                </motion.div>
-
-                {/* Текст согласия */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.8 }}
-                  className='text-xs text-gray-600 leading-relaxed'
-                >
-                  Нажимая на «Купить онлайн» либо «Связаться в Telegram», я даю
-                  согласие на обработку персональных данных в соответствии с{' '}
-                  <Link
-                    href='/policy'
-                    className='text-primary hover:underline'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    политикой конфиденциальности
-                  </Link>{' '}
-                  и согласен с условиями{' '}
-                  <Link
-                    href='/oferta.pdf'
-                    className='text-primary hover:underline'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    договора оферты
-                  </Link>
-                  .
+                  {isConsentChecked ? (
+                    <Link
+                      href='https://t.me/MV_Rehab'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-primary hover:bg-primary-dark hover:border-primary/20 cursor-pointer'
+                    >
+                      📱 Связаться в Telegram
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={handleTelegramClick}
+                      className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-gray-400 cursor-not-allowed'
+                    >
+                      📱 Связаться в Telegram
+                    </button>
+                  )}
                 </motion.div>
               </motion.div>
             </motion.div>

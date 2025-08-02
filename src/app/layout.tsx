@@ -171,7 +171,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} antialiased min-h-screen flex flex-col h-full overflow-x-hidden overflow-y-auto`}
+        className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col h-full overflow-x-hidden overflow-y-auto`}
       >
         <div className='flex flex-col min-h-screen overflow-x-hidden'>
           <a

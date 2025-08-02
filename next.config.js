@@ -49,7 +49,7 @@ const nextConfig = {
           headers: [
             {
               key: "Content-Security-Policy",
-              value: "default-src 'self'; connect-src 'self' https://api.heygen.com https://*.livekit.cloud wss://*.livekit.cloud; img-src * data: blob:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src * data: blob:; worker-src 'self' blob:; frame-src 'self' http://localhost:3001;",
+              value: "default-src 'self'; connect-src 'self' https://api.heygen.com https://*.livekit.cloud wss://*.livekit.cloud; img-src * data: blob:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src * data: blob:; worker-src 'self' blob:; frame-src 'self' http://localhost:3001;",
             },
             {
               key: "Permissions-Policy",
