@@ -57,7 +57,7 @@ export function ServicesSection() {
                     : service.icon === 'online'
                       ? '/images/hero/protocols.jpg'
                       : service.icon === 'training'
-                        ? '/images/hero/online-consultation.jpg'
+                        ? '/images/products/online_training.jpg'
                         : `/images/services/${service.icon}.svg`
               }
               delay={0.1 * (index + 1)}

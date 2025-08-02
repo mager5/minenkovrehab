@@ -243,6 +243,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   transition={{ duration: 0.5, delay: 0.7 }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  className='mb-4'
                 >
                   <Link
                     href='https://t.me/MV_Rehab'
@@ -252,6 +253,35 @@ export default function ProductClient({ product }: { product: Product }) {
                   >
                     📱 Связаться в Telegram
                   </Link>
+                </motion.div>
+
+                {/* Текст согласия */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.8 }}
+                  className='text-xs text-gray-600 leading-relaxed'
+                >
+                  Нажимая на «Купить онлайн» либо «Связаться в Telegram», я даю
+                  согласие на обработку персональных данных в соответствии с{' '}
+                  <Link
+                    href='/policy'
+                    className='text-primary hover:underline'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  >
+                    политикой конфиденциальности
+                  </Link>{' '}
+                  и согласен с условиями{' '}
+                  <Link
+                    href='/oferta.pdf'
+                    className='text-primary hover:underline'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  >
+                    договора оферты
+                  </Link>
+                  .
                 </motion.div>
               </motion.div>
             </motion.div>

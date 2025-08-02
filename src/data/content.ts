@@ -295,7 +295,7 @@ export const productsContent: ProductContentType = {
       title: 'Резекция мениска. Протокол реабилитации.',
       description:
         'Пошаговый алгоритм действий после операции коленного сустава (резекция мениска)',
-      price: formatPrice('personal-program', 10000),
+      price: formatPrice('personal-program', 8000),
       image: '/images/services/program.jpg',
     },
   ],

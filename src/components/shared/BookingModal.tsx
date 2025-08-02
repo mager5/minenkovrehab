@@ -437,6 +437,15 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                             rel='noopener noreferrer'
                           >
                             политикой конфиденциальности
+                          </a>{' '}
+                          и согласен с условиями{' '}
+                          <a
+                            href='/oferta-consultation-training.pdf'
+                            className='text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                          >
+                            договора оферта
                           </a>
                         </span>
                       </label>

@@ -35,7 +35,7 @@ export async function getContent<T>(contentType: string): Promise<T> {
           title: 'Резекция мениска. Протокол реабилитации.',
           description:
             'Пошаговый алгоритм действий после операции коленного сустава (резекция мениска)',
-          price: formatPrice('personal-program', 10000),
+          price: formatPrice('personal-program', 8000),
           image: '/images/products/personal-program.jpg',
         },
         {
@@ -59,7 +59,7 @@ export async function getContent<T>(contentType: string): Promise<T> {
           description:
             'Индивидуальная онлайн-тренировка в формате видеозвонка проводится по предварительному согласованию времени и даты.',
           price: formatPrice('online-training', 5000),
-          image: '/images/products/online-training.jpg',
+          image: '/images/products/online_training.jpg',
         },
         // {
         //   id: 'online-support', // Удален продукт

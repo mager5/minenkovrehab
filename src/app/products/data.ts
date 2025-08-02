@@ -83,7 +83,7 @@ export const products: Product[] = [
       'Видео еженедельных тестовых движений для оценки динамики',
       'Практический блок. Видео с подробным рассказом и показом упражнений 3-х этапов реабилитации',
     ],
-    price: 10000,
+    price: 8000,
     image: '/images/products/personal-program.jpg',
   },
   // {
@@ -118,7 +118,7 @@ export const products: Product[] = [
       'Формат онлайн-тренировок помогает поддерживать системность в процессе, сохранять мотивацию и получать обратную связь в реальном времени, что важно для безопасного и прогрессивного развития.',
     ],
     price: 5000,
-    image: '/images/products/online-training.jpg',
+    image: '/images/products/online_training.jpg',
   },
   {
     id: 'formula-movement',
