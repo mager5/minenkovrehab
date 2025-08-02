@@ -342,7 +342,7 @@ export default function ProductClient({ product }: { product: Product }) {
                         : 'bg-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    💳 Купить онлайн
+                    Купить онлайн
                   </button>
                 </motion.div>
 
@@ -362,14 +362,14 @@ export default function ProductClient({ product }: { product: Product }) {
                       rel='noopener noreferrer'
                       className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-primary hover:bg-primary-dark hover:border-primary/20 cursor-pointer'
                     >
-                      📱 Связаться в Telegram
+                      Связаться в Telegram
                     </Link>
                   ) : (
                     <button
                       onClick={handleTelegramClick}
                       className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-gray-400 cursor-not-allowed'
                     >
-                      📱 Связаться в Telegram
+                      Связаться в Telegram
                     </button>
                   )}
                 </motion.div>
