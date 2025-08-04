@@ -25,6 +25,15 @@ export default function ProductClient({ product }: { product: Product }) {
   // Состояние для чекбокса согласия
   const [isConsentChecked, setIsConsentChecked] = useState(false);
   const [showConsentError, setShowConsentError] = useState(false);
+  // Состояние для показа всех уровней программы "Формула движения"
+  const [showAllLevels, setShowAllLevels] = useState(false);
+  // Состояние для чекбоксов согласия для каждого уровня
+  const [isConsentCheckedLevel2, setIsConsentCheckedLevel2] = useState(false);
+  const [showConsentErrorLevel2, setShowConsentErrorLevel2] = useState(false);
+  const [isConsentCheckedLevel3, setIsConsentCheckedLevel3] = useState(false);
+  const [showConsentErrorLevel3, setShowConsentErrorLevel3] = useState(false);
+  const [isConsentCheckedLevel4, setIsConsentCheckedLevel4] = useState(false);
+  const [showConsentErrorLevel4, setShowConsentErrorLevel4] = useState(false);
 
   // Проверка согласия перед действием
   const checkConsent = () => {
@@ -43,6 +52,62 @@ export default function ProductClient({ product }: { product: Product }) {
       e.preventDefault();
       return;
     }
+  };
+
+  // Обработчики для кнопок Telegram для каждого уровня
+  const handleTelegramClickLevel2 = (e: React.MouseEvent) => {
+    if (!isConsentCheckedLevel2) {
+      setShowConsentErrorLevel2(true);
+      setTimeout(() => setShowConsentErrorLevel2(false), 3000);
+      e.preventDefault();
+      return;
+    }
+  };
+
+  const handleTelegramClickLevel3 = (e: React.MouseEvent) => {
+    if (!isConsentCheckedLevel3) {
+      setShowConsentErrorLevel3(true);
+      setTimeout(() => setShowConsentErrorLevel3(false), 3000);
+      e.preventDefault();
+      return;
+    }
+  };
+
+  const handleTelegramClickLevel4 = (e: React.MouseEvent) => {
+    if (!isConsentCheckedLevel4) {
+      setShowConsentErrorLevel4(true);
+      setTimeout(() => setShowConsentErrorLevel4(false), 3000);
+      e.preventDefault();
+      return;
+    }
+  };
+
+  // Обработчики для кнопок оплаты для каждого уровня
+  const handlePaymentLevel2 = async () => {
+    if (!isConsentCheckedLevel2) {
+      setShowConsentErrorLevel2(true);
+      setTimeout(() => setShowConsentErrorLevel2(false), 3000);
+      return;
+    }
+    await handlePayment();
+  };
+
+  const handlePaymentLevel3 = async () => {
+    if (!isConsentCheckedLevel3) {
+      setShowConsentErrorLevel3(true);
+      setTimeout(() => setShowConsentErrorLevel3(false), 3000);
+      return;
+    }
+    await handlePayment();
+  };
+
+  const handlePaymentLevel4 = async () => {
+    if (!isConsentCheckedLevel4) {
+      setShowConsentErrorLevel4(true);
+      setTimeout(() => setShowConsentErrorLevel4(false), 3000);
+      return;
+    }
+    await handlePayment();
   };
 
   // Динамическая генерация ссылки на оплату через Railway API
@@ -243,7 +308,9 @@ export default function ProductClient({ product }: { product: Product }) {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.5 }}
                 >
-                  {formatPrice(product.id, product.price)}
+                  {product.id === 'formula-movement'
+                    ? '6 000 ₽ первый уровень'
+                    : formatPrice(product.id, product.price)}
                 </motion.div>
 
                 {/* Чекбокс согласия */}
@@ -373,9 +440,391 @@ export default function ProductClient({ product }: { product: Product }) {
                     </button>
                   )}
                 </motion.div>
+
+                {/* Кнопка показать все уровни для Формулы движения */}
+                {product.id === 'formula-movement' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.9 }}
+                    className='mb-4'
+                  >
+                    <button
+                      onClick={() => setShowAllLevels(!showAllLevels)}
+                      className='block w-full text-primary text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-primary hover:bg-primary hover:text-white'
+                    >
+                      {showAllLevels ? 'Свернуть' : 'Показать все уровни'}
+                    </button>
+                  </motion.div>
+                )}
               </motion.div>
             </motion.div>
           </div>
+
+          {/* Дополнительные уровни для Формулы движения */}
+          {product.id === 'formula-movement' && showAllLevels && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5 }}
+              className='mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+            >
+              {/* Второй уровень */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className='bg-secondary p-6 rounded-lg'
+                whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+              >
+                <h3 className='text-xl font-semibold text-primary mb-4'>
+                  Стоимость услуги
+                </h3>
+                <div className='text-2xl font-bold text-accent mb-6'>
+                  6 000 ₽ второй уровень
+                </div>
+                <div
+                  className={`mb-4 p-3 rounded-md transition-all ${
+                    showConsentErrorLevel2
+                      ? 'bg-red-50 border border-red-200'
+                      : 'bg-gray-50'
+                  }`}
+                >
+                  <label className='flex items-start space-x-3 cursor-pointer group'>
+                    <div className='relative mt-1'>
+                      <input
+                        type='checkbox'
+                        checked={isConsentCheckedLevel2}
+                        onChange={e => {
+                          setIsConsentCheckedLevel2(e.target.checked);
+                          if (e.target.checked)
+                            setShowConsentErrorLevel2(false);
+                        }}
+                        className='sr-only'
+                      />
+                      <div
+                        className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                          isConsentCheckedLevel2
+                            ? 'bg-primary border-primary shadow-md'
+                            : 'bg-white border-gray-300 group-hover:border-primary/50'
+                        }`}
+                      >
+                        {isConsentCheckedLevel2 && (
+                          <svg
+                            className='w-3 h-3 text-white'
+                            fill='currentColor'
+                            viewBox='0 0 20 20'
+                          >
+                            <path
+                              fillRule='evenodd'
+                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                              clipRule='evenodd'
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span className='text-xs text-gray-600 leading-relaxed'>
+                      Я даю согласие на обработку персональных данных в
+                      соответствии с{' '}
+                      <Link
+                        href='/policy'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        политикой конфиденциальности
+                      </Link>{' '}
+                      и согласен с условиями{' '}
+                      <Link
+                        href='/oferta.pdf'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        договора оферты
+                      </Link>
+                      .
+                    </span>
+                  </label>
+                  {showConsentErrorLevel2 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className='mt-2 text-xs text-red-600 font-medium'
+                    >
+                      ⚠️ Пожалуйста, отметьте согласие на обработку персональных
+                      данных для продолжения
+                    </motion.div>
+                  )}
+                </div>
+                <button
+                  onClick={handlePaymentLevel2}
+                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 ${
+                    isConsentCheckedLevel2
+                      ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
+                      : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Купить онлайн
+                </button>
+                {isConsentCheckedLevel2 ? (
+                  <Link
+                    href='https://t.me/MV_Rehab'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-primary hover:bg-primary-dark hover:border-primary/20 cursor-pointer'
+                  >
+                    Связаться в Telegram
+                  </Link>
+                ) : (
+                  <button
+                    onClick={handleTelegramClickLevel2}
+                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-gray-400 cursor-not-allowed'
+                  >
+                    Связаться в Telegram
+                  </button>
+                )}
+              </motion.div>
+
+              {/* Третий уровень */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className='bg-secondary p-6 rounded-lg'
+                whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+              >
+                <h3 className='text-xl font-semibold text-primary mb-4'>
+                  Стоимость услуги
+                </h3>
+                <div className='text-2xl font-bold text-accent mb-6'>
+                  6 000 ₽ третий уровень
+                </div>
+                <div
+                  className={`mb-4 p-3 rounded-md transition-all ${
+                    showConsentErrorLevel3
+                      ? 'bg-red-50 border border-red-200'
+                      : 'bg-gray-50'
+                  }`}
+                >
+                  <label className='flex items-start space-x-3 cursor-pointer group'>
+                    <div className='relative mt-1'>
+                      <input
+                        type='checkbox'
+                        checked={isConsentCheckedLevel3}
+                        onChange={e => {
+                          setIsConsentCheckedLevel3(e.target.checked);
+                          if (e.target.checked)
+                            setShowConsentErrorLevel3(false);
+                        }}
+                        className='sr-only'
+                      />
+                      <div
+                        className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                          isConsentCheckedLevel3
+                            ? 'bg-primary border-primary shadow-md'
+                            : 'bg-white border-gray-300 group-hover:border-primary/50'
+                        }`}
+                      >
+                        {isConsentCheckedLevel3 && (
+                          <svg
+                            className='w-3 h-3 text-white'
+                            fill='currentColor'
+                            viewBox='0 0 20 20'
+                          >
+                            <path
+                              fillRule='evenodd'
+                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                              clipRule='evenodd'
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span className='text-xs text-gray-600 leading-relaxed'>
+                      Я даю согласие на обработку персональных данных в
+                      соответствии с{' '}
+                      <Link
+                        href='/policy'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        политикой конфиденциальности
+                      </Link>{' '}
+                      и согласен с условиями{' '}
+                      <Link
+                        href='/oferta.pdf'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        договора оферты
+                      </Link>
+                      .
+                    </span>
+                  </label>
+                  {showConsentErrorLevel3 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className='mt-2 text-xs text-red-600 font-medium'
+                    >
+                      ⚠️ Пожалуйста, отметьте согласие на обработку персональных
+                      данных для продолжения
+                    </motion.div>
+                  )}
+                </div>
+                <button
+                  onClick={handlePaymentLevel3}
+                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 ${
+                    isConsentCheckedLevel3
+                      ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
+                      : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Купить онлайн
+                </button>
+                {isConsentCheckedLevel3 ? (
+                  <Link
+                    href='https://t.me/MV_Rehab'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-primary hover:bg-primary-dark hover:border-primary/20 cursor-pointer'
+                  >
+                    Связаться в Telegram
+                  </Link>
+                ) : (
+                  <button
+                    onClick={handleTelegramClickLevel3}
+                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-gray-400 cursor-not-allowed'
+                  >
+                    Связаться в Telegram
+                  </button>
+                )}
+              </motion.div>
+
+              {/* Четвертый уровень */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className='bg-secondary p-6 rounded-lg'
+                whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+              >
+                <h3 className='text-xl font-semibold text-primary mb-4'>
+                  Стоимость услуги
+                </h3>
+                <div className='text-2xl font-bold text-accent mb-6'>
+                  6 000 ₽ четвертый уровень
+                </div>
+                <div
+                  className={`mb-4 p-3 rounded-md transition-all ${
+                    showConsentErrorLevel4
+                      ? 'bg-red-50 border border-red-200'
+                      : 'bg-gray-50'
+                  }`}
+                >
+                  <label className='flex items-start space-x-3 cursor-pointer group'>
+                    <div className='relative mt-1'>
+                      <input
+                        type='checkbox'
+                        checked={isConsentCheckedLevel4}
+                        onChange={e => {
+                          setIsConsentCheckedLevel4(e.target.checked);
+                          if (e.target.checked)
+                            setShowConsentErrorLevel4(false);
+                        }}
+                        className='sr-only'
+                      />
+                      <div
+                        className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                          isConsentCheckedLevel4
+                            ? 'bg-primary border-primary shadow-md'
+                            : 'bg-white border-gray-300 group-hover:border-primary/50'
+                        }`}
+                      >
+                        {isConsentCheckedLevel4 && (
+                          <svg
+                            className='w-3 h-3 text-white'
+                            fill='currentColor'
+                            viewBox='0 0 20 20'
+                          >
+                            <path
+                              fillRule='evenodd'
+                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                              clipRule='evenodd'
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span className='text-xs text-gray-600 leading-relaxed'>
+                      Я даю согласие на обработку персональных данных в
+                      соответствии с{' '}
+                      <Link
+                        href='/policy'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        политикой конфиденциальности
+                      </Link>{' '}
+                      и согласен с условиями{' '}
+                      <Link
+                        href='/oferta.pdf'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        договора оферты
+                      </Link>
+                      .
+                    </span>
+                  </label>
+                  {showConsentErrorLevel4 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className='mt-2 text-xs text-red-600 font-medium'
+                    >
+                      ⚠️ Пожалуйста, отметьте согласие на обработку персональных
+                      данных для продолжения
+                    </motion.div>
+                  )}
+                </div>
+                <button
+                  onClick={handlePaymentLevel4}
+                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 ${
+                    isConsentCheckedLevel4
+                      ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
+                      : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Купить онлайн
+                </button>
+                {isConsentCheckedLevel4 ? (
+                  <Link
+                    href='https://t.me/MV_Rehab'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-primary hover:bg-primary-dark hover:border-primary/20 cursor-pointer'
+                  >
+                    Связаться в Telegram
+                  </Link>
+                ) : (
+                  <button
+                    onClick={handleTelegramClickLevel4}
+                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-gray-400 cursor-not-allowed'
+                  >
+                    Связаться в Telegram
+                  </button>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
         </motion.div>
       </div>
     </motion.div>
