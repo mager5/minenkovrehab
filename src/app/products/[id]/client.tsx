@@ -83,6 +83,15 @@ export default function ProductClient({ product }: { product: Product }) {
   };
 
   // Обработчики для кнопок оплаты для каждого уровня
+  const handlePaymentLevel1 = async () => {
+    if (!isConsentChecked) {
+      setShowConsentError(true);
+      setTimeout(() => setShowConsentError(false), 3000);
+      return;
+    }
+    await handlePayment();
+  };
+
   const handlePaymentLevel2 = async () => {
     if (!isConsentCheckedLevel2) {
       setShowConsentErrorLevel2(true);
@@ -112,9 +121,6 @@ export default function ProductClient({ product }: { product: Product }) {
 
   // Динамическая генерация ссылки на оплату через Railway API
   const handlePayment = async () => {
-    if (!checkConsent()) {
-      return;
-    }
     try {
       console.log('🔄 Создание платежа для продукта:', product.title);
 
@@ -402,7 +408,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   className='mb-4'
                 >
                   <button
-                    onClick={handlePayment}
+                    onClick={handlePaymentLevel1}
                     className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg ${
                       isConsentChecked
                         ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
