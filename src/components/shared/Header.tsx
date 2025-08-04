@@ -8,10 +8,36 @@ import BookingModal from './BookingModal';
 import { socialLinks, headerContacts, navigationItems } from '@/data/content';
 import { SafeIcon } from '@/components/ui/SafeIcon';
 
+// Данные для выпадающего меню услуг
+const servicesDropdownItems = [
+  {
+    href: '/products/consultation',
+    label: 'Онлайн-консультация',
+    description: 'Индивидуальный разбор вашей ситуации',
+  },
+  {
+    href: '/products/formula-movement',
+    label: 'Программа "Формула Движения"',
+    description: 'Авторская программа тренировок для всего тела',
+  },
+  {
+    href: '/products/personal-program',
+    label: 'Протокол реабилитации',
+    description: 'Пошаговый алгоритм после операций',
+  },
+  {
+    href: '/products/online-training',
+    label: 'Онлайн-тренировки',
+    description: 'Персональные тренировки в режиме реального времени',
+  },
+];
+
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
+  const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const pathname = usePathname();
 
   // Отслеживание скролла для изменения внешнего вида хедера
@@ -36,6 +62,7 @@ export function Header() {
   // Закрытие меню при клике на ссылку
   const closeMenu = () => {
     setIsMenuOpen(false);
+    setIsMobileServicesOpen(false);
   };
 
   // Открытие модального окна записи
@@ -57,6 +84,7 @@ export function Header() {
     const handleEscKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isMenuOpen) {
         setIsMenuOpen(false);
+        setIsMobileServicesOpen(false);
       }
     };
 
@@ -190,16 +218,92 @@ export function Header() {
               className='hidden [&>*]:text-nowrap [@media(min-width:840px)]:flex space-x-1 lg:space-x-2'
               aria-label='Основная навигация'
             >
-              {navigationItems.map(item => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === item.href ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
-                  aria-current={pathname === item.href ? 'page' : undefined}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {navigationItems.map(item => {
+                // Специальная обработка для пункта "Услуги"
+                if (item.href === '/products') {
+                  return (
+                    <div
+                      key={item.href}
+                      className='relative'
+                      onMouseEnter={() => setIsServicesDropdownOpen(true)}
+                      onMouseLeave={() => setIsServicesDropdownOpen(false)}
+                    >
+                      <Link
+                        href={item.href}
+                        className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap flex items-center ${pathname === item.href || pathname.startsWith('/products/') ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                        aria-current={
+                          pathname === item.href ? 'page' : undefined
+                        }
+                      >
+                        {item.label}
+                        <svg
+                          className={`ml-1 h-4 w-4 transition-transform duration-200 ${isServicesDropdownOpen ? 'rotate-180' : ''}`}
+                          fill='none'
+                          viewBox='0 0 24 24'
+                          stroke='currentColor'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M19 9l-7 7-7-7'
+                          />
+                        </svg>
+                      </Link>
+
+                      {/* Выпадающее меню услуг */}
+                      <div
+                        className={`absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-100 transition-all duration-300 z-50 ${isServicesDropdownOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}
+                      >
+                        <div className='py-2'>
+                          {servicesDropdownItems.map((service, index) => (
+                            <Link
+                              key={service.href}
+                              href={service.href}
+                              className='block px-4 py-3 hover:bg-gray-50 transition-colors duration-200 group'
+                            >
+                              <div className='font-medium text-gray-900 group-hover:text-primary transition-colors duration-200'>
+                                {service.label}
+                              </div>
+                              <div
+                                className='text-sm text-gray-500 mt-1'
+                                style={{
+                                  overflow: 'hidden',
+                                  whiteSpace: 'nowrap',
+                                  textOverflow: 'ellipsis',
+                                }}
+                                title={service.description}
+                              >
+                                {service.description}
+                              </div>
+                            </Link>
+                          ))}
+                          <div className='border-t border-gray-100 mt-2 pt-2'>
+                            <Link
+                              href='/products'
+                              className='block px-4 py-2 text-sm font-medium text-primary hover:bg-gray-50 transition-colors duration-200'
+                            >
+                              Все услуги →
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Обычные пункты меню
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === item.href ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                    aria-current={pathname === item.href ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Кнопка записи */}
@@ -269,17 +373,85 @@ export function Header() {
             aria-label='Мобильная навигация'
           >
             <div className='flex flex-col space-y-4'>
-              {navigationItems.map(item => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={closeMenu}
-                  className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === item.href ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                  aria-current={pathname === item.href ? 'page' : undefined}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {navigationItems.map(item => {
+                if (item.label === 'Услуги') {
+                  return (
+                    <div key={item.href} className='flex flex-col'>
+                      <button
+                        onClick={() =>
+                          setIsMobileServicesOpen(!isMobileServicesOpen)
+                        }
+                        className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none text-left flex items-center justify-between ${pathname === item.href ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
+                        aria-expanded={isMobileServicesOpen}
+                        aria-haspopup='true'
+                      >
+                        {item.label}
+                        <svg
+                          className={`w-4 h-4 transition-transform duration-200 ${isMobileServicesOpen ? 'rotate-180' : ''}`}
+                          fill='none'
+                          stroke='currentColor'
+                          viewBox='0 0 24 24'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M19 9l-7 7-7-7'
+                          />
+                        </svg>
+                      </button>
+
+                      {/* Подменю услуг для мобильной версии */}
+                      <div
+                        className={`overflow-hidden transition-all duration-300 ${isMobileServicesOpen ? 'max-h-96 mt-2' : 'max-h-0'}`}
+                      >
+                        <div className='pl-4 space-y-2'>
+                          {servicesDropdownItems.map(service => (
+                            <Link
+                              key={service.href}
+                              href={service.href}
+                              onClick={closeMenu}
+                              className='block py-2 text-sm text-gray-600 hover:text-primary transition-colors duration-200 border-l-2 border-transparent hover:border-primary pl-2'
+                            >
+                              <div className='font-medium'>{service.label}</div>
+                              <div
+                                className='text-xs text-gray-500 mt-1'
+                                style={{
+                                  overflow: 'hidden',
+                                  whiteSpace: 'nowrap',
+                                  textOverflow: 'ellipsis',
+                                }}
+                                title={service.description}
+                              >
+                                {service.description}
+                              </div>
+                            </Link>
+                          ))}
+                          <Link
+                            href='/products'
+                            onClick={closeMenu}
+                            className='block py-2 text-sm font-medium text-primary hover:text-primary-dark transition-colors duration-200 border-l-2 border-transparent hover:border-primary pl-2'
+                          >
+                            Все услуги →
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={closeMenu}
+                    className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === item.href ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
+                    aria-current={pathname === item.href ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
               <button
                 onClick={openBookingModal}
                 className='bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'

@@ -136,10 +136,16 @@ function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
           </motion.h3>
           <motion.p
             className='text-dark mb-4'
+            style={{
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+            }}
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.3, delay: delay + 0.3 }}
+            title={description}
           >
             {description}
           </motion.p>
