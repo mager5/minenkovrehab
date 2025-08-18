@@ -310,7 +310,7 @@ export const contactsContent = {
   phone: '+7 928 328 70 52',
   address: 'Москва',
   social: {
-    vk: 'https://vk.com/minenkovrehab',
+    vk: 'https://vk.com/minenkov_rehab',
     telegram: 'https://t.me/MV_Rehab',
   },
 };

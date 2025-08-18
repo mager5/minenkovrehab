@@ -402,7 +402,7 @@ export default function ReviewsPage() {
               whileTap={{ scale: 0.98 }}
             >
               <Link
-                href='mailto:vadim@minenkovrehab.ru'
+                href='mailto:minenkov.rehab@yandex.ru'
                 className='inline-flex items-center justify-center px-6 py-3 bg-[#E0F2F8] text-[#333333] font-medium rounded-lg hover:bg-[#E0F2F8]/80 transition-colors'
               >
                 <svg

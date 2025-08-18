@@ -35,7 +35,7 @@ export default function ContactsPage() {
     phone: '+79283287052',
     email: 'minenkov.rehab@yandex.ru',
     social: {
-      vk: 'https://vk.com/minenkovrehab',
+      vk: 'https://vk.com/minenkov_rehab',
       telegram: 'https://t.me/MV_Rehab',
     },
   });

@@ -67,7 +67,7 @@ export default function AvatarPage() {
                   className='flex items-center gap-2'
                 >
                   <Calendar className='w-4 h-4' />
-                  Записаться к врачу
+                  Записаться
                 </Button>
               </Link>
               <Link href='/contacts'>

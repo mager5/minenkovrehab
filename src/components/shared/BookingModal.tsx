@@ -213,7 +213,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                   className='text-2xl font-bold text-primary mb-8 relative inline-block'
                   id='booking-modal-title'
                 >
-                  Записаться на приём
+                  Записаться
                   <span
                     className='block h-1.5 w-24 bg-accent mt-2 rounded-full'
                     aria-hidden='true'
