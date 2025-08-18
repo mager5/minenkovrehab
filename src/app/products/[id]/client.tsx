@@ -213,7 +213,7 @@ export default function ProductClient({ product }: { product: Product }) {
                 {product.title}
               </motion.h1>
 
-              {/* Карусель изображений для протокола реабилитации */}
+              {/* Карусель изображений для восстановительной программы */}
               {(product.id === 'rehabilitation-protocols' ||
                 product.id === 'personal-program') && (
                 <motion.div

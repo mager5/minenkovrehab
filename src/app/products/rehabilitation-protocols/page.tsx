@@ -3,7 +3,7 @@ import { getProductById } from '../productAdapter';
 import ProductPageProxy from '../[id]/page-proxy';
 
 export const metadata: Metadata = {
-  title: 'Протоколы реабилитации | Миненков Вадим',
+  title: 'Восстановительные программы | Миненков Вадим',
   description:
     'Пошаговые алгоритмы с подробным объяснением и демонстрацией упражнений при различных состояниях опорно-двигательного аппарата.',
 };

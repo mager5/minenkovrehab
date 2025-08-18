@@ -22,7 +22,7 @@ const servicesDropdownItems = [
   },
   {
     href: '/products/personal-program',
-    label: 'Протокол реабилитации',
+    label: 'Восстановительная программа',
     description: 'Пошаговый алгоритм после операций',
   },
   {

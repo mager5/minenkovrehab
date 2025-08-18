@@ -32,7 +32,7 @@ export async function getContent<T>(contentType: string): Promise<T> {
         },
         {
           id: 'personal-program',
-          title: 'Резекция мениска. Протокол реабилитации.',
+          title: 'Резекция мениска. Восстановительная программа.',
           description:
             'Пошаговый алгоритм действий после операции коленного сустава (резекция мениска)',
           price: formatPrice('personal-program', 8000),

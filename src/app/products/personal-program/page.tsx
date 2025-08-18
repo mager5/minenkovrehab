@@ -3,7 +3,7 @@ import { getProductById } from '../productAdapter';
 import ProductPageProxy from '../[id]/page-proxy';
 
 export const metadata: Metadata = {
-  title: 'Резекция мениска. Протокол реабилитации. | Миненков Вадим',
+  title: 'Резекция мениска. Восстановительная программа. | Миненков Вадим',
   description:
     'Подробный информационный материал в формате пошагового алгоритма для восстановления после операции.',
 };

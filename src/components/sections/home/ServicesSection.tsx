@@ -82,7 +82,7 @@ function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
     if (serviceTitle.includes('Формула Движения')) {
       return '/products/formula-movement';
     }
-    if (serviceTitle.includes('Протокол')) {
+    if (serviceTitle.includes('Программа')) {
       return '/products/personal-program';
     }
     if (serviceTitle.includes('консультаци')) {

@@ -193,9 +193,9 @@ const ServicesColumn = () => {
             href='/products/personal-program'
             className='text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline'
             style={{ color: '#d1f3ea' }}
-            aria-label='Протоколы реабилитации'
+            aria-label='Восстановительные программы'
           >
-            Протоколы реабилитации
+            Восстановительные программы
           </Link>
         </li>
         <li role='listitem'>
