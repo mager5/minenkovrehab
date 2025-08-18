@@ -463,8 +463,10 @@ export default function ReviewsPage() {
             whileTap={{ scale: 0.98 }}
           >
             <Link
-              href='/contact'
+              href='https://t.me/vadim_minenkov'
               className='inline-flex items-center px-8 py-4 bg-[#B5D334] text-white font-bold rounded-lg hover:bg-[#B5D334]/90 transition-colors'
+              target='_blank'
+              rel='noopener noreferrer'
             >
               Записаться на консультацию
               <svg

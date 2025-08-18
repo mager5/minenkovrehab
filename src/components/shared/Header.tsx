@@ -230,7 +230,7 @@ export function Header() {
                     >
                       <Link
                         href={item.href}
-                        className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap flex items-center ${pathname === item.href || pathname.startsWith('/products/') ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                        className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap flex items-center ${pathname === item.href || (pathname && pathname.startsWith('/products/')) ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                         aria-current={
                           pathname === item.href ? 'page' : undefined
                         }
