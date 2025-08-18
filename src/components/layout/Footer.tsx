@@ -499,7 +499,9 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
           style={{ color: '#d1f3ea' }}
         >
           © {currentYear}{' '}
-          <span className='hidden md:inline'>ИП Миненков Вадим Леонидович</span>
+          <span className='hidden md:inline'>
+            ИП Миненков Вадим Леонидович.
+          </span>
           <span className='md:hidden'>ИП Миненков В.Л.</span> Все права
           защищены.
         </p>
