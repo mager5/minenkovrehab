@@ -63,7 +63,7 @@ export default function RequisitesPage() {
                 <br />
                 или в Telegram:
                 <a
-                  href='https://t.me/vadim_minenkov'
+                  href='https://t.me/MV_Rehab'
                   className='text-primary hover:underline ml-1'
                   target='_blank'
                   rel='noopener noreferrer'

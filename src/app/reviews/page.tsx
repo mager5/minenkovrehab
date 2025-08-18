@@ -378,7 +378,7 @@ export default function ReviewsPage() {
               whileTap={{ scale: 0.98 }}
             >
               <Link
-                href='https://t.me/vadim_minenkov'
+                href='https://t.me/MV_Rehab'
                 target='_blank'
                 className='inline-flex items-center justify-center px-6 py-3 bg-[#3A7CA5] text-white font-medium rounded-lg hover:bg-[#3A7CA5]/90 transition-colors'
               >
@@ -463,7 +463,7 @@ export default function ReviewsPage() {
             whileTap={{ scale: 0.98 }}
           >
             <Link
-              href='https://t.me/vadim_minenkov'
+              href='https://t.me/MV_Rehab'
               className='inline-flex items-center px-8 py-4 bg-[#B5D334] text-white font-bold rounded-lg hover:bg-[#B5D334]/90 transition-colors'
               target='_blank'
               rel='noopener noreferrer'

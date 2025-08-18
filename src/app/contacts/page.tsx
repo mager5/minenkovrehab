@@ -36,7 +36,7 @@ export default function ContactsPage() {
     email: 'minenkov.rehab@yandex.ru',
     social: {
       vk: 'https://vk.com/minenkovrehab',
-      telegram: 'https://t.me/minenkov_rehab',
+      telegram: 'https://t.me/MV_Rehab',
     },
   });
 

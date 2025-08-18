@@ -171,7 +171,7 @@ export async function getContent<T>(contentType: string): Promise<T> {
       address: 'Москва',
       social: {
         vk: 'https://vk.com/minenkovrehab',
-        telegram: 'https://t.me/minenkov_rehab',
+        telegram: 'https://t.me/MV_Rehab',
       },
     } as T;
   }
