@@ -454,12 +454,17 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
   <div className='bg-primary-dark py-4 border-t border-primary/30'>
     <div className='container mx-auto px-4'>
       <div className='flex flex-col md:flex-row justify-between items-center'>
-        <p
-          className='text-white text-center md:text-left font-semibold'
-          style={{ color: '#d1f3ea' }}
-        >
-          © {currentYear} Миненков Вадим. Все права защищены.
-        </p>
+        <div className='text-center md:text-left'>
+          <p className='text-white font-semibold' style={{ color: '#d1f3ea' }}>
+            © {currentYear} Миненков Вадим. Все права защищены.
+          </p>
+          <p
+            className='text-white text-xs mt-1 opacity-80'
+            style={{ color: '#d1f3ea' }}
+          >
+            ИНН 262703733425 • ОГРН 325265100067202
+          </p>
+        </div>
         <div className='mt-4 md:mt-0 flex flex-wrap justify-center md:justify-end'>
           <ul
             className='flex flex-wrap justify-center space-x-3 sm:space-x-6'
