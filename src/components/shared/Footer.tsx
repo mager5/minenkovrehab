@@ -456,7 +456,7 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
       <div className='flex flex-col md:flex-row justify-between items-center'>
         <div className='text-center md:text-left'>
           <p className='text-white font-semibold' style={{ color: '#d1f3ea' }}>
-            © {currentYear} Миненков Вадим. Все права защищены.
+            © {currentYear} Миненков В.Л. Все права защищены.
           </p>
           <p
             className='text-white text-xs mt-1 opacity-80'

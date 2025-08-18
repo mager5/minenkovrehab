@@ -498,7 +498,7 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
           className='text-white text-center md:text-left font-semibold'
           style={{ color: '#d1f3ea' }}
         >
-          © {currentYear} Миненков Вадим. Все права защищены.
+          © {currentYear} Миненков В.Л. Все права защищены.
         </p>
         <div className='mt-4 md:mt-0 flex flex-wrap justify-center md:justify-end'>
           <ul
