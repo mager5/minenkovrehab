@@ -60,14 +60,14 @@ export default function Home() {
                 Физическая реабилитация и тренировки для здоровья
               </motion.h1>
               <motion.p
-                className='text-base sm:text-lg md:text-xl opacity-95 mb-8 font-medium leading-relaxed space-y-2'
+                className='text-base sm:text-lg md:text-xl opacity-95 mb-8 font-medium leading-relaxed'
                 style={{ color: '#FFFFFF', opacity: 1, transform: 'none' }}
               >
-                <span className='block'>
+                <span className='block mb-3'>
                   Индивидуальный подход в подборе тренировок с учетом состояния
                   вашего здоровья
                 </span>
-                <span className='block'>
+                <span className='block mb-3'>
                   Программа тренировок "Формула Движения"
                 </span>
                 <span className='block'>
