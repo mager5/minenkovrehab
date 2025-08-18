@@ -256,8 +256,8 @@ export default function ReviewsPage() {
             ))}
           </div>
 
-          {/* Кнопка "Показать больше отзывов" */}
-          <motion.div
+          {/* Кнопка "Показать больше отзывов" - скрыта */}
+          {/* <motion.div
             className='flex justify-center mt-12'
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -283,7 +283,7 @@ export default function ReviewsPage() {
             >
               Показать больше отзывов
             </motion.button>
-          </motion.div>
+          </motion.div> */}
         </div>
       </section>
 
