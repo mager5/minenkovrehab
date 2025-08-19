@@ -377,29 +377,41 @@ export function Header() {
                 if (item.label === 'Услуги') {
                   return (
                     <div key={item.href} className='flex flex-col'>
-                      <button
-                        onClick={() =>
-                          setIsMobileServicesOpen(!isMobileServicesOpen)
-                        }
-                        className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none text-left flex items-center justify-between ${pathname === item.href ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                        aria-expanded={isMobileServicesOpen}
-                        aria-haspopup='true'
-                      >
-                        {item.label}
-                        <svg
-                          className={`w-4 h-4 transition-transform duration-200 ${isMobileServicesOpen ? 'rotate-180' : ''}`}
-                          fill='none'
-                          stroke='currentColor'
-                          viewBox='0 0 24 24'
+                      <div className='flex items-center justify-between'>
+                        <Link
+                          href={item.href}
+                          onClick={closeMenu}
+                          className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none flex-1 ${pathname === item.href ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
+                          aria-current={
+                            pathname === item.href ? 'page' : undefined
+                          }
                         >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M19 9l-7 7-7-7'
-                          />
-                        </svg>
-                      </button>
+                          {item.label}
+                        </Link>
+                        <button
+                          onClick={() =>
+                            setIsMobileServicesOpen(!isMobileServicesOpen)
+                          }
+                          className='ml-2 p-1 hover:text-primary transition-all duration-300 focus:outline-none'
+                          aria-expanded={isMobileServicesOpen}
+                          aria-haspopup='true'
+                          aria-label='Развернуть меню услуг'
+                        >
+                          <svg
+                            className={`w-4 h-4 transition-transform duration-200 ${isMobileServicesOpen ? 'rotate-180' : ''}`}
+                            fill='none'
+                            stroke='currentColor'
+                            viewBox='0 0 24 24'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={2}
+                              d='M19 9l-7 7-7-7'
+                            />
+                          </svg>
+                        </button>
+                      </div>
 
                       {/* Подменю услуг для мобильной версии */}
                       <div
