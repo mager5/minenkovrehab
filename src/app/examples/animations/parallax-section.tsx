@@ -57,7 +57,7 @@ const ParallaxSection = () => {
             Узнать подробнее
           </button>
           <button className='px-6 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-full hover:bg-white/10 transition'>
-            Записаться на приём
+            Записаться
           </button>
         </div>
       </motion.div>
