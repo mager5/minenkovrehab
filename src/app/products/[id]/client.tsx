@@ -35,6 +35,20 @@ export default function ProductClient({ product }: { product: Product }) {
   const [isConsentCheckedLevel4, setIsConsentCheckedLevel4] = useState(false);
   const [showConsentErrorLevel4, setShowConsentErrorLevel4] = useState(false);
 
+  // Состояния для анимации оплаты для каждого уровня
+  const [isPaymentProcessingLevel1, setIsPaymentProcessingLevel1] =
+    useState(false);
+  const [paymentSuccessLevel1, setPaymentSuccessLevel1] = useState(false);
+  const [isPaymentProcessingLevel2, setIsPaymentProcessingLevel2] =
+    useState(false);
+  const [paymentSuccessLevel2, setPaymentSuccessLevel2] = useState(false);
+  const [isPaymentProcessingLevel3, setIsPaymentProcessingLevel3] =
+    useState(false);
+  const [paymentSuccessLevel3, setPaymentSuccessLevel3] = useState(false);
+  const [isPaymentProcessingLevel4, setIsPaymentProcessingLevel4] =
+    useState(false);
+  const [paymentSuccessLevel4, setPaymentSuccessLevel4] = useState(false);
+
   // Проверка согласия перед действием
   const checkConsent = () => {
     if (!isConsentChecked) {
@@ -89,7 +103,7 @@ export default function ProductClient({ product }: { product: Product }) {
       setTimeout(() => setShowConsentError(false), 3000);
       return;
     }
-    await handlePayment();
+    await handlePayment(1);
   };
 
   const handlePaymentLevel2 = async () => {
@@ -98,7 +112,7 @@ export default function ProductClient({ product }: { product: Product }) {
       setTimeout(() => setShowConsentErrorLevel2(false), 3000);
       return;
     }
-    await handlePayment();
+    await handlePayment(2);
   };
 
   const handlePaymentLevel3 = async () => {
@@ -107,7 +121,7 @@ export default function ProductClient({ product }: { product: Product }) {
       setTimeout(() => setShowConsentErrorLevel3(false), 3000);
       return;
     }
-    await handlePayment();
+    await handlePayment(3);
   };
 
   const handlePaymentLevel4 = async () => {
@@ -116,13 +130,29 @@ export default function ProductClient({ product }: { product: Product }) {
       setTimeout(() => setShowConsentErrorLevel4(false), 3000);
       return;
     }
-    await handlePayment();
+    await handlePayment(4);
   };
 
   // Динамическая генерация ссылки на оплату через Railway API
-  const handlePayment = async () => {
+  const handlePayment = async (level: number) => {
     try {
       console.log('🔄 Создание платежа для продукта:', product.title);
+
+      // Устанавливаем состояние загрузки для соответствующего уровня
+      switch (level) {
+        case 1:
+          setIsPaymentProcessingLevel1(true);
+          break;
+        case 2:
+          setIsPaymentProcessingLevel2(true);
+          break;
+        case 3:
+          setIsPaymentProcessingLevel3(true);
+          break;
+        case 4:
+          setIsPaymentProcessingLevel4(true);
+          break;
+      }
 
       // Прямое обращение к Railway API
       const response = await fetch(
@@ -149,15 +179,59 @@ export default function ProductClient({ product }: { product: Product }) {
 
       if (result.success && result.data?.paymentUrl) {
         console.log('✅ Платежная ссылка получена:', result.data.paymentUrl);
-        // Проверяем, что в URL нет лишних кавычек (оставляем для совместимости)
-        const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
-        console.log('🔍 Очищенная ссылка:', cleanUrl);
-        window.location.href = cleanUrl;
+
+        // Показываем галочку на 1 секунду перед переходом
+        switch (level) {
+          case 1:
+            setIsPaymentProcessingLevel1(false);
+            setPaymentSuccessLevel1(true);
+            break;
+          case 2:
+            setIsPaymentProcessingLevel2(false);
+            setPaymentSuccessLevel2(true);
+            break;
+          case 3:
+            setIsPaymentProcessingLevel3(false);
+            setPaymentSuccessLevel3(true);
+            break;
+          case 4:
+            setIsPaymentProcessingLevel4(false);
+            setPaymentSuccessLevel4(true);
+            break;
+        }
+
+        // Ждем 1 секунду, затем переходим на платежную систему
+        setTimeout(() => {
+          const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
+          console.log('🔍 Переход на платежную систему:', cleanUrl);
+          window.location.href = cleanUrl;
+        }, 1000);
       } else {
         throw new Error('Не удалось получить ссылку для оплаты');
       }
     } catch (error) {
       console.error('❌ Ошибка при создании платежа:', error);
+
+      // Сбрасываем состояния при ошибке
+      switch (level) {
+        case 1:
+          setIsPaymentProcessingLevel1(false);
+          setPaymentSuccessLevel1(false);
+          break;
+        case 2:
+          setIsPaymentProcessingLevel2(false);
+          setPaymentSuccessLevel2(false);
+          break;
+        case 3:
+          setIsPaymentProcessingLevel3(false);
+          setPaymentSuccessLevel3(false);
+          break;
+        case 4:
+          setIsPaymentProcessingLevel4(false);
+          setPaymentSuccessLevel4(false);
+          break;
+      }
+
       alert('Произошла ошибка при создании платежа. Попробуйте еще раз.');
     }
   };
@@ -434,13 +508,55 @@ export default function ProductClient({ product }: { product: Product }) {
                 >
                   <button
                     onClick={handlePaymentLevel1}
-                    className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg ${
-                      isConsentChecked
+                    disabled={!isConsentChecked || isPaymentProcessingLevel1}
+                    className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg flex items-center justify-center space-x-2 ${
+                      isConsentChecked && !isPaymentProcessingLevel1
                         ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
                         : 'bg-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    Купить онлайн
+                    {isPaymentProcessingLevel1 ? (
+                      <>
+                        <svg
+                          className='animate-spin h-5 w-5 text-white'
+                          xmlns='http://www.w3.org/2000/svg'
+                          fill='none'
+                          viewBox='0 0 24 24'
+                        >
+                          <circle
+                            className='opacity-25'
+                            cx='12'
+                            cy='12'
+                            r='10'
+                            stroke='currentColor'
+                            strokeWidth='4'
+                          ></circle>
+                          <path
+                            className='opacity-75'
+                            fill='currentColor'
+                            d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                          ></path>
+                        </svg>
+                        <span>Обработка...</span>
+                      </>
+                    ) : paymentSuccessLevel1 ? (
+                      <>
+                        <svg
+                          className='h-5 w-5 text-white'
+                          fill='currentColor'
+                          viewBox='0 0 20 20'
+                        >
+                          <path
+                            fillRule='evenodd'
+                            d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                            clipRule='evenodd'
+                          />
+                        </svg>
+                        <span>Успешно!</span>
+                      </>
+                    ) : (
+                      'Купить онлайн'
+                    )}
                   </button>
                 </motion.div>
 
@@ -592,13 +708,57 @@ export default function ProductClient({ product }: { product: Product }) {
                 </div>
                 <button
                   onClick={handlePaymentLevel2}
-                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 ${
-                    isConsentCheckedLevel2
+                  disabled={
+                    !isConsentCheckedLevel2 || isPaymentProcessingLevel2
+                  }
+                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
+                    isConsentCheckedLevel2 && !isPaymentProcessingLevel2
                       ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
                       : 'bg-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  Купить онлайн
+                  {isPaymentProcessingLevel2 ? (
+                    <>
+                      <svg
+                        className='animate-spin h-5 w-5 text-white'
+                        xmlns='http://www.w3.org/2000/svg'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                      >
+                        <circle
+                          className='opacity-25'
+                          cx='12'
+                          cy='12'
+                          r='10'
+                          stroke='currentColor'
+                          strokeWidth='4'
+                        ></circle>
+                        <path
+                          className='opacity-75'
+                          fill='currentColor'
+                          d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                        ></path>
+                      </svg>
+                      <span>Обработка...</span>
+                    </>
+                  ) : paymentSuccessLevel2 ? (
+                    <>
+                      <svg
+                        className='h-5 w-5 text-white'
+                        fill='currentColor'
+                        viewBox='0 0 20 20'
+                      >
+                        <path
+                          fillRule='evenodd'
+                          d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                          clipRule='evenodd'
+                        />
+                      </svg>
+                      <span>Успешно!</span>
+                    </>
+                  ) : (
+                    'Купить онлайн'
+                  )}
                 </button>
                 {isConsentCheckedLevel2 ? (
                   <Link
@@ -710,13 +870,57 @@ export default function ProductClient({ product }: { product: Product }) {
                 </div>
                 <button
                   onClick={handlePaymentLevel3}
-                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 ${
-                    isConsentCheckedLevel3
+                  disabled={
+                    !isConsentCheckedLevel3 || isPaymentProcessingLevel3
+                  }
+                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
+                    isConsentCheckedLevel3 && !isPaymentProcessingLevel3
                       ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
                       : 'bg-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  Купить онлайн
+                  {isPaymentProcessingLevel3 ? (
+                    <>
+                      <svg
+                        className='animate-spin h-5 w-5 text-white'
+                        xmlns='http://www.w3.org/2000/svg'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                      >
+                        <circle
+                          className='opacity-25'
+                          cx='12'
+                          cy='12'
+                          r='10'
+                          stroke='currentColor'
+                          strokeWidth='4'
+                        ></circle>
+                        <path
+                          className='opacity-75'
+                          fill='currentColor'
+                          d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                        ></path>
+                      </svg>
+                      <span>Обработка...</span>
+                    </>
+                  ) : paymentSuccessLevel3 ? (
+                    <>
+                      <svg
+                        className='h-5 w-5 text-white'
+                        fill='currentColor'
+                        viewBox='0 0 20 20'
+                      >
+                        <path
+                          fillRule='evenodd'
+                          d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                          clipRule='evenodd'
+                        />
+                      </svg>
+                      <span>Успешно!</span>
+                    </>
+                  ) : (
+                    'Купить онлайн'
+                  )}
                 </button>
                 {isConsentCheckedLevel3 ? (
                   <Link
@@ -828,13 +1032,57 @@ export default function ProductClient({ product }: { product: Product }) {
                 </div>
                 <button
                   onClick={handlePaymentLevel4}
-                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 ${
-                    isConsentCheckedLevel4
+                  disabled={
+                    !isConsentCheckedLevel4 || isPaymentProcessingLevel4
+                  }
+                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
+                    isConsentCheckedLevel4 && !isPaymentProcessingLevel4
                       ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
                       : 'bg-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  Купить онлайн
+                  {isPaymentProcessingLevel4 ? (
+                    <>
+                      <svg
+                        className='animate-spin h-5 w-5 text-white'
+                        xmlns='http://www.w3.org/2000/svg'
+                        fill='none'
+                        viewBox='0 0 24 24'
+                      >
+                        <circle
+                          className='opacity-25'
+                          cx='12'
+                          cy='12'
+                          r='10'
+                          stroke='currentColor'
+                          strokeWidth='4'
+                        ></circle>
+                        <path
+                          className='opacity-75'
+                          fill='currentColor'
+                          d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                        ></path>
+                      </svg>
+                      <span>Обработка...</span>
+                    </>
+                  ) : paymentSuccessLevel4 ? (
+                    <>
+                      <svg
+                        className='h-5 w-5 text-white'
+                        fill='currentColor'
+                        viewBox='0 0 20 20'
+                      >
+                        <path
+                          fillRule='evenodd'
+                          d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                          clipRule='evenodd'
+                        />
+                      </svg>
+                      <span>Успешно!</span>
+                    </>
+                  ) : (
+                    'Купить онлайн'
+                  )}
                 </button>
                 {isConsentCheckedLevel4 ? (
                   <Link
