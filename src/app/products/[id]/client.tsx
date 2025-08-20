@@ -137,24 +137,33 @@ export default function ProductClient({ product }: { product: Product }) {
   const handlePayment = async (level: number) => {
     try {
       console.log('🔄 Создание платежа для продукта:', product.title);
+      console.log('🔄 Уровень:', level);
 
       // Устанавливаем состояние загрузки для соответствующего уровня
       switch (level) {
         case 1:
           setIsPaymentProcessingLevel1(true);
+          console.log('✅ Спиннер активирован для уровня 1');
           break;
         case 2:
           setIsPaymentProcessingLevel2(true);
+          console.log('✅ Спиннер активирован для уровня 2');
           break;
         case 3:
           setIsPaymentProcessingLevel3(true);
+          console.log('✅ Спиннер активирован для уровня 3');
           break;
         case 4:
           setIsPaymentProcessingLevel4(true);
+          console.log('✅ Спиннер активирован для уровня 4');
           break;
       }
 
+      // Добавляем минимальную задержку, чтобы пользователь увидел спиннер
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       // Прямое обращение к Railway API
+      console.log('🌐 Отправка запроса к Railway API...');
       const response = await fetch(
         'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url',
         {
@@ -171,11 +180,18 @@ export default function ProductClient({ product }: { product: Product }) {
         }
       );
 
+      console.log('📡 Ответ от API:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error('Ошибка создания платежа');
+        const errorText = await response.text();
+        console.error('❌ Ошибка API:', errorText);
+        throw new Error(
+          `Ошибка создания платежа: ${response.status} ${response.statusText}`
+        );
       }
 
       const result = await response.json();
+      console.log('📦 Результат от API:', result);
 
       if (result.success && result.data?.paymentUrl) {
         console.log('✅ Платежная ссылка получена:', result.data.paymentUrl);
@@ -212,6 +228,9 @@ export default function ProductClient({ product }: { product: Product }) {
     } catch (error) {
       console.error('❌ Ошибка при создании платежа:', error);
 
+      // Добавляем задержку перед сбросом состояния, чтобы пользователь увидел спиннер
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Сбрасываем состояния при ошибке
       switch (level) {
         case 1:
@@ -232,7 +251,12 @@ export default function ProductClient({ product }: { product: Product }) {
           break;
       }
 
-      alert('Произошла ошибка при создании платежа. Попробуйте еще раз.');
+      // Более информативное сообщение об ошибке
+      const errorMessage =
+        error instanceof Error ? error.message : 'Неизвестная ошибка';
+      alert(
+        `Произошла ошибка при создании платежа: ${errorMessage}\n\nПопробуйте еще раз или обратитесь в поддержку.`
+      );
     }
   };
 
