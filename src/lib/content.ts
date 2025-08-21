@@ -39,14 +39,6 @@ export async function getContent<T>(contentType: string): Promise<T> {
           image: '/images/products/personal-program.jpg',
         },
         {
-          id: 'express-consultation',
-          title: 'Экспресс онлайн-консультация',
-          description:
-            'Быстрая консультация в формате видеозвонка для решения конкретных вопросов. Продолжительность — 20 минут. Идеально подходит для получения рекомендаций по упражнениям, разбора техники выполнения или консультации по текущему состоянию.',
-          price: formatPrice('express-consultation', 3000),
-          image: '/images/products/express-consultation.jpg',
-        },
-        {
           id: 'formula-movement',
           title: 'Программа тренировок "Формула Движения"',
           description:
@@ -68,6 +60,14 @@ export async function getContent<T>(contentType: string): Promise<T> {
             'Индивидуальная онлайн-тренировка в формате видеозвонка проводится по предварительному согласованию времени и даты.',
           price: formatPrice('online-training', 5000),
           image: '/images/products/online_training.jpg',
+        },
+        {
+          id: 'express-consultation',
+          title: 'Экспресс онлайн-консультация',
+          description:
+            'Быстрая консультация в формате видеозвонка для решения конкретных вопросов. Продолжительность — 20 минут. Идеально подходит для получения рекомендаций по упражнениям, разбора техники выполнения или консультации по текущему состоянию.',
+          price: formatPrice('express-consultation', 3000),
+          image: '/images/products/consultation.jpg',
         },
         // {
         //   id: 'online-support', // Удален продукт
