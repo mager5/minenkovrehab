@@ -44,25 +44,27 @@ export function ServicesSection() {
         </motion.div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8'>
-          {homeContent.services.items.map((service, index) => (
-            <ServiceCard
-              key={service.title}
-              title={service.title}
-              description={service.description}
-              image={
-                service.icon === 'consultation'
-                  ? '/images/hero/online-consultation.jpg'
-                  : service.icon === 'rehabilitation'
-                    ? '/images/hero/formula-m.jpg'
-                    : service.icon === 'online'
-                      ? '/images/hero/protocols.jpg'
-                      : service.icon === 'training'
-                        ? '/images/products/online_training.jpg'
-                        : `/images/services/${service.icon}.svg`
-              }
-              delay={0.1 * (index + 1)}
-            />
-          ))}
+          {homeContent.services.items
+            .filter(service => service.title !== 'Экспресс онлайн-консультация')
+            .map((service, index) => (
+              <ServiceCard
+                key={service.title}
+                title={service.title}
+                description={service.description}
+                image={
+                  service.icon === 'consultation'
+                    ? '/images/hero/online-consultation.jpg'
+                    : service.icon === 'rehabilitation'
+                      ? '/images/hero/formula-m.jpg'
+                      : service.icon === 'online'
+                        ? '/images/hero/protocols.jpg'
+                        : service.icon === 'training'
+                          ? '/images/products/online_training.jpg'
+                          : `/images/services/${service.icon}.svg`
+                }
+                delay={0.1 * (index + 1)}
+              />
+            ))}
         </div>
       </div>
     </section>
