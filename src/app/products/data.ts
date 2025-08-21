@@ -24,7 +24,7 @@ export function formatPrice(productId: string, price: number): string {
     case 'formula-movement':
       return `${price.toLocaleString('ru-RU')} ₽ / УРОВЕНЬ (2 МЕС.)`;
     case 'express-consultation':
-      return `${price.toLocaleString('ru-RU')} ₽ / 30 МИН.`;
+      return `${price.toLocaleString('ru-RU')} ₽ / 20 МИН.`;
     default:
       return `${price.toLocaleString('ru-RU')} ₽`;
   }
