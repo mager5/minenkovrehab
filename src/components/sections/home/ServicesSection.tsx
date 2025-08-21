@@ -85,6 +85,9 @@ function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
     if (serviceTitle.includes('Программа')) {
       return '/products/personal-program';
     }
+    if (serviceTitle.includes('Экспресс онлайн-консультация')) {
+      return '/products/express-consultation';
+    }
     if (serviceTitle.includes('консультаци')) {
       return '/products/consultation';
     }

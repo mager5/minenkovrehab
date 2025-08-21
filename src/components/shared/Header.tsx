@@ -16,6 +16,11 @@ const servicesDropdownItems = [
     description: 'Индивидуальный разбор вашей ситуации',
   },
   {
+    href: '/products/express-consultation',
+    label: 'Экспресс онлайн-консультация',
+    description: 'Быстрая консультация для разбора конкретного вопроса',
+  },
+  {
     href: '/products/formula-movement',
     label: 'Программа "Формула Движения"',
     description: 'Авторская программа тренировок для всего тела',

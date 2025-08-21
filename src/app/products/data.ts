@@ -23,6 +23,8 @@ export function formatPrice(productId: string, price: number): string {
       return `${price.toLocaleString('ru-RU')} ₽ / 6 МЕС.`;
     case 'formula-movement':
       return `${price.toLocaleString('ru-RU')} ₽ / УРОВЕНЬ (2 МЕС.)`;
+    case 'express-consultation':
+      return `${price.toLocaleString('ru-RU')} ₽ / 30 МИН.`;
     default:
       return `${price.toLocaleString('ru-RU')} ₽`;
   }
@@ -119,6 +121,20 @@ export const products: Product[] = [
     ],
     price: 5000,
     image: '/images/products/online_training.jpg',
+  },
+  {
+    id: 'express-consultation',
+    title: 'Экспресс онлайн-консультация',
+    shortDescription:
+      'Быстрая консультация для разбора конкретного вопроса и получения рекомендаций.',
+    fullDescription: [
+      'Разбор истории вашего состояния',
+      'Ответы на все ваши вопросы',
+      'Определение целей и задач',
+      'Выбор вектора действий по решению вашего вопроса',
+    ],
+    price: 3000,
+    image: '/images/products/consultation.jpg',
   },
   {
     id: 'formula-movement',

@@ -90,6 +90,12 @@ export const homeContent: HomeContent = {
           'Персональные тренировки в режиме реального времени с индивидуальным подходом и коррекцией техники выполнения упражнений.',
         icon: 'training',
       },
+      {
+        title: 'Экспресс онлайн-консультация',
+        description:
+          'Быстрая профессиональная консультация для решения ваших вопросов. Разбор истории состояния, ответы на вопросы, определение целей и выбор вектора действий.',
+        icon: 'consultation',
+      },
     ],
   },
   help: {
@@ -298,6 +304,14 @@ export const productsContent: ProductContentType = {
       price: formatPrice('personal-program', 8000),
       image: '/images/services/program.jpg',
     },
+    {
+      id: 'express-consultation',
+      title: 'Экспресс онлайн-консультация',
+      description:
+        'Быстрая профессиональная консультация для решения ваших вопросов. Разбор истории состояния, ответы на вопросы, определение целей и выбор вектора действий.',
+      price: '3 000 ₽',
+      image: '/images/services/consultation.jpg',
+    },
   ],
 };
 
@@ -320,6 +334,7 @@ export const contactsContent = {
  */
 export const bookingServices = [
   { id: 'online-consultation', name: 'Онлайн консультация' },
+  { id: 'express-consultation', name: 'Экспресс онлайн-консультация' },
   { id: 'formula-movement', name: 'Программа тренировок "Формула Движения"' },
   { id: 'rehab-protocol', name: 'Восстановительная программа' },
   { id: 'online-training', name: 'Онлайн тренировки' },
