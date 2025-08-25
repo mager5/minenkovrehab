@@ -174,6 +174,7 @@ export default function ProductClient({ product }: { product: Product }) {
           body: JSON.stringify({
             amount: product.price,
             // description: product.title, // Убрано по требованию пользователя
+            productId: product.id, // Добавляем ID продукта для правильной фискализации
             level: level, // Передаем уровень отдельным параметром
             email: 'customer@example.com', // Можно добавить форму для email
             phone: '+79001234567', // Корректный формат телефона

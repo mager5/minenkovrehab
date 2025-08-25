@@ -52,27 +52,14 @@ router.post('/generate-payment-url', async (req, res) => {
     }
 
     // Извлечение и санитизация данных
-    const {
-      amount: rawAmount,
-      email: rawEmail,
-      phone: rawPhone,
-      level,
-      productId,
-    } = req.body;
-    console.log('📦 Получены данные:', {
-      amount: rawAmount,
-      email: rawEmail,
-      phone: rawPhone,
-      level,
-      productId,
-    });
-
-    const email = rawEmail ? sanitizeString(rawEmail) : undefined;
-    const phone = rawPhone ? normalizePhone(rawPhone) : undefined;
-    const amount = parseFloat(rawAmount);
+    const email = req.body.email ? sanitizeString(req.body.email) : undefined;
+    const phone = req.body.phone ? normalizePhone(req.body.phone) : undefined;
+    const amount = parseFloat(req.body.amount);
     // const description = sanitizeString(
     //   req.body.description || 'Абонемент клуба формула движения'
     // ); // Убрано по требованию пользователя
+    const productId = req.body.productId; // Получаем ID продукта для определения типа услуги
+    const level = req.body.level; // Получаем уровень отдельным параметром
 
     // Генерируем уникальный ID заказа (числовой, требование Robokassa)
     const invId = generateInvoiceId();
@@ -119,53 +106,49 @@ router.post('/generate-payment-url', async (req, res) => {
     let receiptParam = null;
 
     // Если в запросе передан объект receipt, используем его
+    console.log('🔍 Проверка req.body.receipt:', req.body.receipt);
     if (req.body.receipt) {
       receiptParam = JSON.stringify(req.body.receipt);
       console.log('📄 Использован переданный параметр Receipt:', receiptParam);
     }
     // Иначе создаем автоматически, если есть email или phone
     else if (email || phone) {
-      // Для фискализации определяем название услуги по уровню программы
+      console.log('🚀 ВХОД В ЛОГИКУ ФИСКАЛИЗАЦИИ');
+      // Для фискализации определяем название услуги по productId и level
+      console.log('🔍 Отладка параметров для фискализации:', {
+        productId,
+        level,
+        typeOfProductId: typeof productId,
+        typeOfLevel: typeof level,
+      });
       let fiscalServiceName;
 
-      // Определяем название услуги для фискализации
-
-      // Если это программа "Формула Движения" (formula-movement), используем уровни
-      if (productId === 'formula-movement') {
-        if (level === 1) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' - 1-й уровень";
-        } else if (level === 2) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' - 2-й уровень";
-        } else if (level === 3) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' - 3-й уровень";
-        } else if (level === 4) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' - 4-й уровень";
+      // Определяем название услуги на основе productId
+      if (productId === 'formula-dvizheniya') {
+        // Для программы "Формула Движения" определяем конкретный уровень
+        if (level === '1') {
+          fiscalServiceName = 'Формула Движения - 1-й уровень';
+        } else if (level === '2') {
+          fiscalServiceName = 'Формула Движения - 2-й уровень';
+        } else if (level === '3') {
+          fiscalServiceName = 'Формула Движения - 3-й уровень';
+        } else if (level === '4') {
+          fiscalServiceName = 'Формула Движения - 4-й уровень';
         } else {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' - 1-й уровень"; // По умолчанию
+          // Fallback для неизвестного уровня
+          fiscalServiceName = 'Формула Движения';
         }
+      } else if (productId === 'consultation') {
+        fiscalServiceName = 'Онлайн-консультация';
+      } else if (productId === 'express-consultation') {
+        fiscalServiceName = 'Экспресс онлайн-консультация';
+      } else if (productId === 'personal-program') {
+        fiscalServiceName = 'Программа восстановления после резекции мениска';
+      } else if (productId === 'online-training') {
+        fiscalServiceName = 'Онлайн-тренировка';
       } else {
-        // Для других услуг используем их собственные названия
-        switch (productId) {
-          case 'consultation':
-            fiscalServiceName = 'Консультация';
-            break;
-          case 'express-consultation':
-            fiscalServiceName = 'Экспресс онлайн-консультация';
-            break;
-          case 'personal-program':
-            fiscalServiceName = 'Персональная программа';
-            break;
-          case 'online-training':
-            fiscalServiceName = 'Онлайн-тренировка';
-            break;
-          default:
-            fiscalServiceName = 'Услуга'; // Общее название по умолчанию
-        }
+        // Fallback для неизвестных продуктов - НЕ используем "Формула Движения"
+        fiscalServiceName = 'Услуга реабилитации';
       }
 
       receiptParam = createReceiptParameter(
