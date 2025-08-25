@@ -100,16 +100,23 @@ router.post('/generate-payment-url', async (req, res) => {
       });
     }
 
-    // Создание параметра Receipt для фискализации (если есть email или phone)
+    // Создание параметра Receipt для фискализации
     let receiptParam = null;
-    if (email || phone) {
+
+    // Если в запросе передан объект receipt, используем его
+    if (req.body.receipt) {
+      receiptParam = JSON.stringify(req.body.receipt);
+      console.log('📄 Использован переданный параметр Receipt:', receiptParam);
+    }
+    // Иначе создаем автоматически, если есть email или phone
+    else if (email || phone) {
       receiptParam = createReceiptParameter(
         description,
         amount,
         email || 'noreply@minenkovrehab.ru',
         phone || '+79000000000'
       );
-      console.log('📄 Создан параметр Receipt для фискализации');
+      console.log('📄 Создан автоматический параметр Receipt для фискализации');
     }
 
     // Генерация подписи с учетом параметра Receipt (если есть)
