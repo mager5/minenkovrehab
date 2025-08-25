@@ -110,8 +110,15 @@ router.post('/generate-payment-url', async (req, res) => {
     }
     // Иначе создаем автоматически, если есть email или phone
     else if (email || phone) {
+      // Для фискализации используем более конкретное название услуги
+      const fiscalServiceName = description.includes('Экспресс')
+        ? 'Экспресс консультация невролога'
+        : description.includes('Онлайн')
+          ? 'Онлайн консультация невролога'
+          : 'Консультация невролога';
+
       receiptParam = createReceiptParameter(
-        description,
+        fiscalServiceName,
         amount,
         email || 'noreply@minenkovrehab.ru',
         phone || '+79000000000'
