@@ -127,16 +127,20 @@ router.post('/generate-payment-url', async (req, res) => {
       if (productId === 'formula-dvizheniya') {
         // Для программы "Формула Движения" определяем конкретный уровень
         if (level === '1') {
-          fiscalServiceName = 'Формула Движения - 1-й уровень';
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' 1 уровень";
         } else if (level === '2') {
-          fiscalServiceName = 'Формула Движения - 2-й уровень';
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' 2 уровень";
         } else if (level === '3') {
-          fiscalServiceName = 'Формула Движения - 3-й уровень';
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' 3 уровень";
         } else if (level === '4') {
-          fiscalServiceName = 'Формула Движения - 4-й уровень';
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' 4 уровень";
         } else {
           // Fallback для неизвестного уровня
-          fiscalServiceName = 'Формула Движения';
+          fiscalServiceName = "Программа тренировок 'Формула Движения'";
         }
       } else if (productId === 'consultation') {
         fiscalServiceName = 'Онлайн-консультация';
