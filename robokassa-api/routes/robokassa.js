@@ -110,12 +110,26 @@ router.post('/generate-payment-url', async (req, res) => {
     }
     // Иначе создаем автоматически, если есть email или phone
     else if (email || phone) {
-      // Для фискализации используем более конкретное название услуги
-      const fiscalServiceName = description.includes('Экспресс')
-        ? 'Экспресс консультация невролога'
-        : description.includes('Онлайн')
-          ? 'Онлайн консультация невролога'
-          : 'Консультация невролога';
+      // Для фискализации используем точное название услуги из Description
+      let fiscalServiceName = description;
+
+      // Если description содержит общие фразы, заменяем на точные названия услуг
+      if (description.includes('Экспресс')) {
+        fiscalServiceName = 'Экспресс онлайн-консультация';
+      } else if (description.includes('Онлайн-консультация')) {
+        fiscalServiceName = 'Онлайн-консультация';
+      } else if (description.includes('Онлайн-тренировка')) {
+        fiscalServiceName = 'Онлайн-тренировка';
+      } else if (description.includes('Формула Движения')) {
+        fiscalServiceName = "Программа тренировок 'Формула Движения'";
+      } else if (
+        description.includes('восстановления после резекции мениска')
+      ) {
+        fiscalServiceName = 'Программа восстановления после резекции мениска';
+      } else if (description.includes('Восстановительные программы')) {
+        fiscalServiceName = 'Восстановительные программы';
+      }
+      // Если не найдено совпадений, используем description как есть
 
       receiptParam = createReceiptParameter(
         fiscalServiceName,

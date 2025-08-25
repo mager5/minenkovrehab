@@ -8,12 +8,12 @@ const {
 console.log('🧪 Тестирование генерации ссылки с параметром Receipt');
 console.log('='.repeat(60));
 
-// Тестируем генерацию ссылки для консультации невролога
+// Тестируем генерацию ссылки для консультации специалиста
 const testPayment = {
   amount: 1500,
   description: 'Консультация',
   receipt: {
-    serviceName: 'Консультация невролога',
+    serviceName: 'Консультация специалиста',
   },
 };
 
@@ -84,7 +84,7 @@ const expectedReceiptJson = {
   sno: 'osn',
   items: [
     {
-      name: 'Консультация невролога',
+      name: 'Консультация специалиста',
       quantity: 1,
       sum: 1500,
       payment_method: 'full_payment',
@@ -101,7 +101,7 @@ console.log(JSON.stringify(expectedReceiptJson, null, 2));
 console.log('');
 console.log('🧪 Тестирование функции createReceiptParameter:');
 const testReceipt = createReceiptParameter({
-  name: 'Консультация невролога',
+  name: 'Консультация специалиста',
   sum: 1500,
 });
 console.log('URL-encoded Receipt:', testReceipt);

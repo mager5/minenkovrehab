@@ -13,7 +13,7 @@
 
 ## 🚀 Использование
 
-### Базовый пример для консультации невролога
+### Базовый пример для экспресс онлайн-консультации
 
 ```javascript
 const { generatePaymentLink } = require('./robokassa-payment-generator');
@@ -23,7 +23,7 @@ const result = generatePaymentLink({
   amount: 1500,
   description: 'Консультация',
   receipt: {
-    serviceName: 'Консультация невролога'
+    serviceName: 'Экспресс онлайн-консультация'
   }
 });
 
@@ -45,7 +45,7 @@ https://auth.robokassa.ru/Merchant/Index.aspx?MerchantLogin=Minenkov-2&OutSum=15
   "sno": "osn",
   "items": [
     {
-      "name": "Консультация невролога",
+      "name": "Консультация специалиста",
       "quantity": 1,
       "sum": 1500,
       "payment_method": "full_payment",
@@ -108,7 +108,7 @@ const result = generatePaymentLink({
   amount: 2000,
   description: 'Онлайн-консультация',
   receipt: {
-    serviceName: 'Онлайн-консультация невролога'
+    serviceName: 'Онлайн-консультация'
   }
 });
 ```
@@ -120,7 +120,7 @@ const result = generatePaymentLink({
   amount: 1000,
   description: 'Экспресс консультация',
   receipt: {
-    serviceName: 'Экспресс консультация невролога'
+    serviceName: 'Экспресс онлайн-консультация'
   }
 });
 ```

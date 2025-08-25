@@ -14,13 +14,13 @@ function decodeReceiptParameter(url) {
 // Тестовые данные для экспресс-консультации
 const testData = {
   amount: 1500,
-  description: 'Экспресс-консультация невролога',
+  description: 'Экспресс онлайн-консультация',
   invoiceId: `express-${Date.now()}`,
   receipt: {
     sno: 'osn',
     items: [
       {
-        name: 'Экспресс-консультация невролога',
+        name: 'Экспресс онлайн-консультация',
         quantity: 1,
         sum: 1500,
         payment_method: 'full_payment',

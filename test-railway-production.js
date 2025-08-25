@@ -3,7 +3,7 @@ const https = require('https');
 // Тест Railway API
 const testData = JSON.stringify({
   amount: 3000,
-  description: 'Экспресс-консультация невролога',
+  description: 'Экспресс онлайн-консультация',
   invoiceId: 'test-' + Date.now(),
 });
 

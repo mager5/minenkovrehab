@@ -4,14 +4,14 @@ const http = require('http');
 // Тест локального API с данными экспресс-консультации
 const testData = JSON.stringify({
   amount: 1500,
-  description: 'Экспресс-консультация невролога',
+  description: 'Экспресс онлайн-консультация',
   invoiceId: 'express-' + Date.now(),
   // Добавляем данные для фискализации
   receipt: {
     sno: 'osn',
     items: [
       {
-        name: 'Экспресс-консультация невролога',
+        name: 'Экспресс онлайн-консультация',
         quantity: 1,
         sum: 1500,
         payment_method: 'full_payment',
