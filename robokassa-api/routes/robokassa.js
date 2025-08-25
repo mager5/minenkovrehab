@@ -55,9 +55,10 @@ router.post('/generate-payment-url', async (req, res) => {
     const email = req.body.email ? sanitizeString(req.body.email) : undefined;
     const phone = req.body.phone ? normalizePhone(req.body.phone) : undefined;
     const amount = parseFloat(req.body.amount);
-    const description = sanitizeString(
-      req.body.description || 'Абонемент клуба формула движения'
-    );
+    // const description = sanitizeString(
+    //   req.body.description || 'Абонемент клуба формула движения'
+    // ); // Убрано по требованию пользователя
+    const level = req.body.level; // Получаем уровень отдельным параметром
 
     // Генерируем уникальный ID заказа (числовой, требование Robokassa)
     const invId = generateInvoiceId();
@@ -110,58 +111,26 @@ router.post('/generate-payment-url', async (req, res) => {
     }
     // Иначе создаем автоматически, если есть email или phone
     else if (email || phone) {
-      // Для фискализации используем точное название услуги из Description
-      let fiscalServiceName = description;
+      // Для фискализации определяем название услуги по уровню программы
+      let fiscalServiceName;
 
-      // Если description содержит общие фразы, заменяем на точные названия услуг
-      if (description.includes('Экспресс')) {
-        fiscalServiceName = 'Экспресс онлайн-консультация';
-      } else if (description.includes('Онлайн-консультация')) {
-        fiscalServiceName = 'Онлайн-консультация';
-      } else if (description.includes('Онлайн-тренировка')) {
-        fiscalServiceName = 'Онлайн-тренировка';
-      } else if (description.includes('Формула Движения')) {
-        // Определяем конкретный уровень программы "Формула Движения"
-        if (
-          description.includes('первый уровень') ||
-          description.includes('1-й уровень') ||
-          description.includes('уровень 1')
-        ) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' - 1-й уровень";
-        } else if (
-          description.includes('второй уровень') ||
-          description.includes('2-й уровень') ||
-          description.includes('уровень 2')
-        ) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' - 2-й уровень";
-        } else if (
-          description.includes('третий уровень') ||
-          description.includes('3-й уровень') ||
-          description.includes('уровень 3')
-        ) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' - 3-й уровень";
-        } else if (
-          description.includes('четвертый уровень') ||
-          description.includes('4-й уровень') ||
-          description.includes('уровень 4')
-        ) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' - 4-й уровень";
-        } else {
-          // Если уровень не указан, используем общее название
-          fiscalServiceName = "Программа тренировок 'Формула Движения'";
-        }
-      } else if (
-        description.includes('восстановления после резекции мениска')
-      ) {
-        fiscalServiceName = 'Программа восстановления после резекции мениска';
-      } else if (description.includes('Восстановительные программы')) {
-        fiscalServiceName = 'Восстановительные программы';
+      // Определяем конкретный уровень программы "Формула Движения" по параметру level
+      if (level === 1) {
+        fiscalServiceName =
+          "Программа тренировок 'Формула Движения' - 1-й уровень";
+      } else if (level === 2) {
+        fiscalServiceName =
+          "Программа тренировок 'Формула Движения' - 2-й уровень";
+      } else if (level === 3) {
+        fiscalServiceName =
+          "Программа тренировок 'Формула Движения' - 3-й уровень";
+      } else if (level === 4) {
+        fiscalServiceName =
+          "Программа тренировок 'Формула Движения' - 4-й уровень";
+      } else {
+        // Если уровень не указан, используем общее название
+        fiscalServiceName = "Программа тренировок 'Формула Движения'";
       }
-      // Если не найдено совпадений, используем description как есть
 
       receiptParam = createReceiptParameter(
         fiscalServiceName,
@@ -190,7 +159,7 @@ router.post('/generate-payment-url', async (req, res) => {
       `MerchantLogin=${encodeURIComponent(login)}`,
       `OutSum=${amount.toFixed(2)}`,
       `invoiceID=${invId}`,
-      `Description=${encodeURIComponent(description)}`,
+      // `Description=${encodeURIComponent(description)}`, // Убрано по требованию пользователя
     ];
 
     // Добавляем Receipt параметр, если он создан (для фискализации)
@@ -233,7 +202,7 @@ router.post('/generate-payment-url', async (req, res) => {
         paymentUrl,
         invoiceId: invId,
         amount,
-        description,
+        // description, // Убрано по требованию пользователя
         testMode: isTestMode,
       },
     });

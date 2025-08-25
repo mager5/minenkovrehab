@@ -16,20 +16,19 @@ async function testFormulaMovementLevels() {
   const levels = [
     {
       level: 1,
-      description: "Программа тренировок 'Формула Движения' - первый уровень",
+      description: "Программа тренировок 'Формула Движения'",
     },
     {
       level: 2,
-      description: "Программа тренировок 'Формула Движения' - второй уровень",
+      description: "Программа тренировок 'Формула Движения'",
     },
     {
       level: 3,
-      description: "Программа тренировок 'Формула Движения' - третий уровень",
+      description: "Программа тренировок 'Формула Движения'",
     },
     {
       level: 4,
-      description:
-        "Программа тренировок 'Формула Движения' - четвертый уровень",
+      description: "Программа тренировок 'Формула Движения'",
     },
   ];
 
@@ -46,6 +45,7 @@ async function testFormulaMovementLevels() {
         body: JSON.stringify({
           ...testData,
           description: levelData.description,
+          level: levelData.level,
         }),
       });
 

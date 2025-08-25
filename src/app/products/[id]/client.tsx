@@ -173,7 +173,8 @@ export default function ProductClient({ product }: { product: Product }) {
           },
           body: JSON.stringify({
             amount: product.price,
-            description: `${product.title} - ${level === 1 ? 'первый уровень' : level === 2 ? 'второй уровень' : level === 3 ? 'третий уровень' : 'четвертый уровень'}`,
+            // description: product.title, // Убрано по требованию пользователя
+            level: level, // Передаем уровень отдельным параметром
             email: 'customer@example.com', // Можно добавить форму для email
             phone: '+79001234567', // Корректный формат телефона
           }),
@@ -413,7 +414,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   transition={{ duration: 0.5, delay: 0.5 }}
                 >
                   {product.id === 'formula-movement'
-                    ? '6 000 ₽ первый уровень'
+                    ? '6 000 ₽'
                     : formatPrice(product.id, product.price)}
                 </motion.div>
 
@@ -653,7 +654,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   Стоимость услуги
                 </h3>
                 <div className='text-2xl font-bold text-accent mb-6'>
-                  6 000 ₽ второй уровень
+                  6 000 ₽
                 </div>
                 <div
                   className={`mb-4 p-3 rounded-md transition-all ${
@@ -815,7 +816,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   Стоимость услуги
                 </h3>
                 <div className='text-2xl font-bold text-accent mb-6'>
-                  6 000 ₽ третий уровень
+                  6 000 ₽
                 </div>
                 <div
                   className={`mb-4 p-3 rounded-md transition-all ${
@@ -977,7 +978,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   Стоимость услуги
                 </h3>
                 <div className='text-2xl font-bold text-accent mb-6'>
-                  6 000 ₽ четвертый уровень
+                  6 000 ₽
                 </div>
                 <div
                   className={`mb-4 p-3 rounded-md transition-all ${
