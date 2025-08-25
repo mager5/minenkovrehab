@@ -20,21 +20,95 @@ function generateMD5(str) {
 }
 
 /**
+ * Создает JSON параметр Receipt для фискализации
+ * @param {Object} options - Параметры услуги
+ * @param {string} options.name - Название услуги
+ * @param {number} options.quantity - Количество (обычно 1 для услуг)
+ * @param {number} options.sum - Сумма в рублях
+ * @param {string} [options.payment_method='full_payment'] - Способ расчета
+ * @param {string} [options.payment_object='service'] - Предмет расчета
+ * @param {string} [options.tax='vat20'] - Налоговая ставка
+ * @param {string} [options.sno='osn'] - Система налогообложения
+ * @returns {string} URL-кодированный JSON строка
+ */
+function createReceiptParameter(options) {
+  const {
+    name,
+    quantity = 1,
+    sum,
+    payment_method = 'full_payment',
+    payment_object = 'service',
+    tax = 'vat20',
+    sno = 'osn',
+  } = options;
+
+  const receipt = {
+    sno,
+    items: [
+      {
+        name,
+        quantity,
+        sum,
+        payment_method,
+        payment_object,
+        tax,
+      },
+    ],
+  };
+
+  // Преобразуем в JSON и URL-кодируем
+  const jsonString = JSON.stringify(receipt);
+  return encodeURIComponent(jsonString);
+}
+
+/**
  * Генерирует ссылку на оплату Robokassa
  * @param {Object} options - Параметры платежа
  * @param {number} options.amount - Сумма платежа в рублях
  * @param {string} options.description - Описание платежа
  * @param {number} [options.invoiceId] - Номер счета (опционально)
+ * @param {Object} [options.receipt] - Параметры для фискализации
+ * @param {string} options.receipt.serviceName - Название услуги для фискализации
  * @returns {Object} Объект с данными платежа
  */
 function generatePaymentLink(options) {
-  const { amount, description, invoiceId } = options;
+  const { amount, description, invoiceId, receipt } = options;
 
   // Генерируем уникальный номер счета, если не передан
   const invId = invoiceId || Math.floor(Math.random() * 1000000000);
 
-  // Формируем строку для подписи: MerchantLogin:OutSum:InvId:Password1
-  const signatureString = `${ROBOKASSA_CONFIG.merchantLogin}:${amount}:${invId}:${ROBOKASSA_CONFIG.password1}`;
+  // Создаем параметр Receipt для фискализации, если передан
+  let receiptParam = '';
+  let receiptForSignature = '';
+
+  if (receipt && receipt.serviceName) {
+    receiptParam = createReceiptParameter({
+      name: receipt.serviceName,
+      sum: amount,
+    });
+    // Для подписи используем не URL-кодированную версию
+    const receiptJson = JSON.stringify({
+      sno: 'osn',
+      items: [
+        {
+          name: receipt.serviceName,
+          quantity: 1,
+          sum: amount,
+          payment_method: 'full_payment',
+          payment_object: 'service',
+          tax: 'vat20',
+        },
+      ],
+    });
+    receiptForSignature = receiptJson;
+  }
+
+  // Формируем строку для подписи
+  // Если есть Receipt, добавляем его в подпись: MerchantLogin:OutSum:InvId:Receipt:Password1
+  // Если нет Receipt: MerchantLogin:OutSum:InvId:Password1
+  const signatureString = receiptForSignature
+    ? `${ROBOKASSA_CONFIG.merchantLogin}:${amount}:${invId}:${receiptForSignature}:${ROBOKASSA_CONFIG.password1}`
+    : `${ROBOKASSA_CONFIG.merchantLogin}:${amount}:${invId}:${ROBOKASSA_CONFIG.password1}`;
 
   // Генерируем подпись
   const signature = generateMD5(signatureString);
@@ -43,13 +117,20 @@ function generatePaymentLink(options) {
   const encodedDescription = encodeURIComponent(description);
 
   // Формируем ссылку
-  const paymentUrl =
+  let paymentUrl =
     `https://auth.robokassa.ru/Merchant/Index.aspx?` +
     `MerchantLogin=${ROBOKASSA_CONFIG.merchantLogin}&` +
     `OutSum=${amount}&` +
     `invoiceID=${invId}&` +
-    `Description=${encodedDescription}&` +
-    `SignatureValue=${signature}&` +
+    `Description=${encodedDescription}`;
+
+  // Добавляем Receipt, если есть
+  if (receiptParam) {
+    paymentUrl += `&Receipt=${receiptParam}`;
+  }
+
+  paymentUrl +=
+    `&SignatureValue=${signature}&` +
     `IsTest=${ROBOKASSA_CONFIG.isTest ? 1 : 0}`;
 
   return {
@@ -60,6 +141,7 @@ function generatePaymentLink(options) {
     signature,
     signatureString,
     isTest: ROBOKASSA_CONFIG.isTest,
+    receipt: receiptParam || null,
   };
 }
 
@@ -119,6 +201,7 @@ if (require.main === module) {
 
 module.exports = {
   generatePaymentLink,
+  createReceiptParameter,
   // generateClubSubscriptionLink, // Удалено: функция для клуба
   ROBOKASSA_CONFIG,
 };
