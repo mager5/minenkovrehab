@@ -173,7 +173,7 @@ export default function ProductClient({ product }: { product: Product }) {
           },
           body: JSON.stringify({
             amount: product.price,
-            description: product.title,
+            description: `${product.title} - ${level === 1 ? 'первый уровень' : level === 2 ? 'второй уровень' : level === 3 ? 'третий уровень' : 'четвертый уровень'}`,
             email: 'customer@example.com', // Можно добавить форму для email
             phone: '+79001234567', // Корректный формат телефона
           }),

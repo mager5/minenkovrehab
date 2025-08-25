@@ -121,7 +121,39 @@ router.post('/generate-payment-url', async (req, res) => {
       } else if (description.includes('Онлайн-тренировка')) {
         fiscalServiceName = 'Онлайн-тренировка';
       } else if (description.includes('Формула Движения')) {
-        fiscalServiceName = "Программа тренировок 'Формула Движения'";
+        // Определяем конкретный уровень программы "Формула Движения"
+        if (
+          description.includes('первый уровень') ||
+          description.includes('1-й уровень') ||
+          description.includes('уровень 1')
+        ) {
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' - 1-й уровень";
+        } else if (
+          description.includes('второй уровень') ||
+          description.includes('2-й уровень') ||
+          description.includes('уровень 2')
+        ) {
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' - 2-й уровень";
+        } else if (
+          description.includes('третий уровень') ||
+          description.includes('3-й уровень') ||
+          description.includes('уровень 3')
+        ) {
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' - 3-й уровень";
+        } else if (
+          description.includes('четвертый уровень') ||
+          description.includes('4-й уровень') ||
+          description.includes('уровень 4')
+        ) {
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' - 4-й уровень";
+        } else {
+          // Если уровень не указан, используем общее название
+          fiscalServiceName = "Программа тренировок 'Формула Движения'";
+        }
       } else if (
         description.includes('восстановления после резекции мениска')
       ) {
