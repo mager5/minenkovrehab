@@ -52,13 +52,27 @@ router.post('/generate-payment-url', async (req, res) => {
     }
 
     // Извлечение и санитизация данных
-    const email = req.body.email ? sanitizeString(req.body.email) : undefined;
-    const phone = req.body.phone ? normalizePhone(req.body.phone) : undefined;
-    const amount = parseFloat(req.body.amount);
+    const {
+      amount: rawAmount,
+      email: rawEmail,
+      phone: rawPhone,
+      level,
+      productId,
+    } = req.body;
+    console.log('📦 Получены данные:', {
+      amount: rawAmount,
+      email: rawEmail,
+      phone: rawPhone,
+      level,
+      productId,
+    });
+
+    const email = rawEmail ? sanitizeString(rawEmail) : undefined;
+    const phone = rawPhone ? normalizePhone(rawPhone) : undefined;
+    const amount = parseFloat(rawAmount);
     // const description = sanitizeString(
     //   req.body.description || 'Абонемент клуба формула движения'
     // ); // Убрано по требованию пользователя
-    const level = req.body.level; // Получаем уровень отдельным параметром
 
     // Генерируем уникальный ID заказа (числовой, требование Robokassa)
     const invId = generateInvoiceId();
@@ -114,22 +128,44 @@ router.post('/generate-payment-url', async (req, res) => {
       // Для фискализации определяем название услуги по уровню программы
       let fiscalServiceName;
 
-      // Определяем конкретный уровень программы "Формула Движения" по параметру level
-      if (level === 1) {
-        fiscalServiceName =
-          "Программа тренировок 'Формула Движения' - 1-й уровень";
-      } else if (level === 2) {
-        fiscalServiceName =
-          "Программа тренировок 'Формула Движения' - 2-й уровень";
-      } else if (level === 3) {
-        fiscalServiceName =
-          "Программа тренировок 'Формула Движения' - 3-й уровень";
-      } else if (level === 4) {
-        fiscalServiceName =
-          "Программа тренировок 'Формула Движения' - 4-й уровень";
+      // Определяем название услуги для фискализации
+
+      // Если это программа "Формула Движения" (formula-movement), используем уровни
+      if (productId === 'formula-movement') {
+        if (level === 1) {
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' - 1-й уровень";
+        } else if (level === 2) {
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' - 2-й уровень";
+        } else if (level === 3) {
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' - 3-й уровень";
+        } else if (level === 4) {
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' - 4-й уровень";
+        } else {
+          fiscalServiceName =
+            "Программа тренировок 'Формула Движения' - 1-й уровень"; // По умолчанию
+        }
       } else {
-        // Если уровень не указан, используем общее название
-        fiscalServiceName = "Программа тренировок 'Формула Движения'";
+        // Для других услуг используем их собственные названия
+        switch (productId) {
+          case 'consultation':
+            fiscalServiceName = 'Консультация';
+            break;
+          case 'express-consultation':
+            fiscalServiceName = 'Экспресс онлайн-консультация';
+            break;
+          case 'personal-program':
+            fiscalServiceName = 'Персональная программа';
+            break;
+          case 'online-training':
+            fiscalServiceName = 'Онлайн-тренировка';
+            break;
+          default:
+            fiscalServiceName = 'Услуга'; // Общее название по умолчанию
+        }
       }
 
       receiptParam = createReceiptParameter(
