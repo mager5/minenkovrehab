@@ -101,6 +101,15 @@ export function Header() {
 
   return (
     <>
+      {/* Предотвращение скролла при открытом мобильном меню */}
+      {isMenuOpen && (
+        <style jsx global>{`
+          body {
+            overflow: hidden;
+          }
+        `}</style>
+      )}
+
       {/* Верхняя инфо-панель */}
       <div
         className={`hidden lg:block bg-primary text-white py-2 transition-all duration-500 ease-in-out ${isScrolled ? 'transform -translate-y-full opacity-0 h-0 overflow-hidden' : 'transform translate-y-0 opacity-100'}`}
@@ -370,7 +379,7 @@ export function Header() {
             id='mobile-menu'
             className={`[@media(min-width:840px)]:hidden transition-all duration-500 ease-in-out overflow-hidden ${
               isMenuOpen
-                ? 'max-h-[400px] opacity-100 mt-4 pb-4 border-t pt-4'
+                ? 'max-h-[500px] opacity-100 mt-4 pb-4 border-t pt-4'
                 : 'max-h-0 opacity-0 mt-0 pb-0 border-t border-transparent'
             }`}
             aria-hidden={!isMenuOpen}
@@ -469,6 +478,29 @@ export function Header() {
                   </Link>
                 );
               })}
+
+              {/* Дополнительные ссылки на услуги для лучшей видимости */}
+              <Link
+                href='/products/personal-program'
+                onClick={closeMenu}
+                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/products/personal-program' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
+                aria-current={
+                  pathname === '/products/personal-program' ? 'page' : undefined
+                }
+              >
+                Восстановительная программа
+              </Link>
+
+              <Link
+                href='/products/online-training'
+                onClick={closeMenu}
+                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/products/online-training' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
+                aria-current={
+                  pathname === '/products/online-training' ? 'page' : undefined
+                }
+              >
+                Онлайн тренировки
+              </Link>
               <button
                 onClick={openBookingModal}
                 className='bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
