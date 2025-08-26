@@ -124,18 +124,19 @@ router.post('/generate-payment-url', async (req, res) => {
       let fiscalServiceName;
 
       // Определяем название услуги на основе productId
-      if (productId === 'formula-dvizheniya') {
+      if (productId === 'formula-movement') {
         // Для программы "Формула Движения" определяем конкретный уровень
-        if (level === '1') {
+        // Проверяем и строковые, и числовые значения level
+        if (level === '1' || level === 1) {
           fiscalServiceName =
             "Программа тренировок 'Формула Движения' 1 уровень";
-        } else if (level === '2') {
+        } else if (level === '2' || level === 2) {
           fiscalServiceName =
             "Программа тренировок 'Формула Движения' 2 уровень";
-        } else if (level === '3') {
+        } else if (level === '3' || level === 3) {
           fiscalServiceName =
             "Программа тренировок 'Формула Движения' 3 уровень";
-        } else if (level === '4') {
+        } else if (level === '4' || level === 4) {
           fiscalServiceName =
             "Программа тренировок 'Формула Движения' 4 уровень";
         } else {
