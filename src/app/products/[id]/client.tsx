@@ -38,16 +38,12 @@ export default function ProductClient({ product }: { product: Product }) {
   // Состояния для анимации оплаты для каждого уровня
   const [isPaymentProcessingLevel1, setIsPaymentProcessingLevel1] =
     useState(false);
-  const [paymentSuccessLevel1, setPaymentSuccessLevel1] = useState(false);
   const [isPaymentProcessingLevel2, setIsPaymentProcessingLevel2] =
     useState(false);
-  const [paymentSuccessLevel2, setPaymentSuccessLevel2] = useState(false);
   const [isPaymentProcessingLevel3, setIsPaymentProcessingLevel3] =
     useState(false);
-  const [paymentSuccessLevel3, setPaymentSuccessLevel3] = useState(false);
   const [isPaymentProcessingLevel4, setIsPaymentProcessingLevel4] =
     useState(false);
-  const [paymentSuccessLevel4, setPaymentSuccessLevel4] = useState(false);
 
   // Проверка согласия перед действием
   const checkConsent = () => {
@@ -198,32 +194,11 @@ export default function ProductClient({ product }: { product: Product }) {
       if (result.success && result.data?.paymentUrl) {
         console.log('✅ Платежная ссылка получена:', result.data.paymentUrl);
 
-        // Показываем галочку на 1 секунду перед переходом
-        switch (level) {
-          case 1:
-            setIsPaymentProcessingLevel1(false);
-            setPaymentSuccessLevel1(true);
-            break;
-          case 2:
-            setIsPaymentProcessingLevel2(false);
-            setPaymentSuccessLevel2(true);
-            break;
-          case 3:
-            setIsPaymentProcessingLevel3(false);
-            setPaymentSuccessLevel3(true);
-            break;
-          case 4:
-            setIsPaymentProcessingLevel4(false);
-            setPaymentSuccessLevel4(true);
-            break;
-        }
-
-        // Ждем 1 секунду, затем переходим на платежную систему
-        setTimeout(() => {
-          const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
-          console.log('🔍 Переход на платежную систему:', cleanUrl);
-          window.location.href = cleanUrl;
-        }, 1000);
+        // Сразу переходим на платежную систему без показа галочки
+        // Спиннер будет крутиться до момента перехода
+        const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
+        console.log('🔍 Переход на платежную систему:', cleanUrl);
+        window.location.href = cleanUrl;
       } else {
         throw new Error('Не удалось получить ссылку для оплаты');
       }
@@ -233,23 +208,19 @@ export default function ProductClient({ product }: { product: Product }) {
       // Добавляем задержку перед сбросом состояния, чтобы пользователь увидел спиннер
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Сбрасываем состояния при ошибке
+      // Сбрасываем состояния обработки при ошибке
       switch (level) {
         case 1:
           setIsPaymentProcessingLevel1(false);
-          setPaymentSuccessLevel1(false);
           break;
         case 2:
           setIsPaymentProcessingLevel2(false);
-          setPaymentSuccessLevel2(false);
           break;
         case 3:
           setIsPaymentProcessingLevel3(false);
-          setPaymentSuccessLevel3(false);
           break;
         case 4:
           setIsPaymentProcessingLevel4(false);
-          setPaymentSuccessLevel4(false);
           break;
       }
 
@@ -565,21 +536,6 @@ export default function ProductClient({ product }: { product: Product }) {
                         </svg>
                         <span>Обработка...</span>
                       </>
-                    ) : paymentSuccessLevel1 ? (
-                      <>
-                        <svg
-                          className='h-5 w-5 text-white'
-                          fill='currentColor'
-                          viewBox='0 0 20 20'
-                        >
-                          <path
-                            fillRule='evenodd'
-                            d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                            clipRule='evenodd'
-                          />
-                        </svg>
-                        <span>Успешно!</span>
-                      </>
                     ) : (
                       'Купить онлайн'
                     )}
@@ -767,21 +723,6 @@ export default function ProductClient({ product }: { product: Product }) {
                       </svg>
                       <span>Обработка...</span>
                     </>
-                  ) : paymentSuccessLevel2 ? (
-                    <>
-                      <svg
-                        className='h-5 w-5 text-white'
-                        fill='currentColor'
-                        viewBox='0 0 20 20'
-                      >
-                        <path
-                          fillRule='evenodd'
-                          d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                          clipRule='evenodd'
-                        />
-                      </svg>
-                      <span>Успешно!</span>
-                    </>
                   ) : (
                     'Купить онлайн'
                   )}
@@ -929,21 +870,6 @@ export default function ProductClient({ product }: { product: Product }) {
                       </svg>
                       <span>Обработка...</span>
                     </>
-                  ) : paymentSuccessLevel3 ? (
-                    <>
-                      <svg
-                        className='h-5 w-5 text-white'
-                        fill='currentColor'
-                        viewBox='0 0 20 20'
-                      >
-                        <path
-                          fillRule='evenodd'
-                          d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                          clipRule='evenodd'
-                        />
-                      </svg>
-                      <span>Успешно!</span>
-                    </>
                   ) : (
                     'Купить онлайн'
                   )}
@@ -1090,21 +1016,6 @@ export default function ProductClient({ product }: { product: Product }) {
                         ></path>
                       </svg>
                       <span>Обработка...</span>
-                    </>
-                  ) : paymentSuccessLevel4 ? (
-                    <>
-                      <svg
-                        className='h-5 w-5 text-white'
-                        fill='currentColor'
-                        viewBox='0 0 20 20'
-                      >
-                        <path
-                          fillRule='evenodd'
-                          d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                          clipRule='evenodd'
-                        />
-                      </svg>
-                      <span>Успешно!</span>
                     </>
                   ) : (
                     'Купить онлайн'

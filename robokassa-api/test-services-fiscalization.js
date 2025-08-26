@@ -1,157 +1,146 @@
 const axios = require('axios');
 
-// Тестовые данные для разных услуг
-const testServices = [
-  {
-    name: 'Онлайн-консультация',
-    productId: 'consultation',
-    amount: 5000,
-    level: undefined, // Уровень не нужен для консультации
-  },
-  {
-    name: 'Экспресс онлайн-консультация',
-    productId: 'express-consultation',
-    amount: 3000,
-    level: undefined,
-  },
-  {
-    name: 'Персональная программа',
-    productId: 'personal-program',
-    amount: 10000,
-    level: undefined,
-  },
-  {
-    name: 'Онлайн тренировки',
-    productId: 'online-training',
-    amount: 5000,
-    level: undefined,
-  },
-  {
-    name: 'Формула Движения - 1-й уровень',
-    productId: 'formula-dvizheniya',
-    amount: 6000,
-    level: '1',
-  },
-  {
-    name: 'Формула Движения - 2-й уровень',
-    productId: 'formula-dvizheniya',
-    amount: 6000,
-    level: '2',
-  },
-  {
-    name: 'Формула Движения - 3-й уровень',
-    productId: 'formula-dvizheniya',
-    amount: 6000,
-    level: '3',
-  },
-  {
-    name: 'Формула Движения - 4-й уровень',
-    productId: 'formula-dvizheniya',
-    amount: 6000,
-    level: '4',
-  },
-];
+// Базовый URL боевого API
+const API_BASE_URL =
+  'https://minenkovrehab-robokassa-api-production.up.railway.app/api/robokassa';
 
-async function testServiceFiscalization(service) {
-  console.log(`\n🧪 Тестирование: ${service.name}`);
-  console.log('='.repeat(50));
+// Функция для декодирования URL-encoded строки
+function decodeReceiptData(encodedReceipt) {
+  try {
+    const decoded = decodeURIComponent(encodedReceipt);
+    const parsed = JSON.parse(decoded);
+    return parsed.items[0].name; // Возвращаем название услуги
+  } catch (error) {
+    return 'Ошибка декодирования';
+  }
+}
+
+// Функция для тестирования услуги
+async function testService(testData, expectedName, testName) {
+  console.log(`\n📋 Тестирование: ${testName}`);
 
   try {
-    const requestData = {
-      amount: service.amount,
-      productId: service.productId,
-      email: 'test@example.com',
-      phone: '+79001234567',
-    };
-
-    // Добавляем level только если он определен
-    if (service.level !== undefined) {
-      requestData.level = service.level;
-    }
-
-    console.log('📤 Отправляемые данные:', requestData);
-
     const response = await axios.post(
-      'http://localhost:3002/api/robokassa/generate-payment-url',
-      requestData,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+      `${API_BASE_URL}/generate-payment-url`,
+      testData
     );
 
     if (response.data.success) {
-      console.log('✅ Успешно создана платежная ссылка');
-      console.log('🔗 URL:', response.data.data.paymentUrl);
+      console.log(`✅ Платежная ссылка создана успешно`);
 
-      // Декодируем Receipt параметр для проверки названия услуги
-      const url = new URL(response.data.data.paymentUrl);
-      const receiptParam = url.searchParams.get('Receipt');
+      // Извлекаем параметр Receipt из URL
+      const url =
+        response.data.url ||
+        response.data.data?.url ||
+        response.data.data?.paymentUrl;
 
-      if (receiptParam) {
-        try {
-          const decodedReceipt = JSON.parse(decodeURIComponent(receiptParam));
-          const serviceName = decodedReceipt.items[0].name;
-          console.log('📄 Название услуги в фискализации:', serviceName);
+      if (url) {
+        const receiptMatch = url.match(/Receipt=([^&]+)/);
 
-          // Проверяем правильность названия
-          const expectedNames = {
-            consultation: 'Консультация невролога',
-            'express-consultation': 'Экспресс консультация невролога',
-            'personal-program': 'Персональная программа реабилитации',
-            'online-training': 'Онлайн тренировки',
-            'formula-dvizheniya': {
-              1: 'Формула Движения - 1-й уровень',
-              2: 'Формула Движения - 2-й уровень',
-              3: 'Формула Движения - 3-й уровень',
-              4: 'Формула Движения - 4-й уровень',
-            },
-          };
-
-          let expectedName;
-          if (service.productId === 'formula-dvizheniya') {
-            expectedName = expectedNames[service.productId][service.level];
-          } else {
-            expectedName = expectedNames[service.productId];
-          }
+        if (receiptMatch) {
+          const serviceName = decodeReceiptData(receiptMatch[1]);
+          console.log(`🎯 Название услуги в фискализации: "${serviceName}"`);
 
           if (serviceName === expectedName) {
-            console.log('✅ Название услуги ПРАВИЛЬНОЕ!');
+            console.log(`✅ Фискализация корректна`);
           } else {
-            console.log('❌ Название услуги НЕПРАВИЛЬНОЕ!');
-            console.log('🎯 Ожидалось:', expectedName);
-            console.log('📝 Получено:', serviceName);
+            console.log(`❌ Ошибка фискализации`);
+            console.log(`   Ожидалось: "${expectedName}"`);
+            console.log(`   Получено: "${serviceName}"`);
           }
-        } catch (e) {
-          console.log('❌ Ошибка декодирования Receipt:', e.message);
+        } else {
+          console.log('❌ Параметр Receipt не найден в URL');
         }
       } else {
-        console.log('⚠️ Receipt параметр не найден в URL');
+        console.log('❌ URL не найден в ответе');
       }
     } else {
-      console.log('❌ Ошибка создания платежной ссылки:', response.data.error);
+      console.log(`❌ Ошибка создания ссылки:`, response.data.message);
     }
   } catch (error) {
-    console.log('❌ Ошибка запроса:', error.message);
-    if (error.response) {
-      console.log('📄 Ответ сервера:', error.response.data);
-    }
+    console.log(`❌ Ошибка запроса:`, error.message);
   }
 }
 
-async function runAllTests() {
-  console.log('🚀 Запуск тестирования фискализации для всех услуг');
-  console.log('='.repeat(60));
+// Основная функция тестирования
+async function runTests() {
+  console.log('🚀 Тестирование фискализации всех услуг на боевом сервере\n');
 
-  for (const service of testServices) {
-    await testServiceFiscalization(service);
-    // Небольшая пауза между тестами
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
+  // Тестируем программу "Формула Движения" - все 4 уровня
+  await testService(
+    {
+      amount: 6000,
+      email: 'test@example.com',
+      phone: '+79001234567',
+      productId: 'formula-movement',
+      level: 1,
+    },
+    "Программа тренировок 'Формула Движения' 1 уровень",
+    'Формула Движения - 1 уровень'
+  );
 
-  console.log('\n🏁 Тестирование завершено!');
+  await testService(
+    {
+      amount: 6000,
+      email: 'test@example.com',
+      phone: '+79001234567',
+      productId: 'formula-movement',
+      level: 2,
+    },
+    "Программа тренировок 'Формула Движения' 2 уровень",
+    'Формула Движения - 2 уровень'
+  );
+
+  await testService(
+    {
+      amount: 6000,
+      email: 'test@example.com',
+      phone: '+79001234567',
+      productId: 'formula-movement',
+      level: 3,
+    },
+    "Программа тренировок 'Формула Движения' 3 уровень",
+    'Формула Движения - 3 уровень'
+  );
+
+  await testService(
+    {
+      amount: 6000,
+      email: 'test@example.com',
+      phone: '+79001234567',
+      productId: 'formula-movement',
+      level: 4,
+    },
+    "Программа тренировок 'Формула Движения' 4 уровень",
+    'Формула Движения - 4 уровень'
+  );
+
+  // Тестируем онлайн-консультацию
+  await testService(
+    {
+      amount: 3000,
+      email: 'test@example.com',
+      phone: '+79001234567',
+      productId: 'online-consultation',
+    },
+    'Онлайн-консультация',
+    'Онлайн-консультация'
+  );
+
+  // Тестируем неизвестный продукт (должен использовать запасной вариант)
+  await testService(
+    {
+      amount: 5000,
+      email: 'test@example.com',
+      phone: '+79001234567',
+      productId: 'unknown-product',
+    },
+    'Услуга реабилитации',
+    'Неизвестный продукт (запасной вариант)'
+  );
+
+  console.log('\n🏁 Тестирование завершено');
 }
 
 // Запускаем тесты
-runAllTests().catch(console.error);
+runTests().catch(console.error);
