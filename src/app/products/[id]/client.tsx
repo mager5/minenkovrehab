@@ -27,6 +27,8 @@ export default function ProductClient({ product }: { product: Product }) {
   const [showConsentError, setShowConsentError] = useState(false);
   // Состояние для показа всех уровней программы "Формула движения"
   const [showAllLevels, setShowAllLevels] = useState(false);
+  // Состояние для показа дополнительной информации для консультации
+  const [showMoreConsultation, setShowMoreConsultation] = useState(false);
   // Состояние для чекбоксов согласия для каждого уровня
   const [isConsentCheckedLevel2, setIsConsentCheckedLevel2] = useState(false);
   const [showConsentErrorLevel2, setShowConsentErrorLevel2] = useState(false);
@@ -45,6 +47,10 @@ export default function ProductClient({ product }: { product: Product }) {
   const [isPaymentProcessingLevel4, setIsPaymentProcessingLevel4] =
     useState(false);
 
+  // Состояния для экспресс-консультации
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   // Сброс состояний обработки при возврате пользователя на страницу
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -54,6 +60,7 @@ export default function ProductClient({ product }: { product: Product }) {
         setIsPaymentProcessingLevel2(false);
         setIsPaymentProcessingLevel3(false);
         setIsPaymentProcessingLevel4(false);
+        setIsLoading(false);
         console.log('🔄 Состояния обработки сброшены при возврате на страницу');
       }
     };
@@ -64,6 +71,7 @@ export default function ProductClient({ product }: { product: Product }) {
       setIsPaymentProcessingLevel2(false);
       setIsPaymentProcessingLevel3(false);
       setIsPaymentProcessingLevel4(false);
+      setIsLoading(false);
       console.log('🔄 Состояния обработки сброшены при фокусе на окне');
     };
 
@@ -619,9 +627,211 @@ export default function ProductClient({ product }: { product: Product }) {
                     </button>
                   </motion.div>
                 )}
+
+                {/* Кнопка показать еще для консультации */}
+                {product.id === 'consultation' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.9 }}
+                    className='mb-4'
+                  >
+                    <button
+                      onClick={() =>
+                        setShowMoreConsultation(!showMoreConsultation)
+                      }
+                      className='block w-full text-primary text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-primary hover:bg-primary hover:text-white'
+                    >
+                      {showMoreConsultation ? 'Свернуть' : 'Показать еще'}
+                    </button>
+                  </motion.div>
+                )}
               </motion.div>
             </motion.div>
           </div>
+
+          {/* Карточка оплаты экспресс-онлайн-консультации */}
+          {product.id === 'consultation' && showMoreConsultation && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5 }}
+              className='mt-8'
+            >
+              <div className='bg-secondary p-6 rounded-lg border border-gray-200'>
+                <h3 className='text-2xl font-bold text-primary mb-3'>
+                  Экспресс онлайн-консультация
+                </h3>
+                <p className='text-gray-700 mb-4'>
+                  Быстрая консультация для разбора конкретного вопроса и
+                  получения рекомендаций.
+                </p>
+
+                <div className='space-y-4 mb-6'>
+                  <div>
+                    <h4 className='font-semibold text-primary mb-2'>
+                      Что включает:
+                    </h4>
+                    <ul className='list-disc list-inside space-y-1 text-sm text-gray-700'>
+                      <li>Разбор истории вашего состояния</li>
+                      <li>Ответы на все ваши вопросы</li>
+                      <li>Определение целей и задач</li>
+                      <li>Выбор вектора действий по решению вашего вопроса</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Плашка "Не является медицинской услугой" */}
+                <div className='bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6'>
+                  <p className='text-sm text-yellow-800 font-medium'>
+                    ⚠️ Не является медицинской услугой
+                  </p>
+                </div>
+
+                {/* Цена */}
+                <div className='mb-6'>
+                  <div className='text-2xl font-bold text-primary'>
+                    {formatPrice('express-consultation', 3000)}
+                  </div>
+                </div>
+
+                {/* Чекбокс согласия */}
+                <div className='mb-6'>
+                  <label className='flex items-start space-x-3 cursor-pointer group'>
+                    <div className='relative mt-1'>
+                      <input
+                        type='checkbox'
+                        checked={isAgreed}
+                        onChange={e => setIsAgreed(e.target.checked)}
+                        className='absolute opacity-0 w-5 h-5 cursor-pointer'
+                        required
+                        aria-required='true'
+                      />
+                      <div
+                        className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-all duration-300 flex-shrink-0 
+                        ${isAgreed ? 'bg-accent border-accent' : 'bg-white border-gray-300 group-hover:border-accent'}`}
+                        aria-hidden='true'
+                      >
+                        {isAgreed && (
+                          <svg
+                            className='w-3 h-3 text-white'
+                            fill='none'
+                            stroke='currentColor'
+                            viewBox='0 0 24 24'
+                            aria-hidden='true'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth='3'
+                              d='M5 13l4 4L19 7'
+                            ></path>
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span className='text-sm text-gray-700'>
+                      Я даю согласие на обработку персональных данных в
+                      соответствии с{' '}
+                      <Link
+                        href='/privacy'
+                        className='text-primary hover:underline'
+                      >
+                        политикой конфиденциальности
+                      </Link>{' '}
+                      и согласен с условиями{' '}
+                      <Link
+                        href='/terms'
+                        className='text-primary hover:underline'
+                      >
+                        договора оферты
+                      </Link>
+                      .
+                    </span>
+                  </label>
+                </div>
+
+                {/* Кнопки */}
+                <div className='flex flex-col sm:flex-row gap-4'>
+                  <button
+                    onClick={async () => {
+                      if (!isAgreed) {
+                        alert(
+                          'Пожалуйста, дайте согласие на обработку персональных данных'
+                        );
+                        return;
+                      }
+                      setIsLoading(true);
+                      try {
+                        console.log(
+                          '🔄 Создание платежа для экспресс-консультации'
+                        );
+
+                        const response = await fetch(
+                          'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url',
+                          {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              amount: 3000,
+                              productId: 'express-consultation',
+                              email: 'customer@example.com',
+                              phone: '+79001234567',
+                            }),
+                          }
+                        );
+
+                        if (!response.ok) {
+                          throw new Error('Ошибка создания платежа');
+                        }
+
+                        const result = await response.json();
+
+                        if (result.success && result.data?.paymentUrl) {
+                          const cleanUrl = result.data.paymentUrl.replace(
+                            /%27/g,
+                            ''
+                          );
+                          window.location.href = cleanUrl;
+                        } else {
+                          throw new Error(
+                            'Не удалось получить ссылку для оплаты'
+                          );
+                        }
+                      } catch (error) {
+                        console.error('❌ Ошибка при создании платежа:', error);
+                        alert(
+                          'Произошла ошибка при создании платежа. Попробуйте еще раз.'
+                        );
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }}
+                    disabled={!isAgreed || isLoading}
+                    className='flex-1 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  >
+                    {isLoading ? 'Обработка...' : 'Купить онлайн'}
+                  </button>
+                  <Link
+                    href={isAgreed ? 'https://t.me/MV_Rehab' : '#'}
+                    target={isAgreed ? '_blank' : '_self'}
+                    rel={isAgreed ? 'noopener noreferrer' : ''}
+                    className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-colors text-center ${
+                      isAgreed
+                        ? 'bg-white text-primary border-2 border-primary hover:bg-primary/5 cursor-pointer'
+                        : 'bg-gray-300 text-gray-500 border-2 border-gray-300 cursor-not-allowed'
+                    }`}
+                    {...(!isAgreed && { onClick: e => e.preventDefault() })}
+                  >
+                    Связаться в Telegram
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Дополнительные уровни для Формулы движения */}
           {product.id === 'formula-movement' && showAllLevels && (
@@ -640,9 +850,9 @@ export default function ProductClient({ product }: { product: Product }) {
                 className='bg-secondary p-6 rounded-lg'
                 whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
               >
-                <h3 className='text-xl font-semibold text-primary mb-4'>
-                  Стоимость услуги
-                </h3>
+                <h1 className='text-xl font-semibold text-primary mb-4'>
+                  2-й уровень
+                </h1>
                 <div className='text-2xl font-bold text-accent mb-6'>
                   6 000 ₽
                 </div>
@@ -787,9 +997,9 @@ export default function ProductClient({ product }: { product: Product }) {
                 className='bg-secondary p-6 rounded-lg'
                 whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
               >
-                <h3 className='text-xl font-semibold text-primary mb-4'>
-                  Стоимость услуги
-                </h3>
+                <h1 className='text-xl font-semibold text-primary mb-4'>
+                  3-й уровень
+                </h1>
                 <div className='text-2xl font-bold text-accent mb-6'>
                   6 000 ₽
                 </div>
@@ -934,9 +1144,9 @@ export default function ProductClient({ product }: { product: Product }) {
                 className='bg-secondary p-6 rounded-lg'
                 whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
               >
-                <h3 className='text-xl font-semibold text-primary mb-4'>
-                  Стоимость услуги
-                </h3>
+                <h1 className='text-xl font-semibold text-primary mb-4'>
+                  4-й уровень
+                </h1>
                 <div className='text-2xl font-bold text-accent mb-6'>
                   6 000 ₽
                 </div>

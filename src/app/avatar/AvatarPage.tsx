@@ -60,7 +60,7 @@ export default function AvatarPage() {
             </div>
 
             <div className='flex items-center gap-3'>
-              <Link href='/products/online-consultation'>
+              <Link href='/products'>
                 <Button
                   variant='outline'
                   size='sm'
@@ -143,7 +143,7 @@ export default function AvatarPage() {
                 <CardTitle className='text-lg'>Быстрые действия</CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
-                <Link href='/products/online-consultation' className='block'>
+                <Link href='/products' className='block'>
                   <Button className='w-full justify-start' variant='outline'>
                     <Phone className='w-4 h-4 mr-2' />
                     Записаться на консультацию

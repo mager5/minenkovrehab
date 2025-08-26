@@ -15,6 +15,9 @@ export default function ProductsPage() {
     services: [],
   });
 
+  // Состояние для показа дополнительных услуг
+  const [showMoreServices, setShowMoreServices] = useState(false);
+
   // Загрузка контента при монтировании компонента
   useEffect(() => {
     async function loadProductsData() {

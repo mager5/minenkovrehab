@@ -53,7 +53,7 @@ export function ServicesSection() {
                 description={service.description}
                 image={
                   service.icon === 'consultation'
-                    ? '/images/hero/online-consultation.jpg'
+                    ? '/images/services/consultation.jpg'
                     : service.icon === 'rehabilitation'
                       ? '/images/hero/formula-m.jpg'
                       : service.icon === 'online'

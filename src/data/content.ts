@@ -281,14 +281,6 @@ export const productsContent: ProductContentType = {
       image: '/images/services/consultation.jpg',
     },
     {
-      id: 'online-consultation',
-      title: 'Онлайн консультации',
-      description:
-        'Индивидуальный разбор вашей ситуации с подбором эффективных решений',
-      price: 'от 2 000 ₽',
-      image: '/images/services/consultation.jpg',
-    },
-    {
       id: 'formula-movement',
       title: 'Программа тренировок "Формула Движения"',
       description:
@@ -333,7 +325,6 @@ export const contactsContent = {
  * Данные для модального окна записи
  */
 export const bookingServices = [
-  { id: 'online-consultation', name: 'Онлайн консультация' },
   { id: 'express-consultation', name: 'Экспресс онлайн-консультация' },
   { id: 'formula-movement', name: 'Программа тренировок "Формула Движения"' },
   { id: 'rehab-protocol', name: 'Восстановительная программа' },
