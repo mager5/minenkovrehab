@@ -110,6 +110,7 @@ export default function OnlineConsultationPage() {
   >(null);
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [showMoreConsultations, setShowMoreConsultations] = useState(false);
   const [contactInfo, setContactInfo] = useState({
     name: '',
     email: '',
@@ -231,7 +232,10 @@ export default function OnlineConsultationPage() {
 
           {/* Список консультаций */}
           <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6'>
-            {consultations.map((consultation, index) => (
+            {(showMoreConsultations
+              ? consultations
+              : consultations.slice(0, 2)
+            ).map((consultation, index) => (
               <motion.div
                 key={consultation.id}
                 className={`bg-white rounded-lg shadow-md overflow-hidden border-2 transition-all duration-300 ${
@@ -304,6 +308,23 @@ export default function OnlineConsultationPage() {
               </motion.div>
             ))}
           </div>
+
+          {/* Кнопка "Показать еще" */}
+          {!showMoreConsultations && consultations.length > 2 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className='mt-8 text-center'
+            >
+              <button
+                onClick={() => setShowMoreConsultations(true)}
+                className='inline-block text-primary text-center px-8 py-3 rounded-md font-medium transition-all border-2 border-primary hover:bg-primary hover:text-white'
+              >
+                Показать еще
+              </button>
+            </motion.div>
+          )}
         </div>
       </motion.div>
     );
