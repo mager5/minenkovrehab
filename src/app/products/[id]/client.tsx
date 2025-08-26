@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { products, formatPrice, Product } from '../data';
 import { motion } from 'framer-motion';
 import ImageCarousel from '@/components/ui/ImageCarousel';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -44,6 +44,39 @@ export default function ProductClient({ product }: { product: Product }) {
     useState(false);
   const [isPaymentProcessingLevel4, setIsPaymentProcessingLevel4] =
     useState(false);
+
+  // Сброс состояний обработки при возврате пользователя на страницу
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Сбрасываем все состояния обработки при возврате на страницу
+        setIsPaymentProcessingLevel1(false);
+        setIsPaymentProcessingLevel2(false);
+        setIsPaymentProcessingLevel3(false);
+        setIsPaymentProcessingLevel4(false);
+        console.log('🔄 Состояния обработки сброшены при возврате на страницу');
+      }
+    };
+
+    const handleFocus = () => {
+      // Дополнительный сброс при фокусе на окне
+      setIsPaymentProcessingLevel1(false);
+      setIsPaymentProcessingLevel2(false);
+      setIsPaymentProcessingLevel3(false);
+      setIsPaymentProcessingLevel4(false);
+      console.log('🔄 Состояния обработки сброшены при фокусе на окне');
+    };
+
+    // Добавляем обработчики событий
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // Очистка обработчиков при размонтировании компонента
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
 
   // Проверка согласия перед действием
   const checkConsent = () => {
