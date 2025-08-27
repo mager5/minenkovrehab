@@ -23,6 +23,9 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
   const [submitError, setSubmitError] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [consentChecked, setConsentChecked] = useState(false);
+  const [offerChecked, setOfferChecked] = useState(false);
+  const [consentError, setConsentError] = useState(false);
+  const [offerError, setOfferError] = useState(false);
 
   // Сброс формы при открытии/закрытии модального окна
   useEffect(() => {
@@ -36,6 +39,10 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
       setSubmitSuccess(false);
       setSubmitError(false);
       setConsentChecked(false);
+      setOfferChecked(false);
+      setOfferChecked(false);
+      setConsentError(false);
+      setOfferError(false);
     }
   }, [isOpen]);
 
@@ -129,13 +136,38 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
 
   const handleConsentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setConsentChecked(e.target.checked);
+    if (e.target.checked) {
+      setConsentError(false);
+    }
+  };
+
+  const handleOfferChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOfferChecked(e.target.checked);
+    if (e.target.checked) {
+      setOfferError(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Сброс ошибок
+    setConsentError(false);
+    setOfferError(false);
+
+    // Проверка обоих чекбоксов
+    let hasErrors = false;
     if (!consentChecked) {
-      return; // Prevent submission if consent is not checked
+      setConsentError(true);
+      hasErrors = true;
+    }
+    if (!offerChecked) {
+      setOfferError(true);
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      return; // Предотвращаем отправку если не отмечены оба чекбокса
     }
 
     setIsSubmitting(true);
@@ -389,7 +421,8 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                       ></div>
                     </div>
 
-                    <div className='form-group mb-2'>
+                    <div className='form-group mb-2 space-y-3'>
+                      {/* Первый чекбокс - согласие на обработку персональных данных */}
                       <label
                         className='flex items-center cursor-pointer group'
                         htmlFor='modal-consent'
@@ -406,7 +439,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                           />
                           <div
                             className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-all duration-300 flex-shrink-0 
-                            ${consentChecked ? 'bg-accent border-accent' : 'bg-white border-gray-300 group-hover:border-accent'}`}
+                            ${consentChecked ? 'bg-accent border-accent' : consentError ? 'bg-white border-red-500' : 'bg-white border-gray-300 group-hover:border-accent'}`}
                             aria-hidden='true'
                           >
                             {consentChecked && (
@@ -437,8 +470,56 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                             rel='noopener noreferrer'
                           >
                             политикой конфиденциальности
-                          </a>{' '}
-                          и согласен с условиями{' '}
+                          </a>
+                        </span>
+                      </label>
+                      {consentError && (
+                        <p className='text-red-500 text-sm ml-8'>
+                          Необходимо дать согласие на обработку персональных
+                          данных
+                        </p>
+                      )}
+
+                      {/* Второй чекбокс - согласие с договором оферты */}
+                      <label
+                        className='flex items-center cursor-pointer group'
+                        htmlFor='modal-offer'
+                      >
+                        <div className='relative flex items-center mr-3'>
+                          <input
+                            id='modal-offer'
+                            className='absolute opacity-0 w-5 h-5 cursor-pointer'
+                            required
+                            aria-required='true'
+                            type='checkbox'
+                            checked={offerChecked}
+                            onChange={handleOfferChange}
+                          />
+                          <div
+                            className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-all duration-300 flex-shrink-0 
+                            ${offerChecked ? 'bg-accent border-accent' : offerError ? 'bg-white border-red-500' : 'bg-white border-gray-300 group-hover:border-accent'}`}
+                            aria-hidden='true'
+                          >
+                            {offerChecked && (
+                              <svg
+                                className='w-3 h-3 text-white'
+                                fill='none'
+                                stroke='currentColor'
+                                viewBox='0 0 24 24'
+                                aria-hidden='true'
+                              >
+                                <path
+                                  strokeLinecap='round'
+                                  strokeLinejoin='round'
+                                  strokeWidth='3'
+                                  d='M5 13l4 4L19 7'
+                                ></path>
+                              </svg>
+                            )}
+                          </div>
+                        </div>
+                        <span className='text-sm text-gray-700 pt-0.5 text-left'>
+                          Я согласен с условиями{' '}
                           <a
                             href='/oferta-consultation-training.pdf'
                             className='text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
@@ -449,6 +530,11 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                           </a>
                         </span>
                       </label>
+                      {offerError && (
+                        <p className='text-red-500 text-sm ml-8'>
+                          Необходимо согласиться с условиями договора оферты
+                        </p>
+                      )}
                     </div>
 
                     {submitError && (
@@ -491,10 +577,16 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                             ? 'bg-gray-200 cursor-not-allowed text-gray-500'
                             : !consentChecked
                               ? 'bg-white text-accent border-2 border-accent cursor-not-allowed'
-                              : 'bg-accent text-white hover:bg-accent-dark'
+                              : !offerChecked
+                                ? 'bg-white text-accent border-2 border-accent cursor-not-allowed'
+                                : 'bg-accent text-white hover:bg-accent-dark'
                         }`}
-                        disabled={isSubmitting || !consentChecked}
-                        aria-disabled={isSubmitting || !consentChecked}
+                        disabled={
+                          isSubmitting || !consentChecked || !offerChecked
+                        }
+                        aria-disabled={
+                          isSubmitting || !consentChecked || !offerChecked
+                        }
                         aria-busy={isSubmitting}
                       >
                         <span className='relative z-10 flex items-center justify-center'>
