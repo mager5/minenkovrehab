@@ -525,8 +525,8 @@ export default function ProductClient({ product }: { product: Product }) {
                         : 'bg-gray-50'
                     }`}
                   >
-                    <label className='flex items-start space-x-3 cursor-pointer group'>
-                      <div className='relative mt-1'>
+                    <label className='flex items-center space-x-3 cursor-pointer group'>
+                      <div className='relative'>
                         <input
                           type='checkbox'
                           checked={isConsentChecked}
@@ -591,8 +591,8 @@ export default function ProductClient({ product }: { product: Product }) {
                         : 'bg-gray-50'
                     }`}
                   >
-                    <label className='flex items-start space-x-3 cursor-pointer group'>
-                      <div className='relative mt-1'>
+                    <label className='flex items-center space-x-3 cursor-pointer group'>
+                      <div className='relative'>
                         <input
                           type='checkbox'
                           checked={isOfferChecked}
@@ -826,8 +826,8 @@ export default function ProductClient({ product }: { product: Product }) {
 
                 {/* Чекбокс согласия */}
                 <div className='mb-6'>
-                  <label className='flex items-start space-x-3 cursor-pointer group'>
-                    <div className='relative mt-1'>
+                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                    <div className='relative'>
                       <input
                         type='checkbox'
                         checked={isAgreed}
@@ -992,8 +992,8 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-start space-x-3 cursor-pointer group'>
-                    <div className='relative mt-1'>
+                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                    <div className='relative'>
                       <input
                         type='checkbox'
                         checked={isConsentCheckedLevel2}
@@ -1060,8 +1060,8 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-start space-x-3 cursor-pointer group'>
-                    <div className='relative mt-1'>
+                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                    <div className='relative'>
                       <input
                         type='checkbox'
                         checked={isOfferCheckedLevel2}
@@ -1201,8 +1201,8 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-start space-x-3 cursor-pointer group'>
-                    <div className='relative mt-1'>
+                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                    <div className='relative'>
                       <input
                         type='checkbox'
                         checked={isConsentCheckedLevel3}
@@ -1269,8 +1269,8 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-start space-x-3 cursor-pointer group'>
-                    <div className='relative mt-1'>
+                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                    <div className='relative'>
                       <input
                         type='checkbox'
                         checked={isOfferCheckedLevel3}
@@ -1410,8 +1410,8 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-start space-x-3 cursor-pointer group'>
-                    <div className='relative mt-1'>
+                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                    <div className='relative'>
                       <input
                         type='checkbox'
                         checked={isConsentCheckedLevel4}
@@ -1478,8 +1478,8 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-start space-x-3 cursor-pointer group'>
-                    <div className='relative mt-1'>
+                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                    <div className='relative'>
                       <input
                         type='checkbox'
                         checked={isOfferCheckedLevel4}
