@@ -267,7 +267,16 @@ export function ContactForm() {
                 </div>
               </div>
               <span className='text-sm text-gray-700 pt-0.5 text-left'>
-                Я даю согласие на обработку персональных данных в соответствии с{' '}
+                Я даю{' '}
+                <a
+                  href='/consent'
+                  className='text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  согласие на обработку персональных данных
+                </a>{' '}
+                в соответствии с{' '}
                 <a
                   href='/policy'
                   className='text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'

@@ -488,9 +488,17 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
             </li>
             <li className='mt-2 sm:mt-0' role='menuitem'>
               <Link
-                href='/oferta-consultation-training.pdf'
-                target='_blank'
-                rel='noopener noreferrer'
+                href='/consent'
+                className='text-white hover:text-accent transition-all duration-300 text-sm font-semibold focus:outline-none focus:underline'
+                style={{ color: '#d1f3ea' }}
+                aria-label='Согласие на обработку персональных данных'
+              >
+                Согласие
+              </Link>
+            </li>
+            <li className='mt-2 sm:mt-0' role='menuitem'>
+              <Link
+                href='/offer'
                 className='text-white hover:text-accent transition-all duration-300 text-sm font-semibold focus:outline-none focus:underline'
                 style={{ color: '#d1f3ea' }}
                 aria-label='Договор-оферта'

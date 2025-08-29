@@ -559,8 +559,16 @@ export default function ProductClient({ product }: { product: Product }) {
                         </div>
                       </div>
                       <span className='text-xs text-gray-600 leading-relaxed'>
-                        Я даю согласие на обработку персональных данных в
-                        соответствии с{' '}
+                        Я даю{' '}
+                        <Link
+                          href='/consent'
+                          className='text-primary hover:underline'
+                          target='_blank'
+                          rel='noopener noreferrer'
+                        >
+                          согласие на обработку персональных данных
+                        </Link>{' '}
+                        в соответствии с{' '}
                         <Link
                           href='/policy'
                           className='text-primary hover:underline'
@@ -860,10 +868,16 @@ export default function ProductClient({ product }: { product: Product }) {
                       </div>
                     </div>
                     <span className='text-sm text-gray-700'>
-                      Я даю согласие на обработку персональных данных в
-                      соответствии с{' '}
+                      Я даю{' '}
                       <Link
-                        href='/privacy'
+                        href='/consent'
+                        className='text-primary hover:underline'
+                      >
+                        согласие на обработку персональных данных
+                      </Link>{' '}
+                      в соответствии с{' '}
+                      <Link
+                        href='/policy'
                         className='text-primary hover:underline'
                       >
                         политикой конфиденциальности
@@ -1027,8 +1041,16 @@ export default function ProductClient({ product }: { product: Product }) {
                       </div>
                     </div>
                     <span className='text-xs text-gray-600 leading-relaxed'>
-                      Я даю согласие на обработку персональных данных в
-                      соответствии с{' '}
+                      Я даю{' '}
+                      <Link
+                        href='/consent'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        согласие на обработку персональных данных
+                      </Link>{' '}
+                      в соответствии с{' '}
                       <Link
                         href='/policy'
                         className='text-primary hover:underline'
@@ -1236,8 +1258,16 @@ export default function ProductClient({ product }: { product: Product }) {
                       </div>
                     </div>
                     <span className='text-xs text-gray-600 leading-relaxed'>
-                      Я даю согласие на обработку персональных данных в
-                      соответствии с{' '}
+                      Я даю{' '}
+                      <Link
+                        href='/consent'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        согласие на обработку персональных данных
+                      </Link>{' '}
+                      в соответствии с{' '}
                       <Link
                         href='/policy'
                         className='text-primary hover:underline'
@@ -1445,8 +1475,16 @@ export default function ProductClient({ product }: { product: Product }) {
                       </div>
                     </div>
                     <span className='text-xs text-gray-600 leading-relaxed'>
-                      Я даю согласие на обработку персональных данных в
-                      соответствии с{' '}
+                      Я даю{' '}
+                      <Link
+                        href='/consent'
+                        className='text-primary hover:underline'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        согласие на обработку персональных данных
+                      </Link>{' '}
+                      в соответствии с{' '}
                       <Link
                         href='/policy'
                         className='text-primary hover:underline'
