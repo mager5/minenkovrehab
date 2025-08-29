@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { products, formatPrice, Product } from '../data';
 import { motion } from 'framer-motion';
 import ImageCarousel from '@/components/ui/ImageCarousel';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 // Анимации для появления элементов
@@ -379,18 +380,35 @@ export default function ProductClient({ product }: { product: Product }) {
                 {product.title}
               </motion.h1>
 
+              {/* Основное изображение продукта */}
+              {product.image && (
+                <motion.div
+                  className='mb-6 relative h-64 md:h-80 rounded-lg overflow-hidden'
+                  variants={fadeIn}
+                  custom={2}
+                >
+                  <Image
+                    src={product.image}
+                    alt={product.title}
+                    fill
+                    className='object-cover'
+                    priority
+                  />
+                </motion.div>
+              )}
+
               {/* Карусель изображений для восстановительной программы */}
               {(product.id === 'rehabilitation-protocols' ||
                 product.id === 'personal-program') && (
                 <motion.div
                   className='mb-6 lg:self-start'
                   variants={fadeIn}
-                  custom={2}
+                  custom={3}
                 >
                   <motion.h2
                     className='text-xl font-semibold text-dark mb-4'
                     variants={fadeIn}
-                    custom={3}
+                    custom={4}
                   >
                     Этапы реабилитации
                   </motion.h2>
@@ -421,18 +439,18 @@ export default function ProductClient({ product }: { product: Product }) {
                 </motion.div>
               )}
 
-              <motion.div className='mb-6' variants={fadeIn} custom={5}>
+              <motion.div className='mb-6' variants={fadeIn} custom={6}>
                 <motion.h2
                   className='text-xl font-semibold text-dark mb-4'
                   variants={fadeIn}
-                  custom={6}
+                  custom={7}
                 >
                   Описание
                 </motion.h2>
                 <motion.p
                   className='text-dark mb-4'
                   variants={fadeIn}
-                  custom={7}
+                  custom={8}
                 >
                   {product.shortDescription}
                 </motion.p>
@@ -443,7 +461,7 @@ export default function ProductClient({ product }: { product: Product }) {
                         key={index}
                         className='text-dark'
                         variants={fadeIn}
-                        custom={8 + index * 0.5}
+                        custom={9 + index * 0.5}
                       >
                         {item}
                       </motion.li>
