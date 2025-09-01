@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import ImageCarousel from '@/components/ui/ImageCarousel';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { MoreServicesSection } from '@/components/sections/MoreServicesSection';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -403,12 +404,12 @@ export default function ProductClient({ product }: { product: Product }) {
                 <motion.div
                   className='mb-6 lg:self-start'
                   variants={fadeIn}
-                  custom={3}
+                  custom={2}
                 >
                   <motion.h2
                     className='text-xl font-semibold text-dark mb-4'
                     variants={fadeIn}
-                    custom={4}
+                    custom={3}
                   >
                     Этапы реабилитации
                   </motion.h2>
@@ -439,18 +440,18 @@ export default function ProductClient({ product }: { product: Product }) {
                 </motion.div>
               )}
 
-              <motion.div className='mb-6' variants={fadeIn} custom={6}>
+              <motion.div className='mb-6' variants={fadeIn} custom={5}>
                 <motion.h2
                   className='text-xl font-semibold text-dark mb-4'
                   variants={fadeIn}
-                  custom={7}
+                  custom={6}
                 >
                   Описание
                 </motion.h2>
                 <motion.p
                   className='text-dark mb-4'
                   variants={fadeIn}
-                  custom={8}
+                  custom={7}
                 >
                   {product.shortDescription}
                 </motion.p>
@@ -461,7 +462,7 @@ export default function ProductClient({ product }: { product: Product }) {
                         key={index}
                         className='text-dark'
                         variants={fadeIn}
-                        custom={9 + index * 0.5}
+                        custom={8 + index * 0.5}
                       >
                         {item}
                       </motion.li>
@@ -1656,6 +1657,9 @@ export default function ProductClient({ product }: { product: Product }) {
           )}
         </motion.div>
       </div>
+
+      {/* Секция "Еще услуги" */}
+      <MoreServicesSection currentProductId={product.id} />
     </motion.div>
   );
 }
