@@ -144,8 +144,16 @@ export function Header() {
                     )
                   }
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 129 129" fill="currentColor" aria-hidden="true" focusable="false">
-                    <path d="M128.389 62.7804C128.389 62.1406 127.869 61.6108 127.229 61.5808C104.266 60.7111 90.2906 57.782 80.5136 48.0051C70.7167 38.2081 67.7976 24.2225 66.9279 1.20969C66.9079 0.569886 66.3781 0.0500488 65.7283 0.0500488H63.0491C62.4093 0.0500488 61.8795 0.569886 61.8495 1.20969C60.9797 24.2125 58.0607 38.2081 48.2637 48.0051C38.4768 57.792 24.5111 60.7111 1.54831 61.5808C0.908509 61.6008 0.388672 62.1306 0.388672 62.7804V65.4596C0.388672 66.0994 0.908509 66.6292 1.54831 66.6592C24.5111 67.529 38.4868 70.458 48.2637 80.235C58.0407 90.0119 60.9597 103.958 61.8395 126.88C61.8595 127.52 62.3893 128.04 63.0391 128.04H65.7283C66.3681 128.04 66.8979 127.52 66.9279 126.88C67.8076 103.958 70.7267 90.0119 80.5036 80.235C90.2906 70.448 104.256 67.529 127.219 66.6592C127.859 66.6392 128.379 66.1094 128.379 65.4596V62.7804H128.389Z" />
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='18'
+                    height='18'
+                    viewBox='0 0 129 129'
+                    fill='currentColor'
+                    aria-hidden='true'
+                    focusable='false'
+                  >
+                    <path d='M128.389 62.7804C128.389 62.1406 127.869 61.6108 127.229 61.5808C104.266 60.7111 90.2906 57.782 80.5136 48.0051C70.7167 38.2081 67.7976 24.2225 66.9279 1.20969C66.9079 0.569886 66.3781 0.0500488 65.7283 0.0500488H63.0491C62.4093 0.0500488 61.8795 0.569886 61.8495 1.20969C60.9797 24.2125 58.0607 38.2081 48.2637 48.0051C38.4768 57.792 24.5111 60.7111 1.54831 61.5808C0.908509 61.6008 0.388672 62.1306 0.388672 62.7804V65.4596C0.388672 66.0994 0.908509 66.6292 1.54831 66.6592C24.5111 67.529 38.4868 70.458 48.2637 80.235C58.0407 90.0119 60.9597 103.958 61.8395 126.88C61.8595 127.52 62.3893 128.04 63.0391 128.04H65.7283C66.3681 128.04 66.8979 127.52 66.9279 126.88C67.8076 103.958 70.7267 90.0119 80.5036 80.235C90.2906 70.448 104.256 67.529 127.219 66.6592C127.859 66.6392 128.379 66.1094 128.379 65.4596V62.7804H128.389Z' />
                   </svg>
                 </a>
                 <a
@@ -163,14 +171,22 @@ export function Header() {
                     )
                   }
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 132 132" fill="currentColor" aria-hidden="true" focusable="false">
-                    <g clipPath="url(#clip0_519_header)">
-                      <path d="M81.5361 62.9865H42.5386V47.5547H81.5361C83.814 47.5547 85.3979 47.9518 86.1928 48.6451C86.9877 49.3385 87.4801 50.6245 87.4801 52.5031V58.0441C87.4801 60.0234 86.9877 61.3094 86.1928 62.0028C85.3979 62.6961 83.814 62.9925 81.5361 62.9925V62.9865ZM84.2115 33.0059H26V99H42.5386V77.5294H73.0177L87.4801 99H106L90.0546 77.4287C95.9333 76.5575 98.573 74.7559 100.75 71.7869C102.927 68.8179 104.019 64.071 104.019 57.7359V52.7876C104.019 49.0303 103.621 46.0613 102.927 43.7857C102.233 41.51 101.047 39.5307 99.362 37.7528C97.5824 36.0698 95.6011 34.8845 93.2223 34.0904C90.8435 33.3971 87.8716 33 84.2115 33V33.0059Z" />
-                      <path d="M198 3.05176e-05C198 36.4508 168.451 66.0001 132 66.0001C124.589 66.0001 117.464 64.7786 110.814 62.5261C110.956 60.9577 111.019 59.3541 111.019 57.7359V52.7876C111.019 48.586 110.58 44.8824 109.623 41.7436C108.59 38.3588 106.82 35.4458 104.443 32.938L104.311 32.7988L104.172 32.667C101.64 30.2721 98.7694 28.5625 95.4389 27.4506L95.3108 27.4079L95.1812 27.3701C92.0109 26.446 88.3508 26 84.2115 26H77.2115V26.0059H71.3211C67.8964 18.0257 66 9.23434 66 3.05176e-05C66 -36.4508 95.5492 -66 132 -66C168.451 -66 198 -36.4508 198 3.05176e-05Z" />
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='18'
+                    height='18'
+                    viewBox='0 0 132 132'
+                    fill='currentColor'
+                    aria-hidden='true'
+                    focusable='false'
+                  >
+                    <g clipPath='url(#clip0_519_header)'>
+                      <path d='M81.5361 62.9865H42.5386V47.5547H81.5361C83.814 47.5547 85.3979 47.9518 86.1928 48.6451C86.9877 49.3385 87.4801 50.6245 87.4801 52.5031V58.0441C87.4801 60.0234 86.9877 61.3094 86.1928 62.0028C85.3979 62.6961 83.814 62.9925 81.5361 62.9925V62.9865ZM84.2115 33.0059H26V99H42.5386V77.5294H73.0177L87.4801 99H106L90.0546 77.4287C95.9333 76.5575 98.573 74.7559 100.75 71.7869C102.927 68.8179 104.019 64.071 104.019 57.7359V52.7876C104.019 49.0303 103.621 46.0613 102.927 43.7857C102.233 41.51 101.047 39.5307 99.362 37.7528C97.5824 36.0698 95.6011 34.8845 93.2223 34.0904C90.8435 33.3971 87.8716 33 84.2115 33V33.0059Z' />
+                      <path d='M198 3.05176e-05C198 36.4508 168.451 66.0001 132 66.0001C124.589 66.0001 117.464 64.7786 110.814 62.5261C110.956 60.9577 111.019 59.3541 111.019 57.7359V52.7876C111.019 48.586 110.58 44.8824 109.623 41.7436C108.59 38.3588 106.82 35.4458 104.443 32.938L104.311 32.7988L104.172 32.667C101.64 30.2721 98.7694 28.5625 95.4389 27.4506L95.3108 27.4079L95.1812 27.3701C92.0109 26.446 88.3508 26 84.2115 26H77.2115V26.0059H71.3211C67.8964 18.0257 66 9.23434 66 3.05176e-05C66 -36.4508 95.5492 -66 132 -66C168.451 -66 198 -36.4508 198 3.05176e-05Z' />
                     </g>
                     <defs>
-                      <clipPath id="clip0_519_header">
-                        <rect width="132" height="132" rx="66" fill="white"/>
+                      <clipPath id='clip0_519_header'>
+                        <rect width='132' height='132' rx='66' fill='white' />
                       </clipPath>
                     </defs>
                   </svg>
@@ -286,40 +302,40 @@ export function Header() {
 
             {/* Десктопное меню */}
             <nav
-              className='hidden [&>*]:text-nowrap [@media(min-width:840px)]:flex space-x-1 lg:space-x-2'
+              className='hidden [&>*]:text-nowrap [@media(min-width:900px)]:flex space-x-2'
               aria-label='Основная навигация'
             >
               <Link
                 href='/'
-                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                className={`px-4 py-2 text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                 aria-current={pathname === '/' ? 'page' : undefined}
               >
                 Главная
               </Link>
               <Link
                 href='/about'
-                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/about' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                className={`px-4 py-2 text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/about' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                 aria-current={pathname === '/about' ? 'page' : undefined}
               >
                 Обо мне
               </Link>
               <Link
                 href='/products'
-                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/products' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                className={`px-4 py-2 text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/products' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                 aria-current={pathname === '/products' ? 'page' : undefined}
               >
                 Услуги
               </Link>
               <Link
                 href='/reviews'
-                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/reviews' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                className={`px-4 py-2 text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/reviews' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                 aria-current={pathname === '/reviews' ? 'page' : undefined}
               >
                 Отзывы
               </Link>
               <Link
                 href='/contacts'
-                className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/contacts' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                className={`px-4 py-2 text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === '/contacts' ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                 aria-current={pathname === '/contacts' ? 'page' : undefined}
               >
                 Контакты
@@ -327,10 +343,10 @@ export function Header() {
             </nav>
 
             {/* Кнопка записи */}
-            <div className='hidden [@media(min-width:840px)]:block'>
+            <div className='hidden [@media(min-width:900px)]:block'>
               <button
                 onClick={openBookingModal}
-                className='bg-accent hover:bg-accent-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-2 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
+                className='bg-accent hover:bg-accent-dark text-white font-semibold text-base px-5 py-2 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
                 aria-label='Записаться на консультацию'
                 aria-haspopup='dialog'
               >
@@ -339,7 +355,7 @@ export function Header() {
             </div>
 
             {/* Мобильное меню (бургер) */}
-            <div className='[@media(min-width:840px)]:hidden'>
+            <div className='[@media(min-width:900px)]:hidden'>
               <button
                 type='button'
                 className='text-gray-800 hover:text-primary focus:outline-none transition-all duration-300 p-2 rounded-md'

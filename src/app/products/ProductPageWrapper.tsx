@@ -273,7 +273,7 @@ export default function ProductPageWrapper({
                   variants={fadeIn}
                   custom={2}
                   whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.2 }}
                 >
                   {/* Заглушка для изображения продукта */}
                   <motion.div
@@ -352,7 +352,7 @@ export default function ProductPageWrapper({
                       className='mb-4'
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ duration: 0.4, delay: 0.7 }}
+                      transition={{ duration: 0.2, delay: 0.7 }}
                     >
                       <label htmlFor='name' className='block text-dark mb-2'>
                         Ваше имя
@@ -374,7 +374,7 @@ export default function ProductPageWrapper({
                       className='mb-4'
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ duration: 0.4, delay: 0.8 }}
+                      transition={{ duration: 0.2, delay: 0.8 }}
                     >
                       <label htmlFor='email' className='block text-dark mb-2'>
                         Email
@@ -396,7 +396,7 @@ export default function ProductPageWrapper({
                       className='mb-6'
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ duration: 0.4, delay: 0.9 }}
+                      transition={{ duration: 0.2, delay: 0.9 }}
                     >
                       <label htmlFor='phone' className='block text-dark mb-2'>
                         Телефон

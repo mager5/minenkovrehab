@@ -275,6 +275,7 @@ export function Header() {
                               key={service.href}
                               href={service.href}
                               className='block px-4 py-3 hover:bg-gray-50 transition-colors duration-200 group'
+                              aria-label={`${service.label}: ${service.description}`}
                             >
                               <div className='font-medium text-gray-900 group-hover:text-primary transition-colors duration-200'>
                                 {service.label}
@@ -296,6 +297,7 @@ export function Header() {
                             <Link
                               href='/products'
                               className='block px-4 py-2 text-sm font-medium text-primary hover:bg-gray-50 transition-colors duration-200'
+                              aria-label='Посмотреть все услуги и программы'
                             >
                               Все услуги →
                             </Link>
@@ -313,6 +315,17 @@ export function Header() {
                     href={item.href}
                     className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === item.href ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
                     aria-current={pathname === item.href ? 'page' : undefined}
+                    aria-label={
+                      item.label === 'Главная'
+                        ? 'Перейти на главную страницу'
+                        : item.label === 'Обо мне'
+                          ? 'Узнать больше о специалисте'
+                          : item.label === 'Услуги'
+                            ? 'Посмотреть услуги и программы'
+                            : item.label === 'Контакты'
+                              ? 'Связаться со специалистом'
+                              : `Перейти в раздел ${item.label}`
+                    }
                   >
                     {item.label}
                   </Link>
@@ -399,6 +412,17 @@ export function Header() {
                           aria-current={
                             pathname === item.href ? 'page' : undefined
                           }
+                          aria-label={
+                            item.label === 'Главная'
+                              ? 'Перейти на главную страницу'
+                              : item.label === 'Обо мне'
+                                ? 'Узнать больше о специалисте'
+                                : item.label === 'Услуги'
+                                  ? 'Посмотреть услуги и программы'
+                                  : item.label === 'Контакты'
+                                    ? 'Связаться со специалистом'
+                                    : `Перейти в раздел ${item.label}`
+                          }
                         >
                           {item.label}
                         </Link>
@@ -438,6 +462,7 @@ export function Header() {
                               href={service.href}
                               onClick={closeMenu}
                               className='block py-2 text-sm text-gray-600 hover:text-primary transition-colors duration-200 border-l-2 border-transparent hover:border-primary pl-2'
+                              aria-label={`${service.label}: ${service.description}`}
                             >
                               <div className='font-medium'>{service.label}</div>
                               <div
@@ -457,6 +482,7 @@ export function Header() {
                             href='/products'
                             onClick={closeMenu}
                             className='block py-2 text-sm font-medium text-primary hover:text-primary-dark transition-colors duration-200 border-l-2 border-transparent hover:border-primary pl-2'
+                            aria-label='Посмотреть все услуги и программы'
                           >
                             Все услуги →
                           </Link>
@@ -473,6 +499,17 @@ export function Header() {
                     onClick={closeMenu}
                     className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === item.href ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
                     aria-current={pathname === item.href ? 'page' : undefined}
+                    aria-label={
+                      item.label === 'Главная'
+                        ? 'Перейти на главную страницу'
+                        : item.label === 'Обо мне'
+                          ? 'Узнать больше о специалисте'
+                          : item.label === 'Услуги'
+                            ? 'Посмотреть услуги и программы'
+                            : item.label === 'Контакты'
+                              ? 'Связаться со специалистом'
+                              : `Перейти в раздел ${item.label}`
+                    }
                   >
                     {item.label}
                   </Link>
@@ -480,6 +517,34 @@ export function Header() {
               })}
 
               {/* Дополнительные ссылки на услуги для лучшей видимости */}
+              <Link
+                href='/'
+                className='text-white hover:text-accent transition-colors'
+                aria-label='Перейти на главную страницу'
+              >
+                Главная
+              </Link>
+              <Link
+                href='/about'
+                className='text-white hover:text-accent transition-colors'
+                aria-label='Узнать больше о специалисте'
+              >
+                Обо мне
+              </Link>
+              <Link
+                href='/products'
+                className='text-white hover:text-accent transition-colors'
+                aria-label='Посмотреть услуги и программы'
+              >
+                Услуги
+              </Link>
+              <Link
+                href='/contacts'
+                className='text-white hover:text-accent transition-colors'
+                aria-label='Связаться со специалистом'
+              >
+                Контакты
+              </Link>
               <Link
                 href='/products/personal-program'
                 onClick={closeMenu}

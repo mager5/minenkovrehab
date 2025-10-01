@@ -6,15 +6,15 @@ import { BookingModal, ContactForm } from '@/components';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { getContactsContent } from '@/lib/content';
 
-// Анимации для появления элементов
+// Анимации для появления элементов (ускоренные)
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
   visible: (custom: number) => ({
     opacity: 1,
     y: 0,
     transition: {
-      delay: custom * 0.1,
-      duration: 0.8,
+      delay: custom * 0.05, // Уменьшено с 0.1 до 0.05
+      duration: 0.2, // Уменьшено с 0.8 до 0.2
       ease: [0.25, 0.1, 0.25, 1.0],
     },
   }),
@@ -131,7 +131,7 @@ export default function ContactsPage() {
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.7, delay: 0.1 }}
+                transition={{ duration: 0.2, delay: 0.05 }}
               >
                 <ContactForm />
               </motion.div>
@@ -141,7 +141,7 @@ export default function ContactsPage() {
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.7, delay: 0.3 }}
+                transition={{ duration: 0.2, delay: 0.15 }}
                 className='bg-white rounded-xl shadow p-8'
               >
                 <h2 className='text-2xl font-bold mb-8 text-gray-800'>

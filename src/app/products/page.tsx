@@ -80,7 +80,7 @@ export default function ProductsPage() {
             className='text-4xl md:text-5xl font-bold text-white mb-6'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
           >
             {productsContent.title}
           </motion.h1>
@@ -88,7 +88,7 @@ export default function ProductsPage() {
             className='max-w-2xl text-xl text-white mb-8'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: 0.2, delay: 0.15 }}
           >
             {productsContent.description}
           </motion.p>
@@ -105,7 +105,7 @@ export default function ProductsPage() {
                 className='bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-[1.02] flex flex-col h-full'
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ duration: 0.2, delay: index * 0.05 }}
               >
                 <div className='relative h-64'>
                   <Image
@@ -131,6 +131,7 @@ export default function ProductsPage() {
                     <Link
                       href={`/products/${service.id}`}
                       className='inline-flex items-center text-primary hover:text-accent transition-colors'
+                      aria-label={`Подробнее о услуге: ${service.title}`}
                     >
                       <span className='mr-2'>Подробнее</span>
                       <svg
@@ -138,6 +139,7 @@ export default function ProductsPage() {
                         className='h-5 w-5'
                         viewBox='0 0 20 20'
                         fill='currentColor'
+                        aria-hidden='true'
                       >
                         <path
                           fillRule='evenodd'

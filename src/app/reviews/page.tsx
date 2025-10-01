@@ -6,15 +6,15 @@ import Link from 'next/link';
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
-// Анимации для появления элементов
+// Анимации для появления элементов (ускоренные)
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
   visible: (custom: number) => ({
     opacity: 1,
     y: 0,
     transition: {
-      delay: custom * 0.1,
-      duration: 0.8,
+      delay: custom * 0.05, // Уменьшено с 0.1 до 0.05
+      duration: 0.2, // Уменьшено с 0.8 до 0.2
       ease: [0.25, 0.1, 0.25, 1.0],
     },
   }),
@@ -202,7 +202,10 @@ export default function ReviewsPage() {
                   className='flex items-center mb-4'
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: 0.2 + 0.1 * (index % 3) }}
+                  transition={{
+                    duration: 0.2,
+                    delay: 0.1 + 0.05 * (index % 3),
+                  }}
                 >
                   <motion.div
                     className='w-12 h-12 bg-[#3A7CA5] rounded-full flex items-center justify-center text-white font-bold text-xl mr-4'
@@ -227,8 +230,8 @@ export default function ReviewsPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{
-                      duration: 0.4,
-                      delay: 0.3 + 0.1 * (index % 3),
+                      duration: 0.2,
+                      delay: 0.15 + 0.05 * (index % 3),
                     }}
                   >
                     {renderStars(review.rating)}
@@ -248,7 +251,7 @@ export default function ReviewsPage() {
                   className='text-sm text-[#333333]/50 italic'
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.5 + 0.1 * (index % 3) }}
+                  transition={{ duration: 0.2, delay: 0.5 + 0.1 * (index % 3) }}
                 >
                   {review.date}
                 </motion.div>
@@ -329,7 +332,7 @@ export default function ReviewsPage() {
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: 0.3 + 0.1 * index }}
+                  transition={{ duration: 0.2, delay: 0.3 + 0.1 * index }}
                 >
                   {stat.label}
                 </motion.p>

@@ -381,8 +381,8 @@ export default function ProductClient({ product }: { product: Product }) {
                 {product.title}
               </motion.h1>
 
-              {/* Основное изображение продукта */}
-              {product.image && (
+              {/* Основное изображение продукта - скрыто только для personal-program */}
+              {product.image && product.id !== 'personal-program' && (
                 <motion.div
                   className='mb-6 relative h-64 md:h-80 rounded-lg overflow-hidden'
                   variants={fadeIn}
@@ -696,6 +696,7 @@ export default function ProductClient({ product }: { product: Product }) {
                       !isOfferChecked ||
                       isPaymentProcessingLevel1
                     }
+                    aria-label={`Купить онлайн: ${product.title}`}
                     className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg flex items-center justify-center space-x-2 ${
                       isConsentChecked &&
                       isOfferChecked &&
@@ -972,6 +973,7 @@ export default function ProductClient({ product }: { product: Product }) {
                       }
                     }}
                     disabled={!isAgreed || isLoading}
+                    aria-label='Купить онлайн экспресс-консультацию'
                     className='flex-1 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                   >
                     {isLoading ? 'Обработка...' : 'Купить онлайн'}
@@ -1165,6 +1167,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     !isOfferCheckedLevel2 ||
                     isPaymentProcessingLevel2
                   }
+                  aria-label='Купить онлайн уровень 2 программы Формула движения'
                   className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
                     isConsentCheckedLevel2 &&
                     isOfferCheckedLevel2 &&
@@ -1382,6 +1385,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     !isOfferCheckedLevel3 ||
                     isPaymentProcessingLevel3
                   }
+                  aria-label='Купить онлайн уровень 3 программы Формула движения'
                   className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
                     isConsentCheckedLevel3 &&
                     isOfferCheckedLevel3 &&
@@ -1599,6 +1603,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     !isOfferCheckedLevel4 ||
                     isPaymentProcessingLevel4
                   }
+                  aria-label='Купить онлайн уровень 4 программы Формула движения'
                   className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
                     isConsentCheckedLevel4 &&
                     isOfferCheckedLevel4 &&

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   AboutSection,
@@ -12,18 +13,17 @@ import { useEffect } from 'react';
 import { getHomeContent } from '@/lib/content';
 import { HomeContent } from '@/types/content';
 
-// Анимации для появления элементов
-const fadeIn = {
+// Анимации для появления элементов при прокрутке (ускоренные)
+const fadeInOnScroll = {
   hidden: { opacity: 0, y: 20 },
-  visible: (custom: number) => ({
+  visible: {
     opacity: 1,
     y: 0,
     transition: {
-      delay: custom * 0.1,
-      duration: 0.8,
+      duration: 0.2, // Ускоренная анимация
       ease: [0.25, 0.1, 0.25, 1.0],
     },
-  }),
+  },
 };
 
 export default function Home() {
@@ -46,20 +46,14 @@ export default function Home() {
       <motion.section className='hero-section pt-32 sm:pt-16 pb-20 lg:pt-40 lg:pb-32 overflow-hidden'>
         <div className='container mx-auto px-4 sm:px-6 lg:px-8 relative'>
           <div className='flex flex-col md:flex-row items-center justify-between gap-12'>
-            <motion.div
-              className='md:w-1/2 text-white'
-              initial='hidden'
-              animate='visible'
-              variants={fadeIn}
-              custom={0}
-            >
-              <motion.h1
+            <div className='md:w-1/2 text-white'>
+              <h1
                 className='hero-title font-bold mb-6 leading-tight'
                 style={{ color: '#d1f3ea' }}
               >
                 Физическая реабилитация и тренировки для здоровья
-              </motion.h1>
-              <motion.p
+              </h1>
+              <p
                 className='text-base sm:text-lg md:text-xl opacity-95 mb-8 font-medium leading-relaxed'
                 style={{ color: '#FFFFFF', opacity: 1, transform: 'none' }}
               >
@@ -73,26 +67,24 @@ export default function Home() {
                 <span className='block'>
                   • Готовые восстановительные программы после травм и операций
                 </span>
-              </motion.p>
-              <motion.div
-                className='flex flex-col sm:flex-row gap-4 w-full'
-                variants={fadeIn}
-                custom={2}
-              >
+              </p>
+              <div className='flex flex-col sm:flex-row gap-4'>
                 <Link
                   href='/about'
-                  className='btn bg-accent hover:bg-accent-dark text-white !text-white px-6 py-3 rounded-md font-medium transition-all hover:-translate-y-1 hover:shadow-lg w-full sm:w-auto text-center'
+                  className='inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-primary bg-white rounded-lg hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1'
+                  aria-label='Узнать больше о специалисте и методах реабилитации'
                 >
                   Узнать больше
                 </Link>
                 <Link
                   href='/contacts'
-                  className='btn bg-white/90 text-primary hover:bg-white/95 px-6 py-3 rounded-md font-medium transition-all hover:-translate-y-1 hover:shadow-lg w-full sm:w-auto text-center'
+                  className='inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-accent rounded-lg hover:bg-accent-dark transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1'
+                  aria-label='Записаться на консультацию или связаться со специалистом'
                 >
                   Записаться
                 </Link>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
         </div>
       </motion.section>

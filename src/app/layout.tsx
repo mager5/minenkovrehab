@@ -169,6 +169,13 @@ export default function RootLayout({
           name='msapplication-config'
           content='/favicons/browserconfig.xml'
         />
+        {/* Preload мобильного фонового изображения для быстрой загрузки */}
+        <link
+          rel='preload'
+          as='image'
+          href='/images/hero/section-banner.jpg'
+          media='(max-width: 768px)'
+        />
       </head>
       <body
         className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col h-full overflow-x-hidden overflow-y-auto`}
