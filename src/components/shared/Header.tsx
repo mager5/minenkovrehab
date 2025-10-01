@@ -412,17 +412,7 @@ export function Header() {
                           aria-current={
                             pathname === item.href ? 'page' : undefined
                           }
-                          aria-label={
-                            item.label === 'Главная'
-                              ? 'Перейти на главную страницу'
-                              : item.label === 'Обо мне'
-                                ? 'Узнать больше о специалисте'
-                                : item.label === 'Услуги'
-                                  ? 'Посмотреть услуги и программы'
-                                  : item.label === 'Контакты'
-                                    ? 'Связаться со специалистом'
-                                    : `Перейти в раздел ${item.label}`
-                          }
+                          aria-label='Посмотреть услуги и программы'
                         >
                           {item.label}
                         </Link>
