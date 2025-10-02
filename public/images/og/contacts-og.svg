@@ -1,0 +1,90 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Градиентный фон -->
+  <defs>
+    <linearGradient id="contactsBgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#374151;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4b5563;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Градиент для акцентов -->
+    <linearGradient id="contactsAccentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Градиент для иконок -->
+    <linearGradient id="contactIconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Основной фон -->
+  <rect width="1200" height="630" fill="url(#contactsBgGradient)"/>
+  
+  <!-- Декоративные элементы -->
+  <circle cx="1000" cy="120" r="60" fill="rgba(245,158,11,0.1)"/>
+  <circle cx="150" cy="450" r="40" fill="rgba(16,185,129,0.2)"/>
+  <circle cx="1100" cy="500" r="35" fill="rgba(245,158,11,0.1)"/>
+  
+  <!-- Иконки контактов -->
+  <!-- Телефон -->
+  <g transform="translate(850, 180)">
+    <circle cx="30" cy="30" r="30" fill="rgba(245,158,11,0.2)" stroke="url(#contactsAccentGradient)" stroke-width="2"/>
+    <path d="M20 20 Q20 15 25 15 L35 15 Q40 15 40 20 L40 25 Q40 30 35 30 L32 30 L32 35 Q32 40 27 40 L25 40 Q20 40 20 35 Z" fill="url(#contactIconGradient)"/>
+    <circle cx="25" cy="22" r="2" fill="white"/>
+    <circle cx="35" cy="22" r="2" fill="white"/>
+  </g>
+  
+  <!-- Email -->
+  <g transform="translate(920, 230)">
+    <rect x="5" y="15" width="50" height="30" rx="5" fill="rgba(245,158,11,0.2)" stroke="url(#contactsAccentGradient)" stroke-width="2"/>
+    <path d="M10 20 L30 35 L50 20" stroke="url(#contactIconGradient)" stroke-width="2" fill="none"/>
+  </g>
+  
+  <!-- VK -->
+  <g transform="translate(850, 280)">
+    <circle cx="30" cy="30" r="30" fill="rgba(245,158,11,0.2)" stroke="url(#contactsAccentGradient)" stroke-width="2"/>
+    <text x="30" y="38" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="url(#contactIconGradient)" text-anchor="middle">VK</text>
+  </g>
+  
+  <!-- Telegram -->
+  <g transform="translate(920, 330)">
+    <circle cx="30" cy="30" r="30" fill="rgba(245,158,11,0.2)" stroke="url(#contactsAccentGradient)" stroke-width="2"/>
+    <path d="M15 30 L35 20 L45 25 L25 35 L20 40 Z" fill="url(#contactIconGradient)"/>
+  </g>
+  
+  <!-- Основной текст -->
+  <text x="100" y="180" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white">
+    Контакты
+  </text>
+  
+  <text x="100" y="240" font-family="Arial, sans-serif" font-size="32" fill="rgba(255,255,255,0.9)">
+    Свяжитесь со мной удобным способом
+  </text>
+  
+  <!-- Контактная информация -->
+  <g transform="translate(100, 280)">
+    <text x="0" y="40" font-family="Arial, sans-serif" font-size="24" fill="url(#contactsAccentGradient)" font-weight="600">
+      📞 +7 (928) 328-70-52
+    </text>
+    <text x="0" y="80" font-family="Arial, sans-serif" font-size="24" fill="url(#contactsAccentGradient)" font-weight="600">
+      ✉️ minenkov.rehab@yandex.ru
+    </text>
+    <text x="0" y="120" font-family="Arial, sans-serif" font-size="24" fill="url(#contactsAccentGradient)" font-weight="600">
+      💬 VK: minenkov_rehab
+    </text>
+    <text x="0" y="160" font-family="Arial, sans-serif" font-size="24" fill="url(#contactsAccentGradient)" font-weight="600">
+      📱 Telegram: @MV_Rehab
+    </text>
+  </g>
+  
+  <!-- Логотип/бренд внизу -->
+  <text x="100" y="580" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.6)">
+    minenkovrehab.ru
+  </text>
+  
+  <!-- Декоративная линия -->
+  <rect x="100" y="260" width="100" height="3" fill="url(#contactsAccentGradient)" rx="1.5"/>
+</svg>
