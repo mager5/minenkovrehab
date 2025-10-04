@@ -10,10 +10,11 @@ export const metadata: Metadata = {
       'Свяжитесь с нами для записи на консультацию или получения дополнительной информации о наших услугах.',
     images: [
       {
-        url: '/images/og/contacts-og.svg',
+        url: '/images/og/contacts-og.jpg',
         width: 1200,
         height: 630,
         alt: 'Контакты - МиненковRehab',
+        type: 'image/jpeg',
       },
     ],
   },
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     title: 'Контакты - МиненковRehab',
     description:
       'Свяжитесь с нами для записи на консультацию или получения дополнительной информации о наших услугах.',
-    images: ['/images/og/contacts-og.svg'],
+    images: ['/images/og/contacts-og.jpg'],
   },
 };
 

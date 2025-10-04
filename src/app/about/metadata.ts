@@ -14,6 +14,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'О специалисте - Вадим Миненков',
+        type: 'image/jpeg',
       },
     ],
   },
@@ -22,6 +23,6 @@ export const metadata: Metadata = {
     title: 'О специалисте - Вадим Миненков',
     description:
       'Физический реабилитолог Вадим Миненков. Специалист по спортивной тренировке и физической реабилитации, инструктор-методист ЛФК.',
-    images: ['/images/og/about-og.svg'],
+    images: ['/images/og/about-og.jpg'],
   },
 };
