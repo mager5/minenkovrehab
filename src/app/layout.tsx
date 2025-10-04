@@ -39,7 +39,6 @@ export const metadata: Metadata = {
     locale: 'ru_RU',
     images: [
       {
-        url: '/images/og-image.svg',
         width: 1200,
         height: 630,
         alt: 'МиненковRehab - Физическая реабилитация',
