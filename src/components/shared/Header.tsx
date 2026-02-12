@@ -338,7 +338,7 @@ export function Header() {
             <div className='hidden [@media(min-width:840px)]:flex items-center space-x-3'>
               {/* Кнопка входа */}
               <Link
-                href='/auth-demo/login'
+                href='/login'
                 className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
                 aria-label='Войти в личный кабинет'
               >
@@ -569,7 +569,7 @@ export function Header() {
                 Онлайн тренировки
               </Link>
               <Link
-                href='/auth-demo/login'
+                href='/login'
                 onClick={closeMenu}
                 className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
                 aria-label='Войти в личный кабинет'
