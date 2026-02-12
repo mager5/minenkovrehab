@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/lib/validations/auth';
-import { useMockAuth, MockAuthProvider } from '@/hooks/useMockAuth';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/auth/Button';
 import { Input } from '@/components/ui/auth/Input';
 import {
@@ -25,25 +25,41 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function LoginForm() {
-  const { signIn, isLoading: isAuthLoading } = useMockAuth();
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const supabase = createClient();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = async (data: LoginInput) => {
     setError(null);
+    setIsLoading(true);
+
     try {
-      await signIn(data.email);
-      router.push('/dashboard'); // Or mock dashboard
-    } catch (_err) {
-      setError('Не удалось войти. Пожалуйста, проверьте данные.');
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      router.push('/dashboard');
+      router.refresh();
+    } catch (err: any) {
+      setError(
+        err.message || 'Не удалось войти. Пожалуйста, проверьте данные.'
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,7 +96,7 @@ function LoginForm() {
               type='email'
               label='Email'
               placeholder='name@example.com'
-              error={errors.email?.message}
+              error={errors.email?.message || ''}
               {...register('email')}
             />
           </div>
@@ -102,15 +118,11 @@ function LoginForm() {
             <Input
               id='password'
               type='password'
-              error={errors.password?.message}
+              error={errors.password?.message || ''}
               {...register('password')}
             />
           </div>
-          <Button
-            type='submit'
-            className='w-full'
-            isLoading={isSubmitting || isAuthLoading}
-          >
+          <Button type='submit' className='w-full' isLoading={isLoading}>
             Войти
           </Button>
         </form>
@@ -119,7 +131,7 @@ function LoginForm() {
         <p>
           Нет аккаунта?{' '}
           <Link
-            href='#'
+            href='/register'
             className='font-medium text-indigo-600 hover:text-indigo-500'
           >
             Зарегистрироваться
@@ -132,12 +144,10 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <MockAuthProvider>
-      <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
-        <div className='w-full max-w-md space-y-8'>
-          <LoginForm />
-        </div>
+    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
+      <div className='w-full max-w-md space-y-8'>
+        <LoginForm />
       </div>
-    </MockAuthProvider>
+    </div>
   );
 }

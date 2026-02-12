@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 import { rateLimitConfig } from '@/lib/security';
 
 // Простая реализация rate limiting в памяти
@@ -46,8 +47,16 @@ setInterval(
   5 * 60 * 1000
 );
 
-export function middleware(request: NextRequest) {
-  const response = NextResponse.next();
+export async function middleware(request: NextRequest) {
+  // Исключаем статические файлы из обработки middleware
+  if (
+    request.nextUrl.pathname.startsWith('/_next') ||
+    request.nextUrl.pathname.startsWith('/static') ||
+    request.nextUrl.pathname.startsWith('/api/robokassa') ||
+    request.nextUrl.pathname.match(/\.(svg|png|jpg|jpeg|gif|webp|ico|css|js)$/)
+  ) {
+    return NextResponse.next();
+  }
 
   // Rate limiting для API маршрутов
   if (request.nextUrl.pathname.startsWith('/api/')) {
@@ -66,6 +75,12 @@ export function middleware(request: NextRequest) {
       );
     }
   }
+
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
   // Заголовки безопасности
   response.headers.set('X-Frame-Options', 'DENY');
@@ -106,18 +121,93 @@ export function middleware(request: NextRequest) {
   response.headers.delete('Server');
   response.headers.delete('X-Powered-By');
 
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+
+          const newResponse = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+
+          // Copy headers from previous response
+          response.headers.forEach((value, key) => {
+            newResponse.headers.set(key, value);
+          });
+
+          response = newResponse;
+
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+
+          const newResponse = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+
+          // Copy headers from previous response
+          response.headers.forEach((value, key) => {
+            newResponse.headers.set(key, value);
+          });
+
+          response = newResponse;
+
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+        },
+      },
+    }
+  );
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Защита маршрутов личного кабинета
+  if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // Редирект авторизованных пользователей со страницы входа и регистрации
+  if (
+    (request.nextUrl.pathname.startsWith('/login') ||
+      request.nextUrl.pathname.startsWith('/register')) &&
+    user
+  ) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
   return response;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Применяется ко всем маршрутам кроме:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|css|js)$).*)',
   ],
 };
