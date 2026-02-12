@@ -105,196 +105,26 @@ body {
   }
 }
 
-/* 
-  ========================================
-  iOS 26 Concept Styles (Glassmorphism)
-  ========================================
-*/
+@media (min-width: 640px) and (max-width: 995px) {
+  .md\:w-1\/2 {
+    width: 600px !important;
+  }
+}
 
-/* Глобальный фон для iOS страницы */
-.ios-home-page {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  background-attachment: fixed;
-  min-height: 100vh;
+.hero-section > * {
   position: relative;
-  z-index: 0;
+  z-index: 2;
 }
 
-/* Абстрактные фоновые пятна */
-.ios-bg-blob {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(80px);
-  z-index: -1;
-  opacity: 0.6;
-  animation: float-blob 20s infinite ease-in-out;
-  will-change: transform;
+/* Стили для Swiper пагинации - белые точки */
+.swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.7) !important;
+  opacity: 1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
-.ios-blob-1 {
-  top: -10%;
-  left: -10%;
-  width: 50vw;
-  height: 50vw;
-  background: rgba(168, 237, 234, 0.5); /* Mint */
-}
-
-.ios-blob-2 {
-  bottom: -10%;
-  right: -10%;
-  width: 60vw;
-  height: 60vw;
-  background: rgba(254, 214, 227, 0.5); /* Soft Pink */
-  animation-delay: -5s;
-}
-
-.ios-blob-3 {
-  top: 40%;
-  left: 30%;
-  width: 40vw;
-  height: 40vw;
-  background: rgba(162, 194, 225, 0.4); /* Soft Blue */
-  animation-delay: -10s;
-}
-
-@keyframes float-blob {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-}
-
-/* Glass Effect Utilities */
-.ios-glass {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-  transform: translate3d(0, 0, 0);
-}
-
-.ios-glass-card {
-  @apply ios-glass rounded-3xl transition-all duration-300;
-}
-
-.ios-glass-card:hover {
-  background: rgba(255, 255, 255, 0.75);
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.1);
-}
-
-/* Navigation */
-.ios-nav {
-  position: fixed;
-  top: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%) translateZ(0);
-  z-index: 100;
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-  width: 90%;
-  max-width: 600px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.ios-nav-link {
-  color: #333;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  transition: all 0.2s;
-  font-size: 0.95rem;
-}
-
-.ios-nav-link:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.ios-nav-link.active {
-  background: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-/* Buttons */
-.ios-button {
-  border-radius: 9999px;
-  padding: 1rem 2rem;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  position: relative;
-  overflow: hidden;
-  border: none;
-}
-
-.ios-button-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 10px 20px -10px rgba(118, 75, 162, 0.5);
-}
-
-.ios-button-primary:hover {
-  transform: scale(1.05);
-  box-shadow: 0 15px 30px -10px rgba(118, 75, 162, 0.6);
-}
-
-.ios-button-secondary {
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
-  color: #333;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-}
-
-.ios-button-secondary:hover {
-  background: rgba(255, 255, 255, 0.8);
-  transform: scale(1.05);
-}
-
-/* Overrides for existing components inside iOS wrapper */
-.ios-home-page section {
-  background-color: transparent !important;
-  padding-top: 4rem;
-  padding-bottom: 4rem;
-}
-
-.ios-home-page section .container {
-  @apply ios-glass rounded-[40px] p-8 md:p-12;
-}
-
-/* Hide global header when iOS Home is active (using body class logic if possible, 
-   but since we can't easily set body class, we will try to hide it via CSS 
-   injection in the page component or just overlay it) */
-
-/* Specific overrides for AboutSection content to blend better */
-.ios-home-page .bg-white {
-  background-color: rgba(255, 255, 255, 0.5) !important;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: none !important;
-}
-
-/* Hide original Hero if we render custom one, or style it */
-.ios-home-page .hero-section {
-  background: none !important;
-  min-height: auto;
-  padding-top: 8rem !important;
-}
-
-.ios-home-page .hero-section::before {
-  display: none;
+.swiper-pagination-bullet-active {
+  background: rgba(255, 255, 255, 1) !important;
+  opacity: 1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
 }

@@ -109,7 +109,7 @@ function LoginForm() {
                 Пароль
               </label>
               <Link
-                href='/auth-demo/forgot-password'
+                href='/forgot-password'
                 className='text-sm font-medium text-indigo-600 hover:text-indigo-500'
               >
                 Забыли пароль?

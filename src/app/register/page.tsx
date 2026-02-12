@@ -33,10 +33,13 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
   });
+
+  const password = watch('password', '');
 
   const onSubmit = async (data: RegisterInput) => {
     setError(null);
@@ -134,6 +137,26 @@ export default function RegisterPage() {
                   error={errors.password?.message || ''}
                   {...register('password')}
                 />
+                <div className='text-xs text-gray-500 space-y-1 mt-2'>
+                  <p>Требования к паролю:</p>
+                  <ul className='list-disc list-inside pl-2 space-y-0.5'>
+                    <li
+                      className={password.length >= 8 ? 'text-green-600' : ''}
+                    >
+                      Минимум 8 символов
+                    </li>
+                    <li
+                      className={/[A-Z]/.test(password) ? 'text-green-600' : ''}
+                    >
+                      Заглавная буква
+                    </li>
+                    <li
+                      className={/[0-9]/.test(password) ? 'text-green-600' : ''}
+                    >
+                      Цифра
+                    </li>
+                  </ul>
+                </div>
               </div>
 
               <div className='space-y-2'>
