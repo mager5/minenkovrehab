@@ -32,6 +32,7 @@
     "@heygen/streaming-avatar": "^2.0.16",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-slot": "^1.2.4",
+    "@react-email/render": "^2.0.4",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
     "@tailwindcss/line-clamp": "^0.4.4",
@@ -50,6 +51,7 @@
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.71.1",
     "react-icons": "^4.11.0",
+    "resend": "^6.9.2",
     "swiper": "^11.2.10",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.3.6"
@@ -61,6 +63,7 @@
     "@types/crypto-js": "^4.2.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.8.2",
+    "@types/nodemailer": "^7.0.9",
     "@types/react": "^18.2.24",
     "@types/react-dom": "^18.2.8",
     "@typescript-eslint/eslint-plugin": "^8.34.1",

@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkRobokassaSignature } from '@/lib/robokassa';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { Resend } from 'resend';
+import { PURCHASE_CREDENTIALS_TEMPLATE } from '@/lib/email-templates';
+
+// Helper to generate a strong password
+function generatePassword(length = 12): string {
+  const charset =
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+  let retVal = '';
+  for (let i = 0, n = charset.length; i < length; ++i) {
+    const randomIndex = Math.floor(Math.random() * n);
+    retVal += charset.charAt(randomIndex);
+  }
+  return retVal;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,6 +22,11 @@ export async function POST(req: NextRequest) {
     const outSum = formData.get('OutSum') as string;
     const invId = formData.get('InvId') as string;
     const signatureValue = formData.get('SignatureValue') as string;
+
+    // Пытаемся получить email из стандартного поля или пользовательского параметра
+    const email =
+      (formData.get('Email') as string) ||
+      (formData.get('Shp_Email') as string);
 
     // Получаем custom параметры (Shp_)
     // Robokassa передает их как есть, но Next.js FormData может требовать итерации
@@ -23,6 +42,7 @@ export async function POST(req: NextRequest) {
       invId,
       signatureValue,
       shpParams,
+      email,
     });
 
     if (!checkRobokassaSignature(outSum, invId, signatureValue, shpParams)) {
@@ -33,23 +53,82 @@ export async function POST(req: NextRequest) {
     // Логика обработки успешной оплаты
     const supabase = createAdminClient();
 
-    // 1. Обновляем статус покупки
+    // 1. Обновляем статус покупки (если запись существует)
     const { error: purchaseError } = await supabase
       .from('purchases')
       .update({ status: 'active', robokassa_invoice_id: invId })
-      .match({ robokassa_invoice_id: invId }); // Это пример, логику нужно уточнить под процесс создания заказа
+      .match({ robokassa_invoice_id: invId });
 
-    // ВАЖНО: В текущей реализации мы еще не создавали запись purchase ДО оплаты.
-    // Обычно flow такой:
-    // 1. Клиент нажимает "Купить" -> создается запись в purchases со статусом 'pending'
-    // 2. Клиент переходит в Robokassa
-    // 3. Robokassa вызывает этот webhook -> мы обновляем статус на 'active'
+    if (purchaseError) {
+      // Не блокируем выполнение, если просто не нашли запись (возможно, она создается асинхронно или не была создана)
+      console.log('Purchase update info:', purchaseError.message);
+    }
 
-    // Если у нас нет предварительной записи, нам нужно понимать, что именно купил пользователь.
-    // Обычно это передается через Shp_ параметры (например Shp_ProductId, Shp_UserId).
+    // 2. Создание пользователя и отправка письма с доступами
+    if (email) {
+      // Генерируем пароль
+      const password = generatePassword();
 
-    // Давайте пока просто вернем OK, чтобы Robokassa знала, что мы получили запрос.
-    // Реальную бизнес-логику добавим, когда настроим создание заказа.
+      // Создаем пользователя через Admin API (обходит подтверждение почты, если email_confirm: true)
+      const { data: userData, error: createError } =
+        await supabase.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: {
+            full_name: 'Покупатель', // Можно расширить, если передавать имя в Shp_Name
+          },
+        });
+
+      let shouldSendEmail = false;
+
+      if (!createError && userData.user) {
+        console.log('User created successfully:', userData.user.id);
+        shouldSendEmail = true;
+      } else {
+        console.log(
+          'User creation skipped (likely exists):',
+          createError?.message
+        );
+        // Для тестов: отправляем письмо даже если пользователь существует
+        // В продакшене здесь должна быть другая логика (например, "Курс добавлен в ваш аккаунт")
+        // shouldSendEmail = true; // Раскомментируйте для тестирования на существующем пользователе
+      }
+
+      // Временный лог для тестирования (чтобы видеть пароль в консоли)
+      console.log('TEST CREDENTIALS:', { email, password });
+
+      // Отправка письма с доступами через Resend SDK
+      if (shouldSendEmail && process.env.RESEND_API_KEY) {
+        try {
+          const resend = new Resend(process.env.RESEND_API_KEY);
+
+          // Подставляем данные в шаблон
+          // Используем глобальную замену для надежности
+          const htmlContent = PURCHASE_CREDENTIALS_TEMPLATE.replace(
+            /{{ \.Email }}/g,
+            email
+          ).replace(/{{ \.Password }}/g, password);
+
+          const data = await resend.emails.send({
+            from: 'Вадим Миненков | Реабилитация <onboarding@resend.dev>',
+            to: email,
+            subject: 'Доступ к курсу открыт! Ваши данные для входа',
+            html: htmlContent,
+          });
+
+          console.log('Email sent:', data);
+        } catch (emailError) {
+          console.error('Error sending email:', emailError);
+        }
+      } else {
+        if (!process.env.RESEND_API_KEY) {
+          console.warn('RESEND_API_KEY is missing, skipping email sending');
+        }
+      }
+    } else {
+      console.warn('No email provided in payment notification');
+    }
 
     return new NextResponse(`OK${invId}`, { status: 200 });
   } catch (error) {
