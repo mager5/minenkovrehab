@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import BookingModal from './BookingModal';
 import { socialLinks, headerContacts, navigationItems } from '@/data/content';
 import { SafeIcon } from '@/components/ui/SafeIcon';
+import { LogIn } from 'lucide-react';
 
 // Данные для выпадающего меню услуг
 const servicesDropdownItems = [
@@ -270,7 +271,7 @@ export function Header() {
                         className={`absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-100 transition-all duration-300 z-50 ${isServicesDropdownOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}
                       >
                         <div className='py-2'>
-                          {servicesDropdownItems.map((service, index) => (
+                          {servicesDropdownItems.map((service, _) => (
                             <Link
                               key={service.href}
                               href={service.href}
@@ -333,8 +334,19 @@ export function Header() {
               })}
             </nav>
 
-            {/* Кнопка записи */}
-            <div className='hidden [@media(min-width:840px)]:block'>
+            {/* Кнопки действий (Desktop) */}
+            <div className='hidden [@media(min-width:840px)]:flex items-center space-x-3'>
+              {/* Кнопка входа */}
+              <Link
+                href='/auth-demo/login'
+                className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                aria-label='Войти в личный кабинет'
+              >
+                <LogIn className='w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-1' />
+                <span>Войти</span>
+              </Link>
+
+              {/* Кнопка записи */}
               <button
                 onClick={openBookingModal}
                 className='bg-accent hover:bg-accent-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-2 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
@@ -555,6 +567,15 @@ export function Header() {
                 }
               >
                 Онлайн тренировки
+              </Link>
+              <Link
+                href='/auth-demo/login'
+                onClick={closeMenu}
+                className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                aria-label='Войти в личный кабинет'
+              >
+                <LogIn className='w-5 h-5 mr-2' />
+                <span>Войти</span>
               </Link>
               <button
                 onClick={openBookingModal}
