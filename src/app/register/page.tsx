@@ -26,6 +26,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -43,6 +44,7 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterInput) => {
     setError(null);
+    setSuccess(null);
     setIsLoading(true);
 
     try {
@@ -65,7 +67,7 @@ export default function RegisterPage() {
         router.refresh();
       } else {
         // Если сессия не создана, значит требуется подтверждение email
-        setError(
+        setSuccess(
           'На вашу почту отправлено письмо для подтверждения регистрации. Пожалуйста, проверьте email.'
         );
       }
@@ -102,6 +104,18 @@ export default function RegisterPage() {
                     <Alert variant='destructive'>
                       <AlertTitle>Ошибка</AlertTitle>
                       <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  </motion.div>
+                )}
+                {success && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <Alert variant='success'>
+                      <AlertTitle>Успешно</AlertTitle>
+                      <AlertDescription>{success}</AlertDescription>
                     </Alert>
                   </motion.div>
                 )}
