@@ -445,7 +445,11 @@ export function Header() {
                   ) : (
                     pathname !== '/login' &&
                     pathname !== '/register' &&
-                    !pathname?.startsWith('/dashboard') && <AuthPopover />
+                    !pathname?.startsWith('/dashboard') && (
+                      <div className='hidden [@media(min-width:840px)]:block'>
+                        <AuthPopover />
+                      </div>
+                    )
                   )}
                 </>
               )}
