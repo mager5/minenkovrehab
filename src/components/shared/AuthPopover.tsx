@@ -62,6 +62,14 @@ export default function AuthPopover({
   };
 
   const handleClick = (e: React.MouseEvent) => {
+    // Снимаем фокус с текущего элемента (иконки) для удаления обводки
+    if (
+      typeof document !== 'undefined' &&
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
+    }
+
     if (isMobile && onToggle) {
       e.preventDefault();
       onToggle();
