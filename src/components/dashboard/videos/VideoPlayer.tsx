@@ -41,24 +41,16 @@ export function VideoPlayer({
   useEffect(() => {
     // Check if video is accessible
     if (src) {
-      console.log('VideoPlayer checking src:', src);
       fetch(src, { method: 'HEAD' })
         .then(res => {
-          console.log(
-            'VideoPlayer HEAD check result:',
-            res.status,
-            res.statusText
-          );
           if (res.ok) {
             setIsAccessible(true);
           } else {
             setIsAccessible(false);
-            console.error('VideoPlayer HEAD check failed:', res.status);
             // setError(`Ошибка доступа к файлу (${res.status}). Возможно, истекла ссылка или нет прав.`);
           }
         })
-        .catch(err => {
-          console.error('VideoPlayer HEAD check error:', err);
+        .catch(() => {
           // Network error or CORS
           setIsAccessible(false);
           // Don't set error here immediately, let video element handle it if it fails
@@ -78,19 +70,29 @@ export function VideoPlayer({
 
     const handleError = (e: Event) => {
       const videoElement = e.target as HTMLVideoElement;
-      console.error('Video Error Details:', {
-        error: videoElement.error,
-        code: videoElement.error?.code,
-        message: videoElement.error?.message,
-        src: videoElement.src,
-        networkState: videoElement.networkState,
-        readyState: videoElement.readyState,
-      });
+      let errorMessage = 'Ошибка воспроизведения видео.';
 
-      // Force show detailed error for debugging
-      setError(
-        `DEBUG: ${videoElement.error?.message || 'Unknown error'} (Code: ${videoElement.error?.code})`
-      );
+      if (videoElement.error) {
+        switch (videoElement.error.code) {
+          case MediaError.MEDIA_ERR_ABORTED:
+            errorMessage = 'Загрузка видео прервана.';
+            break;
+          case MediaError.MEDIA_ERR_NETWORK:
+            errorMessage = 'Ошибка сети при загрузке видео.';
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            errorMessage =
+              'Видео повреждено или формат не поддерживается браузером.';
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage =
+              'Формат видео не поддерживается или файл недоступен.';
+            break;
+          default:
+            errorMessage = `Неизвестная ошибка: ${videoElement.error.message}`;
+        }
+      }
+      setError(errorMessage);
     };
 
     video.addEventListener('timeupdate', updateProgress);

@@ -102,6 +102,7 @@ export async function middleware(request: NextRequest) {
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://www.googletagmanager.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https://images.unsplash.com https://*.unsplash.com https://*.googleusercontent.com https://*.cloudinary.com https://*.supabase.co",
+    "media-src 'self' https://*.supabase.co",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://api.telegram.org https://vercel.live https://api.heygen.com https://*.supabase.co",
     "frame-src 'none'",
