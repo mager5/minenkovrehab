@@ -3,8 +3,20 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { VideoPlayer } from './VideoPlayer';
-import { Loader2, Trash2, Search, Play, FileVideo, Eye } from 'lucide-react';
+import {
+  Loader2,
+  Trash2,
+  Search,
+  Play,
+  FileVideo,
+  Eye,
+  Edit2,
+  Save,
+  X,
+  AlertCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 
 interface Video {
   id: string;
@@ -25,6 +37,23 @@ export function VideoList() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loadingUrl, setLoadingUrl] = useState(false);
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
+
+  // Delete modal state
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    videoId: string | null;
+    filePath: string | null;
+  }>({
+    isOpen: false,
+    videoId: null,
+    filePath: null,
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Edit description state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDescription, setEditDescription] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const supabase = createClient();
 
@@ -55,7 +84,6 @@ export function VideoList() {
           const newThumbnails: Record<string, string> = {};
           signedData.forEach(item => {
             if (item.path && item.signedUrl) {
-              // Find video with this path to get ID (assuming paths are unique)
               const video = data.find(v => v.file_path === item.path);
               if (video) {
                 newThumbnails[video.id] = item.signedUrl;
@@ -69,16 +97,6 @@ export function VideoList() {
     setLoading(false);
   };
 
-  // Expose fetchVideos to parent via ref or context if needed, but for now simple polling or re-fetch trigger is fine.
-  // We can add a refresh button or auto-refresh after upload.
-  // Actually, I'll export a refresh function or use a context, but simpler: pass a key to re-mount.
-  // For now, I will just listen to a custom event or just let the user refresh.
-  // Better: Export a method? No, keep it simple.
-
-  // To update list after upload, we can use a shared context or just lift state up.
-  // But since VideoUploader and VideoList are likely siblings, I should probably wrap them in a page component that manages the list state?
-  // Or just trigger a refresh. I'll stick to local state and add a window event listener for 'video-uploaded' for simplicity.
-
   useEffect(() => {
     fetchVideos();
 
@@ -91,13 +109,20 @@ export function VideoList() {
       window.removeEventListener('video-uploaded', handleVideoUploaded);
   }, []);
 
-  const handleDelete = async (
+  const handleDeleteClick = (
     id: string,
     filePath: string,
     e: React.MouseEvent
   ) => {
     e.stopPropagation();
-    if (!confirm('Вы уверены, что хотите удалить это видео?')) return;
+    setDeleteModal({ isOpen: true, videoId: id, filePath });
+  };
+
+  const confirmDelete = async () => {
+    const { videoId, filePath } = deleteModal;
+    if (!videoId || !filePath) return;
+
+    setIsDeleting(true);
 
     const { error: storageError } = await supabase.storage
       .from('videos')
@@ -106,28 +131,94 @@ export function VideoList() {
     if (storageError) {
       console.error('Error deleting file:', storageError);
       alert('Ошибка при удалении файла: ' + storageError.message);
+      setIsDeleting(false);
       return;
     }
 
     const { error: dbError } = await supabase
       .from('videos')
       .delete()
-      .eq('id', id);
+      .eq('id', videoId);
 
     if (dbError) {
       console.error('Error deleting record:', dbError);
       alert('Ошибка при удалении записи');
+      setIsDeleting(false);
       return;
     }
 
-    setVideos(videos.filter(v => v.id !== id));
-    if (selectedVideo?.id === id) {
+    setVideos(videos.filter(v => v.id !== videoId));
+    if (selectedVideo?.id === videoId) {
       setSelectedVideo(null);
       setVideoUrl(null);
     }
+
+    setIsDeleting(false);
+    setDeleteModal({ isOpen: false, videoId: null, filePath: null });
+  };
+
+  const startEdit = (video: Video, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingId(video.id);
+    setEditDescription(video.description || '');
+  };
+
+  const cancelEdit = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setEditingId(null);
+    setEditDescription('');
+  };
+
+  const saveDescription = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!editingId) return;
+
+    if (editDescription.length > 500) {
+      alert('Описание не может превышать 500 символов');
+      return;
+    }
+
+    // Basic sanitization: check for dangerous characters if strict mode is requested
+    // "запрет на специальные символы" - interpreting as allowing standard text, punctuation, and emojis
+    // Regex allowing: Letters (any lang), numbers, whitespace, standard punctuation, emojis
+    // This is a loose interpretation. If "special characters" means ONLY letters/numbers, it would be stricter.
+    // I'll go with a safe set: alphanumeric, spaces, basic punctuation.
+    // Explicitly excluding < > { } to prevent HTML/JS injection vibes, though React escapes by default.
+    const dangerousChars = /[<>{}]/;
+    if (dangerousChars.test(editDescription)) {
+      alert('Описание содержит запрещенные символы (<, >, {, })');
+      return;
+    }
+
+    setIsSaving(true);
+
+    const { error } = await supabase
+      .from('videos')
+      .update({ description: editDescription })
+      .eq('id', editingId);
+
+    if (error) {
+      console.error('Error updating description:', error);
+      alert('Ошибка при обновлении описания');
+    } else {
+      setVideos(
+        videos.map(v =>
+          v.id === editingId ? { ...v, description: editDescription } : v
+        )
+      );
+      // If selected video is the one being edited, update it too
+      if (selectedVideo?.id === editingId) {
+        setSelectedVideo({ ...selectedVideo, description: editDescription });
+      }
+      setEditingId(null);
+    }
+    setIsSaving(false);
   };
 
   const handlePlay = async (video: Video) => {
+    // If we are editing this video, don't play it when clicking the container
+    if (editingId === video.id) return;
+
     setLoadingUrl(true);
 
     // Update local state immediately for better UX
@@ -195,6 +286,18 @@ export function VideoList() {
 
   return (
     <div className='space-y-6'>
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ ...deleteModal, isOpen: false })}
+        onConfirm={confirmDelete}
+        title='Удаление видео'
+        message='Вы действительно хотите удалить это видео? Это действие нельзя отменить.'
+        confirmText='Удалить'
+        cancelText='Отмена'
+        isLoading={isDeleting}
+        variant='danger'
+      />
+
       <div className='flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-lg border border-gray-200 shadow-sm'>
         <h2 className='text-lg font-semibold text-gray-900 flex items-center gap-2'>
           <FileVideo className='h-5 w-5 text-indigo-600' />
@@ -241,19 +344,7 @@ export function VideoList() {
               className='p-2 hover:bg-gray-800 rounded-full transition-colors text-gray-400 hover:text-white'
             >
               <span className='sr-only'>Закрыть</span>
-              <svg
-                className='w-6 h-6'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth='2'
-                  d='M6 18L18 6M6 6l12 12'
-                ></path>
-              </svg>
+              <X className='w-6 h-6' />
             </button>
           </div>
           <VideoPlayer src={videoUrl} type={selectedVideo.mime_type} />
@@ -307,7 +398,6 @@ export function VideoList() {
                   </div>
                 </div>
 
-                {/* Duration could go here if we had it */}
                 <div className='absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity'>
                   {formatSize(video.size)}
                 </div>
@@ -322,7 +412,9 @@ export function VideoList() {
                     {video.title}
                   </h4>
                   <button
-                    onClick={e => handleDelete(video.id, video.file_path, e)}
+                    onClick={e =>
+                      handleDeleteClick(video.id, video.file_path, e)
+                    }
                     className='text-gray-400 hover:text-red-600 p-1 hover:bg-red-50 rounded transition-colors'
                     title='Удалить'
                   >
@@ -330,9 +422,57 @@ export function VideoList() {
                   </button>
                 </div>
 
-                <p className='text-sm text-gray-500 line-clamp-2 mb-3 flex-1'>
-                  {video.description || 'Нет описания'}
-                </p>
+                {editingId === video.id ? (
+                  <div
+                    className='flex-1 mb-3'
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <textarea
+                      value={editDescription}
+                      onChange={e => setEditDescription(e.target.value)}
+                      className='w-full text-sm border border-gray-300 rounded p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none min-h-[80px]'
+                      placeholder='Введите описание...'
+                      maxLength={500}
+                    />
+                    <div className='flex justify-end gap-2 mt-2'>
+                      <button
+                        onClick={cancelEdit}
+                        className='p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded'
+                        disabled={isSaving}
+                        title='Отмена'
+                      >
+                        <X className='h-4 w-4' />
+                      </button>
+                      <button
+                        onClick={saveDescription}
+                        className='p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded'
+                        disabled={isSaving}
+                        title='Сохранить'
+                      >
+                        {isSaving ? (
+                          <Loader2 className='h-4 w-4 animate-spin' />
+                        ) : (
+                          <Save className='h-4 w-4' />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className='flex-1 mb-3 group/desc relative'>
+                    <div className='flex gap-2'>
+                      <p className='text-sm text-gray-500 line-clamp-2 flex-1'>
+                        {video.description || 'Нет описания'}
+                      </p>
+                      <button
+                        onClick={e => startEdit(video, e)}
+                        className='opacity-0 group-hover/desc:opacity-100 text-gray-400 hover:text-indigo-600 p-0.5 transition-all'
+                        title='Редактировать описание'
+                      >
+                        <Edit2 className='h-3 w-3' />
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div className='pt-3 border-t border-gray-100 text-xs text-gray-400 flex justify-between items-center'>
                   <span>{new Date(video.created_at).toLocaleDateString()}</span>
