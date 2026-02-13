@@ -82,8 +82,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className='min-h-screen flex items-start sm:items-center justify-center bg-gray-50 pt-20 pb-12 px-4 sm:px-6 lg:px-8 overflow-y-auto overscroll-none fixed inset-0 sm:static sm:inset-auto sm:overflow-visible'>
-      <div className='w-full max-w-md space-y-8 mt-4 sm:mt-0'>
+    <div className='min-h-[100dvh] flex items-start sm:items-center justify-center bg-gray-50 pt-24 pb-8 px-4 sm:px-6 lg:px-8'>
+      <div className='w-full max-w-md space-y-8'>
         <Card className='border-0 shadow-lg sm:border sm:shadow-sm bg-white'>
           <CardHeader className='space-y-1'>
             <CardTitle className='text-2xl font-bold tracking-tight text-center'>
