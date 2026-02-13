@@ -48,16 +48,23 @@ export function Header() {
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
     const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        setUser(user);
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+      } finally {
+        setIsAuthLoading(false);
+      }
     };
 
     getUser();
@@ -66,6 +73,7 @@ export function Header() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setIsAuthLoading(false);
       if (_event === 'SIGNED_OUT') {
         setUser(null);
         router.refresh();
@@ -374,83 +382,87 @@ export function Header() {
 
             {/* Кнопки действий (Desktop) */}
             <div className='hidden [@media(min-width:840px)]:flex items-center space-x-3'>
-              {user ? (
-                <div
-                  className='relative'
-                  onMouseEnter={() => setIsProfileDropdownOpen(true)}
-                  onMouseLeave={() => setIsProfileDropdownOpen(false)}
-                >
-                  <button
-                    className='flex items-center space-x-2 text-primary hover:text-primary-dark font-medium transition-colors focus:outline-none py-2'
-                    aria-label='Меню профиля'
-                    aria-expanded={isProfileDropdownOpen}
-                  >
-                    <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors'>
-                      <UserIcon className='w-5 h-5 text-primary' />
-                    </div>
-                    <span className='hidden xl:inline text-sm font-medium'>
-                      {user.email?.split('@')[0]}
-                    </span>
-                  </button>
-
-                  {/* Dropdown */}
-                  <div
-                    className={`absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 transition-all duration-300 z-50 overflow-hidden ${
-                      isProfileDropdownOpen
-                        ? 'opacity-100 visible translate-y-0'
-                        : 'opacity-0 invisible -translate-y-2'
-                    }`}
-                  >
-                    <div className='py-1'>
-                      <div className='px-4 py-3 border-b border-gray-100 bg-gray-50/50'>
-                        <p className='text-xs text-gray-500 mb-0.5'>
-                          Вы вошли как
-                        </p>
-                        <p
-                          className='text-sm font-medium text-gray-900 truncate'
-                          title={user.email}
-                        >
-                          {user.email}
-                        </p>
-                      </div>
-                      <Link
-                        href='/dashboard'
-                        className='flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors'
-                        onClick={() => setIsProfileDropdownOpen(false)}
-                      >
-                        <Settings className='w-4 h-4 mr-2.5' />
-                        Личный кабинет
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className='flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left'
-                      >
-                        <LogOut className='w-4 h-4 mr-2.5' />
-                        Выйти
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
+              {!isAuthLoading && (
                 <>
-                  {/* Кнопка входа */}
-                  <Link
-                    href='/login'
-                    className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                    aria-label='Войти в личный кабинет'
-                  >
-                    <LogIn className='w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-1' />
-                    <span>Войти</span>
-                  </Link>
+                  {user ? (
+                    <div
+                      className='relative'
+                      onMouseEnter={() => setIsProfileDropdownOpen(true)}
+                      onMouseLeave={() => setIsProfileDropdownOpen(false)}
+                    >
+                      <button
+                        className='flex items-center space-x-2 text-primary hover:text-primary-dark font-medium transition-colors focus:outline-none py-2'
+                        aria-label='Меню профиля'
+                        aria-expanded={isProfileDropdownOpen}
+                      >
+                        <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors'>
+                          <UserIcon className='w-5 h-5 text-primary' />
+                        </div>
+                        <span className='hidden xl:inline text-sm font-medium'>
+                          {user.email?.split('@')[0]}
+                        </span>
+                      </button>
 
-                  {/* Кнопка регистрации */}
-                  <Link
-                    href='/register'
-                    className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                    aria-label='Зарегистрироваться'
-                  >
-                    <span>Регистрация</span>
-                  </Link>
+                      {/* Dropdown */}
+                      <div
+                        className={`absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 transition-all duration-300 z-50 overflow-hidden ${
+                          isProfileDropdownOpen
+                            ? 'opacity-100 visible translate-y-0'
+                            : 'opacity-0 invisible -translate-y-2'
+                        }`}
+                      >
+                        <div className='py-1'>
+                          <div className='px-4 py-3 border-b border-gray-100 bg-gray-50/50'>
+                            <p className='text-xs text-gray-500 mb-0.5'>
+                              Вы вошли как
+                            </p>
+                            <p
+                              className='text-sm font-medium text-gray-900 truncate'
+                              title={user.email}
+                            >
+                              {user.email}
+                            </p>
+                          </div>
+                          <Link
+                            href='/dashboard'
+                            className='flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors'
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                          >
+                            <Settings className='w-4 h-4 mr-2.5' />
+                            Личный кабинет
+                          </Link>
+                          <button
+                            onClick={handleLogout}
+                            className='flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left'
+                          >
+                            <LogOut className='w-4 h-4 mr-2.5' />
+                            Выйти
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Кнопка входа */}
+                      <Link
+                        href='/login'
+                        className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                        aria-label='Войти в личный кабинет'
+                      >
+                        <LogIn className='w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-1' />
+                        <span>Войти</span>
+                      </Link>
+
+                      {/* Кнопка регистрации */}
+                      <Link
+                        href='/register'
+                        className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                        aria-label='Зарегистрироваться'
+                      >
+                        <span>Регистрация</span>
+                      </Link>
+                    </>
+                  )}
                 </>
               )}
 
