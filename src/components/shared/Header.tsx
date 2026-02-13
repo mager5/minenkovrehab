@@ -443,7 +443,8 @@ export function Header() {
                       </div>
                     </div>
                   ) : (
-                    pathname !== '/login' && <AuthPopover />
+                    pathname !== '/login' &&
+                    pathname !== '/register' && <AuthPopover />
                   )}
                 </>
               )}

@@ -66,13 +66,6 @@ export default function AuthPopover() {
               >
                 Войти или зарегистрироваться
               </Link>
-
-              <Link
-                href='/dashboard'
-                className='flex items-center justify-center w-full bg-blue-50 text-primary px-4 py-3 rounded-lg font-semibold hover:bg-blue-100 transition-colors text-sm'
-              >
-                Личный кабинет
-              </Link>
             </div>
           </div>
         </div>
