@@ -443,24 +443,30 @@ export function Header() {
                     </div>
                   ) : (
                     <>
-                      {/* Кнопка входа */}
-                      <Link
-                        href='/login'
-                        className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                        aria-label='Войти в личный кабинет'
-                      >
-                        <LogIn className='w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-1' />
-                        <span>Войти</span>
-                      </Link>
+                      {/* Кнопка входа - скрываем на странице входа */}
+                      {pathname !== '/login' && (
+                        <Link
+                          href='/login'
+                          className='text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                          aria-label='Войти в личный кабинет'
+                        >
+                          <div className='flex items-center'>
+                            <LogIn className='w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-1' />
+                            <span>Войти</span>
+                          </div>
+                        </Link>
+                      )}
 
-                      {/* Кнопка регистрации */}
-                      <Link
-                        href='/register'
-                        className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                        aria-label='Зарегистрироваться'
-                      >
-                        <span>Регистрация</span>
-                      </Link>
+                      {/* Кнопка регистрации - скрываем на странице регистрации */}
+                      {pathname !== '/register' && (
+                        <Link
+                          href='/register'
+                          className='bg-primary hover:bg-primary-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-2 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                          aria-label='Зарегистрироваться'
+                        >
+                          Регистрация
+                        </Link>
+                      )}
                     </>
                   )}
                 </>
