@@ -106,10 +106,19 @@ export function VideoList() {
 
   const handlePlay = async (video: Video) => {
     setLoadingUrl(true);
+    console.log(
+      'VideoList: handlePlay called for video:',
+      video.id,
+      video.title,
+      video.file_path
+    );
+
     // Try to get signed URL
     const { data, error } = await supabase.storage
       .from('videos')
       .createSignedUrl(video.file_path, 3600); // 1 hour
+
+    console.log('VideoList: createSignedUrl result:', { data, error });
 
     if (error || !data) {
       console.error('Error creating signed url:', error);
@@ -117,6 +126,8 @@ export function VideoList() {
       const { data: publicData } = supabase.storage
         .from('videos')
         .getPublicUrl(video.file_path);
+      console.log('VideoList: fallback to publicUrl:', publicData);
+
       if (publicData) {
         setVideoUrl(publicData.publicUrl);
         setSelectedVideo(video);
@@ -126,6 +137,7 @@ export function VideoList() {
         alert('Не удалось получить ссылку на видео');
       }
     } else {
+      console.log('VideoList: using signedUrl:', data.signedUrl);
       setVideoUrl(data.signedUrl);
       setSelectedVideo(video);
       supabase.rpc('increment_video_view', { video_id: video.id });
