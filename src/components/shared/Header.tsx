@@ -456,17 +456,6 @@ export function Header() {
                           </div>
                         </Link>
                       )}
-
-                      {/* Кнопка регистрации - скрываем на странице регистрации */}
-                      {pathname !== '/register' && (
-                        <Link
-                          href='/register'
-                          className='bg-primary hover:bg-primary-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-2 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                          aria-label='Зарегистрироваться'
-                        >
-                          Регистрация
-                        </Link>
-                      )}
                     </>
                   )}
                 </>
@@ -739,24 +728,16 @@ export function Header() {
                     <LogIn className='w-5 h-5 mr-2' />
                     <span>Войти</span>
                   </Link>
-                  <Link
-                    href='/register'
-                    onClick={closeMenu}
-                    className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                    aria-label='Зарегистрироваться'
+                  <button
+                    onClick={openBookingModal}
+                    className='bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
+                    aria-label='Записаться на консультацию'
+                    aria-haspopup='dialog'
                   >
-                    <span>Регистрация</span>
-                  </Link>
+                    Записаться
+                  </button>
                 </>
               )}
-              <button
-                onClick={openBookingModal}
-                className='bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
-                aria-label='Записаться на консультацию'
-                aria-haspopup='dialog'
-              >
-                Записаться
-              </button>
             </div>
           </div>
         </div>
