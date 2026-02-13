@@ -385,4 +385,6 @@ export const socialLinks = [
 export const headerContacts = {
   phone: '+7 928 328 70 52',
   workingHours: 'Пн-Пт: 9:00-18:00',
+  email: 'minenkov.rehab@yandex.ru',
+  address: 'Москва',
 };
