@@ -8,9 +8,7 @@ import {
   VolumeX,
   Maximize,
   Minimize,
-  SkipBack,
-  SkipForward,
-  Settings,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +31,7 @@ export function VideoPlayer({
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +61,7 @@ export function VideoPlayer({
   useEffect(() => {
     const video = videoRef.current;
     if (video && src) {
+      setIsLoading(true);
       // Small delay to ensure video element is ready
       const playPromise = video.play();
       if (playPromise !== undefined) {
@@ -87,7 +87,13 @@ export function VideoPlayer({
       }
     };
 
+    const handleLoadStart = () => setIsLoading(true);
+    const handleWaiting = () => setIsLoading(true);
+    const handleCanPlay = () => setIsLoading(false);
+    const handlePlaying = () => setIsLoading(false);
+
     const handleError = (e: Event) => {
+      setIsLoading(false);
       const videoElement = e.target as HTMLVideoElement;
       let errorMessage = 'Ошибка воспроизведения видео.';
 
@@ -116,6 +122,10 @@ export function VideoPlayer({
 
     video.addEventListener('timeupdate', updateProgress);
     video.addEventListener('error', handleError);
+    video.addEventListener('loadstart', handleLoadStart);
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('playing', handlePlaying);
 
     // Reset error when src changes
     setError(null);
@@ -123,6 +133,10 @@ export function VideoPlayer({
     return () => {
       video.removeEventListener('timeupdate', updateProgress);
       video.removeEventListener('error', handleError);
+      video.removeEventListener('loadstart', handleLoadStart);
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('playing', handlePlaying);
     };
   }, [src]);
 
@@ -217,6 +231,13 @@ export function VideoPlayer({
               Скачать файл
             </a>
           </div>
+        </div>
+      )}
+
+      {/* Loader */}
+      {isLoading && !error && (
+        <div className='absolute inset-0 flex items-center justify-center bg-black/20 z-10'>
+          <Loader2 className='h-12 w-12 text-white animate-spin' />
         </div>
       )}
 
