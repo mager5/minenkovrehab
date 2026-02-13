@@ -29,14 +29,14 @@ export default function AuthPopover() {
       <Link
         href='/login'
         className={`
-          flex items-center justify-center text-primary font-medium py-2 px-4 
-          border-2 border-primary rounded-md hover:bg-primary hover:text-white 
+          flex items-center justify-center text-primary text-sm font-medium py-1.5 px-3 
+          border border-primary rounded-md hover:bg-primary hover:text-white 
           transition-all duration-300 transform active:scale-95 
           focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
           ${isOpen ? 'bg-primary text-white' : ''}
         `}
       >
-        <LogIn className='w-5 h-5 mr-2' />
+        <LogIn className='w-4 h-4 mr-1.5' />
         <span>Войти</span>
       </Link>
 
