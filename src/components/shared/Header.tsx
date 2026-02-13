@@ -49,6 +49,7 @@ export function Header() {
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const [isMobileAuthOpen, setIsMobileAuthOpen] = useState(false);
+  const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
@@ -103,6 +104,7 @@ export function Header() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsProfileDropdownOpen(false);
+    setIsMobileProfileOpen(false);
     setIsMenuOpen(false);
     router.refresh();
   };
@@ -157,6 +159,9 @@ export function Header() {
         if (isMobileAuthOpen) {
           setIsMobileAuthOpen(false);
         }
+        if (isMobileProfileOpen) {
+          setIsMobileProfileOpen(false);
+        }
       }
     };
 
@@ -164,7 +169,7 @@ export function Header() {
     return () => {
       document.removeEventListener('keydown', handleEscKey);
     };
-  }, [isMenuOpen, isMobileAuthOpen]);
+  }, [isMenuOpen, isMobileAuthOpen, isMobileProfileOpen]);
 
   // Хелперы для переключения меню и авторизации
   const toggleMobileMenu = () => {
@@ -173,6 +178,7 @@ export function Header() {
     } else {
       setIsMenuOpen(true);
       setIsMobileAuthOpen(false);
+      setIsMobileProfileOpen(false);
     }
   };
 
@@ -182,13 +188,24 @@ export function Header() {
     } else {
       setIsMobileAuthOpen(true);
       setIsMenuOpen(false);
+      setIsMobileProfileOpen(false);
+    }
+  };
+
+  const toggleMobileProfile = () => {
+    if (isMobileProfileOpen) {
+      setIsMobileProfileOpen(false);
+    } else {
+      setIsMobileProfileOpen(true);
+      setIsMenuOpen(false);
+      setIsMobileAuthOpen(false);
     }
   };
 
   return (
     <>
       {/* Предотвращение скролла при открытом мобильном меню */}
-      {(isMenuOpen || isMobileAuthOpen) && (
+      {(isMenuOpen || isMobileAuthOpen || isMobileProfileOpen) && (
         <style jsx global>{`
           body {
             overflow: hidden;
@@ -198,7 +215,7 @@ export function Header() {
 
       {/* Backdrop */}
       <Transition
-        show={isMenuOpen || isMobileAuthOpen}
+        show={isMenuOpen || isMobileAuthOpen || isMobileProfileOpen}
         enter='transition-opacity duration-300'
         enterFrom='opacity-0'
         enterTo='opacity-100'
@@ -211,6 +228,7 @@ export function Header() {
           onClick={() => {
             setIsMenuOpen(false);
             setIsMobileAuthOpen(false);
+            setIsMobileProfileOpen(false);
           }}
           aria-hidden='true'
         />
@@ -539,13 +557,61 @@ export function Header() {
                 )}
 
               {user && !isAuthPage && (
-                <Link
-                  href='/dashboard'
-                  className='mr-2 p-2 text-primary hover:text-primary-dark transition-colors'
-                  aria-label='Личный кабинет'
-                >
-                  <UserIcon className='w-6 h-6' />
-                </Link>
+                <div className='relative'>
+                  <button
+                    type='button'
+                    className='mr-2 p-2 text-primary hover:text-primary-dark transition-colors focus:outline-none'
+                    aria-label='Открыть меню профиля'
+                    aria-expanded={isMobileProfileOpen}
+                    aria-controls='mobile-profile-menu'
+                    onClick={toggleMobileProfile}
+                  >
+                    <UserIcon className='w-6 h-6' />
+                  </button>
+
+                  {/* Мобильное выпадающее меню профиля */}
+                  <div
+                    id='mobile-profile-menu'
+                    className={`fixed left-4 right-4 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 transition-all duration-300 origin-top-right ${
+                      isMobileProfileOpen
+                        ? 'opacity-100 visible translate-y-0 scale-100'
+                        : 'opacity-0 invisible -translate-y-4 scale-95'
+                    }`}
+                    style={{
+                      top: isScrolled ? '56px' : '64px',
+                      willChange: 'transform, opacity',
+                    }}
+                  >
+                    <div className='py-1'>
+                      <div className='px-4 py-4 border-b border-gray-100 bg-gray-50/50'>
+                        <p className='text-xs text-gray-500 mb-1'>
+                          Вы вошли как
+                        </p>
+                        <p
+                          className='text-sm font-semibold text-gray-900 truncate'
+                          title={user.email}
+                        >
+                          {user.email}
+                        </p>
+                      </div>
+                      <Link
+                        href='/dashboard'
+                        className='flex items-center px-4 py-3 text-base text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors active:bg-gray-100'
+                        onClick={() => setIsMobileProfileOpen(false)}
+                      >
+                        <Settings className='w-5 h-5 mr-3 text-gray-400' />
+                        Личный кабинет
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className='flex w-full items-center px-4 py-3 text-base text-red-600 hover:bg-red-50 transition-colors text-left active:bg-red-50'
+                      >
+                        <LogOut className='w-5 h-5 mr-3' />
+                        Выйти
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
 
               {isAuthPage ? (
