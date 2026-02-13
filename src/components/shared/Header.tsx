@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import BookingModal from './BookingModal';
 import { socialLinks, headerContacts, navigationItems } from '@/data/content';
 import { SafeIcon } from '@/components/ui/SafeIcon';
-import { User as UserIcon, LogOut, Settings } from 'lucide-react';
+import { User as UserIcon, LogOut, Settings, ArrowLeft } from 'lucide-react';
 import { Transition } from '@headlessui/react';
 import AuthPopover from './AuthPopover';
 import { createClient } from '@/lib/supabase/client';
@@ -55,6 +55,18 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+
+  const isAuthPage = ['/login', '/register', '/auth', '/signin'].some(route =>
+    pathname?.startsWith(route)
+  );
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/');
+    }
+  };
 
   useEffect(() => {
     const getUser = async () => {
@@ -489,8 +501,7 @@ export function Header() {
                       </div>
                     </div>
                   ) : (
-                    pathname !== '/login' &&
-                    pathname !== '/register' &&
+                    !isAuthPage &&
                     !pathname?.startsWith('/dashboard') && (
                       <div className='hidden [@media(min-width:840px)]:block'>
                         <AuthPopover />
@@ -515,8 +526,7 @@ export function Header() {
             <div className='flex items-center gap-1 [@media(min-width:840px)]:hidden'>
               {!isAuthLoading &&
                 !user &&
-                pathname !== '/login' &&
-                pathname !== '/register' &&
+                !isAuthPage &&
                 !pathname?.startsWith('/dashboard') && (
                   <div className='mr-1'>
                     <AuthPopover
@@ -528,7 +538,7 @@ export function Header() {
                   </div>
                 )}
 
-              {user && (
+              {user && !isAuthPage && (
                 <Link
                   href='/dashboard'
                   className='mr-2 p-2 text-primary hover:text-primary-dark transition-colors'
@@ -538,43 +548,54 @@ export function Header() {
                 </Link>
               )}
 
-              <button
-                type='button'
-                className='text-gray-800 hover:text-primary focus:outline-none transition-all duration-300 p-2 rounded-md'
-                onClick={toggleMobileMenu}
-                aria-label={isMenuOpen ? 'Закрыть меню' : 'Открыть меню'}
-                aria-expanded={isMenuOpen}
-                aria-controls='mobile-menu'
-              >
-                <svg
-                  className='h-6 w-6 transition-transform duration-300 ease-in-out'
-                  xmlns='http://www.w3.org/2000/svg'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                  style={{
-                    transform: isMenuOpen ? 'rotate(90deg)' : 'rotate(0)',
-                  }}
-                  aria-hidden='true'
-                  focusable='false'
+              {isAuthPage ? (
+                <button
+                  type='button'
+                  className='text-gray-800 hover:text-primary focus:outline-none transition-all duration-300 p-2 rounded-md'
+                  onClick={handleBack}
+                  aria-label='Вернуться назад'
                 >
-                  {isMenuOpen ? (
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M6 18L18 6M6 6l12 12'
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M4 6h16M4 12h16M4 18h16'
-                    />
-                  )}
-                </svg>
-              </button>
+                  <ArrowLeft className='h-6 w-6' />
+                </button>
+              ) : (
+                <button
+                  type='button'
+                  className='text-gray-800 hover:text-primary focus:outline-none transition-all duration-300 p-2 rounded-md'
+                  onClick={toggleMobileMenu}
+                  aria-label={isMenuOpen ? 'Закрыть меню' : 'Открыть меню'}
+                  aria-expanded={isMenuOpen}
+                  aria-controls='mobile-menu'
+                >
+                  <svg
+                    className='h-6 w-6 transition-transform duration-300 ease-in-out'
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                    style={{
+                      transform: isMenuOpen ? 'rotate(90deg)' : 'rotate(0)',
+                    }}
+                    aria-hidden='true'
+                    focusable='false'
+                  >
+                    {isMenuOpen ? (
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M6 18L18 6M6 6l12 12'
+                      />
+                    ) : (
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M4 6h16M4 12h16M4 18h16'
+                      />
+                    )}
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
 
