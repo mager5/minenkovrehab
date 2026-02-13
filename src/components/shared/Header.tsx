@@ -668,9 +668,9 @@ export function Header() {
           {/* Мобильное меню (выпадающее) */}
           <div
             id='mobile-menu'
-            className={`[@media(min-width:840px)]:hidden transition-all duration-500 ease-in-out overflow-hidden ${
+            className={`[@media(min-width:840px)]:hidden transition-all duration-500 ease-in-out overflow-y-auto ${
               isMenuOpen
-                ? 'max-h-[500px] opacity-100 mt-4 pb-4 border-t pt-4'
+                ? 'max-h-[85vh] opacity-100 mt-4 pb-12 border-t pt-4'
                 : 'max-h-0 opacity-0 mt-0 pb-0 border-t border-transparent'
             }`}
             aria-hidden={!isMenuOpen}
