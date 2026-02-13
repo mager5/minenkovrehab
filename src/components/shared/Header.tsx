@@ -214,6 +214,14 @@ export function Header() {
 
   // Хелперы для переключения меню и авторизации
   const toggleMobileMenu = () => {
+    // Снимаем фокус с активного элемента при клике
+    if (
+      typeof document !== 'undefined' &&
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
+    }
+
     if (isMenuOpen) {
       setIsMenuOpen(false);
     } else {
