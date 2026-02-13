@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { Video } from 'lucide-react';
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -50,6 +52,27 @@ export default async function DashboardPage() {
       <main>
         <div className='mx-auto max-w-7xl py-6 sm:px-6 lg:px-8'>
           <div className='px-4 py-6 sm:px-0'>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8'>
+              <Link
+                href='/dashboard/videos'
+                className='bg-white overflow-hidden shadow rounded-lg p-6 hover:shadow-md transition-shadow group cursor-pointer block'
+              >
+                <div className='flex items-center space-x-4'>
+                  <div className='bg-indigo-100 p-3 rounded-full group-hover:bg-indigo-200 transition-colors'>
+                    <Video className='h-6 w-6 text-indigo-600' />
+                  </div>
+                  <div>
+                    <h3 className='text-lg font-medium text-gray-900'>
+                      Видеогалерея
+                    </h3>
+                    <p className='text-sm text-gray-500'>
+                      Загрузить и смотреть видео
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            </div>
+
             <h2 className='text-xl font-semibold mb-4'>Мои курсы</h2>
 
             {!purchases || purchases.length === 0 ? (
