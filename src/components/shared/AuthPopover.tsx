@@ -36,8 +36,8 @@ export default function AuthPopover() {
           ${isOpen ? 'bg-gray-50' : ''}
         `}
       >
-        <User className='w-5 h-5 mb-0.5' />
-        <span>Войти</span>
+        <User className='w-5 h-5 md:w-5 md:h-5 w-6 h-6' />
+        <span className='hidden md:inline mt-0.5'>Войти</span>
       </Link>
 
       <Transition

@@ -382,12 +382,12 @@ export function Header() {
             </nav>
 
             {/* Кнопки действий (Desktop) */}
-            <div className='hidden [@media(min-width:840px)]:flex items-center space-x-3'>
+            <div className='flex items-center space-x-2 lg:space-x-3'>
               {!isAuthLoading && (
                 <>
                   {user ? (
                     <div
-                      className='relative'
+                      className='relative hidden [@media(min-width:840px)]:block'
                       onMouseEnter={() => setIsProfileDropdownOpen(true)}
                       onMouseLeave={() => setIsProfileDropdownOpen(false)}
                     >
@@ -453,7 +453,7 @@ export function Header() {
               {/* Кнопка записи */}
               <button
                 onClick={openBookingModal}
-                className='bg-accent hover:bg-accent-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-3 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
+                className='hidden [@media(min-width:840px)]:block bg-accent hover:bg-accent-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-3 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
                 aria-label='Записаться на консультацию'
                 aria-haspopup='dialog'
               >
@@ -462,7 +462,27 @@ export function Header() {
             </div>
 
             {/* Мобильное меню (бургер) */}
-            <div className='[@media(min-width:840px)]:hidden'>
+            <div className='flex items-center gap-1 [@media(min-width:840px)]:hidden'>
+              {!isAuthLoading &&
+                !user &&
+                pathname !== '/login' &&
+                pathname !== '/register' &&
+                !pathname?.startsWith('/dashboard') && (
+                  <div className='mr-1'>
+                    <AuthPopover />
+                  </div>
+                )}
+
+              {user && (
+                <Link
+                  href='/dashboard'
+                  className='mr-2 p-2 text-primary hover:text-primary-dark transition-colors'
+                  aria-label='Личный кабинет'
+                >
+                  <UserIcon className='w-6 h-6' />
+                </Link>
+              )}
+
               <button
                 type='button'
                 className='text-gray-800 hover:text-primary focus:outline-none transition-all duration-300 p-2 rounded-md'
@@ -708,20 +728,9 @@ export function Header() {
                 </>
               ) : (
                 <>
-                  {pathname !== '/login' && (
-                    <Link
-                      href='/login'
-                      onClick={closeMenu}
-                      className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                      aria-label='Войти в личный кабинет'
-                    >
-                      <LogIn className='w-5 h-5 mr-2' />
-                      <span>Войти</span>
-                    </Link>
-                  )}
                   <button
                     onClick={openBookingModal}
-                    className='bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
+                    className='bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 mt-4'
                     aria-label='Записаться на консультацию'
                     aria-haspopup='dialog'
                   >
