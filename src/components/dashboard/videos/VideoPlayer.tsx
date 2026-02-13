@@ -58,6 +58,25 @@ export function VideoPlayer({
     }
   }, [src]);
 
+  // Handle autoplay when src changes
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && src) {
+      // Small delay to ensure video element is ready
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch(error => {
+            console.log('Autoplay prevented:', error);
+            setIsPlaying(false);
+          });
+      }
+    }
+  }, [src]);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -208,6 +227,7 @@ export function VideoPlayer({
         className='w-full h-full object-contain'
         onClick={togglePlay}
         playsInline
+        autoPlay
       >
         Your browser does not support the video tag.
       </video>
