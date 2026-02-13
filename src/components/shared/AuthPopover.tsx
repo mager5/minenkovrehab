@@ -91,7 +91,6 @@ export default function AuthPopover({
           rounded-md hover:bg-gray-50
           transition-all duration-300 transform active:scale-95 
           focus:outline-none 
-          ${!isMobile ? 'focus:ring-2 focus:ring-primary focus:ring-offset-2' : ''}
           ${isOpen ? 'bg-gray-50' : ''}
         `}
         aria-expanded={isOpen}
