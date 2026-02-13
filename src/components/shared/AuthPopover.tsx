@@ -1,23 +1,71 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { LogIn, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import { Transition } from '@headlessui/react';
 
-export default function AuthPopover() {
-  const [isOpen, setIsOpen] = useState(false);
+interface AuthPopoverProps {
+  isMobile?: boolean;
+  isOpen?: boolean;
+  onToggle?: () => void;
+  onClose?: () => void;
+}
+
+export default function AuthPopover({
+  isMobile = false,
+  isOpen: controlledIsOpen,
+  onToggle,
+  onClose,
+}: AuthPopoverProps) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  const isOpen = isMobile ? !!controlledIsOpen : internalIsOpen;
+
+  // Handle Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        if (isMobile && onClose) onClose();
+        else setInternalIsOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, isMobile, onClose]);
+
+  // Focus trap for mobile
+  useEffect(() => {
+    if (isMobile && isOpen && popoverRef.current) {
+      const focusableElements = popoverRef.current.querySelectorAll(
+        'a, button, input, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusableElements.length > 0) {
+        (focusableElements[0] as HTMLElement).focus();
+      }
+    }
+  }, [isMobile, isOpen]);
 
   const handleMouseEnter = () => {
+    if (isMobile) return;
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setIsOpen(true);
+    setInternalIsOpen(true);
   };
 
   const handleMouseLeave = () => {
+    if (isMobile) return;
     timeoutRef.current = setTimeout(() => {
-      setIsOpen(false);
-    }, 200); // delay to allow moving to popover
+      setInternalIsOpen(false);
+    }, 200);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isMobile && onToggle) {
+      e.preventDefault();
+      onToggle();
+    }
   };
 
   return (
@@ -25,9 +73,11 @@ export default function AuthPopover() {
       className='relative z-50'
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      ref={popoverRef}
     >
       <Link
         href='/login'
+        onClick={handleClick}
         className={`
           flex flex-col items-center justify-center text-primary text-xs font-medium py-1 px-2
           rounded-md hover:bg-gray-50
@@ -35,6 +85,9 @@ export default function AuthPopover() {
           focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
           ${isOpen ? 'bg-gray-50' : ''}
         `}
+        aria-expanded={isOpen}
+        aria-haspopup='true'
+        role='button'
       >
         <User className='w-5 h-5 md:w-5 md:h-5 w-6 h-6' />
         <span className='hidden md:inline mt-0.5'>Войти</span>
@@ -49,10 +102,18 @@ export default function AuthPopover() {
         leaveFrom='opacity-100 translate-y-0'
         leaveTo='opacity-0 translate-y-1'
       >
-        <div className='absolute right-0 mt-2 w-80 origin-top-right pt-2'>
+        <div
+          className={`${
+            isMobile
+              ? 'fixed left-4 right-4 top-[4.5rem] w-auto'
+              : 'absolute right-0 mt-2 w-80'
+          } origin-top-right pt-2 z-50`}
+        >
           <div className='bg-white rounded-xl shadow-xl ring-1 ring-black/5 p-6 border border-gray-100 relative'>
-            {/* Triangle pointer */}
-            <div className='absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45'></div>
+            {/* Triangle pointer - hide on mobile as positioning changes */}
+            {!isMobile && (
+              <div className='absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45'></div>
+            )}
 
             <p className='text-sm text-gray-600 mb-6 leading-relaxed relative z-10'>
               Войдите, чтобы получить доступ к персональным программам
@@ -63,6 +124,7 @@ export default function AuthPopover() {
               <Link
                 href='/login'
                 className='flex items-center justify-center w-full bg-primary text-white px-4 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-sm text-sm'
+                onClick={() => isMobile && onClose && onClose()}
               >
                 Войти или зарегистрироваться
               </Link>

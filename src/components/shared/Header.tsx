@@ -7,7 +7,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import BookingModal from './BookingModal';
 import { socialLinks, headerContacts, navigationItems } from '@/data/content';
 import { SafeIcon } from '@/components/ui/SafeIcon';
-import { LogIn, User as UserIcon, LogOut, Settings } from 'lucide-react';
+import { User as UserIcon, LogOut, Settings } from 'lucide-react';
+import { Transition } from '@headlessui/react';
 import AuthPopover from './AuthPopover';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -47,6 +48,7 @@ export function Header() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
+  const [isMobileAuthOpen, setIsMobileAuthOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
@@ -135,9 +137,14 @@ export function Header() {
   // Закрытие меню с помощью клавиши Escape
   useEffect(() => {
     const handleEscKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isMenuOpen) {
-        setIsMenuOpen(false);
-        setIsMobileServicesOpen(false);
+      if (e.key === 'Escape') {
+        if (isMenuOpen) {
+          setIsMenuOpen(false);
+          setIsMobileServicesOpen(false);
+        }
+        if (isMobileAuthOpen) {
+          setIsMobileAuthOpen(false);
+        }
       }
     };
 
@@ -145,18 +152,57 @@ export function Header() {
     return () => {
       document.removeEventListener('keydown', handleEscKey);
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, isMobileAuthOpen]);
+
+  // Хелперы для переключения меню и авторизации
+  const toggleMobileMenu = () => {
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+    } else {
+      setIsMenuOpen(true);
+      setIsMobileAuthOpen(false);
+    }
+  };
+
+  const toggleMobileAuth = () => {
+    if (isMobileAuthOpen) {
+      setIsMobileAuthOpen(false);
+    } else {
+      setIsMobileAuthOpen(true);
+      setIsMenuOpen(false);
+    }
+  };
 
   return (
     <>
       {/* Предотвращение скролла при открытом мобильном меню */}
-      {isMenuOpen && (
+      {(isMenuOpen || isMobileAuthOpen) && (
         <style jsx global>{`
           body {
             overflow: hidden;
           }
         `}</style>
       )}
+
+      {/* Backdrop */}
+      <Transition
+        show={isMenuOpen || isMobileAuthOpen}
+        enter='transition-opacity duration-300'
+        enterFrom='opacity-0'
+        enterTo='opacity-100'
+        leave='transition-opacity duration-300'
+        leaveFrom='opacity-100'
+        leaveTo='opacity-0'
+      >
+        <div
+          className='fixed inset-0 bg-black/50 z-40 backdrop-blur-sm'
+          onClick={() => {
+            setIsMenuOpen(false);
+            setIsMobileAuthOpen(false);
+          }}
+          aria-hidden='true'
+        />
+      </Transition>
 
       {/* Верхняя инфо-панель */}
       <div
@@ -473,7 +519,12 @@ export function Header() {
                 pathname !== '/register' &&
                 !pathname?.startsWith('/dashboard') && (
                   <div className='mr-1'>
-                    <AuthPopover />
+                    <AuthPopover
+                      isMobile={true}
+                      isOpen={isMobileAuthOpen}
+                      onToggle={toggleMobileAuth}
+                      onClose={() => setIsMobileAuthOpen(false)}
+                    />
                   </div>
                 )}
 
@@ -490,7 +541,7 @@ export function Header() {
               <button
                 type='button'
                 className='text-gray-800 hover:text-primary focus:outline-none transition-all duration-300 p-2 rounded-md'
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={toggleMobileMenu}
                 aria-label={isMenuOpen ? 'Закрыть меню' : 'Открыть меню'}
                 aria-expanded={isMenuOpen}
                 aria-controls='mobile-menu'
