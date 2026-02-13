@@ -926,18 +926,6 @@ export function Header() {
                       </span>
                     </div>
                   </a>
-
-                  <div className='flex items-start space-x-4 text-gray-700 group'>
-                    <div className='w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary/10 transition-colors'>
-                      <MapPin className='w-5 h-5' />
-                    </div>
-                    <div>
-                      <span className='block text-sm text-gray-500'>Адрес</span>
-                      <span className='font-medium text-sm'>
-                        {headerContacts.address}
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
 

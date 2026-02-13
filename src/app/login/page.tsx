@@ -33,10 +33,13 @@ function LoginForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   });
+
+  const emailValue = watch('email');
 
   const onSubmit = async (data: LoginInput) => {
     setError(null);
@@ -82,7 +85,11 @@ function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className='space-y-4'
+          noValidate
+        >
           <AnimatePresence mode='wait'>
             {error && (
               <motion.div
@@ -110,6 +117,7 @@ function LoginForm() {
               disabled={isLoading}
               className='transition-all duration-300 ease-in-out'
               {...register('email')}
+              value={emailValue}
             />
           </div>
           <div className='space-y-2'>

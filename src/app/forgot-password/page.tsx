@@ -36,10 +36,13 @@ function ForgotPasswordForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ForgotPasswordInput>({
     resolver: zodResolver(forgotPasswordSchema),
   });
+
+  const emailValue = watch('email');
 
   const onSubmit = async (data: ForgotPasswordInput) => {
     setError(null);
@@ -98,11 +101,12 @@ function ForgotPasswordForm() {
             </motion.div>
           ) : (
             <motion.form
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
               onSubmit={handleSubmit(onSubmit)}
               className='space-y-4'
+              noValidate
             >
               {error && (
                 <Alert variant='destructive'>
@@ -118,11 +122,18 @@ function ForgotPasswordForm() {
                   label='Email'
                   placeholder='name@example.com'
                   error={errors.email?.message || ''}
+                  disabled={isLoading}
                   {...register('email')}
+                  value={emailValue}
                 />
               </div>
-              <Button type='submit' className='w-full' isLoading={isLoading}>
-                Сбросить пароль
+              <Button
+                type='submit'
+                className='w-full'
+                isLoading={isLoading}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Отправка...' : 'Отправить инструкцию'}
               </Button>
             </motion.form>
           )}

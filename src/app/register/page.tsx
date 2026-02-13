@@ -41,6 +41,7 @@ export default function RegisterPage() {
   });
 
   const password = watch('password', '');
+  const emailValue = watch('email');
 
   const onSubmit = async (data: RegisterInput) => {
     setError(null);
@@ -94,7 +95,11 @@ export default function RegisterPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className='space-y-4'
+              noValidate
+            >
               <AnimatePresence mode='wait'>
                 {error && (
                   <motion.div
@@ -149,6 +154,7 @@ export default function RegisterPage() {
                   disabled={isLoading}
                   className='transition-all duration-300 ease-in-out'
                   {...register('email')}
+                  value={emailValue}
                 />
               </div>
 
