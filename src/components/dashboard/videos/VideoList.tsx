@@ -24,6 +24,7 @@ export function VideoList() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loadingUrl, setLoadingUrl] = useState(false);
+  const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
 
   const supabase = createClient();
 
@@ -42,6 +43,28 @@ export function VideoList() {
 
     if (data) {
       setVideos(data);
+
+      // Generate signed URLs for thumbnails
+      const paths = data.map(v => v.file_path);
+      if (paths.length > 0) {
+        const { data: signedData, error: signedError } = await supabase.storage
+          .from('videos')
+          .createSignedUrls(paths, 3600);
+
+        if (signedData) {
+          const newThumbnails: Record<string, string> = {};
+          signedData.forEach(item => {
+            if (item.path && item.signedUrl) {
+              // Find video with this path to get ID (assuming paths are unique)
+              const video = data.find(v => v.file_path === item.path);
+              if (video) {
+                newThumbnails[video.id] = item.signedUrl;
+              }
+            }
+          });
+          setThumbnails(newThumbnails);
+        }
+      }
     }
     setLoading(false);
   };
@@ -243,13 +266,23 @@ export function VideoList() {
               className='group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col'
             >
               <div
-                className='aspect-video bg-gray-100 relative cursor-pointer overflow-hidden'
+                className='aspect-video bg-gray-100 relative cursor-pointer overflow-hidden group'
                 onClick={() => handlePlay(video)}
               >
-                <div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
+                {thumbnails[video.id] && (
+                  <video
+                    src={thumbnails[video.id] + '#t=0.1'}
+                    className='absolute inset-0 w-full h-full object-cover'
+                    preload='metadata'
+                    muted
+                    playsInline
+                  />
+                )}
+
+                <div className='absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300' />
 
                 <div className='absolute inset-0 flex items-center justify-center'>
-                  <div className='w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 backdrop-blur-sm'>
+                  <div className='w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 backdrop-blur-sm z-10'>
                     <Play className='h-6 w-6 text-indigo-600 ml-1' />
                   </div>
                 </div>
