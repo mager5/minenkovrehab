@@ -56,9 +56,17 @@ function LoginForm() {
       router.refresh();
       // Не сбрасываем isLoading при успехе, чтобы показать спиннер до редиректа
     } catch (err: any) {
-      setError(
-        err.message || 'Не удалось войти. Пожалуйста, проверьте данные.'
-      );
+      let errorMessage =
+        err.message || 'Не удалось войти. Пожалуйста, проверьте данные.';
+
+      // Перевод ошибок на русский язык
+      if (errorMessage === 'Invalid login credentials') {
+        errorMessage = 'Неверный email или пароль';
+      } else if (errorMessage.includes('Email not confirmed')) {
+        errorMessage = 'Email не подтвержден. Пожалуйста, проверьте почту.';
+      }
+
+      setError(errorMessage);
       setIsLoading(false);
     }
   };
