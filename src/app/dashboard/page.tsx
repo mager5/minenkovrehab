@@ -36,17 +36,6 @@ export default async function DashboardPage() {
           <h1 className='text-3xl font-bold tracking-tight text-gray-900'>
             Личный кабинет
           </h1>
-          <div className='flex items-center gap-4'>
-            <div className='text-sm text-gray-500'>{user.email}</div>
-            <form action='/auth/signout' method='post'>
-              <button
-                type='submit'
-                className='text-sm text-red-600 hover:text-red-800'
-              >
-                Выйти
-              </button>
-            </form>
-          </div>
         </div>
       </header>
       <main>

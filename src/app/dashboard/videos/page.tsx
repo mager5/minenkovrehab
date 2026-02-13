@@ -25,14 +25,6 @@ export default async function VideosPage() {
           <h1 className='text-3xl font-bold tracking-tight text-gray-900'>
             Видеогалерея
           </h1>
-          <div className='flex items-center gap-4'>
-            <a
-              href='/dashboard'
-              className='text-sm font-medium text-gray-500 hover:text-gray-900'
-            >
-              ← Назад в кабинет
-            </a>
-          </div>
         </div>
       </header>
       <main className='max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8'>
