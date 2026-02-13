@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { LogIn } from 'lucide-react';
+import { LogIn, User } from 'lucide-react';
 import { Transition } from '@headlessui/react';
 
 export default function AuthPopover() {
@@ -29,14 +29,14 @@ export default function AuthPopover() {
       <Link
         href='/login'
         className={`
-          flex items-center justify-center text-primary text-sm font-medium py-1.5 px-3 
-          border border-primary rounded-md hover:bg-primary hover:text-white 
+          flex flex-col items-center justify-center text-primary text-xs font-medium py-1 px-2
+          rounded-md hover:bg-gray-50
           transition-all duration-300 transform active:scale-95 
           focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
-          ${isOpen ? 'bg-primary text-white' : ''}
+          ${isOpen ? 'bg-gray-50' : ''}
         `}
       >
-        <LogIn className='w-4 h-4 mr-1.5' />
+        <User className='w-6 h-6 mb-1' />
         <span>Войти</span>
       </Link>
 
