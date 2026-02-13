@@ -90,7 +90,8 @@ export default function AuthPopover({
           flex flex-col items-center justify-center text-primary text-xs font-medium py-1 px-2
           rounded-md hover:bg-gray-50
           transition-all duration-300 transform active:scale-95 
-          focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+          focus:outline-none 
+          ${!isMobile ? 'focus:ring-2 focus:ring-primary focus:ring-offset-2' : ''}
           ${isOpen ? 'bg-gray-50' : ''}
         `}
         aria-expanded={isOpen}
