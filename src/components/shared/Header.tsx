@@ -242,6 +242,14 @@ export function Header() {
   };
 
   const toggleMobileProfile = () => {
+    // Снимаем фокус с активного элемента при клике
+    if (
+      typeof document !== 'undefined' &&
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
+    }
+
     if (isMobileProfileOpen) {
       setIsMobileProfileOpen(false);
     } else {
@@ -265,15 +273,16 @@ export function Header() {
       {/* Backdrop */}
       <Transition
         show={isMenuOpen || isMobileAuthOpen || isMobileProfileOpen}
-        enter='transition-opacity duration-300'
+        as={Fragment}
+        enter='transition-opacity duration-300 ease-in-out'
         enterFrom='opacity-0'
         enterTo='opacity-100'
-        leave='transition-opacity duration-300'
+        leave='transition-opacity duration-300 ease-in-out'
         leaveFrom='opacity-100'
         leaveTo='opacity-0'
       >
         <div
-          className='fixed inset-0 bg-black/50 z-40 backdrop-blur-sm'
+          className='fixed inset-0 bg-black/50 z-40 backdrop-blur-sm will-change-[opacity]'
           onClick={() => {
             setIsMenuOpen(false);
             setIsMobileAuthOpen(false);
