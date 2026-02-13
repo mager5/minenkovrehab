@@ -65,17 +65,18 @@ export default function RegisterPage() {
       if (authData.session) {
         router.push('/dashboard');
         router.refresh();
+        // Не сбрасываем isLoading при успехе, чтобы показать спиннер до редиректа
       } else {
         // Если сессия не создана, значит требуется подтверждение email
         setSuccess(
           'На вашу почту отправлено письмо для подтверждения регистрации. Пожалуйста, проверьте email.'
         );
+        setIsLoading(false);
       }
     } catch (err: any) {
       setError(
         err.message || 'Не удалось зарегистрироваться. Попробуйте позже.'
       );
-    } finally {
       setIsLoading(false);
     }
   };
@@ -94,14 +95,16 @@ export default function RegisterPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-              <AnimatePresence>
+              <AnimatePresence mode='wait'>
                 {error && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
+                    initial={{ opacity: 0, y: -10, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                    exit={{ opacity: 0, y: -10, height: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className='overflow-hidden'
                   >
-                    <Alert variant='destructive'>
+                    <Alert variant='destructive' className='mb-4'>
                       <AlertTitle>Ошибка</AlertTitle>
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
@@ -109,11 +112,13 @@ export default function RegisterPage() {
                 )}
                 {success && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
+                    initial={{ opacity: 0, y: -10, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                    exit={{ opacity: 0, y: -10, height: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className='overflow-hidden'
                   >
-                    <Alert variant='success'>
+                    <Alert variant='success' className='mb-4'>
                       <AlertTitle>Успешно</AlertTitle>
                       <AlertDescription>{success}</AlertDescription>
                     </Alert>
@@ -128,6 +133,8 @@ export default function RegisterPage() {
                   label='Имя'
                   placeholder='Иван Иванов'
                   error={errors.name?.message || ''}
+                  disabled={isLoading}
+                  className='transition-all duration-300 ease-in-out'
                   {...register('name')}
                 />
               </div>
@@ -139,6 +146,8 @@ export default function RegisterPage() {
                   label='Email'
                   placeholder='name@example.com'
                   error={errors.email?.message || ''}
+                  disabled={isLoading}
+                  className='transition-all duration-300 ease-in-out'
                   {...register('email')}
                 />
               </div>
@@ -149,9 +158,13 @@ export default function RegisterPage() {
                   type='password'
                   label='Пароль'
                   error={errors.password?.message || ''}
+                  disabled={isLoading}
+                  className='transition-all duration-300 ease-in-out'
                   {...register('password')}
                 />
-                <div className='text-xs text-gray-500 space-y-1 mt-2'>
+                <div
+                  className={`text-xs text-gray-500 space-y-1 mt-2 transition-opacity duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}
+                >
                   <p>Требования к паролю:</p>
                   <ul className='list-disc list-inside pl-2 space-y-0.5'>
                     <li
@@ -179,13 +192,28 @@ export default function RegisterPage() {
                   type='password'
                   label='Подтвердите пароль'
                   error={errors.confirmPassword?.message || ''}
+                  disabled={isLoading}
+                  className='transition-all duration-300 ease-in-out'
                   {...register('confirmPassword')}
                 />
               </div>
 
-              <Button type='submit' className='w-full' isLoading={isLoading}>
-                Зарегистрироваться
-              </Button>
+              <motion.div
+                animate={{
+                  opacity: isLoading ? 0.8 : 1,
+                  scale: isLoading ? 0.98 : 1,
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                <Button
+                  type='submit'
+                  className='w-full transition-all duration-300'
+                  isLoading={isLoading}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
+                </Button>
+              </motion.div>
             </form>
           </CardContent>
           <CardFooter className='flex flex-col space-y-2 text-center text-sm text-gray-500'>
@@ -193,7 +221,7 @@ export default function RegisterPage() {
               Уже есть аккаунт?{' '}
               <Link
                 href='/login'
-                className='font-medium text-indigo-600 hover:text-indigo-500'
+                className={`font-medium text-indigo-600 hover:text-indigo-500 transition-opacity duration-300 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}
               >
                 Войти
               </Link>
