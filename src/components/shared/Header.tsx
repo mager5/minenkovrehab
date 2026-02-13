@@ -1,13 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import BookingModal from './BookingModal';
 import { socialLinks, headerContacts, navigationItems } from '@/data/content';
 import { SafeIcon } from '@/components/ui/SafeIcon';
-import { User as UserIcon, LogOut, Settings, ArrowLeft } from 'lucide-react';
+import {
+  User as UserIcon,
+  LogOut,
+  Settings,
+  ArrowLeft,
+  X,
+  ChevronDown,
+  MapPin,
+  Mail,
+  Phone,
+} from 'lucide-react';
 import { Transition } from '@headlessui/react';
 import AuthPopover from './AuthPopover';
 import { createClient } from '@/lib/supabase/client';
@@ -56,6 +66,37 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Блокировка touchmove для iOS и управление фокусом
+  useEffect(() => {
+    if (isMenuOpen) {
+      // Фокус на кнопку закрытия при открытии меню
+      // Используем setTimeout, чтобы дать время на рендеринг и анимацию
+      const timer = setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 50);
+
+      const preventDefault = (e: TouchEvent) => {
+        // Разрешаем скролл внутри меню (элементы с overflow-y-auto)
+        const target = e.target as HTMLElement;
+        const scrollable = target.closest('.overflow-y-auto');
+
+        if (!scrollable) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener('touchmove', preventDefault, {
+        passive: false,
+      });
+
+      return () => {
+        document.removeEventListener('touchmove', preventDefault);
+        clearTimeout(timer);
+      };
+    }
+  }, [isMenuOpen]);
 
   const isAuthPage = ['/login', '/register', '/auth', '/signin'].some(route =>
     pathname?.startsWith(route)
@@ -664,226 +705,253 @@ export function Header() {
               )}
             </div>
           </div>
-
-          {/* Мобильное меню (выпадающее) */}
-          <div
-            id='mobile-menu'
-            className={`[@media(min-width:840px)]:hidden transition-all duration-500 ease-in-out overflow-y-auto ${
-              isMenuOpen
-                ? 'max-h-[85vh] opacity-100 mt-4 pb-12 border-t pt-4'
-                : 'max-h-0 opacity-0 mt-0 pb-0 border-t border-transparent'
-            }`}
-            aria-hidden={!isMenuOpen}
-            role='navigation'
-            aria-label='Мобильная навигация'
-          >
-            <div className='flex flex-col space-y-4'>
-              {navigationItems.map(item => {
-                if (item.label === 'Услуги') {
-                  return (
-                    <div key={item.href} className='flex flex-col'>
-                      <div className='flex items-center justify-between'>
-                        <Link
-                          href={item.href}
-                          onClick={closeMenu}
-                          className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none flex-1 ${pathname === item.href ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                          aria-current={
-                            pathname === item.href ? 'page' : undefined
-                          }
-                          aria-label='Посмотреть услуги и программы'
-                        >
-                          {item.label}
-                        </Link>
-                        <button
-                          onClick={() =>
-                            setIsMobileServicesOpen(!isMobileServicesOpen)
-                          }
-                          className='ml-2 p-1 hover:text-primary transition-all duration-300 focus:outline-none'
-                          aria-expanded={isMobileServicesOpen}
-                          aria-haspopup='true'
-                          aria-label='Развернуть меню услуг'
-                        >
-                          <svg
-                            className={`w-4 h-4 transition-transform duration-200 ${isMobileServicesOpen ? 'rotate-180' : ''}`}
-                            fill='none'
-                            stroke='currentColor'
-                            viewBox='0 0 24 24'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth={2}
-                              d='M19 9l-7 7-7-7'
-                            />
-                          </svg>
-                        </button>
-                      </div>
-
-                      {/* Подменю услуг для мобильной версии */}
-                      <div
-                        className={`overflow-hidden transition-all duration-300 ${isMobileServicesOpen ? 'max-h-96 mt-2' : 'max-h-0'}`}
-                      >
-                        <div className='pl-4 space-y-2'>
-                          {servicesDropdownItems.map(service => (
-                            <Link
-                              key={service.href}
-                              href={service.href}
-                              onClick={closeMenu}
-                              className='block py-2 text-sm text-gray-600 hover:text-primary transition-colors duration-200 border-l-2 border-transparent hover:border-primary pl-2'
-                              aria-label={`${service.label}: ${service.description}`}
-                            >
-                              <div className='font-medium'>{service.label}</div>
-                              <div
-                                className='text-xs text-gray-500 mt-1'
-                                style={{
-                                  overflow: 'hidden',
-                                  whiteSpace: 'nowrap',
-                                  textOverflow: 'ellipsis',
-                                }}
-                                title={service.description}
-                              >
-                                {service.description}
-                              </div>
-                            </Link>
-                          ))}
-                          <Link
-                            href='/products'
-                            onClick={closeMenu}
-                            className='block py-2 text-sm font-medium text-primary hover:text-primary-dark transition-colors duration-200 border-l-2 border-transparent hover:border-primary pl-2'
-                            aria-label='Посмотреть все услуги и программы'
-                          >
-                            Все услуги →
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={closeMenu}
-                    className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === item.href ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                    aria-current={pathname === item.href ? 'page' : undefined}
-                    aria-label={
-                      item.label === 'Главная'
-                        ? 'Перейти на главную страницу'
-                        : item.label === 'Обо мне'
-                          ? 'Узнать больше о специалисте'
-                          : item.label === 'Услуги'
-                            ? 'Посмотреть услуги и программы'
-                            : item.label === 'Контакты'
-                              ? 'Связаться со специалистом'
-                              : `Перейти в раздел ${item.label}`
-                    }
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-
-              {/* Дополнительные ссылки на услуги для лучшей видимости */}
-              <Link
-                href='/'
-                className='text-white hover:text-accent transition-colors'
-                aria-label='Перейти на главную страницу'
-              >
-                Главная
-              </Link>
-              <Link
-                href='/about'
-                className='text-white hover:text-accent transition-colors'
-                aria-label='Узнать больше о специалисте'
-              >
-                Обо мне
-              </Link>
-              <Link
-                href='/products'
-                className='text-white hover:text-accent transition-colors'
-                aria-label='Посмотреть услуги и программы'
-              >
-                Услуги
-              </Link>
-              <Link
-                href='/contacts'
-                className='text-white hover:text-accent transition-colors'
-                aria-label='Связаться со специалистом'
-              >
-                Контакты
-              </Link>
-              <Link
-                href='/products/personal-program'
-                onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/products/personal-program' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                aria-current={
-                  pathname === '/products/personal-program' ? 'page' : undefined
-                }
-              >
-                Восстановительная программа
-              </Link>
-
-              <Link
-                href='/products/online-training'
-                onClick={closeMenu}
-                className={`font-medium hover:text-primary transition-all duration-300 border-l-2 border-transparent hover:border-primary focus:outline-none md:focus:ring-2 md:focus:ring-primary md:focus:ring-offset-2 md:focus:rounded-sm ${pathname === '/products/online-training' ? 'text-primary font-semibold border-primary' : 'text-gray-800'}`}
-                aria-current={
-                  pathname === '/products/online-training' ? 'page' : undefined
-                }
-              >
-                Онлайн тренировки
-              </Link>
-              {user ? (
-                <>
-                  <div className='flex items-center px-2 py-2 border-t border-gray-100 mt-2'>
-                    <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 mr-3 shrink-0'>
-                      <UserIcon className='w-6 h-6 text-primary' />
-                    </div>
-                    <div className='overflow-hidden'>
-                      <p className='text-xs text-gray-500'>Вы вошли как</p>
-                      <p
-                        className='text-sm font-medium text-gray-900 truncate'
-                        title={user.email}
-                      >
-                        {user.email}
-                      </p>
-                    </div>
-                  </div>
-
-                  <Link
-                    href='/dashboard'
-                    onClick={closeMenu}
-                    className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                  >
-                    <Settings className='w-5 h-5 mr-2' />
-                    <span>Личный кабинет</span>
-                  </Link>
-
-                  <button
-                    onClick={handleLogout}
-                    className='flex items-center justify-center text-red-600 font-medium py-3 border-2 border-red-200 rounded-md hover:bg-red-50 transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-200 focus:ring-offset-2'
-                  >
-                    <LogOut className='w-5 h-5 mr-2' />
-                    <span>Выйти</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={openBookingModal}
-                    className='bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 mt-4'
-                    aria-label='Записаться на консультацию'
-                    aria-haspopup='dialog'
-                  >
-                    Записаться
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
         </div>
       </header>
+
+      {/* Мобильное меню (Drawer) */}
+      <Transition show={isMenuOpen} as={Fragment}>
+        <div
+          className='fixed inset-0 z-50 lg:hidden'
+          aria-modal='true'
+          role='dialog'
+        >
+          {/* Overlay with dimming */}
+          <Transition.Child
+            as={Fragment}
+            enter='transition-opacity duration-300'
+            enterFrom='opacity-0'
+            enterTo='opacity-100'
+            leave='transition-opacity duration-300'
+            leaveFrom='opacity-100'
+            leaveTo='opacity-0'
+          >
+            <div
+              className='fixed inset-0 bg-black/60 backdrop-blur-sm'
+              onClick={closeMenu}
+              aria-hidden='true'
+            />
+          </Transition.Child>
+
+          {/* Slide-in Menu Panel */}
+          <Transition.Child
+            as={Fragment}
+            enter='transition transform duration-300 ease-in-out'
+            enterFrom='-translate-x-full'
+            enterTo='translate-x-0'
+            leave='transition transform duration-300 ease-in-out'
+            leaveFrom='translate-x-0'
+            leaveTo='-translate-x-full'
+          >
+            <div className='relative flex flex-col w-full h-full bg-white shadow-xl overflow-hidden'>
+              {/* Header */}
+              <div className='flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white z-10'>
+                <Link
+                  href='/'
+                  className='flex items-center space-x-2'
+                  onClick={closeMenu}
+                >
+                  <Image
+                    src='/images/logo.png'
+                    alt='Logo'
+                    width={32}
+                    height={32}
+                    className='w-8 h-8'
+                  />
+                  <span className='text-xl font-bold text-primary'>
+                    Миненков<span className='text-accent'> Вадим</span>
+                  </span>
+                </Link>
+                <button
+                  ref={closeButtonRef}
+                  onClick={closeMenu}
+                  className='p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary'
+                  aria-label='Закрыть меню'
+                >
+                  <X className='w-6 h-6' />
+                </button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className='flex-1 overflow-y-auto overscroll-contain px-4 py-6 space-y-6'>
+                <nav className='space-y-1'>
+                  {/* Профиль пользователя */}
+                  {user && (
+                    <div className='border-b border-gray-100 pb-4 mb-4'>
+                      <div className='flex items-center px-2 py-2 space-x-3 mb-2'>
+                        <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0'>
+                          <UserIcon className='w-6 h-6 text-primary' />
+                        </div>
+                        <div className='overflow-hidden'>
+                          <p className='text-xs text-gray-500'>Вы вошли как</p>
+                          <p
+                            className='text-sm font-medium text-gray-900 truncate'
+                            title={user.email}
+                          >
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <Link
+                        href='/dashboard'
+                        onClick={closeMenu}
+                        className='flex items-center px-2 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary rounded-lg transition-colors'
+                      >
+                        <Settings className='w-5 h-5 mr-3' />
+                        Личный кабинет
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className='flex w-full items-center px-2 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left'
+                      >
+                        <LogOut className='w-5 h-5 mr-3' />
+                        Выйти
+                      </button>
+                    </div>
+                  )}
+
+                  {navigationItems.map(item => {
+                    if (item.label === 'Услуги') {
+                      return (
+                        <div
+                          key={item.label}
+                          className='border-b border-gray-100 pb-2 mb-2'
+                        >
+                          <button
+                            onClick={() =>
+                              setIsMobileServicesOpen(!isMobileServicesOpen)
+                            }
+                            className='flex items-center justify-between w-full py-3 text-lg font-medium text-gray-900 hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-lg px-2 group'
+                            aria-expanded={isMobileServicesOpen}
+                          >
+                            <span>{item.label}</span>
+                            <ChevronDown
+                              className={`w-5 h-5 transition-transform duration-300 text-gray-400 group-hover:text-primary ${isMobileServicesOpen ? 'rotate-180' : ''}`}
+                            />
+                          </button>
+
+                          <div
+                            className={`overflow-hidden transition-all duration-300 ease-in-out ${isMobileServicesOpen ? 'max-h-[800px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}
+                          >
+                            <div className='pl-4 space-y-1 pb-2 border-l-2 border-gray-100 ml-2'>
+                              {servicesDropdownItems.map(service => (
+                                <Link
+                                  key={service.href}
+                                  href={service.href}
+                                  onClick={closeMenu}
+                                  className='block text-gray-600 hover:text-primary py-2 px-2 text-sm font-medium transition-colors rounded-md hover:bg-gray-50'
+                                >
+                                  {service.label}
+                                </Link>
+                              ))}
+                              <Link
+                                href='/products'
+                                onClick={closeMenu}
+                                className='block text-primary font-semibold py-2 px-2 text-sm mt-2 hover:bg-primary/5 rounded-md transition-colors'
+                              >
+                                Все услуги →
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMenu}
+                        className={`block py-3 text-lg font-medium px-2 rounded-lg transition-colors ${pathname === item.href ? 'bg-primary/5 text-primary' : 'text-gray-900 hover:bg-gray-50 hover:text-primary'}`}
+                        aria-current={
+                          pathname === item.href ? 'page' : undefined
+                        }
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </nav>
+
+                {/* Contacts */}
+                <div className='border-t border-gray-100 pt-6 space-y-5'>
+                  <h3 className='text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2'>
+                    Контакты
+                  </h3>
+
+                  <a
+                    href={`tel:${headerContacts.phone.replace(/[^+\d]/g, '')}`}
+                    className='flex items-center space-x-4 text-gray-700 hover:text-primary transition-colors group'
+                  >
+                    <div className='w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary/10 transition-colors'>
+                      <Phone className='w-5 h-5' />
+                    </div>
+                    <div>
+                      <span className='block text-sm text-gray-500'>
+                        Телефон
+                      </span>
+                      <span className='font-medium text-lg'>
+                        {headerContacts.phone}
+                      </span>
+                    </div>
+                  </a>
+
+                  <a
+                    href={`mailto:${headerContacts.email}`}
+                    className='flex items-center space-x-4 text-gray-700 hover:text-primary transition-colors group'
+                  >
+                    <div className='w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary/10 transition-colors'>
+                      <Mail className='w-5 h-5' />
+                    </div>
+                    <div>
+                      <span className='block text-sm text-gray-500'>Email</span>
+                      <span className='font-medium break-all'>
+                        {headerContacts.email}
+                      </span>
+                    </div>
+                  </a>
+
+                  <div className='flex items-start space-x-4 text-gray-700 group'>
+                    <div className='w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary/10 transition-colors'>
+                      <MapPin className='w-5 h-5' />
+                    </div>
+                    <div>
+                      <span className='block text-sm text-gray-500'>Адрес</span>
+                      <span className='font-medium text-sm'>
+                        {headerContacts.address}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className='p-4 border-t border-gray-100 bg-gray-50 z-10'>
+                <button
+                  onClick={openBookingModal}
+                  className='w-full bg-accent hover:bg-accent-dark text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center'
+                >
+                  Записаться на прием
+                </button>
+
+                <div className='flex justify-center space-x-8 mt-6 pb-2'>
+                  {socialLinks.map(link => (
+                    <a
+                      key={link.name}
+                      href={link.url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-gray-400 hover:text-primary transition-all duration-300 transform hover:scale-110'
+                      aria-label={link.label}
+                    >
+                      <SafeIcon name={link.name} className='w-6 h-6' />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Transition.Child>
+        </div>
+      </Transition>
 
       {/* Модальное окно для записи */}
       <BookingModal
