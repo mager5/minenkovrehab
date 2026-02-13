@@ -130,6 +130,22 @@ export function VideoList() {
   const handlePlay = async (video: Video) => {
     setLoadingUrl(true);
 
+    // Update local state immediately for better UX
+    const updatedVideo = { ...video, views: (video.views || 0) + 1 };
+    setVideos(prevVideos =>
+      prevVideos.map(v => (v.id === video.id ? updatedVideo : v))
+    );
+    setSelectedVideo(updatedVideo);
+
+    // Call RPC to update DB
+    const { error: rpcError } = await supabase.rpc('increment_video_view', {
+      video_id: video.id,
+    });
+
+    if (rpcError) {
+      console.error('Error incrementing views:', rpcError);
+    }
+
     // Try to get signed URL
     const { data, error } = await supabase.storage
       .from('videos')
@@ -144,16 +160,12 @@ export function VideoList() {
 
       if (publicData) {
         setVideoUrl(publicData.publicUrl);
-        setSelectedVideo(video);
-        supabase.rpc('increment_video_view', { video_id: video.id });
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         alert('Не удалось получить ссылку на видео');
       }
     } else {
       setVideoUrl(data.signedUrl);
-      setSelectedVideo(video);
-      supabase.rpc('increment_video_view', { video_id: video.id });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     setLoadingUrl(false);
@@ -208,9 +220,17 @@ export function VideoList() {
           <div className='p-4 bg-gray-900 text-white flex justify-between items-center border-b border-gray-800'>
             <div>
               <h3 className='font-medium text-lg'>{selectedVideo.title}</h3>
-              <p className='text-sm text-gray-400'>
-                {new Date(selectedVideo.created_at).toLocaleDateString()} •{' '}
-                {formatSize(selectedVideo.size)}
+              <p className='text-sm text-gray-400 flex items-center gap-3'>
+                <span>
+                  {new Date(selectedVideo.created_at).toLocaleDateString()}
+                </span>
+                <span>•</span>
+                <span>{formatSize(selectedVideo.size)}</span>
+                <span>•</span>
+                <span className='flex items-center text-gray-300'>
+                  <Eye className='h-3 w-3 mr-1' />
+                  {selectedVideo.views || 0}
+                </span>
               </p>
             </div>
             <button
