@@ -32,6 +32,8 @@ export function VideoPlayer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +86,13 @@ export function VideoPlayer({
     const updateProgress = () => {
       if (video.duration) {
         setProgress((video.currentTime / video.duration) * 100);
+        setCurrentTime(video.currentTime);
       }
+    };
+
+    const handleLoadedMetadata = () => {
+      setDuration(video.duration);
+      setIsLoading(false);
     };
 
     const handleLoadStart = () => setIsLoading(true);
@@ -121,6 +129,7 @@ export function VideoPlayer({
     };
 
     video.addEventListener('timeupdate', updateProgress);
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
     video.addEventListener('error', handleError);
     video.addEventListener('loadstart', handleLoadStart);
     video.addEventListener('waiting', handleWaiting);
@@ -132,6 +141,7 @@ export function VideoPlayer({
 
     return () => {
       video.removeEventListener('timeupdate', updateProgress);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('error', handleError);
       video.removeEventListener('loadstart', handleLoadStart);
       video.removeEventListener('waiting', handleWaiting);
@@ -139,6 +149,12 @@ export function VideoPlayer({
       video.removeEventListener('playing', handlePlaying);
     };
   }, [src]);
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -303,6 +319,12 @@ export function VideoPlayer({
                 onChange={handleVolumeChange}
                 className='w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500 opacity-0 group-hover/volume:opacity-100 transition-opacity'
               />
+            </div>
+
+            <div className='text-xs font-medium font-mono text-gray-300 min-w-[80px]'>
+              <span>{formatTime(currentTime)}</span>
+              <span className='mx-1 text-gray-500'>/</span>
+              <span>{formatTime(duration)}</span>
             </div>
           </div>
 
