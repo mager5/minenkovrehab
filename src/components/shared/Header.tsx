@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import BookingModal from './BookingModal';
 import { socialLinks, headerContacts, navigationItems } from '@/data/content';
 import { SafeIcon } from '@/components/ui/SafeIcon';
-import { LogIn } from 'lucide-react';
+import { LogIn, User as UserIcon, LogOut, Settings } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { User } from '@supabase/supabase-js';
 
 // Данные для выпадающего меню услуг
 const servicesDropdownItems = [
@@ -44,7 +46,43 @@ export function Header() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (_event === 'SIGNED_OUT') {
+        setUser(null);
+        router.refresh();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase, router]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsProfileDropdownOpen(false);
+    setIsMenuOpen(false);
+    router.refresh();
+  };
 
   // Отслеживание скролла для изменения внешнего вида хедера
   useEffect(() => {
@@ -336,24 +374,85 @@ export function Header() {
 
             {/* Кнопки действий (Desktop) */}
             <div className='hidden [@media(min-width:840px)]:flex items-center space-x-3'>
-              {/* Кнопка входа */}
-              <Link
-                href='/login'
-                className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                aria-label='Войти в личный кабинет'
-              >
-                <LogIn className='w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-1' />
-                <span>Войти</span>
-              </Link>
+              {user ? (
+                <div
+                  className='relative'
+                  onMouseEnter={() => setIsProfileDropdownOpen(true)}
+                  onMouseLeave={() => setIsProfileDropdownOpen(false)}
+                >
+                  <button
+                    className='flex items-center space-x-2 text-primary hover:text-primary-dark font-medium transition-colors focus:outline-none py-2'
+                    aria-label='Меню профиля'
+                    aria-expanded={isProfileDropdownOpen}
+                  >
+                    <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors'>
+                      <UserIcon className='w-5 h-5 text-primary' />
+                    </div>
+                    <span className='hidden xl:inline text-sm font-medium'>
+                      {user.email?.split('@')[0]}
+                    </span>
+                  </button>
 
-              {/* Кнопка регистрации */}
-              <Link
-                href='/register'
-                className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                aria-label='Зарегистрироваться'
-              >
-                <span>Регистрация</span>
-              </Link>
+                  {/* Dropdown */}
+                  <div
+                    className={`absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 transition-all duration-300 z-50 overflow-hidden ${
+                      isProfileDropdownOpen
+                        ? 'opacity-100 visible translate-y-0'
+                        : 'opacity-0 invisible -translate-y-2'
+                    }`}
+                  >
+                    <div className='py-1'>
+                      <div className='px-4 py-3 border-b border-gray-100 bg-gray-50/50'>
+                        <p className='text-xs text-gray-500 mb-0.5'>
+                          Вы вошли как
+                        </p>
+                        <p
+                          className='text-sm font-medium text-gray-900 truncate'
+                          title={user.email}
+                        >
+                          {user.email}
+                        </p>
+                      </div>
+                      <Link
+                        href='/dashboard'
+                        className='flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors'
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      >
+                        <Settings className='w-4 h-4 mr-2.5' />
+                        Личный кабинет
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className='flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left'
+                      >
+                        <LogOut className='w-4 h-4 mr-2.5' />
+                        Выйти
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Кнопка входа */}
+                  <Link
+                    href='/login'
+                    className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                    aria-label='Войти в личный кабинет'
+                  >
+                    <LogIn className='w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-1' />
+                    <span>Войти</span>
+                  </Link>
+
+                  {/* Кнопка регистрации */}
+                  <Link
+                    href='/register'
+                    className='flex items-center text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                    aria-label='Зарегистрироваться'
+                  >
+                    <span>Регистрация</span>
+                  </Link>
+                </>
+              )}
 
               {/* Кнопка записи */}
               <button
@@ -577,23 +676,61 @@ export function Header() {
               >
                 Онлайн тренировки
               </Link>
-              <Link
-                href='/login'
-                onClick={closeMenu}
-                className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                aria-label='Войти в личный кабинет'
-              >
-                <LogIn className='w-5 h-5 mr-2' />
-                <span>Войти</span>
-              </Link>
-              <Link
-                href='/register'
-                onClick={closeMenu}
-                className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                aria-label='Зарегистрироваться'
-              >
-                <span>Регистрация</span>
-              </Link>
+              {user ? (
+                <>
+                  <div className='flex items-center px-2 py-2 border-t border-gray-100 mt-2'>
+                    <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 mr-3 shrink-0'>
+                      <UserIcon className='w-6 h-6 text-primary' />
+                    </div>
+                    <div className='overflow-hidden'>
+                      <p className='text-xs text-gray-500'>Вы вошли как</p>
+                      <p
+                        className='text-sm font-medium text-gray-900 truncate'
+                        title={user.email}
+                      >
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Link
+                    href='/dashboard'
+                    onClick={closeMenu}
+                    className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                  >
+                    <Settings className='w-5 h-5 mr-2' />
+                    <span>Личный кабинет</span>
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    className='flex items-center justify-center text-red-600 font-medium py-3 border-2 border-red-200 rounded-md hover:bg-red-50 transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-200 focus:ring-offset-2'
+                  >
+                    <LogOut className='w-5 h-5 mr-2' />
+                    <span>Выйти</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href='/login'
+                    onClick={closeMenu}
+                    className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                    aria-label='Войти в личный кабинет'
+                  >
+                    <LogIn className='w-5 h-5 mr-2' />
+                    <span>Войти</span>
+                  </Link>
+                  <Link
+                    href='/register'
+                    onClick={closeMenu}
+                    className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                    aria-label='Зарегистрироваться'
+                  >
+                    <span>Регистрация</span>
+                  </Link>
+                </>
+              )}
               <button
                 onClick={openBookingModal}
                 className='bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
