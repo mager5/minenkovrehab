@@ -8,6 +8,7 @@ import BookingModal from './BookingModal';
 import { socialLinks, headerContacts, navigationItems } from '@/data/content';
 import { SafeIcon } from '@/components/ui/SafeIcon';
 import { LogIn, User as UserIcon, LogOut, Settings } from 'lucide-react';
+import AuthPopover from './AuthPopover';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 
@@ -442,21 +443,7 @@ export function Header() {
                       </div>
                     </div>
                   ) : (
-                    <>
-                      {/* Кнопка входа - скрываем на странице входа */}
-                      {pathname !== '/login' && (
-                        <Link
-                          href='/login'
-                          className='text-primary hover:text-primary-dark font-medium text-sm lg:text-base px-3 lg:px-4 py-2 rounded-md transition-all duration-300 hover:bg-green-50 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                          aria-label='Войти в личный кабинет'
-                        >
-                          <div className='flex items-center'>
-                            <LogIn className='w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-1' />
-                            <span>Войти</span>
-                          </div>
-                        </Link>
-                      )}
-                    </>
+                    pathname !== '/login' && <AuthPopover />
                   )}
                 </>
               )}
@@ -719,15 +706,17 @@ export function Header() {
                 </>
               ) : (
                 <>
-                  <Link
-                    href='/login'
-                    onClick={closeMenu}
-                    className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
-                    aria-label='Войти в личный кабинет'
-                  >
-                    <LogIn className='w-5 h-5 mr-2' />
-                    <span>Войти</span>
-                  </Link>
+                  {pathname !== '/login' && (
+                    <Link
+                      href='/login'
+                      onClick={closeMenu}
+                      className='flex items-center justify-center text-primary font-medium py-3 border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+                      aria-label='Войти в личный кабинет'
+                    >
+                      <LogIn className='w-5 h-5 mr-2' />
+                      <span>Войти</span>
+                    </Link>
+                  )}
                   <button
                     onClick={openBookingModal}
                     className='bg-accent text-white px-4 py-3 rounded-md font-semibold hover:bg-accent-dark transition-all duration-300 transform active:scale-95 text-center shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
