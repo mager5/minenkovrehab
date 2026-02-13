@@ -444,7 +444,8 @@ export function Header() {
                     </div>
                   ) : (
                     pathname !== '/login' &&
-                    pathname !== '/register' && <AuthPopover />
+                    pathname !== '/register' &&
+                    !pathname?.startsWith('/dashboard') && <AuthPopover />
                   )}
                 </>
               )}
