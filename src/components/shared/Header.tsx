@@ -96,6 +96,8 @@ export function Header() {
         clearTimeout(timer);
       };
     }
+    // Явно возвращаем undefined, чтобы удовлетворить строгие настройки TypeScript
+    return undefined;
   }, [isMenuOpen]);
 
   const isAuthPage = ['/login', '/register', '/auth', '/signin'].some(route =>

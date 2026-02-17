@@ -1,11 +1,18 @@
 /** @type {import('next').NextConfig} */
 const isStaticExport = process.env.NODE_ENV === 'production' && process.env.GITHUB_ACTIONS;
+const previewBasePath = process.env.PREVIEW_BASE_PATH || '';
 
 const nextConfig = {
   // Включаем статический экспорт для GitHub Pages
   // Для локальной разработки с API роутами используйте: npm run dev
   // Для деплоя на GitHub Pages используйте: npm run export
   output: isStaticExport ? 'export' : undefined,
+  // Для превью окружений на GitHub Pages подподпуть (например /ios-26)
+  // используем basePath/assetPrefix, если задан PREVIEW_BASE_PATH
+  ...(previewBasePath && {
+    basePath: previewBasePath,
+    assetPrefix: previewBasePath,
+  }),
   images: {
     unoptimized: true,
     remotePatterns: [

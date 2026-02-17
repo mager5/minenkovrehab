@@ -80,7 +80,8 @@ export default function LoginPage() {
               type='email'
               label='Email'
               placeholder='name@example.com'
-              error={errors.email?.message}
+              // error={errors.email?.message}
+              error={errors.email?.message || ''}
               {...register('email')}
             />
           </div>
@@ -102,7 +103,8 @@ export default function LoginPage() {
             <Input
               id='password'
               type='password'
-              error={errors.password?.message}
+              // error={errors.password?.message}
+              error={errors.password?.message || ''}
               {...register('password')}
             />
           </div>
