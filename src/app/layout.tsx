@@ -6,10 +6,18 @@ import CookieBanner from '@/components/CookieBanner';
 // import HeyGenWidget from '@/components/shared/HeyGenWidget';
 import type { Metadata } from 'next';
 
+// const inter = Inter({
+//   subsets: ['latin', 'cyrillic'],
+//   variable: '--font-inter',
+//   display: 'swap',
+// });
+
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   variable: '--font-inter',
   display: 'swap',
+  fallback: ['system-ui', 'sans-serif'],
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
@@ -111,7 +119,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='ru' className='h-full overflow-x-hidden overflow-y-auto'>
+    <html
+      lang='ru'
+      className={`${inter.variable} font-sans h-full overflow-x-hidden overflow-y-auto`}
+    >
       <head>
         <meta
           httpEquiv='Cache-Control'
@@ -170,9 +181,7 @@ export default function RootLayout({
           media='(max-width: 768px)'
         />
       </head>
-      <body
-        className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col h-full overflow-x-hidden overflow-y-auto`}
-      >
+      <body className='antialiased min-h-screen flex flex-col h-full overflow-x-hidden overflow-y-auto'>
         <div className='flex flex-col min-h-screen overflow-x-hidden'>
           <a
             href='#main-content'
