@@ -38,6 +38,7 @@ jobs:
         env:
           NODE_ENV: production
           GITHUB_ACTIONS: true
+          IS_STATIC_EXPORT: '1'
         run: npm run export
 
       - name: List output directory

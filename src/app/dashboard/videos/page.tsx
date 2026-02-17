@@ -8,7 +8,28 @@ export const metadata = {
   description: 'Управление видеоматериалами',
 };
 
+const isStaticExport = process.env.IS_STATIC_EXPORT === '1';
+
 export default async function VideosPage() {
+  if (isStaticExport) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='max-w-lg mx-auto bg-white shadow rounded-lg p-8 text-center'>
+          <h1 className='text-2xl font-bold mb-4'>
+            Видеогалерея недоступна в превью
+          </h1>
+          <p className='text-gray-600 mb-2'>
+            Статическое превью сайта не поддерживает авторизацию и загрузку
+            видео.
+          </p>
+          <p className='text-gray-600'>
+            Откройте основную версию сайта для работы с видеогалереей.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const supabase = createClient();
   const {
     data: { user },
