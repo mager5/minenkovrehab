@@ -547,7 +547,7 @@ export function Header() {
             </nav>
 
             {/* Кнопки действий (Desktop) */}
-            <div className='flex items-center space-x-3 lg:space-x-4 xl:space-x-6 xl:pr-8'>
+            <div className='flex items-center space-x-3 lg:space-x-4 xl:space-x-7 xl:pr-8'>
               <div className='hidden [@media(min-width:840px)]:block w-[112px] shrink-0'>
                 {isAuthLoading ? (
                   <div className='invisible'>
@@ -616,7 +616,7 @@ export function Header() {
               {/* Кнопка записи */}
               <button
                 onClick={openBookingModal}
-                className='hidden [@media(min-width:840px)]:block bg-accent hover:bg-accent-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-3 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 xl:mr-[24px] '
+                className='hidden [@media(min-width:840px)]:block bg-accent hover:bg-accent-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-3 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 xl:mr-8 '
                 aria-label='Записаться на консультацию'
                 aria-haspopup='dialog'
               >
