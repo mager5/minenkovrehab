@@ -548,75 +548,70 @@ export function Header() {
 
             {/* Кнопки действий (Desktop) */}
             <div className='flex items-center space-x-2 lg:space-x-3'>
-              {!isAuthLoading && (
-                <>
-                  {user ? (
-                    <div
-                      className='relative hidden [@media(min-width:840px)]:block'
-                      onMouseEnter={() => setIsProfileDropdownOpen(true)}
-                      onMouseLeave={() => setIsProfileDropdownOpen(false)}
+              <div className='hidden [@media(min-width:840px)]:block w-[112px] shrink-0'>
+                {isAuthLoading ? (
+                  <div className='invisible'>
+                    <AuthPopover />
+                  </div>
+                ) : user ? (
+                  <div
+                    className='relative'
+                    onMouseEnter={() => setIsProfileDropdownOpen(true)}
+                    onMouseLeave={() => setIsProfileDropdownOpen(false)}
+                  >
+                    <button
+                      className='flex items-center space-x-2 text-primary hover:text-primary-dark font-medium transition-colors focus:outline-none py-2'
+                      aria-label='Меню профиля'
+                      aria-expanded={isProfileDropdownOpen}
                     >
-                      <button
-                        className='flex items-center space-x-2 text-primary hover:text-primary-dark font-medium transition-colors focus:outline-none py-2'
-                        aria-label='Меню профиля'
-                        aria-expanded={isProfileDropdownOpen}
-                      >
-                        <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors'>
-                          <UserIcon className='w-5 h-5 text-primary' />
-                        </div>
-                        <span className='hidden xl:inline text-sm font-medium'>
-                          {user.email?.split('@')[0]}
-                        </span>
-                      </button>
-
-                      {/* Dropdown */}
-                      <div
-                        className={`absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 transition-all duration-300 z-50 overflow-hidden ${
-                          isProfileDropdownOpen
-                            ? 'opacity-100 visible translate-y-0'
-                            : 'opacity-0 invisible -translate-y-2'
-                        }`}
-                      >
-                        <div className='py-1'>
-                          <div className='px-4 py-3 border-b border-gray-100 bg-gray-50/50'>
-                            <p className='text-xs text-gray-500 mb-0.5'>
-                              Вы вошли как
-                            </p>
-                            <p
-                              className='text-sm font-medium text-gray-900 truncate'
-                              title={user.email}
-                            >
-                              {user.email}
-                            </p>
-                          </div>
-                          <Link
-                            href='/dashboard'
-                            className='flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors'
-                            onClick={() => setIsProfileDropdownOpen(false)}
+                      <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors'>
+                        <UserIcon className='w-5 h-5 text-primary' />
+                      </div>
+                      <span className='hidden xl:inline text-sm font-medium'>
+                        {user.email?.split('@')[0]}
+                      </span>
+                    </button>
+                    <div
+                      className={`absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 transition-all duration-300 z-50 overflow-hidden ${
+                        isProfileDropdownOpen
+                          ? 'opacity-100 visible translate-y-0'
+                          : 'opacity-0 invisible -translate-y-2'
+                      }`}
+                    >
+                      <div className='py-1'>
+                        <div className='px-4 py-3 border-b border-gray-100 bg-gray-50/50'>
+                          <p className='text-xs text-gray-500 mb-0.5'>
+                            Вы вошли как
+                          </p>
+                          <p
+                            className='text-sm font-medium text-gray-900 truncate'
+                            title={user.email}
                           >
-                            <Settings className='w-4 h-4 mr-2.5' />
-                            Личный кабинет
-                          </Link>
-                          <button
-                            onClick={handleLogout}
-                            className='flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left'
-                          >
-                            <LogOut className='w-4 h-4 mr-2.5' />
-                            Выйти
-                          </button>
+                            {user.email}
+                          </p>
                         </div>
+                        <Link
+                          href='/dashboard'
+                          className='flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors'
+                          onClick={() => setIsProfileDropdownOpen(false)}
+                        >
+                          <Settings className='w-4 h-4 mr-2.5' />
+                          Личный кабинет
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className='flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left'
+                        >
+                          <LogOut className='w-4 h-4 mr-2.5' />
+                          Выйти
+                        </button>
                       </div>
                     </div>
-                  ) : (
-                    !isAuthPage &&
-                    !pathname?.startsWith('/dashboard') && (
-                      <div className='hidden [@media(min-width:840px)]:block'>
-                        <AuthPopover />
-                      </div>
-                    )
-                  )}
-                </>
-              )}
+                  </div>
+                ) : !isAuthPage && !pathname?.startsWith('/dashboard') ? (
+                  <AuthPopover />
+                ) : null}
+              </div>
 
               {/* Кнопка записи */}
               <button
