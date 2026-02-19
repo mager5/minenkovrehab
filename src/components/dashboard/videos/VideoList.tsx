@@ -74,7 +74,7 @@ export function VideoList() {
       setVideos(data);
 
       // Generate signed URLs for thumbnails
-      const paths = data.map(v => v.file_path);
+      const paths = data.map((v: Video) => v.file_path);
       if (paths.length > 0) {
         const { data: signedData, error: signedError } = await supabase.storage
           .from('videos')
@@ -82,14 +82,18 @@ export function VideoList() {
 
         if (signedData) {
           const newThumbnails: Record<string, string> = {};
-          signedData.forEach(item => {
-            if (item.path && item.signedUrl) {
-              const video = data.find(v => v.file_path === item.path);
-              if (video) {
-                newThumbnails[video.id] = item.signedUrl;
+          (signedData as { path: string; signedUrl: string | null }[]).forEach(
+            item => {
+              if (item.path && item.signedUrl) {
+                const video = (data as Video[]).find(
+                  (v: Video) => v.file_path === item.path
+                );
+                if (video) {
+                  newThumbnails[video.id] = item.signedUrl;
+                }
               }
             }
-          });
+          );
           setThumbnails(newThumbnails);
         }
       }

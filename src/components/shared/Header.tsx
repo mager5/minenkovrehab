@@ -21,7 +21,7 @@ import {
 import { Transition } from '@headlessui/react';
 import AuthPopover from './AuthPopover';
 import { createClient } from '@/lib/supabase/client';
-import { User } from '@supabase/supabase-js';
+import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 // Данные для выпадающего меню услуг
 const servicesDropdownItems = [
@@ -69,35 +69,62 @@ export function Header() {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Блокировка touchmove для iOS и управление фокусом
+  // useEffect(() => {
+  //   if (isMenuOpen) {
+  //     const timer = setTimeout(() => {
+  //       closeButtonRef.current?.focus();
+  //     }, 50);
+  //
+  //     const preventDefault = (e: TouchEvent) => {
+  //       const target = e.target as HTMLElement;
+  //       const scrollable = target.closest('.overflow-y-auto');
+  //
+  //       if (!scrollable) {
+  //         e.preventDefault();
+  //       }
+  //     };
+  //
+  //     document.addEventListener('touchmove', preventDefault, {
+  //       passive: false,
+  //     });
+  //
+  //     return () => {
+  //       document.removeEventListener('touchmove', preventDefault);
+  //       clearTimeout(timer);
+  //     };
+  //   }
+  // }, [isMenuOpen]);
+
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const preventDefault = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      const scrollable = target.closest('.overflow-y-auto');
+
+      if (!scrollable) {
+        e.preventDefault();
+      }
+    };
+
     if (isMenuOpen) {
-      // Фокус на кнопку закрытия при открытии меню
-      // Используем setTimeout, чтобы дать время на рендеринг и анимацию
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         closeButtonRef.current?.focus();
       }, 50);
-
-      const preventDefault = (e: TouchEvent) => {
-        // Разрешаем скролл внутри меню (элементы с overflow-y-auto)
-        const target = e.target as HTMLElement;
-        const scrollable = target.closest('.overflow-y-auto');
-
-        if (!scrollable) {
-          e.preventDefault();
-        }
-      };
 
       document.addEventListener('touchmove', preventDefault, {
         passive: false,
       });
-
-      return () => {
-        document.removeEventListener('touchmove', preventDefault);
-        clearTimeout(timer);
-      };
     }
-    // Явно возвращаем undefined, чтобы удовлетворить строгие настройки TypeScript
-    return undefined;
+
+    return () => {
+      if (isMenuOpen) {
+        document.removeEventListener('touchmove', preventDefault);
+        if (timer) {
+          clearTimeout(timer);
+        }
+      }
+    };
   }, [isMenuOpen]);
 
   const isAuthPage = ['/login', '/register', '/auth', '/signin'].some(route =>
@@ -130,14 +157,16 @@ export function Header() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setIsAuthLoading(false);
-      if (_event === 'SIGNED_OUT') {
-        setUser(null);
-        router.refresh();
+    } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        setUser(session?.user ?? null);
+        setIsAuthLoading(false);
+        if (_event === 'SIGNED_OUT') {
+          setUser(null);
+          router.refresh();
+        }
       }
-    });
+    );
 
     return () => {
       subscription.unsubscribe();

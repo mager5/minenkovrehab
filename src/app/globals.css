@@ -11,6 +11,22 @@ body {
   overflow-y: auto;
 }
 
+.touch * {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+/* Избегаем авто-зума iOS при фокусе на input < 16px */
+@media (max-width: 480px) {
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='tel'],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
 .hero-image {
   object-fit: cover;
   object-position: center;

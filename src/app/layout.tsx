@@ -6,19 +6,20 @@ import CookieBanner from '@/components/CookieBanner';
 // import HeyGenWidget from '@/components/shared/HeyGenWidget';
 import type { Metadata } from 'next';
 
-// const inter = Inter({
-//   subsets: ['latin', 'cyrillic'],
-//   variable: '--font-inter',
-//   display: 'swap',
-// });
-
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   variable: '--font-inter',
   display: 'swap',
-  fallback: ['system-ui', 'sans-serif'],
-  adjustFontFallback: false,
 });
+
+// Альтернативная конфигурация с явными fallback-шрифтами, если понадобится вернуться:
+// const inter = Inter({
+//   subsets: ['latin', 'cyrillic'],
+//   variable: '--font-inter',
+//   display: 'swap',
+//   fallback: ['system-ui', 'sans-serif'],
+//   adjustFontFallback: false,
+// });
 
 export const metadata: Metadata = {
   title: 'Миненков Вадим | Физический реабилитолог',

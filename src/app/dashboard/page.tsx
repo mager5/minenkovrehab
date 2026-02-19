@@ -3,28 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Video } from 'lucide-react';
 
-const isStaticExport = process.env.IS_STATIC_EXPORT === '1';
-
 export default async function DashboardPage() {
-  if (isStaticExport) {
-    return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='max-w-lg mx-auto bg-white shadow rounded-lg p-8 text-center'>
-          <h1 className='text-2xl font-bold mb-4'>
-            Личный кабинет недоступен в превью
-          </h1>
-          <p className='text-gray-600 mb-2'>
-            Статическое превью сайта не поддерживает авторизацию и личный
-            кабинет.
-          </p>
-          <p className='text-gray-600'>
-            Откройте основную версию сайта для работы с личным кабинетом.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const supabase = createClient();
 
   const {
@@ -35,6 +14,7 @@ export default async function DashboardPage() {
     return redirect('/login');
   }
 
+  // Получаем покупки пользователя
   const { data: purchases } = await supabase
     .from('purchases')
     .select(
