@@ -547,7 +547,7 @@ export function Header() {
             </nav>
 
             {/* Кнопки действий (Desktop) */}
-            <div className='flex items-center space-x-3 lg:space-x-4 xl:space-x-7 xl:pr-8'>
+            <div className='flex items-center space-x-3 lg:space-x-4 xl:space-x-7 xl:pr-10'>
               <div className='hidden [@media(min-width:840px)]:block w-[112px] shrink-0'>
                 {isAuthLoading ? (
                   <div className='invisible'>
