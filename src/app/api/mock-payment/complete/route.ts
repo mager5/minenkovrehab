@@ -30,8 +30,32 @@ export async function POST(req: NextRequest) {
       !process.env.NEXT_PUBLIC_SUPABASE_URL ||
       !process.env.SUPABASE_SERVICE_ROLE_KEY
     ) {
+      const missingEnv: string[] = [];
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        missingEnv.push('NEXT_PUBLIC_SUPABASE_URL');
+      }
+      if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        missingEnv.push('SUPABASE_SERVICE_ROLE_KEY');
+      }
+
+      console.error('Supabase admin env missing on server:', {
+        hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+        missingEnv,
+      });
+
+      // Старое сообщение:
+      // return NextResponse.json(
+      //   { message: 'Не настроен доступ к Supabase (SERVICE ROLE KEY)' },
+      //   { status: 500 }
+      // );
+
       return NextResponse.json(
-        { message: 'Не настроен доступ к Supabase (SERVICE ROLE KEY)' },
+        {
+          message:
+            'Не настроен доступ к Supabase. Отсутствуют переменные: ' +
+            missingEnv.join(', '),
+        },
         { status: 500 }
       );
     }
