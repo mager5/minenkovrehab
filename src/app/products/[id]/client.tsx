@@ -227,108 +227,116 @@ export default function ProductClient({ product }: { product: Product }) {
   };
 
   // Динамическая генерация ссылки на оплату через Railway API
+  // ВАЖНО: реальный вызов оплаты временно отключен, сейчас имитируем
+  // успешный платеж и переводим пользователя на страницу /payment/success.
   const handlePayment = async (level: number) => {
-    try {
-      console.log('🔄 Создание платежа для продукта:', product.title);
-      console.log('🔄 Уровень:', level);
+    console.log('🧪 Демонстрационный режим оплаты, уровень:', level);
 
-      // Устанавливаем состояние загрузки для соответствующего уровня
-      switch (level) {
-        case 1:
-          setIsPaymentProcessingLevel1(true);
-          console.log('✅ Спиннер активирован для уровня 1');
-          break;
-        case 2:
-          setIsPaymentProcessingLevel2(true);
-          console.log('✅ Спиннер активирован для уровня 2');
-          break;
-        case 3:
-          setIsPaymentProcessingLevel3(true);
-          console.log('✅ Спиннер активирован для уровня 3');
-          break;
-        case 4:
-          setIsPaymentProcessingLevel4(true);
-          console.log('✅ Спиннер активирован для уровня 4');
-          break;
-      }
+    // Устанавливаем состояние загрузки для соответствующего уровня
+    switch (level) {
+      case 1:
+        setIsPaymentProcessingLevel1(true);
+        break;
+      case 2:
+        setIsPaymentProcessingLevel2(true);
+        break;
+      case 3:
+        setIsPaymentProcessingLevel3(true);
+        break;
+      case 4:
+        setIsPaymentProcessingLevel4(true);
+        break;
+    }
 
-      // Добавляем минимальную задержку, чтобы пользователь увидел спиннер
-      await new Promise(resolve => setTimeout(resolve, 500));
+    // Небольшая задержка, чтобы пользователь увидел спиннер
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Прямое обращение к Railway API
-      console.log('🌐 Отправка запроса к Railway API...');
-      const response = await fetch(
-        'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            amount: product.price,
-            // description: product.title, // Убрано по требованию пользователя
-            productId: product.id, // Добавляем ID продукта для правильной фискализации
-            level: level, // Передаем уровень отдельным параметром
-            email: 'customer@example.com', // Можно добавить форму для email
-            phone: '+79001234567', // Корректный формат телефона
-          }),
-        }
-      );
-
-      console.log('📡 Ответ от API:', response.status, response.statusText);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Ошибка API:', errorText);
-        throw new Error(
-          `Ошибка создания платежа: ${response.status} ${response.statusText}`
-        );
-      }
-
-      const result = await response.json();
-      console.log('📦 Результат от API:', result);
-
-      if (result.success && result.data?.paymentUrl) {
-        console.log('✅ Платежная ссылка получена:', result.data.paymentUrl);
-
-        // Сразу переходим на платежную систему без показа галочки
-        // Спиннер будет крутиться до момента перехода
-        const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
-        console.log('🔍 Переход на платежную систему:', cleanUrl);
-        window.location.href = cleanUrl;
-      } else {
-        throw new Error('Не удалось получить ссылку для оплаты');
-      }
-    } catch (error) {
-      console.error('❌ Ошибка при создании платежа:', error);
-
-      // Добавляем задержку перед сбросом состояния, чтобы пользователь увидел спиннер
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Сбрасываем состояния обработки при ошибке
-      switch (level) {
-        case 1:
-          setIsPaymentProcessingLevel1(false);
-          break;
-        case 2:
-          setIsPaymentProcessingLevel2(false);
-          break;
-        case 3:
-          setIsPaymentProcessingLevel3(false);
-          break;
-        case 4:
-          setIsPaymentProcessingLevel4(false);
-          break;
-      }
-
-      // Более информативное сообщение об ошибке
-      const errorMessage =
-        error instanceof Error ? error.message : 'Неизвестная ошибка';
-      alert(
-        `Произошла ошибка при создании платежа: ${errorMessage}\n\nПопробуйте еще раз или обратитесь в поддержку.`
-      );
+    // Переход на страницу успешной оплаты (имитация)
+    if (typeof window !== 'undefined') {
+      window.location.href = '/payment/success?mock=1';
     }
   };
+
+  // Старый вариант handlePayment с обращением к Railway API оставлен для истории:
+  // const handlePayment = async (level: number) => {
+  //   try {
+  //     console.log('🔄 Создание платежа для продукта:', product.title);
+  //     console.log('🔄 Уровень:', level);
+  //
+  //     switch (level) {
+  //       case 1:
+  //         setIsPaymentProcessingLevel1(true);
+  //         break;
+  //       case 2:
+  //         setIsPaymentProcessingLevel2(true);
+  //         break;
+  //       case 3:
+  //         setIsPaymentProcessingLevel3(true);
+  //         break;
+  //       case 4:
+  //         setIsPaymentProcessingLevel4(true);
+  //         break;
+  //     }
+  //
+  //     await new Promise(resolve => setTimeout(resolve, 500));
+  //
+  //     const response = await fetch(
+  //       'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url',
+  //       {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify({
+  //           amount: product.price,
+  //           productId: product.id,
+  //           level,
+  //           email: 'customer@example.com',
+  //           phone: '+79001234567',
+  //         }),
+  //       }
+  //     );
+  //
+  //     if (!response.ok) {
+  //       const errorText = await response.text();
+  //       throw new Error(
+  //         `Ошибка создания платежа: ${response.status} ${response.statusText} ${errorText}`
+  //       );
+  //     }
+  //
+  //     const result = await response.json();
+  //
+  //     if (result.success && result.data?.paymentUrl) {
+  //       const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
+  //       window.location.href = cleanUrl;
+  //     } else {
+  //       throw new Error('Не удалось получить ссылку для оплаты');
+  //     }
+  //   } catch (error) {
+  //     await new Promise(resolve => setTimeout(resolve, 1000));
+  //
+  //     switch (level) {
+  //       case 1:
+  //         setIsPaymentProcessingLevel1(false);
+  //         break;
+  //       case 2:
+  //         setIsPaymentProcessingLevel2(false);
+  //         break;
+  //       case 3:
+  //         setIsPaymentProcessingLevel3(false);
+  //         break;
+  //       case 4:
+  //         setIsPaymentProcessingLevel4(false);
+  //         break;
+  //     }
+  //
+  //     const errorMessage =
+  //       error instanceof Error ? error.message : 'Неизвестная ошибка';
+  //     alert(
+  //       `Произошла ошибка при создании платежа: ${errorMessage}\n\nПопробуйте еще раз или обратитесь в поддержку.`
+  //     );
+  //   }
+  // };
 
   return (
     <motion.div
@@ -927,47 +935,13 @@ export default function ProductClient({ product }: { product: Product }) {
                       setIsLoading(true);
                       try {
                         console.log(
-                          '🔄 Создание платежа для экспресс-консультации'
+                          '🧪 Демонстрационный режим: оплата для экспресс-консультации'
                         );
-
-                        const response = await fetch(
-                          'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url',
-                          {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                              amount: 3000,
-                              productId: 'express-consultation',
-                              email: 'customer@example.com',
-                              phone: '+79001234567',
-                            }),
-                          }
-                        );
-
-                        if (!response.ok) {
-                          throw new Error('Ошибка создания платежа');
+                        await new Promise(resolve => setTimeout(resolve, 800));
+                        if (typeof window !== 'undefined') {
+                          window.location.href =
+                            '/payment/success?mock=1&product=express-consultation';
                         }
-
-                        const result = await response.json();
-
-                        if (result.success && result.data?.paymentUrl) {
-                          const cleanUrl = result.data.paymentUrl.replace(
-                            /%27/g,
-                            ''
-                          );
-                          window.location.href = cleanUrl;
-                        } else {
-                          throw new Error(
-                            'Не удалось получить ссылку для оплаты'
-                          );
-                        }
-                      } catch (error) {
-                        console.error('❌ Ошибка при создании платежа:', error);
-                        alert(
-                          'Произошла ошибка при создании платежа. Попробуйте еще раз.'
-                        );
                       } finally {
                         setIsLoading(false);
                       }
