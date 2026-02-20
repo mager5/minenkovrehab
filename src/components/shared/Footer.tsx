@@ -185,7 +185,7 @@ const ServicesColumn = () => {
             style={{ color: '#d1f3ea' }}
             aria-label='Программа тренировок Формула Движения'
           >
-            Программа тренировок "Формула Движения"
+            Программа тренировок &quot;Формула Движения&quot;
           </Link>
         </li>
         <li role='listitem'>

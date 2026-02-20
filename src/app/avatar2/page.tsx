@@ -343,7 +343,7 @@ export default function Avatar2Page() {
           </div>
 
           <p className='text-sm text-gray-600 mt-2'>
-            Нажмите "Запустить" чтобы начать сессию с аватаром Анна
+            Нажмите &quot;Запустить&quot; чтобы начать сессию с аватаром Анна
           </p>
         </div>
       </div>

@@ -131,8 +131,8 @@ export default function AvatarVideo({
           </div>
           <p className='text-lg font-medium mb-2'>AI Консультант</p>
           <p className='text-sm text-center max-w-xs'>
-            Нажмите "Начать консультацию" для подключения к виртуальному
-            специалисту
+            Нажмите &quot;Начать консультацию&quot; для подключения к
+            виртуальному специалисту
           </p>
         </div>
       );

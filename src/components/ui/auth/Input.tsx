@@ -72,10 +72,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 {/* Content */}
                 <div className='flex-1'>
                   <p className='font-semibold mb-1'>
-                    Пожалуйста, укажите символ '@'
+                    Пожалуйста, укажите символ «@»
                   </p>
                   <p className='text-gray-500'>
-                    В адресе '{props.value}' отсутствует символ '@'.
+                    В адресе «{props.value}» отсутствует символ «@».
                   </p>
                 </div>
               </div>
