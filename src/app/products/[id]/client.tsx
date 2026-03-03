@@ -268,7 +268,11 @@ export default function ProductClient({ product }: { product: Product }) {
               sno: 'usn_income', // УСН Доходы
               items: [
                 {
-                  name: product.title,
+                  // Добавляем уровень только для "Формулы движения", где это действительно нужно
+                  name:
+                    product.id === 'formula-movement' && level
+                      ? `${product.title} (Уровень ${level})`
+                      : product.title,
                   quantity: 1,
                   sum: product.price,
                   payment_method: 'full_payment',
