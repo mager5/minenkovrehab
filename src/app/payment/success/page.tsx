@@ -83,26 +83,19 @@ export default function PaymentSuccessPage() {
     setIsSubmittingEmail(true);
 
     try {
-      const response = await fetch('/api/mock-payment/complete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-        }),
-      });
-
-      // Обработка случая статического экспорта (GitHub Pages), где API недоступен
-      if (response.status === 404 || response.status === 405) {
-        console.warn(
-          'API недоступен (Static Export), эмуляция успешного ответа'
-        );
-        setEmailResultMessage(
-          'Демо-режим: Личный кабинет успешно "создан". В реальной версии вы бы получили письмо с доступами.'
-        );
-        return;
-      }
+      // Используем новый API на Railway
+      const response = await fetch(
+        'https://minenkovrehab-production-15cc.up.railway.app/api/mock-payment/complete',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email.trim(),
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -123,16 +116,9 @@ export default function PaymentSuccessPage() {
       setEmailResultMessage(finalMessage);
     } catch (error) {
       console.error('Ошибка при отправке email:', error);
-      // Если произошла ошибка парсинга JSON (например, вернулся HTML 404), считаем это демо-режимом
-      if (error instanceof SyntaxError) {
-        setEmailResultMessage(
-          'Демо-режим: Личный кабинет успешно "создан". В реальной версии вы бы получили письмо с доступами.'
-        );
-      } else {
-        setEmailResultMessage(
-          'Произошла ошибка. Пожалуйста, попробуйте еще раз.'
-        );
-      }
+      setEmailResultMessage(
+        'Произошла ошибка. Пожалуйста, попробуйте еще раз.'
+      );
     } finally {
       setIsSubmittingEmail(false);
     }

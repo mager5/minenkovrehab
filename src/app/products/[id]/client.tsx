@@ -226,10 +226,93 @@ export default function ProductClient({ product }: { product: Product }) {
     await handlePayment(4);
   };
 
-  // Динамическая генерация ссылки на оплату через Railway API
-  // ВАЖНО: реальный вызов оплаты временно отключен, сейчас имитируем
-  // успешный платеж и переводим пользователя на страницу /payment/success.
+  // Функция создания платежа через Railway API
   const handlePayment = async (level: number) => {
+    try {
+      console.log('🔄 Создание платежа для продукта:', product.title);
+      console.log('🔄 Уровень:', level);
+
+      switch (level) {
+        case 1:
+          setIsPaymentProcessingLevel1(true);
+          break;
+        case 2:
+          setIsPaymentProcessingLevel2(true);
+          break;
+        case 3:
+          setIsPaymentProcessingLevel3(true);
+          break;
+        case 4:
+          setIsPaymentProcessingLevel4(true);
+          break;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Используем новый API на Railway
+      const response = await fetch(
+        'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: product.price,
+            productId: product.id,
+            level,
+            email: 'customer@example.com', // Временный email, потом можно заменить на реальный, если будет форма
+            phone: '+79001234567', // Временный телефон
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Ошибка создания платежа: ${response.status} ${response.statusText} ${errorText}`
+        );
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data?.paymentUrl) {
+        // Убираем лишние символы из URL, если они есть
+        const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
+        window.location.href = cleanUrl;
+      } else {
+        throw new Error('Не удалось получить ссылку для оплаты');
+      }
+    } catch (error) {
+      console.error('Ошибка оплаты:', error);
+
+      // Сбрасываем состояние загрузки
+      switch (level) {
+        case 1:
+          setIsPaymentProcessingLevel1(false);
+          break;
+        case 2:
+          setIsPaymentProcessingLevel2(false);
+          break;
+        case 3:
+          setIsPaymentProcessingLevel3(false);
+          break;
+        case 4:
+          setIsPaymentProcessingLevel4(false);
+          break;
+      }
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Неизвестная ошибка';
+      alert(
+        `Произошла ошибка при создании платежа: ${errorMessage}\n\nПопробуйте еще раз или обратитесь в поддержку.`
+      );
+    }
+  };
+
+  /*
+  // Старый мок-метод для тестов (оставлен для истории)
+  const handlePaymentMock = async (level: number) => {
     console.log('🧪 Демонстрационный режим оплаты, уровень:', level);
 
     // Устанавливаем состояние загрузки для соответствующего уровня
@@ -256,87 +339,7 @@ export default function ProductClient({ product }: { product: Product }) {
       window.location.href = '/payment/success?mock=1';
     }
   };
-
-  // Старый вариант handlePayment с обращением к Railway API оставлен для истории:
-  // const handlePayment = async (level: number) => {
-  //   try {
-  //     console.log('🔄 Создание платежа для продукта:', product.title);
-  //     console.log('🔄 Уровень:', level);
-  //
-  //     switch (level) {
-  //       case 1:
-  //         setIsPaymentProcessingLevel1(true);
-  //         break;
-  //       case 2:
-  //         setIsPaymentProcessingLevel2(true);
-  //         break;
-  //       case 3:
-  //         setIsPaymentProcessingLevel3(true);
-  //         break;
-  //       case 4:
-  //         setIsPaymentProcessingLevel4(true);
-  //         break;
-  //     }
-  //
-  //     await new Promise(resolve => setTimeout(resolve, 500));
-  //
-  //     const response = await fetch(
-  //       'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url',
-  //       {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({
-  //           amount: product.price,
-  //           productId: product.id,
-  //           level,
-  //           email: 'customer@example.com',
-  //           phone: '+79001234567',
-  //         }),
-  //       }
-  //     );
-  //
-  //     if (!response.ok) {
-  //       const errorText = await response.text();
-  //       throw new Error(
-  //         `Ошибка создания платежа: ${response.status} ${response.statusText} ${errorText}`
-  //       );
-  //     }
-  //
-  //     const result = await response.json();
-  //
-  //     if (result.success && result.data?.paymentUrl) {
-  //       const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
-  //       window.location.href = cleanUrl;
-  //     } else {
-  //       throw new Error('Не удалось получить ссылку для оплаты');
-  //     }
-  //   } catch (error) {
-  //     await new Promise(resolve => setTimeout(resolve, 1000));
-  //
-  //     switch (level) {
-  //       case 1:
-  //         setIsPaymentProcessingLevel1(false);
-  //         break;
-  //       case 2:
-  //         setIsPaymentProcessingLevel2(false);
-  //         break;
-  //       case 3:
-  //         setIsPaymentProcessingLevel3(false);
-  //         break;
-  //       case 4:
-  //         setIsPaymentProcessingLevel4(false);
-  //         break;
-  //     }
-  //
-  //     const errorMessage =
-  //       error instanceof Error ? error.message : 'Неизвестная ошибка';
-  //     alert(
-  //       `Произошла ошибка при создании платежа: ${errorMessage}\n\nПопробуйте еще раз или обратитесь в поддержку.`
-  //     );
-  //   }
-  // };
+  */
 
   return (
     <motion.div
@@ -661,14 +664,14 @@ export default function ProductClient({ product }: { product: Product }) {
                       </div>
                       <span className='text-xs text-gray-600 leading-relaxed'>
                         Я согласен с условиями{' '}
-                        <Link
+                        <a
                           href='/oferta.pdf'
                           className='text-primary hover:underline'
                           target='_blank'
                           rel='noopener noreferrer'
                         >
                           договора оферты
-                        </Link>
+                        </a>
                       </span>
                     </label>
                     {showOfferError && (
@@ -1112,14 +1115,14 @@ export default function ProductClient({ product }: { product: Product }) {
                     </div>
                     <span className='text-xs text-gray-600 leading-relaxed'>
                       Я согласен с условиями{' '}
-                      <Link
+                      <a
                         href='/oferta.pdf'
                         className='text-primary hover:underline'
                         target='_blank'
                         rel='noopener noreferrer'
                       >
                         договора оферты
-                      </Link>
+                      </a>
                       .
                     </span>
                   </label>
@@ -1330,14 +1333,14 @@ export default function ProductClient({ product }: { product: Product }) {
                     </div>
                     <span className='text-xs text-gray-600 leading-relaxed'>
                       Я согласен с условиями{' '}
-                      <Link
+                      <a
                         href='/oferta.pdf'
                         className='text-primary hover:underline'
                         target='_blank'
                         rel='noopener noreferrer'
                       >
                         договора оферты
-                      </Link>
+                      </a>
                       .
                     </span>
                   </label>
@@ -1548,14 +1551,14 @@ export default function ProductClient({ product }: { product: Product }) {
                     </div>
                     <span className='text-xs text-gray-600 leading-relaxed'>
                       Я согласен с условиями{' '}
-                      <Link
+                      <a
                         href='/oferta.pdf'
                         className='text-primary hover:underline'
                         target='_blank'
                         rel='noopener noreferrer'
                       >
                         договора оферты
-                      </Link>
+                      </a>
                       .
                     </span>
                   </label>

@@ -206,39 +206,22 @@ export default function ProductPageWrapper({
       setIsEmailSubmitting(true);
       setEmailError('');
 
-      const response = await fetch('/api/mock-payment/complete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          name: contactInfo.name,
-          phone: contactInfo.phone,
-          productId: product?.id,
-        }),
-      });
-
-      // Обработка статического экспорта
-      if (response.status === 404 || response.status === 405) {
-        // Эмуляция успеха
-        setServerMessage(
-          'Демо-режим: Заявка "принята". В реальной версии вы бы получили письмо.'
-        );
-        // Имитируем успешный ответ
-        const mockData = { status: 'created' };
-        // Продолжаем логику как будто успех
-        if (mockData.status === 'exists') {
-          // ... (этот код не выполнится, но для структуры)
-        } else {
-          // Успешный сценарий
-          if (typeof window !== 'undefined') {
-            window.location.href = '/payment/success?mock=1';
-          }
-          return;
+      // Используем новый API на Railway
+      const response = await fetch(
+        'https://minenkovrehab-production-15cc.up.railway.app/api/mock-payment/complete',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email.trim(),
+            name: contactInfo.name,
+            phone: contactInfo.phone,
+            productId: product?.id,
+          }),
         }
-        return;
-      }
+      );
 
       const data = await response.json();
 
@@ -638,14 +621,14 @@ export default function ProductPageWrapper({
                       transition={{ duration: 0.5, delay: 1.1 }}
                     >
                       Нажимая кнопку, вы соглашаетесь с условиями{' '}
-                      <Link
+                      <a
                         href='/oferta-consultation-training.pdf'
+                        className='underline hover:text-gray-700'
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='text-primary hover:underline'
                       >
-                        оферты
-                      </Link>
+                        договора оферты
+                      </a>
                     </motion.p>
                   </motion.form>
                 </motion.div>
