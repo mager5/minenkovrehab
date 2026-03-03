@@ -226,6 +226,21 @@ export default function ProductClient({ product }: { product: Product }) {
     await handlePayment(4);
   };
 
+  // Функция для определения типа платежа (для фискализации)
+  const getPaymentMethod = (productId: string) => {
+    // 100% предоплата для консультаций и онлайн-тренировок
+    if (
+      ['consultation', 'express-consultation', 'online-training'].includes(
+        productId
+      )
+    ) {
+      return 'full_prepayment';
+    }
+    // Полный расчет для программ восстановления и Формулы Движения
+    // (formula-movement, personal-program - Резекция мениска, rehabilitation-protocols)
+    return 'full_payment';
+  };
+
   // Функция создания платежа через Railway API
   const handlePayment = async (level: number) => {
     try {
@@ -275,7 +290,7 @@ export default function ProductClient({ product }: { product: Product }) {
                       : product.title,
                   quantity: 1,
                   sum: product.price,
-                  payment_method: 'full_payment',
+                  payment_method: getPaymentMethod(product.id),
                   payment_object: 'service',
                   tax: 'none', // Без НДС
                 },

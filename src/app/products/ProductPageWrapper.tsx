@@ -178,6 +178,21 @@ export default function ProductPageWrapper({
     return '';
   };
 
+  // Функция для определения типа платежа (для фискализации)
+  const getPaymentMethod = (productId: string) => {
+    // 100% предоплата для консультаций и онлайн-тренировок
+    if (
+      ['consultation', 'express-consultation', 'online-training'].includes(
+        productId
+      )
+    ) {
+      return 'full_prepayment';
+    }
+    // Полный расчет для программ восстановления и Формулы Движения
+    // (formula-movement, personal-program - Резекция мениска, rehabilitation-protocols)
+    return 'full_payment';
+  };
+
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setServerMessage('');
@@ -227,7 +242,9 @@ export default function ProductPageWrapper({
                   name: product.title,
                   quantity: 1,
                   sum: product.price,
-                  payment_method: 'full_payment',
+                  payment_method: product?.id
+                    ? getPaymentMethod(product.id)
+                    : 'full_payment',
                   payment_object: 'service',
                   tax: 'none',
                 },
