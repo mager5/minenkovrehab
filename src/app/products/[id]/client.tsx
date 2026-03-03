@@ -261,8 +261,22 @@ export default function ProductClient({ product }: { product: Product }) {
             amount: product.price,
             productId: product.id,
             level,
-            email: 'customer@example.com', // Временный email, потом можно заменить на реальный, если будет форма
+            email: 'customer@example.com', // Временный email
             phone: '+79001234567', // Временный телефон
+            // Явно передаем параметры чека для корректного отображения в Robokassa
+            receipt: {
+              sno: 'usn_income', // УСН Доходы
+              items: [
+                {
+                  name: product.title + (level ? ` (Уровень ${level})` : ''),
+                  quantity: 1,
+                  sum: product.price,
+                  payment_method: 'full_payment',
+                  payment_object: 'service',
+                  tax: 'none', // Без НДС
+                },
+              ],
+            },
           }),
         }
       );

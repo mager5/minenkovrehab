@@ -219,6 +219,20 @@ export default function ProductPageWrapper({
             name: contactInfo.name,
             phone: contactInfo.phone,
             productId: product?.id,
+            // Добавляем receipt для фискализации (на будущее, если этот метод будет использоваться для оплаты)
+            receipt: {
+              sno: 'usn_income',
+              items: [
+                {
+                  name: product.title,
+                  quantity: 1,
+                  sum: product.price,
+                  payment_method: 'full_payment',
+                  payment_object: 'service',
+                  tax: 'none',
+                },
+              ],
+            },
           }),
         }
       );
