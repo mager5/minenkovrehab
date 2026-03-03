@@ -219,6 +219,27 @@ export default function ProductPageWrapper({
         }),
       });
 
+      // Обработка статического экспорта
+      if (response.status === 404 || response.status === 405) {
+        // Эмуляция успеха
+        setServerMessage(
+          'Демо-режим: Заявка "принята". В реальной версии вы бы получили письмо.'
+        );
+        // Имитируем успешный ответ
+        const mockData = { status: 'created' };
+        // Продолжаем логику как будто успех
+        if (mockData.status === 'exists') {
+          // ... (этот код не выполнится, но для структуры)
+        } else {
+          // Успешный сценарий
+          if (typeof window !== 'undefined') {
+            window.location.href = '/payment/success?mock=1';
+          }
+          return;
+        }
+        return;
+      }
+
       const data = await response.json();
 
       if (!response.ok) {

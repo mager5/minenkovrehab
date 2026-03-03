@@ -93,6 +93,17 @@ export default function PaymentSuccessPage() {
         }),
       });
 
+      // Обработка случая статического экспорта (GitHub Pages), где API недоступен
+      if (response.status === 404 || response.status === 405) {
+        console.warn(
+          'API недоступен (Static Export), эмуляция успешного ответа'
+        );
+        setEmailResultMessage(
+          'Демо-режим: Личный кабинет успешно "создан". В реальной версии вы бы получили письмо с доступами.'
+        );
+        return;
+      }
+
       const data = await response.json();
 
       const serverMessage =
@@ -112,9 +123,16 @@ export default function PaymentSuccessPage() {
       setEmailResultMessage(finalMessage);
     } catch (error) {
       console.error('Ошибка при отправке email:', error);
-      setEmailResultMessage(
-        'Произошла ошибка. Пожалуйста, попробуйте еще раз.'
-      );
+      // Если произошла ошибка парсинга JSON (например, вернулся HTML 404), считаем это демо-режимом
+      if (error instanceof SyntaxError) {
+        setEmailResultMessage(
+          'Демо-режим: Личный кабинет успешно "создан". В реальной версии вы бы получили письмо с доступами.'
+        );
+      } else {
+        setEmailResultMessage(
+          'Произошла ошибка. Пожалуйста, попробуйте еще раз.'
+        );
+      }
     } finally {
       setIsSubmittingEmail(false);
     }
