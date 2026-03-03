@@ -1,0 +1,56 @@
+name: Deploy Preview (feature/ios-26-design) to GitHub Pages subpath
+
+on:
+  push:
+    branches: ['feature/ios-26-design']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages-preview-ios-26'
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and Export static files (with basePath)
+        env:
+          NODE_ENV: production
+          GITHUB_ACTIONS: true
+          PREVIEW_BASE_PATH: /ios-26
+          IS_STATIC_EXPORT: '1'
+        run: npm run export
+
+      - name: Create .nojekyll file
+        run: |
+          mkdir -p out
+          touch out/.nojekyll
+
+      - name: Deploy to GitHub Pages subdirectory
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          publish_branch: gh-pages
+          destination_dir: ios-26
+          keep_files: true
+          force_orphan: false
+          commit_message: 'Preview deploy (feature/ios-26-design) to /ios-26 [skip ci]'
+          full_commit_message: 'Preview deploy from commit ${{ github.sha }} (feature/ios-26-design) to /ios-26 [skip ci]'
