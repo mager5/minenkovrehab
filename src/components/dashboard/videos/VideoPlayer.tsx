@@ -1,6 +1,12 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import {
+  useRef,
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import {
   Play,
   Pause,
@@ -18,309 +24,279 @@ interface VideoPlayerProps {
   type?: string;
 }
 
-export function VideoPlayer({
-  src,
-  poster,
-  type = 'video/mp4',
-}: VideoPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showControls, setShowControls] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+export interface VideoPlayerRef {
+  seekTo: (time: number) => void;
+  play: () => void;
+  pause: () => void;
+}
 
-  const [error, setError] = useState<string | null>(null);
-  const [isAccessible, setIsAccessible] = useState<boolean | null>(null);
+export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
+  ({ src, poster, type = 'video/mp4' }, ref) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [volume, setVolume] = useState(1);
+    const [isMuted, setIsMuted] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showControls, setShowControls] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    // Check if video is accessible
-    if (src) {
-      fetch(src, { method: 'HEAD' })
-        .then(res => {
-          if (res.ok) {
-            setIsAccessible(true);
-          } else {
-            setIsAccessible(false);
-            // setError(`Ошибка доступа к файлу (${res.status}). Возможно, истекла ссылка или нет прав.`);
-          }
-        })
-        .catch(() => {
-          // Network error or CORS
-          setIsAccessible(false);
-          // Don't set error here immediately, let video element handle it if it fails
-        });
-    }
-  }, [src]);
+    const [error, setError] = useState<string | null>(null);
+    const [isAccessible, setIsAccessible] = useState<boolean | null>(null);
 
-  // Handle autoplay when src changes
-  useEffect(() => {
-    const video = videoRef.current;
-    if (video && src) {
-      setIsLoading(true);
-      // Small delay to ensure video element is ready
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
+    useImperativeHandle(ref, () => ({
+      seekTo: (time: number) => {
+        if (videoRef.current) {
+          videoRef.current.currentTime = time;
+          if (!isPlaying) {
+            videoRef.current.play();
             setIsPlaying(true);
+          }
+        }
+      },
+      play: () => {
+        videoRef.current?.play();
+        setIsPlaying(true);
+      },
+      pause: () => {
+        videoRef.current?.pause();
+        setIsPlaying(false);
+      },
+    }));
+
+    useEffect(() => {
+      // Check if video is accessible
+      if (src) {
+        fetch(src, { method: 'HEAD' })
+          .then(res => {
+            if (res.ok) {
+              setIsAccessible(true);
+            } else {
+              setIsAccessible(false);
+              // setError(`Ошибка доступа к файлу (${res.status}). Возможно, истекла ссылка или нет прав.`);
+            }
           })
-          .catch(error => {
-            console.log('Autoplay prevented:', error);
-            setIsPlaying(false);
+          .catch(() => {
+            // Network error or CORS
+            setIsAccessible(false);
+            // Don't set error here immediately, let video element handle it if it fails
           });
       }
-    }
-  }, [src]);
+    }, [src]);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    useEffect(() => {
+      const video = videoRef.current;
+      if (!video) return;
 
-    const updateProgress = () => {
-      if (video.duration) {
-        setProgress((video.currentTime / video.duration) * 100);
-        setCurrentTime(video.currentTime);
+      const updateProgress = () => {
+        if (video.duration) {
+          setProgress((video.currentTime / video.duration) * 100);
+          setCurrentTime(video.currentTime);
+        }
+      };
+
+      const handleLoadedMetadata = () => {
+        setDuration(video.duration);
+        setIsLoading(false);
+      };
+
+      const handleLoadStart = () => setIsLoading(true);
+      const handleWaiting = () => setIsLoading(true);
+      const handleCanPlay = () => setIsLoading(false);
+      const handlePlaying = () => setIsLoading(false);
+
+      const handleError = (e: Event) => {
+        setIsLoading(false);
+        const videoElement = e.target as HTMLVideoElement;
+        let errorMessage = 'Ошибка воспроизведения видео.';
+
+        if (videoElement.error) {
+          switch (videoElement.error.code) {
+            case MediaError.MEDIA_ERR_ABORTED:
+              errorMessage = 'Загрузка видео прервана.';
+              break;
+            case MediaError.MEDIA_ERR_NETWORK:
+              errorMessage = 'Ошибка сети при загрузке видео.';
+              break;
+            case MediaError.MEDIA_ERR_DECODE:
+              errorMessage =
+                'Видео повреждено или формат не поддерживается браузером.';
+              break;
+            case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+              errorMessage =
+                'Формат видео не поддерживается или файл недоступен.';
+              break;
+            default:
+              errorMessage = `Неизвестная ошибка: ${videoElement.error.message}`;
+          }
+        }
+        setError(errorMessage);
+      };
+
+      video.addEventListener('timeupdate', updateProgress);
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      video.addEventListener('error', handleError);
+      video.addEventListener('loadstart', handleLoadStart);
+      video.addEventListener('waiting', handleWaiting);
+      video.addEventListener('canplay', handleCanPlay);
+      video.addEventListener('playing', handlePlaying);
+
+      // Reset error when src changes
+      setError(null);
+
+      return () => {
+        video.removeEventListener('timeupdate', updateProgress);
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        video.removeEventListener('error', handleError);
+        video.removeEventListener('loadstart', handleLoadStart);
+        video.removeEventListener('waiting', handleWaiting);
+        video.removeEventListener('canplay', handleCanPlay);
+        video.removeEventListener('playing', handlePlaying);
+      };
+    }, [src]);
+
+    const formatTime = (time: number) => {
+      const minutes = Math.floor(time / 60);
+      const seconds = Math.floor(time % 60);
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    const togglePlay = () => {
+      if (videoRef.current) {
+        if (isPlaying) {
+          videoRef.current.pause();
+        } else {
+          videoRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
       }
     };
 
-    const handleLoadedMetadata = () => {
-      setDuration(video.duration);
-      setIsLoading(false);
+    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newVolume = parseFloat(e.target.value);
+      setVolume(newVolume);
+      if (videoRef.current) {
+        videoRef.current.volume = newVolume;
+        setIsMuted(newVolume === 0);
+      }
     };
 
-    const handleLoadStart = () => setIsLoading(true);
-    const handleWaiting = () => setIsLoading(true);
-    const handleCanPlay = () => setIsLoading(false);
-    const handlePlaying = () => setIsLoading(false);
-
-    const handleError = (e: Event) => {
-      setIsLoading(false);
-      const videoElement = e.target as HTMLVideoElement;
-      let errorMessage = 'Ошибка воспроизведения видео.';
-
-      if (videoElement.error) {
-        switch (videoElement.error.code) {
-          case MediaError.MEDIA_ERR_ABORTED:
-            errorMessage = 'Загрузка видео прервана.';
-            break;
-          case MediaError.MEDIA_ERR_NETWORK:
-            errorMessage = 'Ошибка сети при загрузке видео.';
-            break;
-          case MediaError.MEDIA_ERR_DECODE:
-            errorMessage =
-              'Видео повреждено или формат не поддерживается браузером.';
-            break;
-          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-            errorMessage =
-              'Формат видео не поддерживается или файл недоступен.';
-            break;
-          default:
-            errorMessage = `Неизвестная ошибка: ${videoElement.error.message}`;
+    const toggleMute = () => {
+      if (videoRef.current) {
+        const newMuted = !isMuted;
+        videoRef.current.muted = newMuted;
+        setIsMuted(newMuted);
+        if (newMuted) {
+          setVolume(0);
+        } else {
+          setVolume(1);
+          videoRef.current.volume = 1;
         }
       }
-      setError(errorMessage);
     };
 
-    video.addEventListener('timeupdate', updateProgress);
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    video.addEventListener('error', handleError);
-    video.addEventListener('loadstart', handleLoadStart);
-    video.addEventListener('waiting', handleWaiting);
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('playing', handlePlaying);
+    const toggleFullscreen = () => {
+      if (!containerRef.current) return;
 
-    // Reset error when src changes
-    setError(null);
-
-    return () => {
-      video.removeEventListener('timeupdate', updateProgress);
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      video.removeEventListener('error', handleError);
-      video.removeEventListener('loadstart', handleLoadStart);
-      video.removeEventListener('waiting', handleWaiting);
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('playing', handlePlaying);
+      if (!document.fullscreenElement) {
+        containerRef.current.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
     };
-  }, [src]);
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
+    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const time =
+        (parseFloat(e.target.value) / 100) * (videoRef.current?.duration || 0);
+      if (videoRef.current) {
+        videoRef.current.currentTime = time;
+        setProgress(parseFloat(e.target.value));
       }
-      setIsPlaying(!isPlaying);
-    }
-  };
+    };
 
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    if (videoRef.current) {
-      videoRef.current.volume = newVolume;
-      setIsMuted(newVolume === 0);
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      const newMuted = !isMuted;
-      videoRef.current.muted = newMuted;
-      setIsMuted(newMuted);
-      if (newMuted) {
-        setVolume(0);
-      } else {
-        setVolume(1);
-        videoRef.current.volume = 1;
+    const handleMouseMove = () => {
+      setShowControls(true);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
       }
-    }
-  };
+      controlsTimeoutRef.current = setTimeout(() => {
+        if (isPlaying) setShowControls(false);
+      }, 3000);
+    };
 
-  const toggleFullscreen = () => {
-    if (!containerRef.current) return;
-
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time =
-      (parseFloat(e.target.value) / 100) * (videoRef.current?.duration || 0);
-    if (videoRef.current) {
-      videoRef.current.currentTime = time;
-      setProgress(parseFloat(e.target.value));
-    }
-  };
-
-  const handleMouseMove = () => {
-    setShowControls(true);
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current);
-    }
-    controlsTimeoutRef.current = setTimeout(() => {
-      if (isPlaying) setShowControls(false);
-    }, 3000);
-  };
-
-  return (
-    <div
-      ref={containerRef}
-      className='relative w-full bg-black rounded-lg overflow-hidden group aspect-video'
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => isPlaying && setShowControls(false)}
-    >
-      {error && (
-        <div className='absolute inset-0 flex items-center justify-center bg-gray-900/90 z-20 p-4 text-center'>
-          <div className='max-w-md'>
-            <p className='text-red-500 font-medium mb-2'>
-              Ошибка воспроизведения
-            </p>
-            <p className='text-white text-sm mb-4'>{error}</p>
-            <p className='text-gray-400 text-xs'>
-              Попробуйте обновить страницу или скачать файл.
-            </p>
-            <a
-              href={src}
-              download
-              target='_blank'
-              className='mt-4 inline-block px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded transition-colors'
-            >
-              Скачать файл
-            </a>
-          </div>
-        </div>
-      )}
-
-      {/* Loader */}
-      {isLoading && !error && (
-        <div className='absolute inset-0 flex items-center justify-center bg-black/20 z-10'>
-          <Loader2 className='h-12 w-12 text-white animate-spin' />
-        </div>
-      )}
-
-      <video
-        ref={videoRef}
-        src={src}
-        poster={poster}
-        className='w-full h-full object-contain'
-        onClick={togglePlay}
-        playsInline
-        autoPlay
-      >
-        Your browser does not support the video tag.
-      </video>
-
-      {/* Controls Overlay */}
+    return (
       <div
-        className={cn(
-          'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-4 transition-opacity duration-300',
-          showControls ? 'opacity-100' : 'opacity-0'
-        )}
+        ref={containerRef}
+        className='relative w-full bg-black rounded-lg overflow-hidden group aspect-video'
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => isPlaying && setShowControls(false)}
       >
-        {/* Progress Bar */}
-        <input
-          type='range'
-          min='0'
-          max='100'
-          value={progress}
-          onChange={handleSeek}
-          className='w-full h-1 mb-4 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:h-2 transition-all'
-        />
-
-        <div className='flex items-center justify-between text-white'>
-          <div className='flex items-center space-x-4'>
-            <button
-              onClick={togglePlay}
-              className='hover:text-indigo-400 transition-colors'
-            >
-              {isPlaying ? (
-                <Pause className='h-6 w-6' />
-              ) : (
-                <Play className='h-6 w-6' />
-              )}
-            </button>
-
-            <div className='flex items-center space-x-2 group/volume'>
-              <button
-                onClick={toggleMute}
-                className='hover:text-indigo-400 transition-colors'
+        {error && (
+          <div className='absolute inset-0 flex items-center justify-center bg-gray-900/90 z-30 p-4 text-center'>
+            <div className='max-w-md'>
+              <p className='text-red-500 font-medium mb-2'>
+                Ошибка воспроизведения
+              </p>
+              <p className='text-white text-sm mb-4'>{error}</p>
+              <p className='text-gray-400 text-xs'>
+                Попробуйте обновить страницу или скачать файл.
+              </p>
+              <a
+                href={src}
+                download
+                target='_blank'
+                className='mt-4 inline-block px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded transition-colors'
               >
-                {isMuted ? (
-                  <VolumeX className='h-5 w-5' />
-                ) : (
-                  <Volume2 className='h-5 w-5' />
-                )}
-              </button>
-              <input
-                type='range'
-                min='0'
-                max='1'
-                step='0.1'
-                value={volume}
-                onChange={handleVolumeChange}
-                className='w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500 opacity-0 group-hover/volume:opacity-100 transition-opacity'
-              />
+                Скачать файл
+              </a>
             </div>
+          </div>
+        )}
 
+        {/* Loader */}
+        {isLoading && !error && (
+          <div className='absolute inset-0 flex items-center justify-center bg-black/20 z-10'>
+            <Loader2 className='h-12 w-12 text-white animate-spin' />
+          </div>
+        )}
+
+        <video
+          ref={videoRef}
+          src={src}
+          poster={poster}
+          className='w-full h-full object-contain'
+          onClick={togglePlay}
+          playsInline
+        >
+          Your browser does not support the video tag.
+        </video>
+
+        {/* Play Button Overlay */}
+        {!isPlaying && !isLoading && !error && (
+          <div
+            className='absolute inset-0 flex items-center justify-center cursor-pointer bg-black/10 hover:bg-black/20 transition-colors z-10'
+            onClick={togglePlay}
+          >
+            <div className='w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg transform transition-transform duration-300 backdrop-blur-sm hover:scale-110'>
+              <Play className='h-8 w-8 text-indigo-600 ml-1' />
+            </div>
+          </div>
+        )}
+
+        {/* Controls Overlay */}
+        <div
+          className={cn(
+            'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-4 transition-opacity duration-300 z-20',
+            showControls ? 'opacity-100' : 'opacity-0'
+          )}
+        >
+          <div className='flex justify-between items-center mb-2'>
             <div className='text-xs font-medium font-mono text-gray-300 min-w-[80px]'>
               <span>{formatTime(currentTime)}</span>
               <span className='mx-1 text-gray-500'>/</span>
@@ -328,20 +304,69 @@ export function VideoPlayer({
             </div>
           </div>
 
-          <div className='flex items-center space-x-4'>
-            <button
-              onClick={toggleFullscreen}
-              className='hover:text-indigo-400 transition-colors'
-            >
-              {isFullscreen ? (
-                <Minimize className='h-5 w-5' />
-              ) : (
-                <Maximize className='h-5 w-5' />
-              )}
-            </button>
+          {/* Progress Bar */}
+          <input
+            type='range'
+            min='0'
+            max='100'
+            value={progress}
+            onChange={handleSeek}
+            className='w-full h-1 mb-4 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:h-2 transition-all'
+          />
+
+          <div className='flex items-center justify-between text-white'>
+            <div className='flex items-center space-x-4'>
+              <button
+                onClick={togglePlay}
+                className='hover:text-indigo-400 transition-colors'
+              >
+                {isPlaying ? (
+                  <Pause className='h-6 w-6' />
+                ) : (
+                  <Play className='h-6 w-6' />
+                )}
+              </button>
+
+              <div className='flex items-center space-x-2 group/volume'>
+                <button
+                  onClick={toggleMute}
+                  className='hover:text-indigo-400 transition-colors'
+                >
+                  {isMuted ? (
+                    <VolumeX className='h-5 w-5' />
+                  ) : (
+                    <Volume2 className='h-5 w-5' />
+                  )}
+                </button>
+                <input
+                  type='range'
+                  min='0'
+                  max='1'
+                  step='0.1'
+                  value={volume}
+                  onChange={handleVolumeChange}
+                  className='w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-indigo-500 opacity-0 group-hover/volume:opacity-100 transition-opacity'
+                />
+              </div>
+            </div>
+
+            <div className='flex items-center space-x-4'>
+              <button
+                onClick={toggleFullscreen}
+                className='hover:text-indigo-400 transition-colors'
+              >
+                {isFullscreen ? (
+                  <Minimize className='h-5 w-5' />
+                ) : (
+                  <Maximize className='h-5 w-5' />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+);
+
+VideoPlayer.displayName = 'VideoPlayer';

@@ -329,7 +329,7 @@ export function Header() {
         role='complementary'
         aria-label='Контактная информация'
       >
-        <div className='container mx-auto px-4 lg:px-8'>
+        <div className='max-w-screen-2xl mx-auto px-4 lg:px-8'>
           <div className='flex justify-between items-center'>
             <div className='flex items-center space-x-4'>
               <p className='text-sm font-medium' style={{ color: '#ffffff' }}>
@@ -420,7 +420,7 @@ export function Header() {
         className={`sticky top-0 left-0 right-0 z-50 bg-white transition-all duration-500 ease-in-out ${isScrolled ? 'shadow-lg py-3' : 'shadow-sm py-4'}`}
         role='banner'
       >
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8'>
           <div className='flex justify-between items-center'>
             {/* Логотип и название */}
             <Link

@@ -168,23 +168,36 @@ function verifySignature(receivedSignature, expectedSignature) {
  * @returns {string} JSON строка с параметрами чека
  */
 function createReceiptParameter(serviceName, price, email, phone) {
+  // Получаем настройки фискализации из переменных окружения или используем значения по умолчанию
+  const sno = process.env.ROBOKASSA_SNO || 'usn_income'; // УСН Доходы
+  const tax = process.env.ROBOKASSA_TAX || 'none'; // Без НДС
+  const paymentMethod = process.env.ROBOKASSA_PAYMENT_METHOD || 'full_payment'; // Полный расчет
+  const paymentObject = process.env.ROBOKASSA_PAYMENT_OBJECT || 'service'; // Услуга
+  const inn = process.env.ROBOKASSA_INN || '262703733425'; // ИНН ИП Миненков В.В.
+
+  if (inn === '000000000000') {
+    console.warn(
+      '⚠️ ПРЕДУПРЕЖДЕНИЕ: Используется тестовый ИНН 000000000000. Установите ROBOKASSA_INN в переменных окружения!'
+    );
+  }
+
   const receipt = {
-    sno: 'osn', // Общая система налогообложения
+    sno: sno,
     items: [
       {
         name: serviceName,
         quantity: 1,
         sum: price,
-        payment_method: 'full_prepayment', // Предоплата 100%
-        payment_object: 'service', // Услуга
-        tax: 'none', // Без НДС
+        payment_method: paymentMethod,
+        payment_object: paymentObject,
+        tax: tax,
       },
     ],
     payments: {
       electronic: price, // Электронными
     },
     vats: {
-      none: price, // Без НДС
+      none: price, // Без НДС (сумма) - нужно корректировать если tax != none
     },
     client: {
       email: email,
@@ -192,12 +205,22 @@ function createReceiptParameter(serviceName, price, email, phone) {
     },
     company: {
       email: 'info@minenkovrehab.ru',
-      sno: 'osn',
-      inn: '000000000000', // Замените на реальный ИНН
+      sno: sno,
+      inn: inn,
       payment_address: 'https://minenkovrehab.ru',
     },
     total: price,
   };
+
+  // Если ставка налога не "none", объект vats должен быть другим
+  // Для простоты, если используется НДС, нужно более сложная логика расчета
+  // Но для текущей задачи (без НДС) это подходит.
+  if (tax !== 'none') {
+    // Очищаем vats.none если налог есть
+    delete receipt.vats.none;
+    // Добавляем соответствующую ставку (примерная логика, требует уточнения если клиент перейдет на НДС)
+    receipt.vats[tax] = price;
+  }
 
   return JSON.stringify(receipt);
 }
