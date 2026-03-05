@@ -71,20 +71,10 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     useEffect(() => {
       // Check if video is accessible
       if (src) {
-        fetch(src, { method: 'HEAD' })
-          .then(res => {
-            if (res.ok) {
-              setIsAccessible(true);
-            } else {
-              setIsAccessible(false);
-              // setError(`Ошибка доступа к файлу (${res.status}). Возможно, истекла ссылка или нет прав.`);
-            }
-          })
-          .catch(() => {
-            // Network error or CORS
-            setIsAccessible(false);
-            // Don't set error here immediately, let video element handle it if it fails
-          });
+        // Пропускаем HEAD запрос, так как он вызывает ошибку "querystring must have required property 'token'"
+        // для подписанных URL Supabase, если токен передан в query params.
+        // Просто считаем, что видео доступно, и позволяем HTML5 video обработать ошибку загрузки.
+        setIsAccessible(true);
       }
     }, [src]);
 
