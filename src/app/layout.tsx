@@ -196,7 +196,6 @@ export default function RootLayout({
           </main>
           <Footer />
           <CookieBanner />
-          {/* <HeyGenWidget /> */}
         </div>
       </body>
     </html>
