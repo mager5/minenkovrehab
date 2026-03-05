@@ -13,6 +13,8 @@ const nextConfig = {
     basePath: previewBasePath,
     assetPrefix: previewBasePath,
   }),
+  // Попытка исправить предупреждение "resource preloaded but not used"
+  crossOrigin: 'anonymous',
   images: {
     unoptimized: true,
     remotePatterns: [
