@@ -270,47 +270,35 @@ function RegisterForm() {
           className='transition-all duration-300 ease-in-out'
           {...register('email')}
           value={emailValue}
+          autoComplete='email'
         />
       </div>
 
-      <div className='space-y-2'>
-        <Input
-          id='password'
-          type='password'
-          label='Пароль'
-          error={errors.password?.message || ''}
-          disabled={isLoading}
-          className='transition-all duration-300 ease-in-out'
-          {...register('password')}
-        />
-        <div
-          className={`text-xs text-gray-500 space-y-1 mt-2 transition-opacity duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}
-        >
-          <p>Требования к паролю:</p>
-          <ul className='list-disc list-inside pl-2 space-y-0.5'>
-            <li className={password.length >= 8 ? 'text-green-600' : ''}>
-              Минимум 8 символов
-            </li>
-            <li className={/[A-Z]/.test(password) ? 'text-green-600' : ''}>
-              Заглавная буква
-            </li>
-            <li className={/[0-9]/.test(password) ? 'text-green-600' : ''}>
-              Цифра
-            </li>
-          </ul>
+      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+        <div className='space-y-2'>
+          <Input
+            id='password'
+            type='password'
+            label='Пароль'
+            error={errors.password?.message || ''}
+            disabled={isLoading}
+            className='transition-all duration-300 ease-in-out'
+            {...register('password')}
+            autoComplete='new-password'
+          />
         </div>
-      </div>
-
-      <div className='space-y-2'>
-        <Input
-          id='confirmPassword'
-          type='password'
-          label='Подтвердите пароль'
-          error={errors.confirmPassword?.message || ''}
-          disabled={isLoading}
-          className='transition-all duration-300 ease-in-out'
-          {...register('confirmPassword')}
-        />
+        <div className='space-y-2'>
+          <Input
+            id='confirmPassword'
+            type='password'
+            label='Подтвердите пароль'
+            error={errors.confirmPassword?.message || ''}
+            disabled={isLoading}
+            className='transition-all duration-300 ease-in-out'
+            {...register('confirmPassword')}
+            autoComplete='new-password'
+          />
+        </div>
       </div>
 
       <motion.div
