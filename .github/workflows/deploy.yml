@@ -39,6 +39,8 @@ jobs:
           NODE_ENV: production
           GITHUB_ACTIONS: true
           IS_STATIC_EXPORT: '1'
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run export
 
       - name: List output directory
