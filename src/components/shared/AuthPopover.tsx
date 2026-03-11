@@ -125,8 +125,7 @@ export default function AuthPopover({
             )}
 
             <p className='text-sm text-gray-600 mb-6 leading-relaxed relative z-10'>
-              Войдите, чтобы получить доступ к персональным программам
-              реабилитации, отслеживать прогресс и смотреть видеокурсы.
+              Войдите, чтобы получить доступ к вашим программам и материалам.
             </p>
 
             <div className='flex flex-col gap-3 relative z-10'>

@@ -698,7 +698,7 @@ export default function ProductClient({ product }: { product: Product }) {
                       <span className='text-xs text-gray-600 leading-relaxed'>
                         Я согласен с условиями{' '}
                         <a
-                          href='/oferta.pdf'
+                          href='/offer'
                           className='text-primary hover:underline'
                           target='_blank'
                           rel='noopener noreferrer'
@@ -1149,7 +1149,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     <span className='text-xs text-gray-600 leading-relaxed'>
                       Я согласен с условиями{' '}
                       <a
-                        href='/oferta.pdf'
+                        href='/offer'
                         className='text-primary hover:underline'
                         target='_blank'
                         rel='noopener noreferrer'
@@ -1367,7 +1367,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     <span className='text-xs text-gray-600 leading-relaxed'>
                       Я согласен с условиями{' '}
                       <a
-                        href='/oferta.pdf'
+                        href='/offer'
                         className='text-primary hover:underline'
                         target='_blank'
                         rel='noopener noreferrer'
@@ -1585,7 +1585,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     <span className='text-xs text-gray-600 leading-relaxed'>
                       Я согласен с условиями{' '}
                       <a
-                        href='/oferta.pdf'
+                        href='/offer'
                         className='text-primary hover:underline'
                         target='_blank'
                         rel='noopener noreferrer'

@@ -529,7 +529,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                         <span className='text-sm text-gray-700 pt-0.5 text-left'>
                           Я согласен с условиями{' '}
                           <a
-                            href='/oferta-consultation-training.pdf'
+                            href='/offer'
                             className='text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
                             target='_blank'
                             rel='noopener noreferrer'

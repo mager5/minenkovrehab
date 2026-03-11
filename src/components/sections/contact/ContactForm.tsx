@@ -287,7 +287,7 @@ export function ContactForm() {
                 </a>{' '}
                 и согласен с условиями{' '}
                 <a
-                  href='/oferta-consultation-training.pdf'
+                  href='/offer'
                   className='text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
                   target='_blank'
                   rel='noopener noreferrer'
