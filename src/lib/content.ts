@@ -39,6 +39,15 @@ export async function getContent<T>(contentType: string): Promise<T> {
           image: '/images/products/personal-program.jpg',
         },
         {
+          id: 'plantar-fasciopathy',
+          title:
+            'Плантарный фасциит "Пяточная шпора". Восстановительная программа',
+          description:
+            'Подробный информационный материал в формате пошагового алгоритма для восстановления при плантарной фасциопатии.',
+          price: formatPrice('plantar-fasciopathy', 10000),
+          image: '/images/products/protocols.jpg',
+        },
+        {
           id: 'formula-movement',
           title: 'Программа тренировок "Формула Движения"',
           description:

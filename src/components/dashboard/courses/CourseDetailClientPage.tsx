@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { COURSES } from '@/data/courses';
 import { MeniscusStagesDetails } from '@/components/dashboard/courses/MeniscusStagesDetails';
+import { PlantarFasciopathyDetails } from '@/components/dashboard/courses/PlantarFasciopathyDetails';
 
 type Props = {
   slug: string;
@@ -58,6 +59,7 @@ export default function CourseDetailClientPage({ slug }: Props) {
   }
 
   const isMeniscusCourse = course.slug === 'meniscus-resection-rehab';
+  const isPlantarCourse = course.slug === 'plantar-fasciopathy';
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -236,6 +238,8 @@ export default function CourseDetailClientPage({ slug }: Props) {
               <MeniscusStagesDetails />
             </div>
           </div>
+        ) : isPlantarCourse ? (
+          <PlantarFasciopathyDetails />
         ) : (
           <div className='space-y-8'>
             <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
