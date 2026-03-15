@@ -57,6 +57,15 @@ export async function getContent<T>(contentType: string): Promise<T> {
           image: '/images/products/protocols.jpg',
         },
         {
+          id: 'neck-thoracic-pain',
+          title:
+            'Восстановительная программа "Шея + грудной отдел" (неспецифическая боль в верхней части спины)',
+          description:
+            'Пошаговый информационный материал по работе с шеей и грудным отделом — от мягкого снятия напряжения до постепенного укрепления и улучшения контроля движений.',
+          price: formatPrice('neck-thoracic-pain', 10000),
+          image: '/images/products/protocols.jpg',
+        },
+        {
           id: 'formula-movement',
           title: 'Программа тренировок "Формула Движения"',
           description:
