@@ -225,7 +225,7 @@ router.get('/me', async (req, res) => {
   try {
     const payload = authFromRequest(req);
     if (!payload?.sub) {
-      return res.status(401).json({ success: false, error: 'Не авторизован' });
+      return res.json({ success: true, data: { user: null } });
     }
 
     return res.json({
@@ -239,7 +239,7 @@ router.get('/me', async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(401).json({ success: false, error: 'Не авторизован' });
+    return res.json({ success: true, data: { user: null } });
   }
 });
 
