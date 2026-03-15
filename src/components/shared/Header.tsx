@@ -91,6 +91,11 @@ export function Header() {
         method: 'GET',
         credentials: 'include',
       });
+      if (response.status === 401) {
+        setUser(null);
+        return;
+      }
+
       const payload = await response.json().catch(() => null);
       if (response.ok && payload?.success && payload?.data?.user?.id) {
         setUser(payload.data.user);
@@ -225,9 +230,9 @@ export function Header() {
     setIsProfileDropdownOpen(false);
     setIsMobileProfileOpen(false);
     setIsMenuOpen(false);
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('mr-auth-changed'));
-    }
+    // if (typeof window !== 'undefined') {
+    //   window.dispatchEvent(new Event('mr-auth-changed'));
+    // }
     router.push('/login');
     router.refresh();
   };
