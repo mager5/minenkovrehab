@@ -48,6 +48,15 @@ export async function getContent<T>(contentType: string): Promise<T> {
           image: '/images/products/protocols.jpg',
         },
         {
+          id: 'low-back-pain',
+          title:
+            'Восстановительная программа "Поясница" (неспецифическая боль в нижней части спины)',
+          description:
+            'Пошаговый информационный материал по работе с поясничным отделом — от мягкого снятия напряжения до формирования "мышечного корсета".',
+          price: formatPrice('low-back-pain', 10000),
+          image: '/images/products/protocols.jpg',
+        },
+        {
           id: 'formula-movement',
           title: 'Программа тренировок "Формула Движения"',
           description:
