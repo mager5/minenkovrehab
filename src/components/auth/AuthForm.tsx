@@ -9,7 +9,7 @@ import {
   type LoginInput,
   type RegisterInput,
 } from '@/lib/validations/auth';
-import { createClient } from '@/lib/supabase/client';
+// import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/auth/Button';
 import { Input } from '@/components/ui/auth/Input';
 import {
@@ -29,11 +29,18 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
+function getRailwayApiBaseUrl() {
+  return (
+    process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+    'https://minenkovrehab-production-15cc.up.railway.app'
+  );
+}
+
 function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+  // const supabase = createClient();
 
   const {
     register,
@@ -51,13 +58,33 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
+      // const { error } = await supabase.auth.signInWithPassword({
+      //   email: data.email,
+      //   password: data.password,
+      // });
+      //
+      // if (error) {
+      //   throw error;
+      // }
 
-      if (error) {
-        throw error;
+      const response = await fetch(
+        `${getRailwayApiBaseUrl()}/api/auth/signin`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+          }),
+        }
+      );
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success) {
+        const message =
+          payload?.error || 'Не удалось войти. Пожалуйста, проверьте данные.';
+        throw new Error(message);
       }
 
       router.push('/dashboard');
@@ -160,7 +187,7 @@ function RegisterForm() {
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+  // const supabase = createClient();
 
   const {
     register,
@@ -180,31 +207,63 @@ function RegisterForm() {
     setIsLoading(true);
 
     try {
-      const { data: authData, error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            full_name: data.name,
-          },
-        },
-      });
+      // const { data: authData, error } = await supabase.auth.signUp({
+      //   email: data.email,
+      //   password: data.password,
+      //   options: {
+      //     data: {
+      //       full_name: data.name,
+      //     },
+      //   },
+      // });
+      //
+      // if (error) {
+      //   throw error;
+      // }
+      //
+      // if (authData.session) {
+      //   router.push('/dashboard');
+      //   router.refresh();
+      //   // Не сбрасываем isLoading при успехе, чтобы показать спиннер до редиректа
+      // } else {
+      //   // Если сессия не создана, значит требуется подтверждение email
+      //   setSuccess(
+      //     'На вашу почту отправлено письмо для подтверждения регистрации. Пожалуйста, проверьте email.'
+      //   );
+      //   setIsLoading(false);
+      // }
 
-      if (error) {
-        throw error;
+      const response = await fetch(
+        `${getRailwayApiBaseUrl()}/api/auth/signup`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+            name: data.name,
+          }),
+        }
+      );
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success) {
+        const message =
+          payload?.error || 'Не удалось зарегистрироваться. Попробуйте позже.';
+        throw new Error(message);
       }
 
-      if (authData.session) {
-        router.push('/dashboard');
-        router.refresh();
-        // Не сбрасываем isLoading при успехе, чтобы показать спиннер до редиректа
-      } else {
-        // Если сессия не создана, значит требуется подтверждение email
+      if (payload?.data?.requiresEmailConfirmation) {
         setSuccess(
           'На вашу почту отправлено письмо для подтверждения регистрации. Пожалуйста, проверьте email.'
         );
         setIsLoading(false);
+        return;
       }
+
+      router.push('/dashboard');
+      router.refresh();
     } catch (err: any) {
       setError(
         err.message || 'Не удалось зарегистрироваться. Попробуйте позже.'

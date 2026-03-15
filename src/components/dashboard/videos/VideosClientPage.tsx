@@ -2,32 +2,56 @@
 
 import { VideoUploader } from '@/components/dashboard/videos/VideoUploader';
 import { VideoList } from '@/components/dashboard/videos/VideoList';
-import { createClient } from '@/lib/supabase/client';
+// import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+
+function getRailwayApiBaseUrl() {
+  return (
+    process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+    'https://minenkovrehab-production-15cc.up.railway.app'
+  );
+}
 
 export default function VideosClientPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
-  const supabase = createClient();
+  // const supabase = createClient();
 
   useEffect(() => {
     const checkUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      // const {
+      //   data: { user },
+      // } = await supabase.auth.getUser();
+      //
+      // if (!user) {
+      //   router.push('/login');
+      //   return;
+      // }
+      // setUser(user);
+      // setLoading(false);
 
-      if (!user) {
-        router.push('/login');
-        return;
+      try {
+        const response = await fetch(`${getRailwayApiBaseUrl()}/api/auth/me`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok || !payload?.success || !payload?.data?.user?.id) {
+          router.push('/login');
+          return;
+        }
+
+        setUser(payload.data.user);
+      } finally {
+        setLoading(false);
       }
-      setUser(user);
-      setLoading(false);
     };
 
     checkUser();
-  }, [router, supabase]);
+  }, [router]);
 
   if (loading) {
     return (

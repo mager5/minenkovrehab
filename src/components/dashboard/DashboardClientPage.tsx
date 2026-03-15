@@ -1,6 +1,6 @@
 'use client';
 
-import { createClient } from '@/lib/supabase/client';
+// import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,43 +8,86 @@ import { Video } from 'lucide-react';
 import { COURSES } from '@/data/courses';
 import { useEffect, useState } from 'react';
 
+function getRailwayApiBaseUrl() {
+  return (
+    process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+    'https://minenkovrehab-production-15cc.up.railway.app'
+  );
+}
+
 export default function DashboardClientPage() {
   const [user, setUser] = useState<any>(null);
   const [purchases, setPurchases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const supabase = createClient();
+  // const supabase = createClient();
 
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        // const {
+        //   data: { user },
+        // } = await supabase.auth.getUser();
+        //
+        // if (!user) {
+        //   router.push('/login');
+        //   return;
+        // }
+        //
+        // setUser(user);
+        //
+        // // Получаем покупки пользователя
+        // const { data: purchasesData } = await supabase
+        //   .from('purchases')
+        //   .select(
+        //     `
+        //     *,
+        //     products (
+        //       title,
+        //       description
+        //     )
+        //   `
+        //   )
+        //   .eq('user_id', user.id)
+        //   .eq('status', 'active');
+        //
+        // setPurchases(purchasesData || []);
 
-        if (!user) {
+        const meResponse = await fetch(
+          `${getRailwayApiBaseUrl()}/api/auth/me`,
+          {
+            method: 'GET',
+            credentials: 'include',
+          }
+        );
+        const mePayload = await meResponse.json().catch(() => null);
+
+        if (
+          !meResponse.ok ||
+          !mePayload?.success ||
+          !mePayload?.data?.user?.id
+        ) {
           router.push('/login');
           return;
         }
 
-        setUser(user);
+        setUser(mePayload.data.user);
 
-        // Получаем покупки пользователя
-        const { data: purchasesData } = await supabase
-          .from('purchases')
-          .select(
-            `
-            *,
-            products (
-              title,
-              description
-            )
-          `
-          )
-          .eq('user_id', user.id)
-          .eq('status', 'active');
-
-        setPurchases(purchasesData || []);
+        const purchasesResponse = await fetch(
+          `${getRailwayApiBaseUrl()}/api/auth/purchases`,
+          {
+            method: 'GET',
+            credentials: 'include',
+          }
+        );
+        const purchasesPayload = await purchasesResponse
+          .json()
+          .catch(() => null);
+        if (purchasesResponse.ok && purchasesPayload?.success) {
+          setPurchases(purchasesPayload?.data?.purchases || []);
+        } else {
+          setPurchases([]);
+        }
       } catch (error) {
         console.error('Error loading dashboard data:', error);
       } finally {
@@ -53,7 +96,7 @@ export default function DashboardClientPage() {
     };
 
     checkUser();
-  }, [router, supabase]);
+  }, [router]);
 
   if (loading) {
     return (

@@ -20,8 +20,8 @@ import {
 } from 'lucide-react';
 import { Transition } from '@headlessui/react';
 import AuthPopover from './AuthPopover';
-import { createClient } from '@/lib/supabase/client';
-import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
+// import { createClient } from '@/lib/supabase/client';
+// import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 // Данные для выпадающего меню услуг
 const servicesDropdownItems = [
@@ -52,6 +52,19 @@ const servicesDropdownItems = [
   },
 ];
 
+type AuthUser = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+};
+
+function getRailwayApiBaseUrl() {
+  return (
+    process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+    'https://minenkovrehab-production-15cc.up.railway.app'
+  );
+}
+
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -61,11 +74,11 @@ export function Header() {
   const [isMobileAuthOpen, setIsMobileAuthOpen] = useState(false);
   const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClient();
+  // const supabase = createClient();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Блокировка touchmove для iOS и управление фокусом
@@ -142,12 +155,24 @@ export function Header() {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        setUser(user);
+        // const {
+        //   data: { user },
+        // } = await supabase.auth.getUser();
+        // setUser(user);
+
+        const response = await fetch(`${getRailwayApiBaseUrl()}/api/auth/me`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        const payload = await response.json().catch(() => null);
+        if (response.ok && payload?.success && payload?.data?.user?.id) {
+          setUser(payload.data.user);
+        } else {
+          setUser(null);
+        }
       } catch (error) {
         console.error('Error checking auth status:', error);
+        setUser(null);
       } finally {
         setIsAuthLoading(false);
       }
@@ -155,26 +180,32 @@ export function Header() {
 
     getUser();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event: AuthChangeEvent, session: Session | null) => {
-        setUser(session?.user ?? null);
-        setIsAuthLoading(false);
-        if (_event === 'SIGNED_OUT') {
-          setUser(null);
-          router.refresh();
-        }
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase, router]);
+    // const {
+    //   data: { subscription },
+    // } = supabase.auth.onAuthStateChange(
+    //   (_event: AuthChangeEvent, session: Session | null) => {
+    //     setUser(session?.user ?? null);
+    //     setIsAuthLoading(false);
+    //     if (_event === 'SIGNED_OUT') {
+    //       setUser(null);
+    //       router.refresh();
+    //     }
+    //   }
+    // );
+    //
+    // return () => {
+    //   subscription.unsubscribe();
+    // };
+  }, [router]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    // await supabase.auth.signOut();
+    await fetch(`${getRailwayApiBaseUrl()}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    }).catch(() => null);
+    setUser(null);
     setIsProfileDropdownOpen(false);
     setIsMobileProfileOpen(false);
     setIsMenuOpen(false);
@@ -585,7 +616,7 @@ export function Header() {
                           </p>
                           <p
                             className='text-sm font-medium text-gray-900 truncate'
-                            title={user.email}
+                            title={user.email ?? undefined}
                           >
                             {user.email}
                           </p>
@@ -673,7 +704,7 @@ export function Header() {
                         </p>
                         <p
                           className='text-sm font-semibold text-gray-900 truncate'
-                          title={user.email}
+                          title={user.email ?? undefined}
                         >
                           {user.email}
                         </p>
@@ -828,7 +859,7 @@ export function Header() {
                           <p className='text-xs text-gray-500'>Вы вошли как</p>
                           <p
                             className='text-sm font-medium text-gray-900 truncate'
-                            title={user.email}
+                            title={user.email ?? undefined}
                           >
                             {user.email}
                           </p>
