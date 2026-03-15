@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Fragment, useRef } from 'react';
+import { useState, useEffect, Fragment, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -81,6 +81,32 @@ export function Header() {
   // const supabase = createClient();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
+  const refreshUser = useCallback(async (silent?: boolean) => {
+    if (!silent) {
+      setIsAuthLoading(true);
+    }
+
+    try {
+      const response = await fetch(`${getRailwayApiBaseUrl()}/api/auth/me`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      const payload = await response.json().catch(() => null);
+      if (response.ok && payload?.success && payload?.data?.user?.id) {
+        setUser(payload.data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      setUser(null);
+    } finally {
+      if (!silent) {
+        setIsAuthLoading(false);
+      }
+    }
+  }, []);
+
   // Блокировка touchmove для iOS и управление фокусом
   // useEffect(() => {
   //   if (isMenuOpen) {
@@ -153,32 +179,7 @@ export function Header() {
   };
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        // const {
-        //   data: { user },
-        // } = await supabase.auth.getUser();
-        // setUser(user);
-
-        const response = await fetch(`${getRailwayApiBaseUrl()}/api/auth/me`, {
-          method: 'GET',
-          credentials: 'include',
-        });
-        const payload = await response.json().catch(() => null);
-        if (response.ok && payload?.success && payload?.data?.user?.id) {
-          setUser(payload.data.user);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Error checking auth status:', error);
-        setUser(null);
-      } finally {
-        setIsAuthLoading(false);
-      }
-    };
-
-    getUser();
+    refreshUser();
 
     // const {
     //   data: { subscription },
@@ -196,7 +197,22 @@ export function Header() {
     // return () => {
     //   subscription.unsubscribe();
     // };
-  }, [router]);
+  }, [refreshUser]);
+
+  useEffect(() => {
+    refreshUser(true);
+  }, [pathname, refreshUser]);
+
+  useEffect(() => {
+    const handleAuthChanged = () => {
+      refreshUser(true);
+    };
+
+    window.addEventListener('mr-auth-changed', handleAuthChanged);
+    return () => {
+      window.removeEventListener('mr-auth-changed', handleAuthChanged);
+    };
+  }, [refreshUser]);
 
   const handleLogout = async () => {
     // await supabase.auth.signOut();

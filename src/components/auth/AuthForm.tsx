@@ -87,6 +87,10 @@ function LoginForm() {
         throw new Error(message);
       }
 
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('mr-auth-changed'));
+      }
+
       router.push('/dashboard');
       router.refresh();
       // Не сбрасываем isLoading при успехе, чтобы показать спиннер до редиректа
@@ -262,6 +266,10 @@ function RegisterForm() {
         );
         setIsLoading(false);
         return;
+      }
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('mr-auth-changed'));
       }
 
       router.push('/dashboard');
