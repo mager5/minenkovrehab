@@ -136,6 +136,7 @@ function LoginForm() {
           className='transition-all duration-300 ease-in-out'
           {...register('email')}
           value={emailValue}
+          autoComplete='email'
         />
       </div>
       <div className='space-y-2'>
@@ -160,6 +161,7 @@ function LoginForm() {
           disabled={isLoading}
           className='transition-all duration-300 ease-in-out'
           {...register('password')}
+          autoComplete='current-password'
         />
       </div>
       <motion.div
