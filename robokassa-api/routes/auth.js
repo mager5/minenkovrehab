@@ -6,14 +6,29 @@ const router = express.Router();
 
 const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || 'mr_auth';
 
-function getCookieOptions() {
+function getCookieOptions(req) {
   const isProd = process.env.NODE_ENV === 'production';
   const maxAgeMs = 1000 * 60 * 60 * 24 * 30;
+  const origin =
+    req && req.headers && typeof req.headers.origin === 'string'
+      ? req.headers.origin
+      : '';
+  const isLocalOrigin =
+    origin.startsWith('http://localhost:') ||
+    origin.startsWith('http://127.0.0.1:');
+  const forwardedProto =
+    req && req.headers && typeof req.headers['x-forwarded-proto'] === 'string'
+      ? req.headers['x-forwarded-proto']
+      : '';
+  const isHttps = Boolean(req && req.secure) || forwardedProto === 'https';
+
+  const sameSite = isLocalOrigin && isHttps ? 'none' : 'lax';
+  const secure = sameSite === 'none' ? true : isProd;
 
   return {
     httpOnly: true,
-    secure: isProd,
-    sameSite: 'lax',
+    secure,
+    sameSite,
     path: '/',
     maxAge: maxAgeMs,
     domain: process.env.COOKIE_DOMAIN || undefined,
@@ -107,8 +122,7 @@ router.post('/signin', async (req, res) => {
       },
       60 * 60 * 24 * 30
     );
-
-    res.cookie(AUTH_COOKIE_NAME, jwt, getCookieOptions());
+    res.cookie(AUTH_COOKIE_NAME, jwt, getCookieOptions(req));
     return res.json({
       success: true,
       data: {
@@ -175,7 +189,7 @@ router.post('/signup', async (req, res) => {
         60 * 60 * 24 * 30
       );
 
-      res.cookie(AUTH_COOKIE_NAME, jwt, getCookieOptions());
+      res.cookie(AUTH_COOKIE_NAME, jwt, getCookieOptions(req));
       return res.json({
         success: true,
         data: {
@@ -209,7 +223,7 @@ router.post('/signup', async (req, res) => {
 router.post('/logout', async (req, res) => {
   try {
     res.clearCookie(AUTH_COOKIE_NAME, {
-      ...getCookieOptions(),
+      ...getCookieOptions(req),
       maxAge: 0,
     });
     return res.json({ success: true });
