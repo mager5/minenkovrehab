@@ -14,6 +14,13 @@ type Props = {
 };
 
 function getRailwayApiBaseUrl() {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return '';
+    }
+  }
+
   return (
     process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
     'https://minenkovrehab-production-15cc.up.railway.app'

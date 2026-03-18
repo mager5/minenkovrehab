@@ -103,8 +103,8 @@ export async function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https://images.unsplash.com https://*.unsplash.com https://*.googleusercontent.com https://*.cloudinary.com https://*.supabase.co",
     "media-src 'self' https://*.supabase.co",
-    "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://api.telegram.org https://vercel.live https://api.heygen.com https://*.supabase.co",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "connect-src 'self' https://api.telegram.org https://vercel.live https://api.heygen.com https://*.supabase.co https://api.minenkovrehab.ru https://*.railway.app https://*.up.railway.app",
     "frame-src 'none'",
     "object-src 'none'",
     "base-uri 'self'",
@@ -121,6 +121,13 @@ export async function middleware(request: NextRequest) {
   // Удаление заголовков, раскрывающих информацию о сервере
   response.headers.delete('Server');
   response.headers.delete('X-Powered-By');
+
+  const isLocalhost =
+    request.nextUrl.hostname === 'localhost' ||
+    request.nextUrl.hostname === '127.0.0.1';
+  if (isLocalhost) {
+    return response;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

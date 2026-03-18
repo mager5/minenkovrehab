@@ -30,6 +30,13 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function getRailwayApiBaseUrl() {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return '';
+    }
+  }
+
   return (
     process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
     'https://minenkovrehab-production-15cc.up.railway.app'
@@ -139,7 +146,7 @@ function LoginForm() {
           disabled={isLoading}
           className='transition-all duration-300 ease-in-out'
           {...register('email')}
-          value={emailValue}
+          value={emailValue ?? ''}
           autoComplete='email'
         />
       </div>
@@ -338,7 +345,7 @@ function RegisterForm() {
           disabled={isLoading}
           className='transition-all duration-300 ease-in-out'
           {...register('email')}
-          value={emailValue}
+          value={emailValue ?? ''}
           autoComplete='email'
         />
       </div>
