@@ -160,6 +160,15 @@ const HeyGenWidget: React.FC = () => {
             width: 50px;
             height: 50px;
           }
+
+          .widget-description {
+            font-size: 16px;
+            line-height: 1.5;
+          }
+
+          .widget-cta {
+            font-size: 16px;
+          }
         }
       `}</style>
 

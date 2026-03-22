@@ -2,6 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --fs-xs: 12px;
+  --lh-xs: 16px;
+  --fs-sm: 14px;
+  --lh-sm: 20px;
+  --fs-base: 16px;
+  --lh-base: 24px;
+  --fs-lg: 18px;
+  --lh-lg: 28px;
+  --fs-xl: 20px;
+  --lh-xl: 28px;
+  --fs-2xl: 24px;
+  --lh-2xl: 32px;
+  --fs-3xl: 30px;
+  --lh-3xl: 36px;
+  --fs-4xl: 36px;
+  --lh-4xl: 40px;
+  --fs-5xl: 48px;
+  --lh-5xl: 56px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --fs-xs: 16px;
+    --lh-xs: 24px;
+    --fs-sm: 16px;
+    --lh-sm: 24px;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: 16px;
+}
+
+body {
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
+  text-rendering: optimizeLegibility;
+}
+
 /* Предотвращение горизонтального скролла на мобильных устройствах */
 html,
 body {
