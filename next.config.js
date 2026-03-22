@@ -51,6 +51,14 @@ const nextConfig = {
   // CSP заголовки для поддержки HeyGen StreamingAvatar SDK
   // Отключаем для статического экспорта
   ...(!isStaticExport && {
+    async rewrites() {
+      return [
+        {
+          source: '/api/auth/:path*',
+          destination: 'https://api.minenkovrehab.ru/api/auth/:path*',
+        },
+      ];
+    },
     async headers() {
       return [
         {

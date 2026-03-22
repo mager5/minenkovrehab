@@ -99,11 +99,6 @@ export function CoursesList({ courses }: Props) {
                   priority={index < 2}
                 />
                 <div className='absolute inset-0 bg-gradient-to-t from-black/40 to-transparent' />
-                <div className='absolute bottom-3 left-3 right-3'>
-                  <p className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/90 text-gray-800 shadow'>
-                    Связанных услуг: {course.services.length}
-                  </p>
-                </div>
               </div>
               <div className='flex-1 px-4 py-4 sm:px-5 sm:py-5 flex flex-col'>
                 <h3 className='text-lg font-semibold text-gray-900 mb-2'>
@@ -113,21 +108,6 @@ export function CoursesList({ courses }: Props) {
                   {course.shortDescription}
                 </p>
                 <div className='mt-auto flex items-center justify-between pt-2 border-t border-gray-100'>
-                  <div className='flex -space-x-2'>
-                    {course.services.slice(0, 3).map(service => (
-                      <span
-                        key={service.id}
-                        className='inline-flex items-center justify-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-[10px] font-medium text-indigo-700'
-                      >
-                        {service.title}
-                      </span>
-                    ))}
-                    {course.services.length > 3 && (
-                      <span className='inline-flex items-center justify-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[10px] font-medium text-gray-600'>
-                        +{course.services.length - 3}
-                      </span>
-                    )}
-                  </div>
                   <span className='text-sm font-medium text-indigo-600 group-hover:text-indigo-700'>
                     Открыть курс
                   </span>

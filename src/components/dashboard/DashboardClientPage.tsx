@@ -184,11 +184,6 @@ export default function DashboardClientPage() {
                       className='object-cover'
                     />
                     <div className='absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity' />
-                    <div className='absolute bottom-3 left-4 right-4'>
-                      <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/90 text-gray-800'>
-                        Связанных услуг: {course.services.length}
-                      </span>
-                    </div>
                   </div>
                   <div className='px-4 py-4 sm:px-5 sm:py-5'>
                     <h3 className='text-lg font-medium text-gray-900 mb-1'>
