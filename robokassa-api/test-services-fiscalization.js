@@ -118,10 +118,10 @@ async function runTests() {
   // Тестируем онлайн-консультацию
   await testService(
     {
-      amount: 3000,
+      amount: 7000,
       email: 'test@example.com',
       phone: '+79001234567',
-      productId: 'online-consultation',
+      productId: 'consultation',
     },
     'Онлайн-консультация',
     'Онлайн-консультация'

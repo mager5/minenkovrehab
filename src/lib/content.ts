@@ -27,7 +27,7 @@ export async function getContent<T>(contentType: string): Promise<T> {
           title: 'Онлайн-консультация',
           description:
             'Индивидуальный разбор вашей ситуации с подбором эффективных решений',
-          price: formatPrice('consultation', 5000),
+          price: formatPrice('consultation', 7000),
           image: '/images/products/consultation.jpg',
         },
         {
@@ -93,7 +93,7 @@ export async function getContent<T>(contentType: string): Promise<T> {
           title: 'Экспресс онлайн-консультация',
           description:
             'Быстрая консультация в формате видеозвонка для решения конкретных вопросов. Продолжительность — 20 минут. Идеально подходит для получения рекомендаций по упражнениям, разбора техники выполнения или консультации по текущему состоянию.',
-          price: formatPrice('express-consultation', 3000),
+          price: formatPrice('express-consultation', 4000),
           image: '/images/products/consultation.jpg',
         },
         // {

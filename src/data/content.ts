@@ -277,7 +277,7 @@ export const productsContent: ProductContentType = {
       title: 'Консультация',
       description:
         'Индивидуальный разбор вашей ситуации с подбором эффективных решений',
-      price: '5 000 ₽ / 60 МИН.',
+      price: formatPrice('consultation', 7000),
       image: '/images/services/consultation.jpg',
     },
     {
@@ -301,7 +301,7 @@ export const productsContent: ProductContentType = {
       title: 'Экспресс онлайн-консультация',
       description:
         'Быстрая профессиональная консультация для решения ваших вопросов. Разбор истории состояния, ответы на вопросы, определение целей и выбор вектора действий.',
-      price: '3 000 ₽',
+      price: formatPrice('express-consultation', 4000),
       image: '/images/services/consultation.jpg',
     },
   ],
