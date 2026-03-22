@@ -9,6 +9,11 @@ import {
 
 type StageId = 1 | 2 | 3 | 4 | 5;
 
+type Props = {
+  activeStageId?: StageId;
+  onActiveStageIdChange?: (stageId: StageId) => void;
+};
+
 type Stage = {
   id: StageId;
   title: string;
@@ -465,8 +470,21 @@ const STAGES: Stage[] = [
   },
 ];
 
-export function MeniscusStagesDetails() {
-  const [activeStageId, setActiveStageId] = useState<StageId>(1);
+export function MeniscusStagesDetails({
+  activeStageId: controlledActiveStageId,
+  onActiveStageIdChange,
+}: Props) {
+  const [uncontrolledActiveStageId, setUncontrolledActiveStageId] =
+    useState<StageId>(1);
+  const activeStageId = controlledActiveStageId ?? uncontrolledActiveStageId;
+  const shouldScrollRef = useRef(false);
+  const setActiveStageId = (nextId: StageId) => {
+    shouldScrollRef.current = true;
+    if (controlledActiveStageId === undefined) {
+      setUncontrolledActiveStageId(nextId);
+    }
+    onActiveStageIdChange?.(nextId);
+  };
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const videoPlayerRef = useRef<VideoPlayerRef>(null);
   const topRef = useRef<HTMLElement>(null);
@@ -476,6 +494,10 @@ export function MeniscusStagesDetails() {
   const activeStage = STAGES.find(stage => stage.id === activeStageId);
 
   useEffect(() => {
+    if (!shouldScrollRef.current) {
+      return;
+    }
+    shouldScrollRef.current = false;
     if (topRef.current) {
       topRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -535,7 +557,7 @@ export function MeniscusStagesDetails() {
           <h2 className='text-2xl font-semibold text-gray-900'>
             Этапы реабилитации
           </h2>
-          <p className='mt-1 text-sm text-gray-600 max-w-3xl'>
+          <p className='mt-1 text-base text-gray-600 max-w-3xl'>
             Выберите этап, чтобы увидеть его цели, ограничения, рекомендации по
             активности, упражнения и критерии перехода к следующему этапу.
           </p>
@@ -561,15 +583,25 @@ export function MeniscusStagesDetails() {
           </button>
         ))}
       </div>
+      {activeStage && (
+        <div className='space-y-1'>
+          <h2 className='text-2xl font-semibold text-gray-900'>
+            {activeStage.title}
+          </h2>
+          <p className='text-base text-gray-600'>
+            Период: {activeStage.period}
+          </p>
+        </div>
+      )}
       {/* Удалён верхний навигационный блок, оставлен только нижний */}
 
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-        <div className='lg:col-span-2 space-y-6'>
+      <div className='grid grid-cols-1 gap-6'>
+        <div className='space-y-6'>
           <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
             <h3 className='text-base font-semibold text-gray-900 mb-3'>
               Цели и задачи
             </h3>
-            <ul className='space-y-2 text-sm text-gray-700'>
+            <ul className='space-y-2 text-base text-gray-700'>
               {activeStage?.goals.map(goal => (
                 <li key={goal} className='flex gap-2'>
                   {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-indigo-500' /> */}
@@ -596,7 +628,7 @@ export function MeniscusStagesDetails() {
                     >
                       {block.title}
                     </p>
-                    <ul className='list-none space-y-1.5 text-sm text-gray-700'>
+                    <ul className='list-none space-y-1.5 text-base text-gray-700'>
                       {block.items.map(item => {
                         const isPolice = block.title === 'Протокол POLICE';
                         const [strongPart, restPart] = isPolice
@@ -633,7 +665,7 @@ export function MeniscusStagesDetails() {
               <h3 className='text-base font-bold text-rose-900 mb-2'>
                 Запрещено
               </h3>
-              <p className='text-sm text-rose-800'>{activeStage.forbidden}</p>
+              <p className='text-base text-rose-800'>{activeStage.forbidden}</p>
             </div>
           )}
 
@@ -665,7 +697,7 @@ export function MeniscusStagesDetails() {
                   >
                     {block.title}
                   </p>
-                  <ul className='list-none space-y-1.5 text-sm text-gray-700'>
+                  <ul className='list-none space-y-1.5 text-base text-gray-700'>
                     {block.items.map(item => (
                       <li key={item} className='flex gap-2'>
                         {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
@@ -685,7 +717,7 @@ export function MeniscusStagesDetails() {
               </h3>
               <div>
                 <p className='text-base font-bold text-gray-900 mb-1'>Ходьба</p>
-                <ul className='list-none space-y-1.5 text-sm text-gray-700'>
+                <ul className='list-none space-y-1.5 text-base text-gray-700'>
                   <li className='flex gap-2'>
                     {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
                     <span>
@@ -705,7 +737,7 @@ export function MeniscusStagesDetails() {
                     </span>
                   </li>
                 </ul>
-                <p className='mt-2 text-sm text-gray-700'>
+                <p className='mt-2 text-base text-gray-700'>
                   На данном этапе ходьбу используем для профилактики
                   тромбообразования (круг по комнате каждые 1–2 часа) и для
                   реализации минимальных бытовых потребностей, связанных с
@@ -722,7 +754,7 @@ export function MeniscusStagesDetails() {
                 <p className='text-base font-bold text-gray-900 mb-1'>
                   Положение ноги
                 </p>
-                <ul className='list-none space-y-1.5 text-sm text-gray-700'>
+                <ul className='list-none space-y-1.5 text-base text-gray-700'>
                   <li className='flex gap-2'>
                     {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
                     <span>
@@ -749,7 +781,7 @@ export function MeniscusStagesDetails() {
                 <p className='text-base font-bold text-gray-900 mb-1'>
                   Компрессионное бельё и профилактика тромбообразования
                 </p>
-                <ul className='list-none space-y-1.5 text-sm text-gray-700'>
+                <ul className='list-none space-y-1.5 text-base text-gray-700'>
                   <li className='flex gap-2'>
                     {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
                     <span>
@@ -817,7 +849,7 @@ export function MeniscusStagesDetails() {
                 <p className='text-base font-bold text-gray-900 mb-1'>
                   Уход за швами
                 </p>
-                <ul className='list-none space-y-1.5 text-sm text-gray-700'>
+                <ul className='list-none space-y-1.5 text-base text-gray-700'>
                   <li className='flex gap-2'>
                     {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
                     <span>
@@ -857,7 +889,7 @@ export function MeniscusStagesDetails() {
                 <p className='text-base font-bold text-gray-900 mb-1'>
                   Охлаждение
                 </p>
-                <ul className='space-y-1.5 text-sm text-gray-700'>
+                <ul className='space-y-1.5 text-base text-gray-700'>
                   <li className='flex gap-2'>
                     {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
                     <span>
@@ -891,17 +923,17 @@ export function MeniscusStagesDetails() {
               {activeStage.id === 1 ? (
                 <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6 space-y-4'>
                   <div>
-                    <h3 className='text-base font-semibold text-gray-900'>
+                    <h3 className='text-2xl font-semibold text-gray-900'>
                       УПРАЖНЕНИЯ ЭТАП 1
                     </h3>
-                    <p className='mt-1 text-xs text-gray-500'>
+                    <p className='mt-1 text-base text-gray-500'>
                       выполняются 2 раза в день, ежедневно (возможна коррекция в
                       зависимости от ситуации)
                     </p>
                   </div>
 
                   <div>
-                    <ul className='list-none space-y-1.5 text-sm text-gray-700'>
+                    <ul className='list-none space-y-1.5 text-base text-gray-700'>
                       <li className='flex gap-2'>
                         <span>Мобилизация надколенника</span>
                       </li>
@@ -947,7 +979,7 @@ export function MeniscusStagesDetails() {
                     <p className='text-base font-bold inline-block rounded bg-yellow-200 px-2 py-0.5 text-gray-900 mb-2'>
                       Рекомендации
                     </p>
-                    <ul className='list-none space-y-1.5 text-sm text-gray-700'>
+                    <ul className='list-none space-y-1.5 text-base text-gray-700'>
                       <li className='flex gap-2'>
                         <span>
                           Основной приоритет — пассивное (по возможности
@@ -1025,46 +1057,17 @@ export function MeniscusStagesDetails() {
                       </li>
                     </ul>
                   </div>
-
-                  <div>
-                    <p className='text-sm font-medium text-gray-900 mb-1'>
-                      Критерии перехода на 2 этап реабилитации
-                    </p>
-                    <ul className='list-none space-y-1.5 text-sm text-gray-700'>
-                      <li className='flex gap-2'>
-                        <span>Уменьшение отёка (контролируемый отёк)</span>
-                      </li>
-                      <li className='flex gap-2'>
-                        <span>
-                          Отсутствие боли при выполнении упражнений 1 этапа
-                        </span>
-                      </li>
-                      <li className='flex gap-2'>
-                        <span>
-                          Способность устоять на одной ноге (10–15 секунд)
-                        </span>
-                      </li>
-                      <li className='flex gap-2'>
-                        <span>
-                          Полное пассивное разгибание коленного сустава
-                        </span>
-                      </li>
-                      <li className='flex gap-2'>
-                        <span>Сгибание коленного сустава 90+ градусов</span>
-                      </li>
-                    </ul>
-                  </div>
                 </div>
               ) : activeStage.id === 2 ? (
                 <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
-                  <h3 className='text-base font-semibold text-gray-900'>
+                  <h3 className='text-2xl font-semibold text-gray-900'>
                     УПРАЖНЕНИЯ ЭТАП 2
                   </h3>
-                  <p className='mt-1 text-xs text-gray-500 mb-3'>
+                  <p className='mt-1 text-base text-gray-500 mb-3'>
                     (выполняются 2 раза в день, 5-6 раз в неделю /возможна
                     коррекция в зависимости от ситуации)
                   </p>
-                  <ul className='list-none space-y-2 text-sm text-gray-700'>
+                  <ul className='list-none space-y-2 text-base text-gray-700'>
                     {activeStage.exercises.map(ex => (
                       <li key={ex} className='flex gap-2'>
                         {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500' /> */}
@@ -1075,14 +1078,14 @@ export function MeniscusStagesDetails() {
                 </div>
               ) : activeStage.id === 3 ? (
                 <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
-                  <h3 className='text-base font-semibold text-gray-900'>
+                  <h3 className='text-2xl font-semibold text-gray-900'>
                     УПРАЖНЕНИЯ ЭТАП 3
                   </h3>
-                  <p className='mt-1 text-xs text-gray-500 mb-3'>
+                  <p className='mt-1 text-base text-gray-500 mb-3'>
                     (выполняются 1-2 раза в день, 3-5 раз в неделю /возможна
                     коррекция в зависимости от ситуации)
                   </p>
-                  <ul className='list-none space-y-2 text-sm text-gray-700'>
+                  <ul className='list-none space-y-2 text-base text-gray-700'>
                     {activeStage.exercises.map(ex => (
                       <li key={ex} className='flex gap-2'>
                         {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500' /> */}
@@ -1093,14 +1096,14 @@ export function MeniscusStagesDetails() {
                 </div>
               ) : activeStage.id === 4 ? (
                 <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
-                  <h3 className='text-base font-semibold text-gray-900'>
+                  <h3 className='text-2xl font-semibold text-gray-900'>
                     УПРАЖНЕНИЯ ЭТАП 4
                   </h3>
-                  <p className='mt-1 text-xs text-gray-500 mb-3'>
+                  <p className='mt-1 text-base text-gray-500 mb-3'>
                     (выполняются 1 раза в день, 3-4 раза в неделю /возможна
                     коррекция в зависимости от ситуации)
                   </p>
-                  <ul className='list-none space-y-2 text-sm text-gray-700'>
+                  <ul className='list-none space-y-2 text-base text-gray-700'>
                     {activeStage.exercises.map(ex => (
                       <li key={ex} className='flex gap-2'>
                         {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500' /> */}
@@ -1111,14 +1114,14 @@ export function MeniscusStagesDetails() {
                 </div>
               ) : activeStage.id === 5 ? (
                 <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
-                  <h3 className='text-base font-semibold text-gray-900'>
+                  <h3 className='text-2xl font-semibold text-gray-900'>
                     УПРАЖНЕНИЯ ЭТАП 5
                   </h3>
-                  <p className='mt-1 text-xs text-gray-500 mb-3'>
+                  <p className='mt-1 text-base text-gray-500 mb-3'>
                     (выполняются 1 раза в день, 3-5 раз в неделю /возможна
                     коррекция в зависимости от ситуации)
                   </p>
-                  <ul className='list-none space-y-2 text-sm text-gray-700'>
+                  <ul className='list-none space-y-2 text-base text-gray-700'>
                     {activeStage.exercises.map(ex => (
                       <li key={ex} className='flex gap-2'>
                         {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500' /> */}
@@ -1132,7 +1135,7 @@ export function MeniscusStagesDetails() {
                   <h3 className='text-base font-semibold text-gray-900 mb-3'>
                     Упражнения
                   </h3>
-                  <ul className='list-none space-y-2 text-sm text-gray-700'>
+                  <ul className='list-none space-y-2 text-base text-gray-700'>
                     {activeStage.exercises.map(ex => (
                       <li key={ex} className='flex gap-2'>
                         {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500' /> */}
@@ -1140,13 +1143,30 @@ export function MeniscusStagesDetails() {
                       </li>
                     ))}
                   </ul>
-                  <p className='mt-3 text-xs text-gray-500'>
+                  <p className='mt-3 text-base text-gray-500'>
                     Частота и объём выполнения корректируются с учётом
                     самочувствия, реакции сустава и рекомендаций лечащего врача.
                   </p>
                 </div>
               )}
             </>
+          )}
+
+          {activeStage?.criteria && (
+            <div className='bg-indigo-50 border border-indigo-100 rounded-lg px-5 py-5 sm:px-6 sm:py-6'>
+              <h3 className='text-base font-bold text-indigo-900 mb-2'>
+                {activeStage.id === 5
+                  ? 'Критерии возвращения в спорт'
+                  : 'Критерии перехода'}
+              </h3>
+              <ul className='list-none space-y-1.5 text-base text-indigo-900'>
+                {activeStage.criteria.map(criterion => (
+                  <li key={criterion} className='flex gap-2'>
+                    <span>{criterion}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
 
           {videoUrl && (
@@ -1161,7 +1181,7 @@ export function MeniscusStagesDetails() {
               </div>
               {activeStage?.videoDescription && (
                 <div className='px-5 py-5 sm:px-6 sm:py-6 border-t border-gray-100'>
-                  <div className='space-y-4 text-sm text-gray-700'>
+                  <div className='space-y-4 text-base text-gray-700'>
                     {activeStage.videoDescription.text.map((paragraph, idx) => (
                       <p key={idx}>{paragraph}</p>
                     ))}
@@ -1179,10 +1199,10 @@ export function MeniscusStagesDetails() {
                             onClick={() => handleTimecodeClick(item.time)}
                             className='flex items-center text-left group hover:bg-gray-50 p-2 rounded-md transition-colors -mx-2'
                           >
-                            <span className='text-sm text-indigo-600 w-12 shrink-0 group-hover:underline'>
+                            <span className='text-base text-indigo-600 w-12 shrink-0 group-hover:underline'>
                               {item.time}
                             </span>
-                            <span className='text-sm text-gray-700 ml-2'>
+                            <span className='text-base text-gray-700 ml-2'>
                               {item.label}
                             </span>
                           </button>
@@ -1192,37 +1212,6 @@ export function MeniscusStagesDetails() {
                   </div>
                 </div>
               )}
-            </div>
-          )}
-        </div>
-
-        <div className='space-y-6'>
-          {/*
-          {activeStage?.forbidden && (
-            <div className='bg-rose-50 border border-rose-100 rounded-lg px-5 py-5 sm:px-6 sm:py-6'>
-              <h3 className='text-base font-semibold text-rose-900 mb-2'>
-                Запрещено
-              </h3>
-              <p className='text-sm text-rose-800'>{activeStage.forbidden}</p>
-            </div>
-          )}
-          */}
-
-          {activeStage?.criteria && (
-            <div className='bg-indigo-50 border border-indigo-100 rounded-lg px-5 py-5 sm:px-6 sm:py-6'>
-              <h3 className='text-base font-bold text-indigo-900 mb-2'>
-                {activeStage.id === 5
-                  ? 'Критерии возвращения в спорт'
-                  : 'Критерии перехода'}
-              </h3>
-              <ul className='list-none space-y-1.5 text-sm text-indigo-900'>
-                {activeStage.criteria.map(criterion => (
-                  <li key={criterion} className='flex gap-2'>
-                    {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-indigo-600' /> */}
-                    <span>{criterion}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           )}
         </div>
