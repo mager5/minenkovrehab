@@ -35,6 +35,8 @@ export default function CourseDetailClientPage({ slug }: Props) {
     progression: false,
     specificity: false,
     recovery: false,
+    individuality: false,
+    trialLoad: false,
   });
   const [meniscusStageId, setMeniscusStageId] = useState<1 | 2 | 3 | 4 | 5>(1);
   const router = useRouter();
@@ -400,7 +402,7 @@ export default function CourseDetailClientPage({ slug }: Props) {
 
                 <button
                   type='button'
-                  className='w-full bg-transparent py-2 flex items-center justify-between text-left group mb-2'
+                  className='w-full bg-transparent py-2 flex items-center justify-between text-left group'
                   onClick={() =>
                     setOpenPrinciples(prev => ({
                       ...prev,
@@ -427,6 +429,52 @@ export default function CourseDetailClientPage({ slug }: Props) {
                     частые нагрузки без должного восстановления повышают риск
                     перегрузки (рецидив, травмы, ухудшение результатов)
                   </p>
+                )}
+
+                <button
+                  type='button'
+                  className='w-full bg-transparent py-2 flex items-center justify-between text-left group'
+                  onClick={() =>
+                    setOpenPrinciples(prev => ({
+                      ...prev,
+                      individuality: !prev.individuality,
+                    }))
+                  }
+                  aria-expanded={openPrinciples.individuality}
+                >
+                  <span className='text-base font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors'>
+                    4. Принцип индивидуальности
+                  </span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-gray-500 transition-transform ${openPrinciples.individuality ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {openPrinciples.individuality && (
+                  <p className='text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line mb-5'>{`Каждый человек обладает уникальными структурно-функциональными особенностями и специфической реакцией на физическую нагрузку, что определяет необходимость персонализированного подхода при построении тренировочной или восстановительной программы. Однотипные упражнения, объёмы и интенсивность нагрузки не могут одинаково эффективно воздействовать на всех, поэтому каждый элемент программы подбирается с учётом текущего функционального состояния, способности к адаптации, уровня подготовки, скорости восстановления и переносимости нагрузок. Применение этого принципа предполагает гибкость: параметры выполнения упражнений, их объём, темп, амплитуда движения и сложность корректируются в соответствии с индивидуальными особенностями и реакцией организма. Если выполнение упражнения сопровождается дискомфортом, болевыми ощущениями или другими функциональными ограничениями, нагрузка изменяется до тех пор, пока выполнение не станет безопасным и функционально допустимым; при невозможности устранить негативные проявления рассматривается замена упражнения или отказ от него. Такой подход обеспечивает адаптацию тренировочного процесса к конкретному человеку, позволяет постепенно увеличивать нагрузку и способствует развитию силы, выносливости, координации и других функциональных характеристик без излишнего риска перегрузки.`}</p>
+                )}
+
+                <button
+                  type='button'
+                  className='w-full bg-transparent py-2 flex items-center justify-between text-left group mb-2'
+                  onClick={() =>
+                    setOpenPrinciples(prev => ({
+                      ...prev,
+                      trialLoad: !prev.trialLoad,
+                    }))
+                  }
+                  aria-expanded={openPrinciples.trialLoad}
+                >
+                  <span className='text-base font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors'>
+                    5. Принцип пробного освоения нагрузки
+                  </span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-gray-500 transition-transform ${openPrinciples.trialLoad ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {openPrinciples.trialLoad && (
+                  <p className='text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line mb-5'>{`Принцип пробного освоения нагрузки применяется как к новым упражнениям, так и к упражнениям, которые человек выполняет после длительного перерыва, травмы, операции или значительных изменений физической подготовки. Суть этого принципа в том, что любую такую нагрузку сначала выполняют в облегчённом варианте, уменьшая объём и интенсивность на 30–50% относительно общей рекомендуемой нагрузки. Это позволяет безопасно проверить, как организм и ткани реагируют на новую или изменённую активность, выявить возможные ограничения и избежать перегрузки.
+Реакцию наблюдают во время выполнения упражнения, сразу после тренировки и в течение последующих суток, включая ночной период. На основе этих наблюдений решают, как продолжать нагрузку: при нормальной реакции её постепенно увеличивают до целевых параметров, при появлении дискомфорта, боли или ограничений — корректируют объём, интенсивность или технику выполнения, либо заменяют упражнение.
+Принцип пробной дозировки включает возможность постепенного освоения нагрузки в разных формах. В его рамках можно начинать с меньшего числа тренировочных сессий в течение дня или недели, следить за реакцией организма на получаемый объём и постепенно увеличивать количество подходов или сессий до рабочих значений. Такой подход помогает организму постепенно привыкать к нагрузке, снижает риск перегрузки и создаёт безопасную основу для последовательного и контролируемого прогрессирования тренировочного процесса.`}</p>
                 )}
 
                 <p className='text-sm sm:text-base text-gray-700 leading-relaxed mb-3'>
