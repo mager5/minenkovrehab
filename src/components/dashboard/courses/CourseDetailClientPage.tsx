@@ -150,6 +150,84 @@ export default function CourseDetailClientPage({ slug }: Props) {
         {isMeniscusCourse ? (
           <div className='space-y-10'>
             <section className='max-w-5xl space-y-8'>
+              <div className='rounded-2xl border border-gray-100 bg-white shadow-sm px-5 py-6 sm:px-7 sm:py-7 space-y-4'>
+                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                  Данный раздел сайта представляет собой собрание
+                  аудиовизуальных и текстовых материалов моего личного
+                  авторства. Меня зовут Миненков Вадим Леонидович, я —
+                  инструктор методист ЛФК (специалист по физической реабилитации
+                  и спортивной тренировке)
+                </p>
+
+                <p className='text-sm sm:text-base font-semibold text-gray-900 leading-relaxed'>
+                  Что такое &quot;восстановительная программа&quot; в нашем
+                  случае?
+                </p>
+                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                  Восстановительная программа — это структурированная
+                  последовательность этапов восстановления после резекции
+                  мениска. Это своего рода &quot;дорожная карта&quot;, которая
+                  помогает понимать, какие задачи стоят на каждом этапе, как
+                  двигаться вперёд и какие ориентиры учитывать. Это не строгое
+                  правило, а скорее логичный и обоснованный путь восстановления,
+                  проверенный практикой.
+                </p>
+
+                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                  Материалы, представленные на канале, не противоречат
+                  официальным клиническим рекомендациям. Напротив — они
+                  дополняют их, раскрывая нюансы и детали, которые часто
+                  остаются &quot;за кадром&quot;.
+                </p>
+
+                <p className='text-sm sm:text-base font-semibold text-gray-900 leading-relaxed'>
+                  При этом они не могут использоваться без предварительной
+                  консультации с лечащим врачом.
+                </p>
+
+                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                  Весь контент является компиляцией — собранной информацией из
+                  различных источников: методических пособий, бумажных изданий,
+                  планов лечения, а также рекомендаций врачей и моего
+                  собственного опыта практической работы.
+                </p>
+
+                <p className='text-sm sm:text-base font-semibold text-gray-900 leading-relaxed'>
+                  Важно понимать:
+                </p>
+                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                  <strong>
+                    Доступ к материалам не является назначением лечения и не
+                    заменяет очную консультацию со специалистом.
+                  </strong>{' '}
+                  Материалы программы{' '}
+                  <strong>
+                    не учитывают индивидуальные особенности организма и
+                    состояния здоровья каждого конкретного человека.
+                  </strong>
+                </p>
+
+                <p className='text-sm sm:text-base font-semibold text-gray-900 leading-relaxed'>
+                  Перед выполнением любых упражнений обязательно
+                  проконсультируйтесь с лечащим врачом или специалистом по
+                  реабилитации.
+                </p>
+
+                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                  Восстановительная программа ниже представлена в текстовом
+                  формате. И так же представлены видео упражнений для первых 3-х
+                  этапов. С первого дня после операции до возвращения к ранней
+                  беговой активности (бег трусцой). Далее, при переходе к
+                  последующим двум этапам, выбор нагрузок и конкретных
+                  упражнений должен строиться с учётом индивидуальной специфики
+                  вида спорта и профессиональной активности. В связи с этим, в
+                  программе не закреплены конкретные упражнения для этих этапов,
+                  так как их содержание будет значительно варьироваться в
+                  зависимости от профессиональных целей, вида спорта и
+                  индивидуальных потребностей.
+                </p>
+              </div>
+
               <div className='rounded-2xl border border-gray-100 bg-white shadow-sm px-5 py-6 sm:px-7 sm:py-7 space-y-5'>
                 <h2 className='text-xl sm:text-2xl font-semibold tracking-tight text-gray-900'>
                   Что такое резекция мениска
@@ -196,9 +274,6 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   значительной степени отличаться
                 </p>
 
-                <p className='text-base font-semibold text-gray-900'>
-                  Кому какой этап нужен
-                </p>
                 <ul className='space-y-3 text-sm sm:text-base text-gray-700 leading-relaxed'>
                   <li>
                     Позднего восстановительного этапа будет достаточно
@@ -227,9 +302,6 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   </li>
                 </ul>
 
-                <p className='text-base font-semibold text-gray-900'>
-                  Факторы, влияющие на сроки
-                </p>
                 <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
                   Так же на сроки восстановления могут повлиять следующие
                   факторы: возраст, физическая подготовка, объем оперативного
@@ -253,6 +325,10 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   повышение толерантности тканей к нагрузкам, что приводит к
                   увеличению их функциональной прочности и устойчивости к
                   повреждениям.
+                </p>
+                <p className='text-sm sm:text-base text-gray-700 leading-relaxed mb-4'>
+                  Для реализации данной формулы необходимо соблюдать основные
+                  принципы физической реабилитации:
                 </p>
 
                 <button
