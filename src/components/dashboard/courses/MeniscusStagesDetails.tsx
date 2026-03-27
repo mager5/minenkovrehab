@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import {
   VideoPlayer,
   VideoPlayerRef,
@@ -488,6 +489,11 @@ export function MeniscusStagesDetails({
   const videoPlayerRef = useRef<VideoPlayerRef>(null);
   const weeklyTestRef = useRef<VideoPlayerRef>(null);
   const topRef = useRef<HTMLElement>(null);
+  const supabase = useMemo(() => createClient(), []);
+  const isStaticSite =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'minenkovrehab.ru' ||
+      window.location.hostname.endsWith('github.io'));
 
   const activeStage = STAGES.find(stage => stage.id === activeStageId);
 
@@ -508,23 +514,45 @@ export function MeniscusStagesDetails({
         return;
       }
 
-      const response = await fetch(
-        '/api/courses/meniscus/stage-video?stage=1',
-        {
-          credentials: 'include',
+      if (!isStaticSite) {
+        const response = await fetch(
+          '/api/courses/meniscus/stage-video?stage=1',
+          { credentials: 'include' }
+        );
+        if (response.status !== 404) {
+          const payload = await response.json().catch(() => null);
+          if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+            setVideoUrl(null);
+            return;
+          }
+          setVideoUrl(payload.data.signedUrl);
+          return;
         }
-      );
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
-        setVideoUrl(null);
+      }
+
+      const { data, error } = await supabase.storage
+        .from('videos')
+        .createSignedUrl(activeStage.videoPath, 3600);
+
+      if (!error && data?.signedUrl) {
+        setVideoUrl(data.signedUrl);
         return;
       }
 
-      setVideoUrl(payload.data.signedUrl);
+      const { data: publicData } = supabase.storage
+        .from('videos')
+        .getPublicUrl(activeStage.videoPath);
+      setVideoUrl(publicData?.publicUrl || null);
     };
 
     fetchVideoUrl();
-  }, [activeStage]);
+  }, [
+    activeStageId,
+    isStaticSite,
+    supabase,
+    activeStage?.videoPath,
+    activeStage?.id,
+  ]);
 
   const handleTimecodeClick = (timeString: string) => {
     if (!videoPlayerRef.current) return;
@@ -556,18 +584,55 @@ export function MeniscusStagesDetails({
         return;
       }
 
-      const response = await fetch('/api/courses/meniscus/weekly-test', {
-        credentials: 'include',
-      });
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+      if (!isStaticSite) {
+        const response = await fetch('/api/courses/meniscus/weekly-test', {
+          credentials: 'include',
+        });
+        if (response.status !== 404) {
+          const payload = await response.json().catch(() => null);
+          if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+            setWeeklyTestUrl(null);
+            return;
+          }
+          setWeeklyTestUrl(payload.data.signedUrl);
+          return;
+        }
+      }
+
+      const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
+      const { data, error } = await supabase
+        .from('videos')
+        .select('file_path,title,created_at')
+        .eq('user_id', INSTRUCTOR_USER_ID)
+        .ilike('title', '%еженедель%')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
         setWeeklyTestUrl(null);
         return;
       }
-      setWeeklyTestUrl(payload.data.signedUrl);
+
+      const filePath = data?.[0]?.file_path || null;
+      if (!filePath) {
+        setWeeklyTestUrl(null);
+        return;
+      }
+
+      const { data: signed, error: signedError } = await supabase.storage
+        .from('videos')
+        .createSignedUrl(filePath, 3600);
+      if (!signedError && signed?.signedUrl) {
+        setWeeklyTestUrl(signed.signedUrl);
+        return;
+      }
+      const { data: publicData } = supabase.storage
+        .from('videos')
+        .getPublicUrl(filePath);
+      setWeeklyTestUrl(publicData?.publicUrl || null);
     };
     loadWeeklyTest();
-  }, [activeStage]);
+  }, [activeStage, isStaticSite, supabase]);
 
   const goPrev = () =>
     setActiveStageId((activeStageId > 1 ? activeStageId - 1 : 1) as StageId);

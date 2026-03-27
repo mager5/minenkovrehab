@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { VideoPlayer } from './VideoPlayer';
+import { createClient } from '@/lib/supabase/client';
 import {
   Loader2,
   Trash2,
@@ -55,23 +56,74 @@ export function VideoList() {
   const [editDescription, setEditDescription] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  const isStaticSite =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'minenkovrehab.ru' ||
+      window.location.hostname.endsWith('github.io'));
+
+  const supabase = createClient();
+
+  const fetchVideosViaSupabase = async () => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+    if (!user) throw new Error('Auth session missing!');
+
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const list = (data as Video[]) || [];
+    const paths = list.map(v => v.file_path).filter(Boolean);
+    const { data: signedData } = paths.length
+      ? await supabase.storage.from('videos').createSignedUrls(paths, 3600)
+      : { data: [] as any };
+
+    const thumbs: Record<string, string> = {};
+    (
+      signedData as { path: string; signedUrl: string | null }[] | undefined
+    )?.forEach(item => {
+      if (!item?.path || !item.signedUrl) return;
+      const match = list.find(v => v.file_path === item.path);
+      if (match?.id) thumbs[match.id] = item.signedUrl;
+    });
+
+    setVideos(list);
+    setThumbnails(thumbs);
+  };
+
   const fetchVideos = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/videos', { credentials: 'include' });
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.success) {
-        throw new Error(payload?.message || 'Auth session missing!');
+      if (isStaticSite) {
+        await fetchVideosViaSupabase();
+      } else {
+        const response = await fetch('/api/videos', { credentials: 'include' });
+        if (response.status === 404) {
+          await fetchVideosViaSupabase();
+        } else {
+          const payload = await response.json().catch(() => null);
+          if (!response.ok || !payload?.success) {
+            throw new Error(payload?.message || 'Auth session missing!');
+          }
+
+          const list = (payload.data?.videos as Video[]) || [];
+          const thumbs =
+            (payload.data?.thumbnailsById as Record<string, string>) || {};
+
+          setVideos(list);
+          setThumbnails(thumbs);
+        }
       }
-
-      const list = (payload.data?.videos as Video[]) || [];
-      const thumbs =
-        (payload.data?.thumbnailsById as Record<string, string>) || {};
-
-      setVideos(list);
-      setThumbnails(thumbs);
     } catch (error) {
       setVideos([]);
       setThumbnails({});
@@ -110,16 +162,34 @@ export function VideoList() {
 
     setIsDeleting(true);
     try {
-      const response = await fetch(
-        `/api/videos/${encodeURIComponent(videoId)}`,
-        {
-          method: 'DELETE',
-          credentials: 'include',
+      if (!isStaticSite) {
+        const response = await fetch(
+          `/api/videos/${encodeURIComponent(videoId)}`,
+          {
+            method: 'DELETE',
+            credentials: 'include',
+          }
+        );
+        if (response.status !== 404) {
+          const payload = await response.json().catch(() => null);
+          if (!response.ok || !payload?.success) {
+            throw new Error(payload?.message || 'Ошибка при удалении');
+          }
+        } else {
+          const { error } = await supabase
+            .from('videos')
+            .delete()
+            .eq('id', videoId);
+          if (error) throw error;
+          await supabase.storage.from('videos').remove([filePath]);
         }
-      );
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.success) {
-        throw new Error(payload?.message || 'Ошибка при удалении');
+      } else {
+        const { error } = await supabase
+          .from('videos')
+          .delete()
+          .eq('id', videoId);
+        if (error) throw error;
+        await supabase.storage.from('videos').remove([filePath]);
       }
 
       setVideos(videos.filter(v => v.id !== videoId));
@@ -170,18 +240,36 @@ export function VideoList() {
 
     setIsSaving(true);
     try {
-      const response = await fetch(
-        `/api/videos/${encodeURIComponent(editingId)}`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ description: editDescription }),
+      if (!isStaticSite) {
+        const response = await fetch(
+          `/api/videos/${encodeURIComponent(editingId)}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ description: editDescription }),
+          }
+        );
+        if (response.status !== 404) {
+          const payload = await response.json().catch(() => null);
+          if (!response.ok || !payload?.success) {
+            throw new Error(
+              payload?.message || 'Ошибка при обновлении описания'
+            );
+          }
+        } else {
+          const { error } = await supabase
+            .from('videos')
+            .update({ description: editDescription })
+            .eq('id', editingId);
+          if (error) throw error;
         }
-      );
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.success) {
-        throw new Error(payload?.message || 'Ошибка при обновлении описания');
+      } else {
+        const { error } = await supabase
+          .from('videos')
+          .update({ description: editDescription })
+          .eq('id', editingId);
+        if (error) throw error;
       }
 
       setVideos(
@@ -218,29 +306,52 @@ export function VideoList() {
     setSelectedVideo(updatedVideo);
 
     try {
-      await fetch(`/api/videos/${encodeURIComponent(video.id)}/views`, {
-        method: 'POST',
-        credentials: 'include',
-      }).catch(() => null);
-
-      const response = await fetch(
-        `/api/videos/signed-url?path=${encodeURIComponent(video.file_path)}`,
-        { credentials: 'include' }
-      );
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.success) {
-        throw new Error(
-          payload?.message || 'Не удалось получить ссылку на видео'
+      if (!isStaticSite) {
+        const viewsResp = await fetch(
+          `/api/videos/${encodeURIComponent(video.id)}/views`,
+          { method: 'POST', credentials: 'include' }
         );
+        if (viewsResp.status === 404) {
+          await supabase
+            .rpc('increment_video_view', { video_id: video.id })
+            .catch(() => null);
+        }
+
+        const response = await fetch(
+          `/api/videos/signed-url?path=${encodeURIComponent(video.file_path)}`,
+          { credentials: 'include' }
+        );
+
+        if (response.status === 404) {
+          const { data, error } = await supabase.storage
+            .from('videos')
+            .createSignedUrl(video.file_path, 3600);
+          if (error || !data?.signedUrl)
+            throw error || new Error('Видео недоступно');
+          setVideoUrl(data.signedUrl);
+        } else {
+          const payload = await response.json().catch(() => null);
+          if (!response.ok || !payload?.success) {
+            throw new Error(
+              payload?.message || 'Не удалось получить ссылку на видео'
+            );
+          }
+          setVideoUrl(payload.data.signedUrl);
+        }
+      } else {
+        await supabase
+          .rpc('increment_video_view', { video_id: video.id })
+          .catch(() => null);
+        const { data, error } = await supabase.storage
+          .from('videos')
+          .createSignedUrl(video.file_path, 3600);
+        if (error || !data?.signedUrl)
+          throw error || new Error('Видео недоступно');
+        setVideoUrl(data.signedUrl);
       }
-      setVideoUrl(payload.data.signedUrl);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'Не удалось получить ссылку на видео'
-      );
+      alert(error instanceof Error);
     }
     setLoadingUrl(false);
   };

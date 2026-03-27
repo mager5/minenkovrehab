@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { createClient } from '@/lib/supabase/client';
 import {
   Loader2,
   Upload,
@@ -57,59 +58,139 @@ export function VideoUploader({ onUploadComplete }: VideoUploaderProps) {
     setError(null);
 
     try {
+      const isStaticSite =
+        typeof window !== 'undefined' &&
+        (window.location.hostname === 'minenkovrehab.ru' ||
+          window.location.hostname.endsWith('github.io'));
+
+      const supabase = createClient();
       const fileExt = file.name.split('.').pop() || '';
 
-      const uploadUrlResponse = await fetch('/api/videos/upload-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          fileName: file.name,
-          fileExt,
-        }),
-      });
+      if (!isStaticSite) {
+        const uploadUrlResponse = await fetch('/api/videos/upload-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            fileName: file.name,
+            fileExt,
+          }),
+        });
 
-      const uploadUrlPayload = await uploadUrlResponse.json().catch(() => null);
-      if (!uploadUrlResponse.ok || !uploadUrlPayload?.success) {
-        throw new Error(uploadUrlPayload?.message || 'Auth session missing!');
-      }
+        if (uploadUrlResponse.status !== 404) {
+          const uploadUrlPayload = await uploadUrlResponse
+            .json()
+            .catch(() => null);
+          if (!uploadUrlResponse.ok || !uploadUrlPayload?.success) {
+            throw new Error(
+              uploadUrlPayload?.message || 'Auth session missing!'
+            );
+          }
 
-      const { signedUrl, filePath } = uploadUrlPayload.data as {
-        signedUrl: string;
-        filePath: string;
-      };
+          const { signedUrl, filePath } = uploadUrlPayload.data as {
+            signedUrl: string;
+            filePath: string;
+          };
 
-      const formData = new FormData();
-      formData.append('cacheControl', '3600');
-      formData.append('', file);
+          const formData = new FormData();
+          formData.append('cacheControl', '3600');
+          formData.append('', file);
 
-      const uploadResponse = await fetch(signedUrl, {
-        method: 'PUT',
-        body: formData,
-      });
+          const uploadResponse = await fetch(signedUrl, {
+            method: 'PUT',
+            body: formData,
+          });
 
-      if (!uploadResponse.ok) {
-        const errPayload = await uploadResponse.json().catch(() => null);
-        throw new Error(errPayload?.message || 'Ошибка при загрузке видео');
-      }
+          if (!uploadResponse.ok) {
+            const errPayload = await uploadResponse.json().catch(() => null);
+            throw new Error(errPayload?.message || 'Ошибка при загрузке видео');
+          }
 
-      const commitResponse = await fetch('/api/videos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
+          const commitResponse = await fetch('/api/videos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              title,
+              description,
+              filePath,
+              size: file.size,
+              mimeType: file.type,
+            }),
+          });
+          const commitPayload = await commitResponse.json().catch(() => null);
+          if (!commitResponse.ok || !commitPayload?.success) {
+            throw new Error(
+              commitPayload?.message || 'Не удалось сохранить метаданные'
+            );
+          }
+        } else {
+          const {
+            data: { user },
+            error: userError,
+          } = await supabase.auth.getUser();
+          if (userError) throw userError;
+          if (!user)
+            throw new Error('Вы должны быть авторизованы для загрузки видео');
+
+          const cleanFileName = file.name.replace(/[^a-zA-Z0-9]/g, '_');
+          const fileName = `${Date.now()}_${cleanFileName}.${fileExt}`;
+          const filePath = `${user.id}/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('videos')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false,
+            });
+          if (uploadError) throw uploadError;
+
+          const { error: dbError } = await supabase.from('videos').insert({
+            user_id: user.id,
+            title,
+            description,
+            file_path: filePath,
+            size: file.size,
+            mime_type: file.type,
+          });
+          if (dbError) {
+            await supabase.storage.from('videos').remove([filePath]);
+            throw dbError;
+          }
+        }
+      } else {
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        if (!user)
+          throw new Error('Вы должны быть авторизованы для загрузки видео');
+
+        const cleanFileName = file.name.replace(/[^a-zA-Z0-9]/g, '_');
+        const fileName = `${Date.now()}_${cleanFileName}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('videos')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+        if (uploadError) throw uploadError;
+
+        const { error: dbError } = await supabase.from('videos').insert({
+          user_id: user.id,
           title,
           description,
-          filePath,
+          file_path: filePath,
           size: file.size,
-          mimeType: file.type,
-        }),
-      });
-      const commitPayload = await commitResponse.json().catch(() => null);
-      if (!commitResponse.ok || !commitPayload?.success) {
-        throw new Error(
-          commitPayload?.message || 'Не удалось сохранить метаданные'
-        );
+          mime_type: file.type,
+        });
+        if (dbError) {
+          await supabase.storage.from('videos').remove([filePath]);
+          throw dbError;
+        }
       }
 
       setSuccess(true);
