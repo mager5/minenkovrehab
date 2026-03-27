@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { VideoPlayer } from './VideoPlayer';
 import {
   Loader2,
@@ -32,6 +31,7 @@ interface Video {
 export function VideoList() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -55,50 +55,32 @@ export function VideoList() {
   const [editDescription, setEditDescription] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  const supabase = createClient();
-
   const fetchVideos = async () => {
     setLoading(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
+    setError(null);
 
-    const { data, error } = await supabase
-      .from('videos')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (data) {
-      setVideos(data);
-
-      // Generate signed URLs for thumbnails
-      const paths = data.map((v: Video) => v.file_path);
-      if (paths.length > 0) {
-        const { data: signedData, error: signedError } = await supabase.storage
-          .from('videos')
-          .createSignedUrls(paths, 3600);
-
-        if (signedData) {
-          const newThumbnails: Record<string, string> = {};
-          (signedData as { path: string; signedUrl: string | null }[]).forEach(
-            item => {
-              if (item.path && item.signedUrl) {
-                const video = (data as Video[]).find(
-                  (v: Video) => v.file_path === item.path
-                );
-                if (video) {
-                  newThumbnails[video.id] = item.signedUrl;
-                }
-              }
-            }
-          );
-          setThumbnails(newThumbnails);
-        }
+    try {
+      const response = await fetch('/api/videos', { credentials: 'include' });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.message || 'Auth session missing!');
       }
+
+      const list = (payload.data?.videos as Video[]) || [];
+      const thumbs =
+        (payload.data?.thumbnailsById as Record<string, string>) || {};
+
+      setVideos(list);
+      setThumbnails(thumbs);
+    } catch (error) {
+      setVideos([]);
+      setThumbnails({});
+      setError(
+        error instanceof Error ? error.message : 'Не удалось загрузить видео.'
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -127,38 +109,30 @@ export function VideoList() {
     if (!videoId || !filePath) return;
 
     setIsDeleting(true);
+    try {
+      const response = await fetch(
+        `/api/videos/${encodeURIComponent(videoId)}`,
+        {
+          method: 'DELETE',
+          credentials: 'include',
+        }
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.message || 'Ошибка при удалении');
+      }
 
-    const { error: storageError } = await supabase.storage
-      .from('videos')
-      .remove([filePath]);
-
-    if (storageError) {
-      console.error('Error deleting file:', storageError);
-      alert('Ошибка при удалении файла: ' + storageError.message);
+      setVideos(videos.filter(v => v.id !== videoId));
+      if (selectedVideo?.id === videoId) {
+        setSelectedVideo(null);
+        setVideoUrl(null);
+      }
+      setDeleteModal({ isOpen: false, videoId: null, filePath: null });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Ошибка при удалении');
+    } finally {
       setIsDeleting(false);
-      return;
     }
-
-    const { error: dbError } = await supabase
-      .from('videos')
-      .delete()
-      .eq('id', videoId);
-
-    if (dbError) {
-      console.error('Error deleting record:', dbError);
-      alert('Ошибка при удалении записи');
-      setIsDeleting(false);
-      return;
-    }
-
-    setVideos(videos.filter(v => v.id !== videoId));
-    if (selectedVideo?.id === videoId) {
-      setSelectedVideo(null);
-      setVideoUrl(null);
-    }
-
-    setIsDeleting(false);
-    setDeleteModal({ isOpen: false, videoId: null, filePath: null });
   };
 
   const startEdit = (video: Video, e: React.MouseEvent) => {
@@ -195,28 +169,39 @@ export function VideoList() {
     }
 
     setIsSaving(true);
+    try {
+      const response = await fetch(
+        `/api/videos/${encodeURIComponent(editingId)}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ description: editDescription }),
+        }
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.message || 'Ошибка при обновлении описания');
+      }
 
-    const { error } = await supabase
-      .from('videos')
-      .update({ description: editDescription })
-      .eq('id', editingId);
-
-    if (error) {
-      console.error('Error updating description:', error);
-      alert('Ошибка при обновлении описания');
-    } else {
       setVideos(
         videos.map(v =>
           v.id === editingId ? { ...v, description: editDescription } : v
         )
       );
-      // If selected video is the one being edited, update it too
       if (selectedVideo?.id === editingId) {
         setSelectedVideo({ ...selectedVideo, description: editDescription });
       }
       setEditingId(null);
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении описания'
+      );
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
   const handlePlay = async (video: Video) => {
@@ -232,36 +217,30 @@ export function VideoList() {
     );
     setSelectedVideo(updatedVideo);
 
-    // Call RPC to update DB
-    const { error: rpcError } = await supabase.rpc('increment_video_view', {
-      video_id: video.id,
-    });
+    try {
+      await fetch(`/api/videos/${encodeURIComponent(video.id)}/views`, {
+        method: 'POST',
+        credentials: 'include',
+      }).catch(() => null);
 
-    if (rpcError) {
-      console.error('Error incrementing views:', rpcError);
-    }
-
-    // Try to get signed URL
-    const { data, error } = await supabase.storage
-      .from('videos')
-      .createSignedUrl(video.file_path, 3600); // 1 hour
-
-    if (error || !data) {
-      console.error('Error creating signed url:', error);
-      // Fallback to public URL if bucket is public (just in case)
-      const { data: publicData } = supabase.storage
-        .from('videos')
-        .getPublicUrl(video.file_path);
-
-      if (publicData) {
-        setVideoUrl(publicData.publicUrl);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        alert('Не удалось получить ссылку на видео');
+      const response = await fetch(
+        `/api/videos/signed-url?path=${encodeURIComponent(video.file_path)}`,
+        { credentials: 'include' }
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success) {
+        throw new Error(
+          payload?.message || 'Не удалось получить ссылку на видео'
+        );
       }
-    } else {
-      setVideoUrl(data.signedUrl);
+      setVideoUrl(payload.data.signedUrl);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось получить ссылку на видео'
+      );
     }
     setLoadingUrl(false);
   };
@@ -284,6 +263,17 @@ export function VideoList() {
     return (
       <div className='flex justify-center p-8'>
         <Loader2 className='h-8 w-8 animate-spin text-indigo-600' />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='p-6 rounded-xl border border-gray-200 bg-white'>
+        <div className='flex items-start gap-3'>
+          <AlertCircle className='h-5 w-5 text-red-600 mt-0.5' />
+          <p className='text-sm text-gray-700 leading-relaxed'>{error}</p>
+        </div>
       </div>
     );
   }

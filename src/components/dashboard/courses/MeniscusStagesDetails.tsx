@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import {
   VideoPlayer,
   VideoPlayerRef,
@@ -487,9 +486,8 @@ export function MeniscusStagesDetails({
   };
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const videoPlayerRef = useRef<VideoPlayerRef>(null);
+  const weeklyTestRef = useRef<VideoPlayerRef>(null);
   const topRef = useRef<HTMLElement>(null);
-
-  const supabase = createClient();
 
   const activeStage = STAGES.find(stage => stage.id === activeStageId);
 
@@ -505,32 +503,28 @@ export function MeniscusStagesDetails({
 
   useEffect(() => {
     const fetchVideoUrl = async () => {
-      if (activeStage?.videoPath) {
-        const { data } = await supabase.storage
-          .from('videos')
-          .createSignedUrl(activeStage.videoPath, 3600);
-
-        if (data?.signedUrl) {
-          setVideoUrl(data.signedUrl);
-        } else {
-          // Fallback to public URL if signed URL fails (e.g. public bucket)
-          const { data: publicData } = supabase.storage
-            .from('videos')
-            .getPublicUrl(activeStage.videoPath);
-
-          if (publicData?.publicUrl) {
-            setVideoUrl(publicData.publicUrl);
-          } else {
-            setVideoUrl(null);
-          }
-        }
-      } else {
+      if (!activeStage?.videoPath || activeStage.id !== 1) {
         setVideoUrl(null);
+        return;
       }
+
+      const response = await fetch(
+        '/api/courses/meniscus/stage-video?stage=1',
+        {
+          credentials: 'include',
+        }
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+        setVideoUrl(null);
+        return;
+      }
+
+      setVideoUrl(payload.data.signedUrl);
     };
 
     fetchVideoUrl();
-  }, [activeStage, supabase]);
+  }, [activeStage]);
 
   const handleTimecodeClick = (timeString: string) => {
     if (!videoPlayerRef.current) return;
@@ -544,6 +538,36 @@ export function MeniscusStagesDetails({
 
     videoPlayerRef.current.seekTo(timeInSeconds);
   };
+
+  const handleWeeklyTimecodeClick = (timeString: string) => {
+    if (!weeklyTestRef.current) return;
+    const parts = timeString.split(':').map(Number);
+    const minutes = parts[0] || 0;
+    const seconds = parts[1] || 0;
+    const timeInSeconds = minutes * 60 + seconds;
+    weeklyTestRef.current.seekTo(timeInSeconds);
+  };
+
+  const [weeklyTestUrl, setWeeklyTestUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const loadWeeklyTest = async () => {
+      if (!activeStage || activeStage.id !== 1) {
+        setWeeklyTestUrl(null);
+        return;
+      }
+
+      const response = await fetch('/api/courses/meniscus/weekly-test', {
+        credentials: 'include',
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+        setWeeklyTestUrl(null);
+        return;
+      }
+      setWeeklyTestUrl(payload.data.signedUrl);
+    };
+    loadWeeklyTest();
+  }, [activeStage]);
 
   const goPrev = () =>
     setActiveStageId((activeStageId > 1 ? activeStageId - 1 : 1) as StageId);
@@ -1173,30 +1197,32 @@ export function MeniscusStagesDetails({
             <div className='bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden'>
               <div className='px-5 py-4 border-b border-gray-100 bg-gray-50'>
                 <h3 className='text-base font-semibold text-gray-900'>
-                  Видеоматериалы
+                  {activeStage?.id === 1
+                    ? 'Еженедельные тесты и упражнения 1 этапа'
+                    : 'Видеоматериалы'}
                 </h3>
               </div>
               <div className='p-0'>
-                <VideoPlayer src={videoUrl} ref={videoPlayerRef} />
-              </div>
-              {activeStage?.videoDescription && (
-                <div className='px-5 py-5 sm:px-6 sm:py-6 border-t border-gray-100'>
-                  <div className='space-y-4 text-base text-gray-700'>
-                    {activeStage.videoDescription.text.map((paragraph, idx) => (
-                      <p key={idx}>{paragraph}</p>
-                    ))}
-                  </div>
-
-                  <div className='mt-6'>
+                {activeStage?.id === 1 && weeklyTestUrl && (
+                  <div className='px-5 py-5 sm:px-6 sm:py-6'>
                     <h4 className='font-medium text-gray-900 mb-3'>
-                      Таймкоды:
+                      Еженедельный тест
                     </h4>
-                    <div className='grid gap-1'>
-                      {activeStage.videoDescription.timecodes.map(
-                        (item, idx) => (
+                    <VideoPlayer src={weeklyTestUrl} ref={weeklyTestRef} />
+                    <div className='mt-4'>
+                      <p className='text-base text-gray-700 mb-3'>
+                        Еженедельный ТЕСТ — отслеживание динамики восстановления
+                        амплитуды движения сустава и паттерна шага
+                      </p>
+                      <div className='grid gap-1'>
+                        {[
+                          { time: '0:30', label: 'Тест разгибания' },
+                          { time: '2:06', label: 'Тест сгибания' },
+                          { time: '2:48', label: 'Тест ходьбы' },
+                        ].map((item, idx) => (
                           <button
                             key={idx}
-                            onClick={() => handleTimecodeClick(item.time)}
+                            onClick={() => handleWeeklyTimecodeClick(item.time)}
                             className='flex items-center text-left group hover:bg-gray-50 p-2 rounded-md transition-colors -mx-2'
                           >
                             <span className='text-base text-indigo-600 w-12 shrink-0 group-hover:underline'>
@@ -1206,12 +1232,65 @@ export function MeniscusStagesDetails({
                               {item.label}
                             </span>
                           </button>
-                        )
-                      )}
+                        ))}
+                      </div>
                     </div>
                   </div>
+                )}
+
+                <div
+                  className={
+                    activeStage?.id === 1 && weeklyTestUrl
+                      ? 'border-t border-gray-100'
+                      : ''
+                  }
+                >
+                  {activeStage?.id === 1 && (
+                    <div className='px-5 pt-5 sm:px-6 text-base text-gray-700'>
+                      <h4 className='font-medium text-gray-900 mb-3'>
+                        Видео 1 этапа — Острый
+                      </h4>
+                    </div>
+                  )}
+                  <VideoPlayer src={videoUrl} ref={videoPlayerRef} />
+
+                  {activeStage?.videoDescription && (
+                    <div className='px-5 py-5 sm:px-6 sm:py-6 border-t border-gray-100'>
+                      <div className='space-y-4 text-base text-gray-700'>
+                        {activeStage.videoDescription.text.map(
+                          (paragraph, idx) => (
+                            <p key={idx}>{paragraph}</p>
+                          )
+                        )}
+                      </div>
+
+                      <div className='mt-6'>
+                        <h4 className='font-medium text-gray-900 mb-3'>
+                          Таймкоды:
+                        </h4>
+                        <div className='grid gap-1'>
+                          {activeStage.videoDescription.timecodes.map(
+                            (item, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => handleTimecodeClick(item.time)}
+                                className='flex items-center text-left group hover:bg-gray-50 p-2 rounded-md transition-colors -mx-2'
+                              >
+                                <span className='text-base text-indigo-600 w-12 shrink-0 group-hover:underline'>
+                                  {item.time}
+                                </span>
+                                <span className='text-base text-gray-700 ml-2'>
+                                  {item.label}
+                                </span>
+                              </button>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>
