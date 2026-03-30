@@ -148,7 +148,7 @@ const STAGES: Stage[] = [
     title: '2 этап — Ранний восстановительный',
     period: '2–4 недели',
     videoPath:
-      '6639a601-4007-46d8-a058-fe2cd2086fa1/1771875320518_2_HLh9prrm_mp4.mp4',
+      '6639a601-4007-46d8-a058-fe2cd2086fa1/1774614743708_mHTR6x8C_mp4.mp4',
     videoDescription: {
       text: ['Ранний восстановительный этап реабилитации (2–4 недели).'],
       timecodes: [
