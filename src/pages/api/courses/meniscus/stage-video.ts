@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 const STAGE_VIDEO_PATHS: Record<string, string> = {
   '1': '6639a601-4007-46d8-a058-fe2cd2086fa1/1771875320518_1_HLh9prrm_mp4.mp4',
   '2': '6639a601-4007-46d8-a058-fe2cd2086fa1/1774614743708_mHTR6x8C_mp4.mp4',
+  '3': '6639a601-4007-46d8-a058-fe2cd2086fa1/1774895893009________________________________________________4_8________.mp4',
 };
 
 async function isAuthorized(req: NextApiRequest) {
