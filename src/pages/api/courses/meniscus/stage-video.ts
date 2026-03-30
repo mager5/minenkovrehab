@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 const STAGE_VIDEO_PATHS: Record<string, string> = {
   '1': '6639a601-4007-46d8-a058-fe2cd2086fa1/1771875320518_1_HLh9prrm_mp4.mp4',
+  '2': '6639a601-4007-46d8-a058-fe2cd2086fa1/1771875320518_2_HLh9prrm_mp4.mp4',
 };
 
 async function isAuthorized(req: NextApiRequest) {
@@ -53,12 +54,10 @@ export default async function handler(
     .createSignedUrl(path, 3600);
 
   if (error || !data?.signedUrl) {
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: error?.message || 'Не удалось создать ссылку',
-      });
+    return res.status(500).json({
+      success: false,
+      message: error?.message || 'Не удалось создать ссылку',
+    });
   }
 
   return res

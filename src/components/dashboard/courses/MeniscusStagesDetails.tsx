@@ -147,6 +147,33 @@ const STAGES: Stage[] = [
     id: 2,
     title: '2 этап — Ранний восстановительный',
     period: '2–4 недели',
+    videoPath:
+      '6639a601-4007-46d8-a058-fe2cd2086fa1/1771875320518_2_HLh9prrm_mp4.mp4',
+    videoDescription: {
+      text: ['Ранний восстановительный этап реабилитации (2–4 недели).'],
+      timecodes: [
+        { time: '1:20', label: 'Разминка' },
+        { time: '2:16', label: 'Мобилизация надколенника' },
+        { time: '3:41', label: 'Мобилизация шва' },
+        { time: '5:46', label: 'Массаж задней поверхности бедра + голень' },
+        { time: '8:06', label: 'Упражнение 1 (пассивное разгибание)' },
+        { time: '10:20', label: 'Массаж передней поверхности бедра' },
+        {
+          time: '11:55',
+          label: 'Упражнение 2 (сгибание пассивное + активное)',
+        },
+        { time: '13:23', label: 'Упражнение 3 (задняя поверхность бедра)' },
+        { time: '15:18', label: 'Упражнение 4 (передняя поверхность бедра)' },
+        { time: '16:16', label: 'Упражнение 5 (отводящие мышцы)' },
+        { time: '17:21', label: 'Упражнение 6 (ягодичный мост)' },
+        { time: '18:58', label: 'Упражнение 7 (приводящие мышцы)' },
+        { time: '20:31', label: 'Упражнение 8 (мышцы голени)' },
+        { time: '22:02', label: 'Упражнение 9 (баланс)' },
+        { time: '23:23', label: 'Упражнение 10 (баланс + проприоцепция)' },
+        { time: '24:20', label: 'Упражнение 11 (функциональная ходьба)' },
+        { time: '25:34', label: 'Упражнение 12 (приседания)' },
+      ],
+    },
     goals: [
       'Контроль боли и отека.',
       'Поддержание достигнутой амплитуды разгибаний 0 градусов.',
@@ -509,14 +536,33 @@ export function MeniscusStagesDetails({
 
   useEffect(() => {
     const fetchVideoUrl = async () => {
-      if (!activeStage?.videoPath || activeStage.id !== 1) {
+      if (!activeStage) {
+        setVideoUrl(null);
+        return;
+      }
+
+      let candidatePath = activeStage.videoPath || null;
+
+      if (!candidatePath && activeStage.id === 2) {
+        const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
+        const { data } = await supabase
+          .from('videos')
+          .select('file_path,title,created_at')
+          .eq('user_id', INSTRUCTOR_USER_ID)
+          .ilike('title', '%ранний восстанов%')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        candidatePath = data?.[0]?.file_path || null;
+      }
+
+      if (!candidatePath) {
         setVideoUrl(null);
         return;
       }
 
       if (!isStaticSite) {
         const response = await fetch(
-          '/api/courses/meniscus/stage-video?stage=1',
+          `/api/courses/meniscus/stage-video?stage=${activeStage.id}`,
           { credentials: 'include' }
         );
         if (response.status !== 404) {
@@ -530,18 +576,9 @@ export function MeniscusStagesDetails({
         }
       }
 
-      const { data, error } = await supabase.storage
-        .from('videos')
-        .createSignedUrl(activeStage.videoPath, 3600);
-
-      if (!error && data?.signedUrl) {
-        setVideoUrl(data.signedUrl);
-        return;
-      }
-
       const { data: publicData } = supabase.storage
         .from('videos')
-        .getPublicUrl(activeStage.videoPath);
+        .getPublicUrl(candidatePath);
       setVideoUrl(publicData?.publicUrl || null);
     };
 
@@ -1310,10 +1347,12 @@ export function MeniscusStagesDetails({
                       : ''
                   }
                 >
-                  {activeStage?.id === 1 && (
+                  {(activeStage?.id === 1 || activeStage?.id === 2) && (
                     <div className='px-5 pt-5 sm:px-6 text-base text-gray-700'>
                       <h4 className='font-medium text-gray-900 mb-3'>
-                        Видео 1 этапа — Острый
+                        {activeStage.id === 1
+                          ? 'Видео 1 этапа — Острый'
+                          : 'Видео 2 этапа — Ранний восстановительный'}
                       </h4>
                     </div>
                   )}
