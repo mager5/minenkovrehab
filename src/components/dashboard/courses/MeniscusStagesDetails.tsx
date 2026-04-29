@@ -664,13 +664,35 @@ export function MeniscusStagesDetails({
       }
 
       const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
-      const { data, error } = await supabase
+      // Старый запрос (оставлен для истории): искали по "еженедель"
+      // const { data, error } = await supabase
+      //   .from('videos')
+      //   .select('file_path,title,created_at')
+      //   .eq('user_id', INSTRUCTOR_USER_ID)
+      //   .ilike('title', '%еженедель%')
+      //   .order('created_at', { ascending: false })
+      //   .limit(1);
+
+      // Новый приоритет: "тест разгибания" (без водяного знака / оригинальный размер),
+      // затем fallback на "еженедель" для совместимости со старыми названиями.
+      const { data: extensionData, error: extensionError } = await supabase
         .from('videos')
         .select('file_path,title,created_at')
         .eq('user_id', INSTRUCTOR_USER_ID)
-        .ilike('title', '%еженедель%')
+        .ilike('title', '%разгиб%')
         .order('created_at', { ascending: false })
         .limit(1);
+
+      const { data, error } =
+        extensionData?.[0]?.file_path && !extensionError
+          ? { data: extensionData, error: null }
+          : await supabase
+              .from('videos')
+              .select('file_path,title,created_at')
+              .eq('user_id', INSTRUCTOR_USER_ID)
+              .ilike('title', '%еженедель%')
+              .order('created_at', { ascending: false })
+              .limit(1);
 
       if (error) {
         setWeeklyTestUrl(null);
