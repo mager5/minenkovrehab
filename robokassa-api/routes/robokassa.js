@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const {
   generatePaymentSignature,
   generateResultSignature,
@@ -17,6 +18,88 @@ const {
   sanitizeString,
   normalizePhone,
 } = require('../utils/validation');
+
+function getSupabaseConfig() {
+  const url = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url) throw new Error('SUPABASE_URL is not set');
+  if (!serviceRoleKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set');
+  return { url, serviceRoleKey };
+}
+
+function generatePassword(length = 12) {
+  const charset =
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+  const bytes = crypto.randomBytes(length);
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += charset[bytes[i] % charset.length];
+  }
+  return password;
+}
+
+async function resendEmail({ to, subject, html }) {
+  if (!process.env.RESEND_API_KEY) {
+    return { ok: false, error: 'RESEND_API_KEY is missing' };
+  }
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'Вадим Миненков | Реабилитация <onboarding@resend.dev>',
+      to,
+      subject,
+      html,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    return {
+      ok: false,
+      error: data?.message || data?.error || `Resend error: ${response.status}`,
+    };
+  }
+
+  return { ok: true, data };
+}
+
+async function supabaseAuthAdminRequest(path, method, body) {
+  const { url, serviceRoleKey } = getSupabaseConfig();
+  const response = await fetch(`${url}${path}`, {
+    method,
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const data = await response.json().catch(() => ({}));
+  return { response, data };
+}
+
+async function supabaseRestRequest(pathWithQuery, method, body) {
+  const { url, serviceRoleKey } = getSupabaseConfig();
+  const response = await fetch(`${url}${pathWithQuery}`, {
+    method,
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const data = await response.json().catch(() => null);
+  return { response, data };
+}
 
 // Проверка переменных окружения при загрузке модуля
 const envValidation = validateEnvironment();
@@ -165,13 +248,24 @@ router.post('/generate-payment-url', async (req, res) => {
       console.log('📄 Создан автоматический параметр Receipt для фискализации');
     }
 
+    const shpParams = {};
+    if (email) {
+      shpParams.shp_email = String(email).trim().toLowerCase();
+    }
+    if (productId) {
+      shpParams.shp_product_id = String(productId);
+    }
+    if (typeof level !== 'undefined' && level !== null && String(level)) {
+      shpParams.shp_level = String(level);
+    }
+
     // Генерация подписи с учетом параметра Receipt (если есть)
     const signature = generatePaymentSignature(
       login,
       amount,
       invId,
       password1,
-      {},
+      shpParams,
       receiptParam
     );
 
@@ -189,6 +283,11 @@ router.post('/generate-payment-url', async (req, res) => {
     // Добавляем Receipt параметр, если он создан (для фискализации)
     if (receiptParam) {
       params.push(`Receipt=${encodeURIComponent(receiptParam)}`);
+    }
+
+    const shpKeys = Object.keys(shpParams).sort();
+    for (const key of shpKeys) {
+      params.push(`${key}=${encodeURIComponent(shpParams[key])}`);
     }
 
     // Добавляем подпись в конце
@@ -315,6 +414,160 @@ const handleResult = async (req, res) => {
     // Например:
     // await updateOrderStatus(InvId, 'paid', outSum);
     // await sendConfirmationEmail(email);
+
+    try {
+      const pick = value => (Array.isArray(value) ? value[0] : value);
+      const emailRaw =
+        pick(shpParams.shp_email) ||
+        pick(params.Email) ||
+        pick(params.email) ||
+        '';
+      const email = String(emailRaw).trim().toLowerCase();
+      const productSlugRaw = pick(shpParams.shp_product_id) || '';
+      const productSlug = String(productSlugRaw).trim();
+
+      if (!email) {
+        console.warn('Email отсутствует в Result URL (ожидается shp_email)');
+      } else {
+        const password = generatePassword();
+
+        let userId = null;
+        const created = await supabaseAuthAdminRequest(
+          '/auth/v1/admin/users',
+          'POST',
+          {
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: {
+              full_name: 'Покупатель',
+            },
+          }
+        );
+
+        if (created.response.ok && created.data?.user?.id) {
+          userId = created.data.user.id;
+        } else {
+          const PER_PAGE = 200;
+          for (let page = 1; page <= 10; page++) {
+            const list = await supabaseAuthAdminRequest(
+              `/auth/v1/admin/users?page=${page}&per_page=${PER_PAGE}`,
+              'GET'
+            );
+            const users = Array.isArray(list.data?.users)
+              ? list.data.users
+              : [];
+            const hit = users.find(
+              u =>
+                typeof u?.email === 'string' &&
+                u.email.toLowerCase() === email.toLowerCase()
+            );
+            if (hit?.id) {
+              userId = hit.id;
+              break;
+            }
+            if (!list.response.ok || users.length < PER_PAGE) {
+              break;
+            }
+          }
+
+          if (userId) {
+            await supabaseAuthAdminRequest(
+              `/auth/v1/admin/users/${userId}`,
+              'PUT',
+              { password }
+            );
+          }
+        }
+
+        const siteUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.ru';
+        const html = `
+          <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+            <h2>Доступ к курсу открыт</h2>
+            <p>Ваши данные для входа:</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Пароль:</strong> ${password}</p>
+            <p>Войти можно здесь: <a href="${siteUrl}/login">${siteUrl}/login</a></p>
+          </div>
+        `;
+
+        const emailResult = await resendEmail({
+          to: email,
+          subject: 'Доступ к курсу открыт! Ваши данные для входа',
+          html,
+        });
+
+        if (!emailResult.ok) {
+          console.warn('Email send skipped/failed:', emailResult.error);
+        }
+
+        if (userId && productSlug) {
+          let productId = null;
+
+          const productLookup = await supabaseRestRequest(
+            `/rest/v1/products?select=id&slug=eq.${encodeURIComponent(productSlug)}&limit=1`,
+            'GET'
+          );
+          if (
+            productLookup.response.ok &&
+            Array.isArray(productLookup.data) &&
+            productLookup.data[0]?.id
+          ) {
+            productId = productLookup.data[0].id;
+          } else {
+            const looksLikeUuid =
+              /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+                productSlug
+              );
+            if (looksLikeUuid) {
+              productId = productSlug;
+            }
+          }
+
+          if (productId) {
+            const existing = await supabaseRestRequest(
+              `/rest/v1/purchases?select=id&robokassa_invoice_id=eq.${encodeURIComponent(
+                String(InvId)
+              )}&limit=1`,
+              'GET'
+            );
+
+            const hasPurchase =
+              existing.response.ok &&
+              Array.isArray(existing.data) &&
+              existing.data.length > 0;
+
+            if (hasPurchase) {
+              await supabaseRestRequest(
+                `/rest/v1/purchases?robokassa_invoice_id=eq.${encodeURIComponent(
+                  String(InvId)
+                )}`,
+                'PATCH',
+                {
+                  status: 'active',
+                  user_id: userId,
+                  product_id: productId,
+                }
+              );
+            } else {
+              await supabaseRestRequest('/rest/v1/purchases', 'POST', {
+                user_id: userId,
+                product_id: productId,
+                status: 'active',
+                robokassa_invoice_id: String(InvId),
+              });
+            }
+          } else {
+            console.warn(
+              'Не удалось определить product_id в Supabase для productSlug:',
+              productSlug
+            );
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Post-payment processing error:', e);
+    }
 
     // Robokassa ожидает ответ "OK{InvId}"
     res.send(`OK${InvId}`);

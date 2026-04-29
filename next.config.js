@@ -52,6 +52,10 @@ const nextConfig = {
   // Отключаем для статического экспорта
   ...(!isStaticExport && {
     async rewrites() {
+      if (process.env.NODE_ENV === 'development') {
+        return [];
+      }
+
       return [
         {
           source: '/api/auth/:path*',

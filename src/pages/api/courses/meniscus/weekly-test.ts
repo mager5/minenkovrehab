@@ -52,6 +52,29 @@ export default async function handler(
   const filePath = data?.[0]?.file_path || null;
   const pickPath = async () => {
     if (filePath) return filePath;
+
+    // Приоритет: тест разгибания (без водяного знака / оригинальный размер может быть последней версией)
+    const { data: extension, error: extensionError } = await supabase
+      .from('videos')
+      .select('file_path,title,created_at')
+      .eq('user_id', INSTRUCTOR_USER_ID)
+      .ilike('title', '%разгиб%')
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (extensionError) throw new Error(extensionError.message);
+    if (extension?.[0]?.file_path) return extension[0].file_path;
+
+    // Старый fallback (оставлен для истории):
+    // const { data: fallback, error: fallbackError } = await supabase
+    //   .from('videos')
+    //   .select('file_path,title,created_at')
+    //   .eq('user_id', INSTRUCTOR_USER_ID)
+    //   .ilike('title', '%тест%')
+    //   .order('created_at', { ascending: false })
+    //   .limit(1);
+    // if (fallbackError) throw new Error(fallbackError.message);
+    // return fallback?.[0]?.file_path || null;
+
     const { data: fallback, error: fallbackError } = await supabase
       .from('videos')
       .select('file_path,title,created_at')
@@ -75,18 +98,14 @@ export default async function handler(
     .createSignedUrl(path, 3600);
 
   if (signedError || !signed?.signedUrl) {
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: signedError?.message || 'Не удалось создать ссылку',
-      });
+    return res.status(500).json({
+      success: false,
+      message: signedError?.message || 'Не удалось создать ссылку',
+    });
   }
 
-  return res
-    .status(200)
-    .json({
-      success: true,
-      data: { signedUrl: signed.signedUrl, filePath: path },
-    });
+  return res.status(200).json({
+    success: true,
+    data: { signedUrl: signed.signedUrl, filePath: path },
+  });
 }

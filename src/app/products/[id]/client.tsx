@@ -60,6 +60,8 @@ export default function ProductClient({ product }: { product: Product }) {
   // Состояния для экспресс-консультации
   const [isAgreed, setIsAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
 
   // Сброс состояний обработки при возврате пользователя на страницу
   useEffect(() => {
@@ -94,6 +96,15 @@ export default function ProductClient({ product }: { product: Product }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
+  }, []);
+
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem('mr_checkout_email') || '';
+      const savedPhone = localStorage.getItem('mr_checkout_phone') || '';
+      if (savedEmail) setCustomerEmail(savedEmail);
+      if (savedPhone) setCustomerPhone(savedPhone);
+    } catch {}
   }, []);
 
   // Проверка согласия перед действием
@@ -247,6 +258,41 @@ export default function ProductClient({ product }: { product: Product }) {
       console.log('🔄 Создание платежа для продукта:', product.title);
       console.log('🔄 Уровень:', level);
 
+      let email = customerEmail.trim();
+      if (!email && typeof window !== 'undefined') {
+        const promptedEmail =
+          window.prompt(
+            'Укажите email, на который отправить доступ к курсу:',
+            ''
+          ) || '';
+        email = promptedEmail.trim();
+        if (email) {
+          setCustomerEmail(email);
+          try {
+            localStorage.setItem('mr_checkout_email', email);
+          } catch {}
+        }
+      }
+
+      email = email.toLowerCase();
+      const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+      if (!email || !emailRegex.test(email)) {
+        throw new Error('Укажите корректный email для получения доступа');
+      }
+
+      let phone = customerPhone.trim();
+      if (!phone && typeof window !== 'undefined') {
+        const promptedPhone =
+          window.prompt('Телефон (необязательно):', '') || '';
+        phone = promptedPhone.trim();
+        if (phone) {
+          setCustomerPhone(phone);
+          try {
+            localStorage.setItem('mr_checkout_phone', phone);
+          } catch {}
+        }
+      }
+
       switch (level) {
         case 1:
           setIsPaymentProcessingLevel1(true);
@@ -276,8 +322,8 @@ export default function ProductClient({ product }: { product: Product }) {
             amount: product.price,
             productId: product.id,
             level,
-            email: 'customer@example.com', // Временный email
-            phone: '+79001234567', // Временный телефон
+            email,
+            phone: phone || undefined,
             // Явно передаем параметры чека для корректного отображения в Robokassa
             receipt: {
               sno: 'usn_income', // УСН Доходы
