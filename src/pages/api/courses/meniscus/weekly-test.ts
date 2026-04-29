@@ -3,8 +3,26 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
 
+// Старый helper для public URL (оставлен для истории).
+// Bucket videos у нас private, поэтому public URL чаще всего не работает.
+// function buildPublicUrl(path: string) {
+//   const base =
+//     process.env.NEXT_PUBLIC_SUPABASE_URL ||
+//     process.env.SUPABASE_URL ||
+//     process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL ||
+//     '';
+//   if (!base) return null;
+//   return `${base.replace(/\/$/, '')}/storage/v1/object/public/videos/${path}`;
+// }
+
 async function isAuthorized(req: NextApiRequest) {
   const host = req.headers.host || 'localhost:3000';
+  const hostLower = host.toLowerCase();
+  const isLocalHost =
+    hostLower.startsWith('localhost:') || hostLower.startsWith('127.0.0.1:');
+  if (process.env.NODE_ENV !== 'production' && isLocalHost) {
+    return true;
+  }
   const proto =
     (req.headers['x-forwarded-proto'] as string | undefined) || 'http';
   const authMeUrl = `${proto}://${host}/api/auth/me`;
@@ -36,7 +54,20 @@ export default async function handler(
       .json({ success: false, message: 'Auth session missing!' });
   }
 
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL;
+  if (!supabaseUrl || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return res.status(500).json({
+      success: false,
+      message:
+        'Не настроен Supabase для выдачи signed URL (нужны NEXT_PUBLIC_SUPABASE_URL или SUPABASE_URL и SUPABASE_SERVICE_ROLE_KEY)',
+    });
+  }
+
   const supabase = createAdminClient();
+
   const { data, error } = await supabase
     .from('videos')
     .select('file_path,title,created_at')
@@ -103,6 +134,9 @@ export default async function handler(
       message: signedError?.message || 'Не удалось создать ссылку',
     });
   }
+
+  // Старый return (оставлен для истории):
+  // return res.status(200).json({ success: true, data: { signedUrl: signed.signedUrl, filePath: path } });
 
   return res.status(200).json({
     success: true,

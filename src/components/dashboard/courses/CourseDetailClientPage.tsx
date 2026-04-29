@@ -44,6 +44,16 @@ export default function CourseDetailClientPage({ slug }: Props) {
 
   useEffect(() => {
     const checkUser = async () => {
+      if (typeof window !== 'undefined') {
+        const hostname = window.location.hostname;
+        const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+        if (process.env.NODE_ENV !== 'production' && isLocal) {
+          setUser({ id: 'local-dev' });
+          setLoading(false);
+          return;
+        }
+      }
+
       // const {
       //   data: { user },
       // } = await supabase.auth.getUser();

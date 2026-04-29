@@ -9,6 +9,20 @@ import {
 
 type StageId = 1 | 2 | 3 | 4 | 5;
 
+function getRailwayApiBaseUrl() {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return '';
+    }
+  }
+
+  return (
+    process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+    'https://minenkovrehab-production-15cc.up.railway.app'
+  );
+}
+
 type Props = {
   activeStageId?: StageId;
   onActiveStageIdChange?: (stageId: StageId) => void;
@@ -20,7 +34,7 @@ type Stage = {
   period: string;
   goals: string[];
   forbidden?: string;
-  videoPath?: string;
+  videoPath?: string | undefined;
   videoDescription?: {
     text: string[];
     timecodes: {
@@ -147,8 +161,10 @@ const STAGES: Stage[] = [
     id: 2,
     title: '2 этап — Ранний восстановительный',
     period: '2–4 недели',
-    videoPath:
-      '6639a601-4007-46d8-a058-fe2cd2086fa1/1774614743708_mHTR6x8C_mp4.mp4',
+    // Старое видео (с водяным знаком) — оставлено для истории:
+    // videoPath:
+    //   '6639a601-4007-46d8-a058-fe2cd2086fa1/1774614743708_mHTR6x8C_mp4.mp4',
+    videoPath: undefined,
     videoDescription: {
       text: ['Ранний восстановительный этап реабилитации (2–4 недели).'],
       timecodes: [
@@ -568,45 +584,83 @@ export function MeniscusStagesDetails({
         return;
       }
 
-      let candidatePath = activeStage.videoPath || null;
-
-      if (!candidatePath && activeStage.id === 2) {
-        const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
-        const { data } = await supabase
-          .from('videos')
-          .select('file_path,title,created_at')
-          .eq('user_id', INSTRUCTOR_USER_ID)
-          .ilike('title', '%ранний восстанов%')
-          .order('created_at', { ascending: false })
-          .limit(1);
-        candidatePath = data?.[0]?.file_path || null;
-      }
-
-      if (!candidatePath) {
+      const baseUrl = isStaticSite ? getRailwayApiBaseUrl() : '';
+      const response = await fetch(
+        `${baseUrl}/api/courses/meniscus/stage-video?stage=${activeStage.id}`,
+        { credentials: 'include' }
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
         setVideoUrl(null);
         return;
       }
+      setVideoUrl(payload.data.signedUrl);
 
-      if (!isStaticSite) {
-        const response = await fetch(
-          `/api/courses/meniscus/stage-video?stage=${activeStage.id}`,
-          { credentials: 'include' }
-        );
-        if (response.status !== 404) {
-          const payload = await response.json().catch(() => null);
-          if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
-            setVideoUrl(null);
-            return;
-          }
-          setVideoUrl(payload.data.signedUrl);
-          return;
-        }
-      }
-
-      const { data: publicData } = supabase.storage
-        .from('videos')
-        .getPublicUrl(candidatePath);
-      setVideoUrl(publicData?.publicUrl || null);
+      // Старый вариант (оставлен для истории): подбор candidatePath на клиенте и publicUrl fallback.
+      // Bucket videos у нас private, поэтому publicUrl не подходит для боевого статического сайта.
+      //
+      // let candidatePath = activeStage.videoPath || null;
+      //
+      // if (!candidatePath && activeStage.id === 2) {
+      //   const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
+      //   const { data: strict } = await supabase
+      //     .from('videos')
+      //     .select('file_path,title,created_at')
+      //     .eq('user_id', INSTRUCTOR_USER_ID)
+      //     .ilike('title', '%ранний восстанов%')
+      //     .order('created_at', { ascending: false })
+      //     .limit(1);
+      //
+      //   candidatePath = strict?.[0]?.file_path || null;
+      //
+      //   if (!candidatePath) {
+      //     const { data: loose } = await supabase
+      //       .from('videos')
+      //       .select('file_path,title,created_at')
+      //       .eq('user_id', INSTRUCTOR_USER_ID)
+      //       .ilike('title', '%ранний%')
+      //       .order('created_at', { ascending: false })
+      //       .limit(1);
+      //     candidatePath = loose?.[0]?.file_path || null;
+      //   }
+      //
+      //   if (!candidatePath) {
+      //     const { data: byWeeks } = await supabase
+      //       .from('videos')
+      //       .select('file_path,title,created_at')
+      //       .eq('user_id', INSTRUCTOR_USER_ID)
+      //       .or('title.ilike.%2-4%,title.ilike.%2–4%,title.ilike.%2 4%')
+      //       .order('created_at', { ascending: false })
+      //       .limit(1);
+      //     candidatePath = byWeeks?.[0]?.file_path || null;
+      //   }
+      // }
+      //
+      // if (!candidatePath) {
+      //   setVideoUrl(null);
+      //   return;
+      // }
+      //
+      // if (!isStaticSite) {
+      //   const response = await fetch(
+      //     `/api/courses/meniscus/stage-video?stage=${activeStage.id}`,
+      //     { credentials: 'include' }
+      //   );
+      //   if (response.status !== 404) {
+      //     const payload = await response.json().catch(() => null);
+      //     if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+      //       setVideoUrl(null);
+      //       return;
+      //     }
+      //     setVideoUrl(payload.data.signedUrl);
+      //     return;
+      //   }
+      // }
+      //
+      // const { data: publicData } = supabase.storage
+      //   .from('videos')
+      //   .getPublicUrl(candidatePath);
+      // setVideoUrl(publicData?.publicUrl || null);
     };
 
     fetchVideoUrl();
@@ -648,74 +702,79 @@ export function MeniscusStagesDetails({
         return;
       }
 
-      if (!isStaticSite) {
-        const response = await fetch('/api/courses/meniscus/weekly-test', {
-          credentials: 'include',
-        });
-        if (response.status !== 404) {
-          const payload = await response.json().catch(() => null);
-          if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
-            setWeeklyTestUrl(null);
-            return;
-          }
-          setWeeklyTestUrl(payload.data.signedUrl);
-          return;
-        }
+      const baseUrl = isStaticSite ? getRailwayApiBaseUrl() : '';
+      const response = await fetch(
+        `${baseUrl}/api/courses/meniscus/weekly-test`,
+        { credentials: 'include' }
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+        setWeeklyTestUrl(null);
+        return;
       }
+      setWeeklyTestUrl(payload.data.signedUrl);
 
-      const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
-      // Старый запрос (оставлен для истории): искали по "еженедель"
-      // const { data, error } = await supabase
+      // Старый вариант (оставлен для истории): делали запросы к таблице videos и пытались
+      // создать signed URL прямо в браузере, а потом падали в publicUrl.
+      // При private bucket это приводит к "видео недоступно" на статическом сайте.
+      //
+      // if (!isStaticSite) {
+      //   const response = await fetch('/api/courses/meniscus/weekly-test', {
+      //     credentials: 'include',
+      //   });
+      //   if (response.status !== 404) {
+      //     const payload = await response.json().catch(() => null);
+      //     if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+      //       setWeeklyTestUrl(null);
+      //       return;
+      //     }
+      //     setWeeklyTestUrl(payload.data.signedUrl);
+      //     return;
+      //   }
+      // }
+      //
+      // const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
+      // const { data: extensionData, error: extensionError } = await supabase
       //   .from('videos')
       //   .select('file_path,title,created_at')
       //   .eq('user_id', INSTRUCTOR_USER_ID)
-      //   .ilike('title', '%еженедель%')
+      //   .ilike('title', '%разгиб%')
       //   .order('created_at', { ascending: false })
       //   .limit(1);
-
-      // Новый приоритет: "тест разгибания" (без водяного знака / оригинальный размер),
-      // затем fallback на "еженедель" для совместимости со старыми названиями.
-      const { data: extensionData, error: extensionError } = await supabase
-        .from('videos')
-        .select('file_path,title,created_at')
-        .eq('user_id', INSTRUCTOR_USER_ID)
-        .ilike('title', '%разгиб%')
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      const { data, error } =
-        extensionData?.[0]?.file_path && !extensionError
-          ? { data: extensionData, error: null }
-          : await supabase
-              .from('videos')
-              .select('file_path,title,created_at')
-              .eq('user_id', INSTRUCTOR_USER_ID)
-              .ilike('title', '%еженедель%')
-              .order('created_at', { ascending: false })
-              .limit(1);
-
-      if (error) {
-        setWeeklyTestUrl(null);
-        return;
-      }
-
-      const filePath = data?.[0]?.file_path || null;
-      if (!filePath) {
-        setWeeklyTestUrl(null);
-        return;
-      }
-
-      const { data: signed, error: signedError } = await supabase.storage
-        .from('videos')
-        .createSignedUrl(filePath, 3600);
-      if (!signedError && signed?.signedUrl) {
-        setWeeklyTestUrl(signed.signedUrl);
-        return;
-      }
-      const { data: publicData } = supabase.storage
-        .from('videos')
-        .getPublicUrl(filePath);
-      setWeeklyTestUrl(publicData?.publicUrl || null);
+      //
+      // const { data, error } =
+      //   extensionData?.[0]?.file_path && !extensionError
+      //     ? { data: extensionData, error: null }
+      //     : await supabase
+      //         .from('videos')
+      //         .select('file_path,title,created_at')
+      //         .eq('user_id', INSTRUCTOR_USER_ID)
+      //         .ilike('title', '%еженедель%')
+      //         .order('created_at', { ascending: false })
+      //         .limit(1);
+      //
+      // if (error) {
+      //   setWeeklyTestUrl(null);
+      //   return;
+      // }
+      //
+      // const filePath = data?.[0]?.file_path || null;
+      // if (!filePath) {
+      //   setWeeklyTestUrl(null);
+      //   return;
+      // }
+      //
+      // const { data: signed, error: signedError } = await supabase.storage
+      //   .from('videos')
+      //   .createSignedUrl(filePath, 3600);
+      // if (!signedError && signed?.signedUrl) {
+      //   setWeeklyTestUrl(signed.signedUrl);
+      //   return;
+      // }
+      // const { data: publicData } = supabase.storage
+      //   .from('videos')
+      //   .getPublicUrl(filePath);
+      // setWeeklyTestUrl(publicData?.publicUrl || null);
     };
     loadWeeklyTest();
   }, [activeStage, isStaticSite, supabase]);

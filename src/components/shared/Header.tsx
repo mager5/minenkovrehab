@@ -87,17 +87,29 @@ export function Header() {
   const router = useRouter();
   // const supabase = createClient();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const lastAuthFetchAtRef = useRef<number>(0);
+  const authFetchInFlightRef = useRef(false);
 
   const refreshUser = useCallback(async (silent?: boolean) => {
+    const now = Date.now();
+    const THROTTLE_MS = 2000;
+    if (authFetchInFlightRef.current) return;
+    if (now - lastAuthFetchAtRef.current < THROTTLE_MS) return;
+    lastAuthFetchAtRef.current = now;
+
     if (!silent) {
       setIsAuthLoading(true);
     }
 
     try {
+      authFetchInFlightRef.current = true;
       const response = await fetch(`${getRailwayApiBaseUrl()}/api/auth/me`, {
         method: 'GET',
         credentials: 'include',
       });
+      if (response.status === 429) {
+        return;
+      }
       if (response.status === 401) {
         setUser(null);
         return;
@@ -113,6 +125,7 @@ export function Header() {
       console.error('Error checking auth status:', error);
       setUser(null);
     } finally {
+      authFetchInFlightRef.current = false;
       if (!silent) {
         setIsAuthLoading(false);
       }

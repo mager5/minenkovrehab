@@ -58,6 +58,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const isLocalhost =
+    request.nextUrl.hostname === 'localhost' ||
+    request.nextUrl.hostname === '127.0.0.1';
+  if (isLocalhost) {
+    return NextResponse.next();
+  }
+
   // Rate limiting для API маршрутов
   if (request.nextUrl.pathname.startsWith('/api/')) {
     const key = getRateLimitKey(request);
@@ -121,13 +128,6 @@ export async function middleware(request: NextRequest) {
   // Удаление заголовков, раскрывающих информацию о сервере
   response.headers.delete('Server');
   response.headers.delete('X-Powered-By');
-
-  const isLocalhost =
-    request.nextUrl.hostname === 'localhost' ||
-    request.nextUrl.hostname === '127.0.0.1';
-  if (isLocalhost) {
-    return response;
-  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
