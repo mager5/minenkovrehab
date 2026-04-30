@@ -60,8 +60,8 @@ export default function ProductClient({ product }: { product: Product }) {
   // Состояния для экспресс-консультации
   const [isAgreed, setIsAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
+  // const [customerEmail, setCustomerEmail] = useState('');
+  // const [customerPhone, setCustomerPhone] = useState('');
 
   // Сброс состояний обработки при возврате пользователя на страницу
   useEffect(() => {
@@ -98,14 +98,14 @@ export default function ProductClient({ product }: { product: Product }) {
     };
   }, []);
 
-  useEffect(() => {
-    try {
-      const savedEmail = localStorage.getItem('mr_checkout_email') || '';
-      const savedPhone = localStorage.getItem('mr_checkout_phone') || '';
-      if (savedEmail) setCustomerEmail(savedEmail);
-      if (savedPhone) setCustomerPhone(savedPhone);
-    } catch {}
-  }, []);
+  // useEffect(() => {
+  //   try {
+  //     const savedEmail = localStorage.getItem('mr_checkout_email') || '';
+  //     const savedPhone = localStorage.getItem('mr_checkout_phone') || '';
+  //     if (savedEmail) setCustomerEmail(savedEmail);
+  //     if (savedPhone) setCustomerPhone(savedPhone);
+  //   } catch {}
+  // }, []);
 
   // Проверка согласия перед действием
   const checkConsent = () => {
@@ -258,6 +258,7 @@ export default function ProductClient({ product }: { product: Product }) {
       console.log('🔄 Создание платежа для продукта:', product.title);
       console.log('🔄 Уровень:', level);
 
+      /*
       const isEmailRequiredForAccess = ![
         'consultation',
         'express-consultation',
@@ -335,6 +336,7 @@ export default function ProductClient({ product }: { product: Product }) {
       //     } catch {}
       //   }
       // }
+      */
 
       switch (level) {
         case 1:
@@ -365,8 +367,8 @@ export default function ProductClient({ product }: { product: Product }) {
             amount: product.price,
             productId: product.id,
             level,
-            email: email || undefined,
-            phone: phone || undefined,
+            email: 'customer@example.com', // Временный email
+            phone: '+79001234567', // Временный телефон
             // Явно передаем параметры чека для корректного отображения в Robokassa
             receipt: {
               sno: 'usn_income', // УСН Доходы

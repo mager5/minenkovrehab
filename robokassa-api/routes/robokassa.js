@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const crypto = require('crypto');
+// const crypto = require('crypto');
 const {
   generatePaymentSignature,
   generateResultSignature,
@@ -18,6 +18,9 @@ const {
   sanitizeString,
   normalizePhone,
 } = require('../utils/validation');
+
+/*
+const crypto = require('crypto');
 
 function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL;
@@ -100,6 +103,7 @@ async function supabaseRestRequest(pathWithQuery, method, body) {
   const data = await response.json().catch(() => null);
   return { response, data };
 }
+*/
 
 // Проверка переменных окружения при загрузке модуля
 const envValidation = validateEnvironment();
@@ -248,24 +252,13 @@ router.post('/generate-payment-url', async (req, res) => {
       console.log('📄 Создан автоматический параметр Receipt для фискализации');
     }
 
-    const shpParams = {};
-    if (email) {
-      shpParams.shp_email = String(email).trim().toLowerCase();
-    }
-    if (productId) {
-      shpParams.shp_product_id = String(productId);
-    }
-    if (typeof level !== 'undefined' && level !== null && String(level)) {
-      shpParams.shp_level = String(level);
-    }
-
     // Генерация подписи с учетом параметра Receipt (если есть)
     const signature = generatePaymentSignature(
       login,
       amount,
       invId,
       password1,
-      shpParams,
+      {},
       receiptParam
     );
 
@@ -274,16 +267,13 @@ router.post('/generate-payment-url', async (req, res) => {
 
     // Формируем параметры в том же порядке как в образце
     const params = [
-      // Добавляем параметры кодировки/локали, чтобы Robokassa корректно обрабатывала кириллицу
-      // (особенно важно, когда Receipt содержит русские символы)
-      'Encoding=utf-8',
-      'Culture=ru',
-      'Locale=ru-RU',
+      // 'Encoding=utf-8',
+      // 'Culture=ru',
+      // 'Locale=ru-RU',
       `MerchantLogin=${encodeURIComponent(login)}`,
       `OutSum=${amount.toFixed(2)}`,
-      // Старый параметр (оставлен для истории): Robokassa может ожидать InvId, а не invoiceID
-      // `invoiceID=${invId}`,
-      `InvId=${invId}`,
+      `invoiceID=${invId}`,
+      // `InvId=${invId}`,
       // `Description=${encodeURIComponent(description)}`, // Убрано по требованию пользователя
     ];
 
@@ -292,10 +282,10 @@ router.post('/generate-payment-url', async (req, res) => {
       params.push(`Receipt=${encodeURIComponent(receiptParam)}`);
     }
 
-    const shpKeys = Object.keys(shpParams).sort();
-    for (const key of shpKeys) {
-      params.push(`${key}=${encodeURIComponent(shpParams[key])}`);
-    }
+    // const shpKeys = Object.keys(shpParams).sort();
+    // for (const key of shpKeys) {
+    //   params.push(`${key}=${encodeURIComponent(shpParams[key])}`);
+    // }
 
     // Добавляем подпись в конце
     params.push(`SignatureValue=${signature}`);
@@ -422,6 +412,7 @@ const handleResult = async (req, res) => {
     // await updateOrderStatus(InvId, 'paid', outSum);
     // await sendConfirmationEmail(email);
 
+    /*
     try {
       const pick = value => (Array.isArray(value) ? value[0] : value);
       const emailRaw =
@@ -575,6 +566,7 @@ const handleResult = async (req, res) => {
     } catch (e) {
       console.error('Post-payment processing error:', e);
     }
+    */
 
     // Robokassa ожидает ответ "OK{InvId}"
     res.send(`OK${InvId}`);
