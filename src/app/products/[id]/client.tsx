@@ -367,26 +367,24 @@ export default function ProductClient({ product }: { product: Product }) {
             amount: product.price,
             productId: product.id,
             level,
-            email: 'customer@example.com', // Временный email
-            phone: '+79001234567', // Временный телефон
-            // Явно передаем параметры чека для корректного отображения в Robokassa
-            receipt: {
-              sno: 'usn_income', // УСН Доходы
-              items: [
-                {
-                  // Добавляем уровень только для "Формулы движения", где это действительно нужно
-                  name:
-                    product.id === 'formula-movement' && level
-                      ? `${product.title} (Уровень ${level})`
-                      : product.title,
-                  quantity: 1,
-                  sum: product.price,
-                  payment_method: getPaymentMethod(product.id),
-                  payment_object: 'service',
-                  tax: 'none', // Без НДС
-                },
-              ],
-            },
+            // email: 'customer@example.com', // Временный email
+            // phone: '+79001234567', // Временный телефон
+            // receipt: {
+            //   sno: 'usn_income', // УСН Доходы
+            //   items: [
+            //     {
+            //       name:
+            //         product.id === 'formula-movement' && level
+            //           ? `${product.title} (Уровень ${level})`
+            //           : product.title,
+            //       quantity: 1,
+            //       sum: product.price,
+            //       payment_method: getPaymentMethod(product.id),
+            //       payment_object: 'service',
+            //       tax: 'none',
+            //     },
+            //   ],
+            // },
           }),
         }
       );
