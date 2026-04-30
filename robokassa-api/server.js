@@ -12,6 +12,7 @@ const coursesRoutes = require('./routes/courses');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const STARTED_AT = new Date().toISOString();
 
 // Middleware для безопасности
 app.use(helmet());
@@ -162,8 +163,15 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
     timestamp: new Date().toISOString(),
+    startedAt: STARTED_AT,
     environment: process.env.NODE_ENV || 'development',
     testMode: process.env.ROBOKASSA_TEST_MODE === 'true',
+    gitSha:
+      process.env.RAILWAY_GIT_COMMIT_SHA ||
+      process.env.RAILWAY_GIT_SHA ||
+      process.env.GIT_COMMIT_SHA ||
+      process.env.GIT_SHA ||
+      null,
   });
 });
 
