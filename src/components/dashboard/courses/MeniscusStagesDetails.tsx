@@ -590,11 +590,15 @@ export function MeniscusStagesDetails({
         { credentials: 'include' }
       );
       const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+      const nextUrl =
+        payload?.data?.url ||
+        payload?.data?.publicUrl ||
+        payload?.data?.signedUrl;
+      if (!response.ok || !payload?.success || !nextUrl) {
         setVideoUrl(null);
         return;
       }
-      setVideoUrl(payload.data.signedUrl);
+      setVideoUrl(nextUrl);
 
       // Старый вариант (оставлен для истории): подбор candidatePath на клиенте и publicUrl fallback.
       // Bucket videos у нас private, поэтому publicUrl не подходит для боевого статического сайта.
@@ -708,11 +712,15 @@ export function MeniscusStagesDetails({
         { credentials: 'include' }
       );
       const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+      const nextUrl =
+        payload?.data?.url ||
+        payload?.data?.publicUrl ||
+        payload?.data?.signedUrl;
+      if (!response.ok || !payload?.success || !nextUrl) {
         setWeeklyTestUrl(null);
         return;
       }
-      setWeeklyTestUrl(payload.data.signedUrl);
+      setWeeklyTestUrl(nextUrl);
 
       // Старый вариант (оставлен для истории): делали запросы к таблице videos и пытались
       // создать signed URL прямо в браузере, а потом падали в publicUrl.

@@ -83,6 +83,12 @@ function encodeStoragePath(objectPath) {
     .join('/');
 }
 
+function buildPublicUrl(bucket, objectPath) {
+  const { url } = getSupabaseConfig();
+  const encodedPath = encodeStoragePath(objectPath);
+  return `${url.replace(/\/$/, '')}/storage/v1/object/public/${bucket}/${encodedPath}`;
+}
+
 async function createSignedUrl(bucket, objectPath, expiresInSeconds) {
   const { url, serviceRoleKey } = getSupabaseConfig();
   const encodedPath = encodeStoragePath(objectPath);
@@ -207,6 +213,7 @@ router.get('/meniscus/stage-video', async (req, res) => {
     }
 
     const expiresInSeconds = 60 * 60 * 6;
+    const publicUrl = buildPublicUrl('videos', path);
     let signedUrl = null;
     try {
       signedUrl = await createSignedUrl('videos', path, expiresInSeconds);
@@ -220,9 +227,11 @@ router.get('/meniscus/stage-video', async (req, res) => {
       }
       throw e;
     }
+
+    const url = publicUrl || signedUrl;
     return res.status(200).json({
       success: true,
-      data: { signedUrl, filePath: path },
+      data: { url, publicUrl, signedUrl, filePath: path },
     });
   } catch (error) {
     return res.status(500).json({
@@ -263,6 +272,7 @@ router.get('/meniscus/weekly-test', async (req, res) => {
     }
 
     const expiresInSeconds = 60 * 60 * 6;
+    const publicUrl = buildPublicUrl('videos', path);
     let signedUrl = null;
     try {
       signedUrl = await createSignedUrl('videos', path, expiresInSeconds);
@@ -275,9 +285,11 @@ router.get('/meniscus/weekly-test', async (req, res) => {
       }
       throw e;
     }
+
+    const url = publicUrl || signedUrl;
     return res.status(200).json({
       success: true,
-      data: { signedUrl, filePath: path },
+      data: { url, publicUrl, signedUrl, filePath: path },
     });
   } catch (error) {
     return res.status(500).json({
