@@ -206,9 +206,10 @@ router.get('/meniscus/stage-video', async (req, res) => {
       });
     }
 
+    const expiresInSeconds = 60 * 60 * 6;
     let signedUrl = null;
     try {
-      signedUrl = await createSignedUrl('videos', path, 3600);
+      signedUrl = await createSignedUrl('videos', path, expiresInSeconds);
     } catch (e) {
       const msg = String(e?.message || '');
       if (msg.toLowerCase().includes('object not found')) {
@@ -261,9 +262,10 @@ router.get('/meniscus/weekly-test', async (req, res) => {
         .json({ success: false, message: 'Видео не найдено' });
     }
 
+    const expiresInSeconds = 60 * 60 * 6;
     let signedUrl = null;
     try {
-      signedUrl = await createSignedUrl('videos', path, 3600);
+      signedUrl = await createSignedUrl('videos', path, expiresInSeconds);
     } catch (e) {
       const msg = String(e?.message || '');
       if (msg.toLowerCase().includes('object not found')) {

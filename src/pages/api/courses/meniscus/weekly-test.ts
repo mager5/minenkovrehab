@@ -126,7 +126,7 @@ export default async function handler(
 
   const { data: signed, error: signedError } = await supabase.storage
     .from('videos')
-    .createSignedUrl(path, 3600);
+    .createSignedUrl(path, 60 * 60 * 6);
 
   if (signedError || !signed?.signedUrl) {
     return res.status(500).json({

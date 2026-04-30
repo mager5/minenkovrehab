@@ -34,6 +34,9 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
   ({ src, poster, type = 'video/mp4' }, ref) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [resolvedSrc, setResolvedSrc] = useState(src);
+    const blobUrlRef = useRef<string | null>(null);
+    const blobFallbackAttemptedRef = useRef(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [volume, setVolume] = useState(1);
@@ -47,6 +50,15 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
     const [error, setError] = useState<string | null>(null);
     const [isAccessible, setIsAccessible] = useState<boolean | null>(null);
+
+    useEffect(() => {
+      setResolvedSrc(src);
+      blobFallbackAttemptedRef.current = false;
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    }, [src]);
 
     useImperativeHandle(ref, () => ({
       seekTo: (time: number) => {
@@ -99,7 +111,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       const handleCanPlay = () => setIsLoading(false);
       const handlePlaying = () => setIsLoading(false);
 
-      const handleError = (e: Event) => {
+      const handleError = async (e: Event) => {
         setIsLoading(false);
         const videoElement = e.target as HTMLVideoElement;
         let errorMessage = 'Ошибка воспроизведения видео.';
@@ -124,6 +136,32 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
               errorMessage = `Неизвестная ошибка: ${videoElement.error.message}`;
           }
         }
+
+        if (
+          videoElement.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED &&
+          !blobFallbackAttemptedRef.current &&
+          resolvedSrc === src &&
+          /^https?:\/\//i.test(src)
+        ) {
+          blobFallbackAttemptedRef.current = true;
+          setIsLoading(true);
+
+          try {
+            const response = await fetch(src);
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            blobUrlRef.current = objectUrl;
+            setResolvedSrc(objectUrl);
+            setError(null);
+            return;
+          } catch (_e) {
+            setIsLoading(false);
+          }
+        }
+
         setError(errorMessage);
       };
 
@@ -147,7 +185,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         video.removeEventListener('canplay', handleCanPlay);
         video.removeEventListener('playing', handlePlaying);
       };
-    }, [src]);
+    }, [src, resolvedSrc]);
 
     const formatTime = (time: number) => {
       const minutes = Math.floor(time / 60);
@@ -258,11 +296,12 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
         <video
           ref={videoRef}
-          src={src}
+          src={resolvedSrc}
           poster={poster}
           className='w-full h-full object-contain'
           onClick={togglePlay}
           playsInline
+          preload='metadata'
         >
           Your browser does not support the video tag.
         </video>
