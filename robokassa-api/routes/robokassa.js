@@ -274,9 +274,16 @@ router.post('/generate-payment-url', async (req, res) => {
 
     // Формируем параметры в том же порядке как в образце
     const params = [
+      // Добавляем параметры кодировки/локали, чтобы Robokassa корректно обрабатывала кириллицу
+      // (особенно важно, когда Receipt содержит русские символы)
+      'Encoding=utf-8',
+      'Culture=ru',
+      'Locale=ru-RU',
       `MerchantLogin=${encodeURIComponent(login)}`,
       `OutSum=${amount.toFixed(2)}`,
-      `invoiceID=${invId}`,
+      // Старый параметр (оставлен для истории): Robokassa может ожидать InvId, а не invoiceID
+      // `invoiceID=${invId}`,
+      `InvId=${invId}`,
       // `Description=${encodeURIComponent(description)}`, // Убрано по требованию пользователя
     ];
 
