@@ -57,6 +57,25 @@ async function supabaseRestGet(pathWithQuery) {
   return { response, data };
 }
 
+async function storageObjectExists(bucket, objectPath) {
+  const { url, serviceRoleKey } = getSupabaseConfig();
+  const encodedPath = encodeStoragePath(objectPath);
+
+  const response = await fetch(
+    `${url}/storage/v1/object/info/${bucket}/${encodedPath}`,
+    {
+      method: 'GET',
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+      },
+    }
+  );
+
+  if (response.ok) return true;
+  return false;
+}
+
 function encodeStoragePath(objectPath) {
   return String(objectPath)
     .split('/')
@@ -126,52 +145,44 @@ async function pickLatestVideoPathByTitleLike(titleLikePattern) {
 }
 
 async function resolveStagePath(stage) {
+  const bucket = 'videos';
+  const candidates = [];
+
   if (stage === '1') {
-    const acutePath = await pickLatestVideoPathByTitleLike('*острый*');
-    if (acutePath) return acutePath;
+    candidates.push(await pickLatestVideoPathByTitleLike('*острый*'));
+    candidates.push(await pickLatestVideoPathByTitleLike('*0-2*'));
+    candidates.push(await pickLatestVideoPathByTitleLike('*0–2*'));
+    candidates.push(await pickLatestVideoPathByTitleLike('*0 2*'));
+    candidates.push(STAGE_VIDEO_PATHS['1'] || null);
+  } else if (stage === '2') {
+    candidates.push(await pickLatestVideoPathByTitleLike('*ранний восстанов*'));
+    candidates.push(await pickLatestVideoPathByTitleLike('*ранний*'));
+    candidates.push(await pickLatestVideoPathByTitleLike('*2-4*'));
+    candidates.push(await pickLatestVideoPathByTitleLike('*2–4*'));
+    candidates.push(await pickLatestVideoPathByTitleLike('*2 4*'));
 
-    const byWeeks1 = await pickLatestVideoPathByTitleLike('*0-2*');
-    if (byWeeks1) return byWeeks1;
+    // Старый вариант (оставлен для истории): всегда возвращали захардкоженный путь для stage=2
+    // candidates.push(STAGE_VIDEO_PATHS['2'] || null);
 
-    const byWeeks2 = await pickLatestVideoPathByTitleLike('*0–2*');
-    if (byWeeks2) return byWeeks2;
-
-    const byWeeks3 = await pickLatestVideoPathByTitleLike('*0 2*');
-    if (byWeeks3) return byWeeks3;
-
-    return STAGE_VIDEO_PATHS['1'] || null;
+    candidates.push(STAGE_VIDEO_PATHS['2'] || null);
+  } else if (stage === '3') {
+    candidates.push(await pickLatestVideoPathByTitleLike('*поздний*'));
+    candidates.push(await pickLatestVideoPathByTitleLike('*4-8*'));
+    candidates.push(await pickLatestVideoPathByTitleLike('*4–8*'));
+    candidates.push(await pickLatestVideoPathByTitleLike('*4 8*'));
+    candidates.push(STAGE_VIDEO_PATHS['3'] || null);
+  } else {
+    candidates.push(STAGE_VIDEO_PATHS[stage] || null);
   }
 
-  if (stage === '3') {
-    const latePath = await pickLatestVideoPathByTitleLike('*поздний*');
-    if (latePath) return latePath;
-
-    const byWeeks1 = await pickLatestVideoPathByTitleLike('*4-8*');
-    if (byWeeks1) return byWeeks1;
-
-    const byWeeks2 = await pickLatestVideoPathByTitleLike('*4–8*');
-    if (byWeeks2) return byWeeks2;
-
-    const byWeeks3 = await pickLatestVideoPathByTitleLike('*4 8*');
-    if (byWeeks3) return byWeeks3;
-
-    return STAGE_VIDEO_PATHS['3'] || null;
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    if (!String(candidate).startsWith(`${INSTRUCTOR_USER_ID}/`)) continue;
+    const exists = await storageObjectExists(bucket, candidate);
+    if (exists) return candidate;
   }
 
-  if (stage !== '2') {
-    return STAGE_VIDEO_PATHS[stage] || null;
-  }
-
-  const strictPath = await pickLatestVideoPathByTitleLike('*ранний восстанов*');
-  if (strictPath) return strictPath;
-
-  const loosePath = await pickLatestVideoPathByTitleLike('*ранний*');
-  if (loosePath) return loosePath;
-
-  // Старый вариант (оставлен для истории): всегда возвращали захардкоженный путь для stage=2
-  // return STAGE_VIDEO_PATHS['2'] || null;
-
-  return STAGE_VIDEO_PATHS['2'] || null;
+  return null;
 }
 
 router.get('/meniscus/stage-video', async (req, res) => {
@@ -187,11 +198,11 @@ router.get('/meniscus/stage-video', async (req, res) => {
     const auth = requireAuth(req, res);
     if (!auth) return;
 
-    const path = (await resolveStagePath(stage)) || fallbackPath;
-    if (!String(path).startsWith(`${INSTRUCTOR_USER_ID}/`)) {
-      return res.status(400).json({
+    const path = (await resolveStagePath(stage)) || null;
+    if (!path) {
+      return res.status(404).json({
         success: false,
-        message: 'Недопустимый путь файла',
+        message: 'Видео не найдено',
       });
     }
 
@@ -216,22 +227,26 @@ router.get('/meniscus/weekly-test', async (req, res) => {
     // Старый приоритет (оставлен для истории): искали по "еженедель"
     // const path = await pickLatestVideoPathByTitleLike('*еженедель*');
 
-    const path =
-      (await pickLatestVideoPathByTitleLike('*разгиб*')) ||
-      (await pickLatestVideoPathByTitleLike('*еженедель*')) ||
-      (await pickLatestVideoPathByTitleLike('*тест*'));
+    const candidates = [
+      await pickLatestVideoPathByTitleLike('*разгиб*'),
+      await pickLatestVideoPathByTitleLike('*еженедель*'),
+      await pickLatestVideoPathByTitleLike('*тест*'),
+    ].filter(Boolean);
+
+    let path = null;
+    for (const candidate of candidates) {
+      if (!String(candidate).startsWith(`${INSTRUCTOR_USER_ID}/`)) continue;
+      const exists = await storageObjectExists('videos', candidate);
+      if (exists) {
+        path = candidate;
+        break;
+      }
+    }
 
     if (!path) {
       return res
         .status(404)
         .json({ success: false, message: 'Видео не найдено' });
-    }
-
-    if (!String(path).startsWith(`${INSTRUCTOR_USER_ID}/`)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Недопустимый путь файла',
-      });
     }
 
     const signedUrl = await createSignedUrl('videos', path, 3600);
