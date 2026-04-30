@@ -6,6 +6,7 @@ const router = express.Router();
 
 const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || 'mr_auth';
 const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
+const SIGNED_URL_EXPIRES_IN_SECONDS = 60 * 60 * 24 * 7;
 
 const STAGE_VIDEO_PATHS = {
   1: '6639a601-4007-46d8-a058-fe2cd2086fa1/1771875320518_1_HLh9prrm_mp4.mp4',
@@ -130,6 +131,47 @@ async function createSignedUrl(bucket, objectPath, expiresInSeconds) {
   return `${url.replace(/\/$/, '')}${signed.startsWith('/') ? '' : '/'}${signed}`;
 }
 
+async function fetchStorageObjectText(bucket, objectPath) {
+  const { url, serviceRoleKey } = getSupabaseConfig();
+  const encodedPath = encodeStoragePath(objectPath);
+  const response = await fetch(
+    `${url.replace(/\/$/, '')}/storage/v1/object/${bucket}/${encodedPath}`,
+    {
+      method: 'GET',
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+      },
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Storage object fetch error: ${response.status}`);
+  }
+  return await response.text();
+}
+
+function getSelfBaseUrl(req) {
+  const host = req.get('host');
+  return `${req.protocol}://${host}`;
+}
+
+function getDirname(objectPath) {
+  const parts = String(objectPath).split('/');
+  parts.pop();
+  return parts.join('/');
+}
+
+function joinStoragePath(dir, relativePath) {
+  if (!dir) return relativePath;
+  return `${dir.replace(/\/$/, '')}/${String(relativePath).replace(/^\//, '')}`;
+}
+
+function deriveHlsMasterPathFromMp4Path(mp4Path) {
+  const p = String(mp4Path);
+  if (!/\.mp4(\?|#|$)/i.test(p)) return null;
+  return p.replace(/\.mp4(\?|#|$)/i, '_hls/master.m3u8');
+}
+
 async function pickLatestVideoPathByTitleLike(titleLikePattern) {
   const { response, data } = await supabaseRestGet(
     `/rest/v1/videos?select=file_path,title,created_at&user_id=eq.${encodeURIComponent(
@@ -212,11 +254,14 @@ router.get('/meniscus/stage-video', async (req, res) => {
       });
     }
 
-    const expiresInSeconds = 60 * 60 * 6;
     const publicUrl = buildPublicUrl('videos', path);
     let signedUrl = null;
     try {
-      signedUrl = await createSignedUrl('videos', path, expiresInSeconds);
+      signedUrl = await createSignedUrl(
+        'videos',
+        path,
+        SIGNED_URL_EXPIRES_IN_SECONDS
+      );
     } catch (e) {
       const msg = String(e?.message || '');
       if (msg.toLowerCase().includes('object not found')) {
@@ -228,10 +273,30 @@ router.get('/meniscus/stage-video', async (req, res) => {
       throw e;
     }
 
+    const hlsMasterPath = deriveHlsMasterPathFromMp4Path(path);
+    let hlsMasterUrl = null;
+    if (hlsMasterPath) {
+      const exists = await storageObjectExists('videos', hlsMasterPath);
+      if (exists) {
+        hlsMasterUrl = `${getSelfBaseUrl(
+          req
+        )}/api/courses/meniscus/hls/master?path=${encodeURIComponent(
+          hlsMasterPath
+        )}`;
+      }
+    }
+
     const url = publicUrl || signedUrl;
     return res.status(200).json({
       success: true,
-      data: { url, publicUrl, signedUrl, filePath: path },
+      data: {
+        url,
+        publicUrl,
+        signedUrl,
+        filePath: path,
+        hlsMasterUrl,
+        hlsMasterPath,
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -271,11 +336,14 @@ router.get('/meniscus/weekly-test', async (req, res) => {
         .json({ success: false, message: 'Видео не найдено' });
     }
 
-    const expiresInSeconds = 60 * 60 * 6;
     const publicUrl = buildPublicUrl('videos', path);
     let signedUrl = null;
     try {
-      signedUrl = await createSignedUrl('videos', path, expiresInSeconds);
+      signedUrl = await createSignedUrl(
+        'videos',
+        path,
+        SIGNED_URL_EXPIRES_IN_SECONDS
+      );
     } catch (e) {
       const msg = String(e?.message || '');
       if (msg.toLowerCase().includes('object not found')) {
@@ -286,16 +354,122 @@ router.get('/meniscus/weekly-test', async (req, res) => {
       throw e;
     }
 
+    const hlsMasterPath = deriveHlsMasterPathFromMp4Path(path);
+    let hlsMasterUrl = null;
+    if (hlsMasterPath) {
+      const exists = await storageObjectExists('videos', hlsMasterPath);
+      if (exists) {
+        hlsMasterUrl = `${getSelfBaseUrl(
+          req
+        )}/api/courses/meniscus/hls/master?path=${encodeURIComponent(
+          hlsMasterPath
+        )}`;
+      }
+    }
+
     const url = publicUrl || signedUrl;
     return res.status(200).json({
       success: true,
-      data: { url, publicUrl, signedUrl, filePath: path },
+      data: {
+        url,
+        publicUrl,
+        signedUrl,
+        filePath: path,
+        hlsMasterUrl,
+        hlsMasterPath,
+      },
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: error?.message || 'Внутренняя ошибка сервера',
     });
+  }
+});
+
+router.get('/meniscus/hls/master', async (req, res) => {
+  try {
+    const auth = requireAuth(req, res);
+    if (!auth) return;
+
+    const masterPath = typeof req.query.path === 'string' ? req.query.path : '';
+    if (
+      !masterPath ||
+      !String(masterPath).startsWith(`${INSTRUCTOR_USER_ID}/`)
+    ) {
+      return res.status(400).send('Bad Request');
+    }
+
+    const exists = await storageObjectExists('videos', masterPath);
+    if (!exists) {
+      return res.status(404).send('Not Found');
+    }
+
+    const text = await fetchStorageObjectText('videos', masterPath);
+    const baseDir = getDirname(masterPath);
+
+    const playlistUrlBase = `${getSelfBaseUrl(req)}/api/courses/meniscus/hls/playlist?path=`;
+    const rewritten = text
+      .split(/\r?\n/)
+      .map(line => {
+        if (!line || line.startsWith('#')) return line;
+        const variantPath = joinStoragePath(baseDir, line);
+        return `${playlistUrlBase}${encodeURIComponent(variantPath)}`;
+      })
+      .join('\n');
+
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    return res.status(200).send(rewritten);
+  } catch (error) {
+    return res.status(500).send('Internal Server Error');
+  }
+});
+
+router.get('/meniscus/hls/playlist', async (req, res) => {
+  try {
+    const auth = requireAuth(req, res);
+    if (!auth) return;
+
+    const playlistPath =
+      typeof req.query.path === 'string' ? req.query.path : '';
+    if (
+      !playlistPath ||
+      !String(playlistPath).startsWith(`${INSTRUCTOR_USER_ID}/`)
+    ) {
+      return res.status(400).send('Bad Request');
+    }
+
+    const exists = await storageObjectExists('videos', playlistPath);
+    if (!exists) {
+      return res.status(404).send('Not Found');
+    }
+
+    const text = await fetchStorageObjectText('videos', playlistPath);
+    const baseDir = getDirname(playlistPath);
+
+    const rewrittenLines = await Promise.all(
+      text.split(/\r?\n/).map(async line => {
+        if (!line || line.startsWith('#')) return line;
+        if (/^https?:\/\//i.test(line)) return line;
+        const segmentPath = joinStoragePath(baseDir, line);
+        try {
+          return await createSignedUrl(
+            'videos',
+            segmentPath,
+            SIGNED_URL_EXPIRES_IN_SECONDS
+          );
+        } catch (_e) {
+          return line;
+        }
+      })
+    );
+
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    return res.status(200).send(rewrittenLines.join('\n'));
+  } catch (error) {
+    return res.status(500).send('Internal Server Error');
   }
 });
 

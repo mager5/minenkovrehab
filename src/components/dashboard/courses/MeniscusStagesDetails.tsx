@@ -591,6 +591,7 @@ export function MeniscusStagesDetails({
       );
       const payload = await response.json().catch(() => null);
       const nextUrl =
+        payload?.data?.hlsMasterUrl ||
         payload?.data?.url ||
         payload?.data?.publicUrl ||
         payload?.data?.signedUrl;
@@ -713,6 +714,7 @@ export function MeniscusStagesDetails({
       );
       const payload = await response.json().catch(() => null);
       const nextUrl =
+        payload?.data?.hlsMasterUrl ||
         payload?.data?.url ||
         payload?.data?.publicUrl ||
         payload?.data?.signedUrl;

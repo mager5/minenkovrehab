@@ -43,6 +43,7 @@
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
     "framer-motion": "^10.16.4",
+    "hls.js": "^1.6.16",
     "livekit-client": "^2.15.3",
     "lottie-react": "^2.4.0",
     "lucide-react": "^0.525.0",

@@ -7,6 +7,7 @@ import {
   forwardRef,
   useImperativeHandle,
 } from 'react';
+import Hls from 'hls.js';
 import {
   Play,
   Pause,
@@ -37,6 +38,8 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     const [resolvedSrc, setResolvedSrc] = useState(src);
     const blobUrlRef = useRef<string | null>(null);
     const blobFallbackAttemptedRef = useRef(false);
+    const hlsRef = useRef<Hls | null>(null);
+    const [useHlsJs, setUseHlsJs] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [volume, setVolume] = useState(1);
@@ -54,6 +57,11 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     useEffect(() => {
       setResolvedSrc(src);
       blobFallbackAttemptedRef.current = false;
+      setUseHlsJs(false);
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
       if (blobUrlRef.current) {
         URL.revokeObjectURL(blobUrlRef.current);
         blobUrlRef.current = null;
@@ -111,6 +119,45 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       const handleCanPlay = () => setIsLoading(false);
       const handlePlaying = () => setIsLoading(false);
 
+      const isHls =
+        type.toLowerCase().includes('mpegurl') ||
+        /\.m3u8(\?|#|$)/i.test(String(src));
+
+      if (isHls) {
+        if (hlsRef.current) {
+          hlsRef.current.destroy();
+          hlsRef.current = null;
+        }
+
+        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          setUseHlsJs(false);
+          setResolvedSrc(src);
+        } else if (Hls.isSupported()) {
+          const hls = new Hls({
+            enableWorker: true,
+            backBufferLength: 90,
+          });
+          hlsRef.current = hls;
+          setUseHlsJs(true);
+          hls.loadSource(src);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.ERROR, (_event, data) => {
+            if (!data?.fatal) return;
+            if (hlsRef.current) {
+              hlsRef.current.destroy();
+              hlsRef.current = null;
+            }
+            setIsLoading(false);
+            setError('Ошибка загрузки HLS видео.');
+          });
+        } else {
+          setUseHlsJs(false);
+          setError('HLS видео не поддерживается браузером.');
+        }
+      } else {
+        setUseHlsJs(false);
+      }
+
       const handleError = async (e: Event) => {
         setIsLoading(false);
         const videoElement = e.target as HTMLVideoElement;
@@ -141,7 +188,8 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
           videoElement.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED &&
           !blobFallbackAttemptedRef.current &&
           resolvedSrc === src &&
-          /^https?:\/\//i.test(src)
+          /^https?:\/\//i.test(src) &&
+          !isHls
         ) {
           blobFallbackAttemptedRef.current = true;
           setIsLoading(true);
@@ -184,8 +232,13 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         video.removeEventListener('waiting', handleWaiting);
         video.removeEventListener('canplay', handleCanPlay);
         video.removeEventListener('playing', handlePlaying);
+        if (hlsRef.current) {
+          hlsRef.current.destroy();
+          hlsRef.current = null;
+        }
+        setUseHlsJs(false);
       };
-    }, [src, resolvedSrc]);
+    }, [src, resolvedSrc, type]);
 
     const formatTime = (time: number) => {
       const minutes = Math.floor(time / 60);
@@ -296,7 +349,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
         <video
           ref={videoRef}
-          src={resolvedSrc}
+          src={useHlsJs ? undefined : resolvedSrc}
           poster={poster}
           className='w-full h-full object-contain'
           onClick={togglePlay}
