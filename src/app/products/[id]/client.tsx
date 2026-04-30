@@ -258,40 +258,83 @@ export default function ProductClient({ product }: { product: Product }) {
       console.log('🔄 Создание платежа для продукта:', product.title);
       console.log('🔄 Уровень:', level);
 
+      const isEmailRequiredForAccess = ![
+        'consultation',
+        'express-consultation',
+        'online-training',
+      ].includes(product.id);
+
       let email = customerEmail.trim();
-      if (!email && typeof window !== 'undefined') {
-        const promptedEmail =
-          window.prompt(
-            'Укажите email, на который отправить доступ к курсу:',
-            ''
-          ) || '';
-        email = promptedEmail.trim();
-        if (email) {
-          setCustomerEmail(email);
-          try {
-            localStorage.setItem('mr_checkout_email', email);
-          } catch {}
-        }
-      }
 
-      email = email.toLowerCase();
+      // Старый вариант (оставлен для истории): всегда требовали email и блокировали оплату услуг
+      // if (!email && typeof window !== 'undefined') {
+      //   const promptedEmail =
+      //     window.prompt(
+      //       'Укажите email, на который отправить доступ к курсу:',
+      //       ''
+      //     ) || '';
+      //   email = promptedEmail.trim();
+      //   if (email) {
+      //     setCustomerEmail(email);
+      //     try {
+      //       localStorage.setItem('mr_checkout_email', email);
+      //     } catch {}
+      //   }
+      // }
+      //
+      // email = email.toLowerCase();
+      // const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+      // if (!email || !emailRegex.test(email)) {
+      //   throw new Error('Укажите корректный email для получения доступа');
+      // }
+
       const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-      if (!email || !emailRegex.test(email)) {
-        throw new Error('Укажите корректный email для получения доступа');
-      }
+      if (isEmailRequiredForAccess) {
+        if (!email && typeof window !== 'undefined') {
+          const promptedEmail =
+            window.prompt(
+              'Укажите email, на который отправить доступ к курсу:',
+              ''
+            ) || '';
+          email = promptedEmail.trim();
+          if (email) {
+            setCustomerEmail(email);
+            try {
+              localStorage.setItem('mr_checkout_email', email);
+            } catch {}
+          }
+        }
 
-      let phone = customerPhone.trim();
-      if (!phone && typeof window !== 'undefined') {
-        const promptedPhone =
-          window.prompt('Телефон (необязательно):', '') || '';
-        phone = promptedPhone.trim();
-        if (phone) {
-          setCustomerPhone(phone);
-          try {
-            localStorage.setItem('mr_checkout_phone', phone);
-          } catch {}
+        email = email.toLowerCase();
+        if (!email || !emailRegex.test(email)) {
+          throw new Error('Укажите корректный email для получения доступа');
+        }
+      } else {
+        // Для услуг (консультации/тренировки) email необязателен:
+        // если введен и корректен — передаем; если пустой/некорректный — не блокируем оплату.
+        if (email) {
+          const normalized = email.toLowerCase();
+          if (emailRegex.test(normalized)) {
+            email = normalized;
+          } else {
+            email = '';
+          }
         }
       }
+
+      const phone = customerPhone.trim();
+      // Старый вариант (оставлен для истории): спрашивали телефон через window.prompt
+      // if (!phone && typeof window !== 'undefined') {
+      //   const promptedPhone =
+      //     window.prompt('Телефон (необязательно):', '') || '';
+      //   phone = promptedPhone.trim();
+      //   if (phone) {
+      //     setCustomerPhone(phone);
+      //     try {
+      //       localStorage.setItem('mr_checkout_phone', phone);
+      //     } catch {}
+      //   }
+      // }
 
       switch (level) {
         case 1:
@@ -322,7 +365,7 @@ export default function ProductClient({ product }: { product: Product }) {
             amount: product.price,
             productId: product.id,
             level,
-            email,
+            email: email || undefined,
             phone: phone || undefined,
             // Явно передаем параметры чека для корректного отображения в Robokassa
             receipt: {
