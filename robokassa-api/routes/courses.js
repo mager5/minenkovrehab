@@ -126,6 +126,38 @@ async function pickLatestVideoPathByTitleLike(titleLikePattern) {
 }
 
 async function resolveStagePath(stage) {
+  if (stage === '1') {
+    const acutePath = await pickLatestVideoPathByTitleLike('*острый*');
+    if (acutePath) return acutePath;
+
+    const byWeeks1 = await pickLatestVideoPathByTitleLike('*0-2*');
+    if (byWeeks1) return byWeeks1;
+
+    const byWeeks2 = await pickLatestVideoPathByTitleLike('*0–2*');
+    if (byWeeks2) return byWeeks2;
+
+    const byWeeks3 = await pickLatestVideoPathByTitleLike('*0 2*');
+    if (byWeeks3) return byWeeks3;
+
+    return STAGE_VIDEO_PATHS['1'] || null;
+  }
+
+  if (stage === '3') {
+    const latePath = await pickLatestVideoPathByTitleLike('*поздний*');
+    if (latePath) return latePath;
+
+    const byWeeks1 = await pickLatestVideoPathByTitleLike('*4-8*');
+    if (byWeeks1) return byWeeks1;
+
+    const byWeeks2 = await pickLatestVideoPathByTitleLike('*4–8*');
+    if (byWeeks2) return byWeeks2;
+
+    const byWeeks3 = await pickLatestVideoPathByTitleLike('*4 8*');
+    if (byWeeks3) return byWeeks3;
+
+    return STAGE_VIDEO_PATHS['3'] || null;
+  }
+
   if (stage !== '2') {
     return STAGE_VIDEO_PATHS[stage] || null;
   }
@@ -135,6 +167,9 @@ async function resolveStagePath(stage) {
 
   const loosePath = await pickLatestVideoPathByTitleLike('*ранний*');
   if (loosePath) return loosePath;
+
+  // Старый вариант (оставлен для истории): всегда возвращали захардкоженный путь для stage=2
+  // return STAGE_VIDEO_PATHS['2'] || null;
 
   return STAGE_VIDEO_PATHS['2'] || null;
 }
