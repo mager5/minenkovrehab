@@ -206,7 +206,19 @@ router.get('/meniscus/stage-video', async (req, res) => {
       });
     }
 
-    const signedUrl = await createSignedUrl('videos', path, 3600);
+    let signedUrl = null;
+    try {
+      signedUrl = await createSignedUrl('videos', path, 3600);
+    } catch (e) {
+      const msg = String(e?.message || '');
+      if (msg.toLowerCase().includes('object not found')) {
+        return res.status(404).json({
+          success: false,
+          message: 'Видео не найдено',
+        });
+      }
+      throw e;
+    }
     return res.status(200).json({
       success: true,
       data: { signedUrl, filePath: path },
@@ -249,7 +261,18 @@ router.get('/meniscus/weekly-test', async (req, res) => {
         .json({ success: false, message: 'Видео не найдено' });
     }
 
-    const signedUrl = await createSignedUrl('videos', path, 3600);
+    let signedUrl = null;
+    try {
+      signedUrl = await createSignedUrl('videos', path, 3600);
+    } catch (e) {
+      const msg = String(e?.message || '');
+      if (msg.toLowerCase().includes('object not found')) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Видео не найдено' });
+      }
+      throw e;
+    }
     return res.status(200).json({
       success: true,
       data: { signedUrl, filePath: path },
