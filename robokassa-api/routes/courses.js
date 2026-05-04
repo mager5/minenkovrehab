@@ -22,6 +22,34 @@ const STAGE_VIDEO_PATHS = {
   3: '6639a601-4007-46d8-a058-fe2cd2086fa1/1774895893009________________________________________________4_8________.mp4',
 };
 
+function applyCors(req, res) {
+  const origin = req.get('origin');
+  const allowedOrigins = [
+    'https://minenkovrehab.ru',
+    'https://www.minenkovrehab.ru',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ];
+
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, Range'
+  );
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+}
+
+router.options('/meniscus/*', (req, res) => {
+  applyCors(req, res);
+  return res.status(204).send('');
+});
+
 function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -266,6 +294,8 @@ async function resolveStagePath(stage) {
 
 router.get('/meniscus/stage-video', async (req, res) => {
   try {
+    applyCors(req, res);
+
     const stage = typeof req.query.stage === 'string' ? req.query.stage : '';
     const fallbackPath = STAGE_VIDEO_PATHS[stage];
     if (!fallbackPath) {
@@ -339,6 +369,8 @@ router.get('/meniscus/stage-video', async (req, res) => {
 
 router.get('/meniscus/weekly-test', async (req, res) => {
   try {
+    applyCors(req, res);
+
     const auth = requireAuth(req, res);
     if (!auth) return;
 
@@ -421,6 +453,8 @@ router.get('/meniscus/weekly-test', async (req, res) => {
 
 router.get('/meniscus/hls/master', async (req, res) => {
   try {
+    applyCors(req, res);
+
     const auth = requireAuth(req, res);
     if (!auth) return;
 
@@ -457,6 +491,8 @@ router.get('/meniscus/hls/master', async (req, res) => {
 
 router.get('/meniscus/hls/playlist', async (req, res) => {
   try {
+    applyCors(req, res);
+
     const auth = requireAuth(req, res);
     if (!auth) return;
 
