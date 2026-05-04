@@ -528,11 +528,19 @@ router.get('/meniscus/hls/playlist', async (req, res) => {
         if (/^https?:\/\//i.test(line)) return line;
         const segmentPath = joinStoragePath(baseDir, line);
         try {
-          return await createSignedUrl(
-            'videos',
-            segmentPath,
-            SIGNED_URL_EXPIRES_IN_SECONDS
-          );
+          // Старый вариант (оставлен для истории): отдавали прямые signed URL на Supabase,
+          // но в некоторых браузерах это приводит к ORB/CORS блокировке сегментов.
+          // return await createSignedUrl(
+          //   'videos',
+          //   segmentPath,
+          //   SIGNED_URL_EXPIRES_IN_SECONDS
+          // );
+
+          return `${getSelfBaseUrl(
+            req
+          )}/api/courses/meniscus/hls/segment?path=${encodeURIComponent(
+            segmentPath
+          )}`;
         } catch (_e) {
           return line;
         }
@@ -543,6 +551,69 @@ router.get('/meniscus/hls/playlist', async (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=300');
     return res.status(200).send(rewrittenLines.join('\n'));
   } catch (error) {
+    return res.status(500).send('Internal Server Error');
+  }
+});
+
+router.get('/meniscus/hls/segment', async (req, res) => {
+  try {
+    applyCors(req, res);
+
+    const auth = requireAuth(req, res);
+    if (!auth) return;
+
+    const objectPath = typeof req.query.path === 'string' ? req.query.path : '';
+    if (!objectPath || !isAllowedVideoPath(objectPath)) {
+      return res.status(400).send('Bad Request');
+    }
+
+    const exists = await storageObjectExists('videos', objectPath);
+    if (!exists) {
+      return res.status(404).send('Not Found');
+    }
+
+    const { url, serviceRoleKey } = getSupabaseConfig();
+    const encodedPath = encodeStoragePath(objectPath);
+    const upstreamUrl = `${url.replace(/\/$/, '')}/storage/v1/object/videos/${encodedPath}`;
+
+    const headers = {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+    };
+    const range = req.get('range');
+    if (range) {
+      headers.Range = range;
+    }
+
+    const upstream = await fetch(upstreamUrl, { method: 'GET', headers });
+    if (!upstream.ok && upstream.status !== 206) {
+      return res.status(upstream.status).send('Upstream Error');
+    }
+
+    const lower = String(objectPath).toLowerCase();
+    if (lower.endsWith('.m3u8')) {
+      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    } else if (lower.endsWith('.ts')) {
+      res.setHeader('Content-Type', 'video/mp2t');
+    } else if (lower.endsWith('.mp4')) {
+      res.setHeader('Content-Type', 'video/mp4');
+    } else {
+      res.setHeader('Content-Type', 'application/octet-stream');
+    }
+
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+    const contentLength = upstream.headers.get('content-length');
+    if (contentLength) res.setHeader('Content-Length', contentLength);
+    const contentRange = upstream.headers.get('content-range');
+    if (contentRange) res.setHeader('Content-Range', contentRange);
+    const acceptRanges = upstream.headers.get('accept-ranges');
+    if (acceptRanges) res.setHeader('Accept-Ranges', acceptRanges);
+
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+    return res.status(upstream.status).send(buffer);
+  } catch (_error) {
     return res.status(500).send('Internal Server Error');
   }
 });

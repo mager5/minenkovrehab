@@ -135,7 +135,13 @@ export default async function handler(
       if (/^https?:\/\//i.test(line)) return line;
       const segmentPath = joinStoragePath(baseDir, line);
       try {
-        return await getSignedSegmentUrl(supabase, segmentPath);
+        // Старый вариант (оставлен для истории): отдавали прямые signed URL на Supabase,
+        // но в некоторых браузерах это приводит к ORB/CORS блокировке сегментов.
+        // return await getSignedSegmentUrl(supabase, segmentPath);
+
+        return `/api/courses/meniscus/hls/segment?path=${encodeURIComponent(
+          segmentPath
+        )}`;
       } catch (_e) {
         return line;
       }
