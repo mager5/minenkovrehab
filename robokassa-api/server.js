@@ -15,7 +15,14 @@ const PORT = process.env.PORT || 3000;
 const STARTED_AT = new Date().toISOString();
 
 // Middleware для безопасности
-app.use(helmet());
+// Старый вариант (оставлен для истории):
+// app.use(helmet());
+
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'same-site' },
+  })
+);
 
 app.set('trust proxy', 1);
 
@@ -38,7 +45,7 @@ app.use(
     origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Range'],
   })
 );
 
