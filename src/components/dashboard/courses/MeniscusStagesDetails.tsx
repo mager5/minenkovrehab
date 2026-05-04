@@ -606,10 +606,18 @@ export function MeniscusStagesDetails({
       //   payload?.data?.publicUrl ||
       //   payload?.data?.signedUrl;
 
+      // Старый порядок (оставлен для истории): signedUrl стоял выше url,
+      // но прямые signed URL на Supabase могут блокироваться (ORB/CORP).
+      // const nextUrl =
+      //   payload?.data?.hlsMasterUrl ||
+      //   payload?.data?.signedUrl ||
+      //   payload?.data?.url ||
+      //   payload?.data?.publicUrl;
+
       const nextUrl =
         payload?.data?.hlsMasterUrl ||
-        payload?.data?.signedUrl ||
         payload?.data?.url ||
+        payload?.data?.signedUrl ||
         payload?.data?.publicUrl;
       if (!response.ok || !payload?.success || !nextUrl) {
         setVideoUrl(null);
@@ -737,10 +745,18 @@ export function MeniscusStagesDetails({
       //   payload?.data?.publicUrl ||
       //   payload?.data?.signedUrl;
 
+      // Старый порядок (оставлен для истории): signedUrl стоял выше url,
+      // но прямые signed URL на Supabase могут блокироваться (ORB/CORP).
+      // const nextUrl =
+      //   payload?.data?.hlsMasterUrl ||
+      //   payload?.data?.signedUrl ||
+      //   payload?.data?.url ||
+      //   payload?.data?.publicUrl;
+
       const nextUrl =
         payload?.data?.hlsMasterUrl ||
-        payload?.data?.signedUrl ||
         payload?.data?.url ||
+        payload?.data?.signedUrl ||
         payload?.data?.publicUrl;
       if (!response.ok || !payload?.success || !nextUrl) {
         setWeeklyTestUrl(null);

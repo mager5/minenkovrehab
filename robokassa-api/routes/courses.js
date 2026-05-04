@@ -355,13 +355,22 @@ router.get('/meniscus/stage-video', async (req, res) => {
       }
     }
 
+    const proxyUrl = `${getSelfBaseUrl(
+      req
+    )}/api/courses/meniscus/hls/segment?path=${encodeURIComponent(path)}`;
+
     // Старый вариант (оставлен для истории): publicUrl мог быть недоступен при private bucket
     // const url = publicUrl || signedUrl;
-    const url = signedUrl;
+    //
+    // Старый вариант (оставлен для истории): отдавали прямой signedUrl на Supabase,
+    // но в некоторых браузерах это приводит к ORB/CORP блокировке mp4.
+    // const url = signedUrl;
+    const url = proxyUrl;
     return res.status(200).json({
       success: true,
       data: {
         url,
+        proxyUrl,
         publicUrl,
         signedUrl,
         filePath: path,
@@ -441,13 +450,22 @@ router.get('/meniscus/weekly-test', async (req, res) => {
       }
     }
 
+    const proxyUrl = `${getSelfBaseUrl(
+      req
+    )}/api/courses/meniscus/hls/segment?path=${encodeURIComponent(path)}`;
+
     // Старый вариант (оставлен для истории): publicUrl мог быть недоступен при private bucket
     // const url = publicUrl || signedUrl;
-    const url = signedUrl;
+    //
+    // Старый вариант (оставлен для истории): отдавали прямой signedUrl на Supabase,
+    // но в некоторых браузерах это приводит к ORB/CORP блокировке mp4.
+    // const url = signedUrl;
+    const url = proxyUrl;
     return res.status(200).json({
       success: true,
       data: {
         url,
+        proxyUrl,
         publicUrl,
         signedUrl,
         filePath: path,
