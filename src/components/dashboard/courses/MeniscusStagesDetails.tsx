@@ -598,11 +598,19 @@ export function MeniscusStagesDetails({
         { credentials: 'include' }
       );
       const payload = await response.json().catch(() => null);
+      // Старый порядок (оставлен для истории): url/publicUrl мог перехватывать signedUrl
+      // и ломать воспроизведение при private bucket.
+      // const nextUrl =
+      //   payload?.data?.hlsMasterUrl ||
+      //   payload?.data?.url ||
+      //   payload?.data?.publicUrl ||
+      //   payload?.data?.signedUrl;
+
       const nextUrl =
         payload?.data?.hlsMasterUrl ||
+        payload?.data?.signedUrl ||
         payload?.data?.url ||
-        payload?.data?.publicUrl ||
-        payload?.data?.signedUrl;
+        payload?.data?.publicUrl;
       if (!response.ok || !payload?.success || !nextUrl) {
         setVideoUrl(null);
         return;
@@ -721,11 +729,19 @@ export function MeniscusStagesDetails({
         { credentials: 'include' }
       );
       const payload = await response.json().catch(() => null);
+      // Старый порядок (оставлен для истории): url/publicUrl мог перехватывать signedUrl
+      // и ломать воспроизведение при private bucket.
+      // const nextUrl =
+      //   payload?.data?.hlsMasterUrl ||
+      //   payload?.data?.url ||
+      //   payload?.data?.publicUrl ||
+      //   payload?.data?.signedUrl;
+
       const nextUrl =
         payload?.data?.hlsMasterUrl ||
+        payload?.data?.signedUrl ||
         payload?.data?.url ||
-        payload?.data?.publicUrl ||
-        payload?.data?.signedUrl;
+        payload?.data?.publicUrl;
       if (!response.ok || !payload?.success || !nextUrl) {
         setWeeklyTestUrl(null);
         return;
