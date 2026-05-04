@@ -186,6 +186,21 @@ function deriveHlsMasterPathFromMp4Path(mp4Path) {
   return p.replace(/\.mp4(\?|#|$)/i, '_hls/master.m3u8');
 }
 
+async function isHlsReady(bucket, masterPath) {
+  if (!masterPath) return false;
+  const existsMaster = await storageObjectExists(bucket, masterPath);
+  if (!existsMaster) return false;
+  const baseDir = getDirname(masterPath);
+  const variants = ['v0/prog.m3u8', 'v1/prog.m3u8', 'v2/prog.m3u8'].map(rel =>
+    joinStoragePath(baseDir, rel)
+  );
+  for (const p of variants) {
+    const ok = await storageObjectExists(bucket, p);
+    if (!ok) return false;
+  }
+  return true;
+}
+
 async function pickLatestVideoPathByTitleLike(titleLikePattern) {
   const { response, data } = await supabaseRestGet(
     `/rest/v1/videos?select=file_path,title,created_at&user_id=eq.${encodeURIComponent(
@@ -292,7 +307,7 @@ router.get('/meniscus/stage-video', async (req, res) => {
     const hlsMasterPath = deriveHlsMasterPathFromMp4Path(path);
     let hlsMasterUrl = null;
     if (hlsMasterPath) {
-      const exists = await storageObjectExists('videos', hlsMasterPath);
+      const exists = await isHlsReady('videos', hlsMasterPath);
       if (exists) {
         hlsMasterUrl = `${getSelfBaseUrl(
           req
@@ -374,7 +389,7 @@ router.get('/meniscus/weekly-test', async (req, res) => {
     const hlsMasterPath = deriveHlsMasterPathFromMp4Path(path);
     let hlsMasterUrl = null;
     if (hlsMasterPath) {
-      const exists = await storageObjectExists('videos', hlsMasterPath);
+      const exists = await isHlsReady('videos', hlsMasterPath);
       if (exists) {
         hlsMasterUrl = `${getSelfBaseUrl(
           req

@@ -6,6 +6,30 @@ const WEEKLY_TEST_PREFERRED_PATHS = [
   'My Bucket/Resection/test-razgibaniya-2.kf2s.mp4',
 ];
 
+function toHlsMasterPath(mp4Path: string) {
+  return mp4Path.replace(/\.mp4$/i, '_hls/master.m3u8');
+}
+
+function toHlsVariantPlaylistPaths(masterPath: string) {
+  const baseDir = String(masterPath || '')
+    .split('/')
+    .slice(0, -1)
+    .join('/');
+  return ['v0/prog.m3u8', 'v1/prog.m3u8', 'v2/prog.m3u8'].map(rel =>
+    baseDir ? `${baseDir}/${rel}` : rel
+  );
+}
+
+async function canSignPath(
+  supabase: ReturnType<typeof createAdminClient>,
+  path: string
+) {
+  const { data, error } = await supabase.storage
+    .from('videos')
+    .createSignedUrl(path, 60);
+  return !error && !!data?.signedUrl;
+}
+
 // Старый helper для public URL (оставлен для истории).
 // Bucket videos у нас private, поэтому public URL чаще всего не работает.
 // function buildPublicUrl(path: string) {
@@ -166,11 +190,34 @@ export default async function handler(
     });
   }
 
+  let hlsMasterUrl: string | null = null;
+  let hlsMasterPath: string | null = null;
+  if (/\.mp4$/i.test(resolvedPath)) {
+    const candidateHlsMasterPath = toHlsMasterPath(resolvedPath);
+    const variantPaths = toHlsVariantPlaylistPaths(candidateHlsMasterPath);
+    const checks = await Promise.all(
+      [candidateHlsMasterPath, ...variantPaths].map(p =>
+        canSignPath(supabase, p)
+      )
+    );
+    if (checks.every(Boolean)) {
+      hlsMasterPath = candidateHlsMasterPath;
+      hlsMasterUrl = `/api/courses/meniscus/hls/master?path=${encodeURIComponent(
+        candidateHlsMasterPath
+      )}`;
+    }
+  }
+
   // Старый return (оставлен для истории):
   // return res.status(200).json({ success: true, data: { signedUrl: signed.signedUrl, filePath: path } });
 
   return res.status(200).json({
     success: true,
-    data: { signedUrl: signed.signedUrl, filePath: resolvedPath },
+    data: {
+      signedUrl: signed.signedUrl,
+      filePath: resolvedPath,
+      hlsMasterUrl,
+      hlsMasterPath,
+    },
   });
 }

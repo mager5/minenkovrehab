@@ -11,6 +11,20 @@ const STAGE_PREFERRED_PATHS: Record<string, string[]> = {
   '2': ['My Bucket/Resection/ranniy-etap-2-4-nedeli.kf2s.mp4'],
 };
 
+function toHlsMasterPath(mp4Path: string) {
+  return mp4Path.replace(/\.mp4$/i, '_hls/master.m3u8');
+}
+
+function toHlsVariantPlaylistPaths(masterPath: string) {
+  const baseDir = String(masterPath || '')
+    .split('/')
+    .slice(0, -1)
+    .join('/');
+  return ['v0/prog.m3u8', 'v1/prog.m3u8', 'v2/prog.m3u8'].map(rel =>
+    baseDir ? `${baseDir}/${rel}` : rel
+  );
+}
+
 async function canSignPath(
   supabase: ReturnType<typeof createAdminClient>,
   path: string
@@ -236,8 +250,34 @@ export default async function handler(
     });
   }
 
+  let hlsMasterUrl: string | null = null;
+  let hlsMasterPath: string | null = null;
+  if (/\.mp4$/i.test(path)) {
+    const candidateHlsMasterPath = toHlsMasterPath(path);
+    const variantPaths = toHlsVariantPlaylistPaths(candidateHlsMasterPath);
+    const checks = await Promise.all(
+      [candidateHlsMasterPath, ...variantPaths].map(p =>
+        canSignPath(supabase, p)
+      )
+    );
+    if (checks.every(Boolean)) {
+      hlsMasterPath = candidateHlsMasterPath;
+      hlsMasterUrl = `/api/courses/meniscus/hls/master?path=${encodeURIComponent(
+        candidateHlsMasterPath
+      )}`;
+    }
+  }
+
+  // Старый return (оставлен для истории):
+  // return res.status(200).json({ success: true, data: { signedUrl: data.signedUrl, filePath: path } });
+
   return res.status(200).json({
     success: true,
-    data: { signedUrl: data.signedUrl, filePath: path },
+    data: {
+      signedUrl: data.signedUrl,
+      filePath: path,
+      hlsMasterUrl,
+      hlsMasterPath,
+    },
   });
 }
