@@ -187,8 +187,16 @@ async function fetchStorageObjectText(bucket, objectPath) {
 }
 
 function getSelfBaseUrl(req) {
+  // Старый вариант (оставлен для истории):
+  // const host = req.get('host');
+  // return `${req.protocol}://${host}`;
+
   const host = req.get('host');
-  return `${req.protocol}://${host}`;
+  const forwardedProtoHeader = req.get('x-forwarded-proto') || '';
+  const forwardedProto = String(forwardedProtoHeader).split(',')[0]?.trim();
+  const proto =
+    forwardedProto || (req.secure ? 'https' : '') || req.protocol || 'https';
+  return `${proto}://${host}`;
 }
 
 function getDirname(objectPath) {
@@ -347,7 +355,9 @@ router.get('/meniscus/stage-video', async (req, res) => {
       }
     }
 
-    const url = publicUrl || signedUrl;
+    // Старый вариант (оставлен для истории): publicUrl мог быть недоступен при private bucket
+    // const url = publicUrl || signedUrl;
+    const url = signedUrl;
     return res.status(200).json({
       success: true,
       data: {
@@ -431,7 +441,9 @@ router.get('/meniscus/weekly-test', async (req, res) => {
       }
     }
 
-    const url = publicUrl || signedUrl;
+    // Старый вариант (оставлен для истории): publicUrl мог быть недоступен при private bucket
+    // const url = publicUrl || signedUrl;
+    const url = signedUrl;
     return res.status(200).json({
       success: true,
       data: {
