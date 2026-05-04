@@ -136,6 +136,17 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
           const hls = new Hls({
             enableWorker: true,
             backBufferLength: 90,
+            xhrSetup: (xhr, url) => {
+              try {
+                const resolved = new URL(url, window.location.href);
+                const isMeniscusHlsApi = /\/api\/courses\/meniscus\/hls\//.test(
+                  resolved.pathname
+                );
+                xhr.withCredentials = isMeniscusHlsApi;
+              } catch {
+                xhr.withCredentials = false;
+              }
+            },
           });
           hlsRef.current = hls;
           setUseHlsJs(true);
