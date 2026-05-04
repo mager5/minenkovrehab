@@ -2,6 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
+const WEEKLY_TEST_PREFERRED_PATHS = [
+  'My Bucket/Resection/test-razgibaniya-2.kf2s.mp4',
+];
 
 // Старый helper для public URL (оставлен для истории).
 // Bucket videos у нас private, поэтому public URL чаще всего не работает.
@@ -118,15 +121,43 @@ export default async function handler(
   };
 
   const path = await pickPath();
-  if (!path) {
+  let resolvedPath = path;
+
+  if (!resolvedPath) {
+    for (const candidate of WEEKLY_TEST_PREFERRED_PATHS) {
+      const { data: candidateSigned, error: candidateError } =
+        await supabase.storage.from('videos').createSignedUrl(candidate, 60);
+      if (!candidateError && candidateSigned?.signedUrl) {
+        resolvedPath = candidate;
+        break;
+      }
+    }
+  }
+
+  if (!resolvedPath) {
     return res
       .status(404)
       .json({ success: false, message: 'Видео не найдено' });
   }
 
-  const { data: signed, error: signedError } = await supabase.storage
+  let { data: signed, error: signedError } = await supabase.storage
     .from('videos')
-    .createSignedUrl(path, 60 * 60 * 6);
+    .createSignedUrl(resolvedPath, 60 * 60 * 6);
+
+  if (signedError?.message?.toLowerCase().includes('object not found')) {
+    for (const candidate of WEEKLY_TEST_PREFERRED_PATHS) {
+      const { data: candidateSigned, error: candidateError } =
+        await supabase.storage
+          .from('videos')
+          .createSignedUrl(candidate, 60 * 60 * 6);
+      if (!candidateError && candidateSigned?.signedUrl) {
+        resolvedPath = candidate;
+        signed = candidateSigned;
+        signedError = null;
+        break;
+      }
+    }
+  }
 
   if (signedError || !signed?.signedUrl) {
     return res.status(500).json({
@@ -140,6 +171,6 @@ export default async function handler(
 
   return res.status(200).json({
     success: true,
-    data: { signedUrl: signed.signedUrl, filePath: path },
+    data: { signedUrl: signed.signedUrl, filePath: resolvedPath },
   });
 }

@@ -584,6 +584,14 @@ export function MeniscusStagesDetails({
         return;
       }
 
+      // Старый workaround (оставлен для истории): мы отключали stage-video для 1 этапа,
+      // пока не было отдельного видео этапа и это создавало постоянные 404.
+      //
+      // if (activeStage.id === 1) {
+      //   setVideoUrl(null);
+      //   return;
+      // }
+
       const baseUrl = isStaticSite ? getRailwayApiBaseUrl() : '';
       const response = await fetch(
         `${baseUrl}/api/courses/meniscus/stage-video?stage=${activeStage.id}`,
@@ -1413,7 +1421,7 @@ export function MeniscusStagesDetails({
             </div>
           )}
 
-          {videoUrl && (
+          {(videoUrl || (activeStage?.id === 1 && weeklyTestUrl)) && (
             <div className='bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden'>
               <div className='px-5 py-4 border-b border-gray-100 bg-gray-50'>
                 <h3 className='text-base font-semibold text-gray-900'>
@@ -1458,64 +1466,66 @@ export function MeniscusStagesDetails({
                   </div>
                 )}
 
-                <div
-                  className={
-                    activeStage?.id === 1 && weeklyTestUrl
-                      ? 'border-t border-gray-100'
-                      : ''
-                  }
-                >
-                  {(activeStage?.id === 1 ||
-                    activeStage?.id === 2 ||
-                    activeStage?.id === 3) && (
-                    <div className='px-5 pt-5 sm:px-6 text-base text-gray-700'>
-                      <h4 className='font-medium text-gray-900 mb-3'>
-                        {activeStage.id === 1
-                          ? 'Видео 1 этапа — Острый'
-                          : activeStage.id === 2
-                            ? 'Видео 2 этапа — Ранний восстановительный'
-                            : 'Видео 3 этапа — Поздний восстановительный'}
-                      </h4>
-                    </div>
-                  )}
-                  <VideoPlayer src={videoUrl} ref={videoPlayerRef} />
-
-                  {activeStage?.videoDescription && (
-                    <div className='px-5 py-5 sm:px-6 sm:py-6 border-t border-gray-100'>
-                      <div className='space-y-4 text-base text-gray-700'>
-                        {activeStage.videoDescription.text.map(
-                          (paragraph, idx) => (
-                            <p key={idx}>{paragraph}</p>
-                          )
-                        )}
-                      </div>
-
-                      <div className='mt-6'>
+                {videoUrl && (
+                  <div
+                    className={
+                      activeStage?.id === 1 && weeklyTestUrl
+                        ? 'border-t border-gray-100'
+                        : ''
+                    }
+                  >
+                    {(activeStage?.id === 1 ||
+                      activeStage?.id === 2 ||
+                      activeStage?.id === 3) && (
+                      <div className='px-5 pt-5 sm:px-6 text-base text-gray-700'>
                         <h4 className='font-medium text-gray-900 mb-3'>
-                          Таймкоды:
+                          {activeStage.id === 1
+                            ? 'Видео 1 этапа — Острый'
+                            : activeStage.id === 2
+                              ? 'Видео 2 этапа — Ранний восстановительный'
+                              : 'Видео 3 этапа — Поздний восстановительный'}
                         </h4>
-                        <div className='grid gap-1'>
-                          {activeStage.videoDescription.timecodes.map(
-                            (item, idx) => (
-                              <button
-                                key={idx}
-                                onClick={() => handleTimecodeClick(item.time)}
-                                className='flex items-center text-left group hover:bg-gray-50 p-2 rounded-md transition-colors -mx-2'
-                              >
-                                <span className='text-base text-indigo-600 w-12 shrink-0 group-hover:underline'>
-                                  {item.time}
-                                </span>
-                                <span className='text-base text-gray-700 ml-2'>
-                                  {item.label}
-                                </span>
-                              </button>
+                      </div>
+                    )}
+                    <VideoPlayer src={videoUrl} ref={videoPlayerRef} />
+
+                    {activeStage?.videoDescription && (
+                      <div className='px-5 py-5 sm:px-6 sm:py-6 border-t border-gray-100'>
+                        <div className='space-y-4 text-base text-gray-700'>
+                          {activeStage.videoDescription.text.map(
+                            (paragraph, idx) => (
+                              <p key={idx}>{paragraph}</p>
                             )
                           )}
                         </div>
+
+                        <div className='mt-6'>
+                          <h4 className='font-medium text-gray-900 mb-3'>
+                            Таймкоды:
+                          </h4>
+                          <div className='grid gap-1'>
+                            {activeStage.videoDescription.timecodes.map(
+                              (item, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => handleTimecodeClick(item.time)}
+                                  className='flex items-center text-left group hover:bg-gray-50 p-2 rounded-md transition-colors -mx-2'
+                                >
+                                  <span className='text-base text-indigo-600 w-12 shrink-0 group-hover:underline'>
+                                    {item.time}
+                                  </span>
+                                  <span className='text-base text-gray-700 ml-2'>
+                                    {item.label}
+                                  </span>
+                                </button>
+                              )
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

@@ -7,6 +7,14 @@ const router = express.Router();
 const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || 'mr_auth';
 const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
 const SIGNED_URL_EXPIRES_IN_SECONDS = 60 * 60 * 24 * 7;
+const ALLOWED_VIDEO_PATH_PREFIXES = [`${INSTRUCTOR_USER_ID}/`, 'My Bucket/'];
+const WEEKLY_TEST_PREFERRED_PATHS = [
+  'My Bucket/Resection/test-razgibaniya-2.kf2s.mp4',
+];
+const STAGE_PREFERRED_PATHS = {
+  1: ['My Bucket/Resection/ostry-etap-0-2-nedeli.kf2s.mp4'],
+  2: ['My Bucket/Resection/ranniy-etap-2-4-nedeli.kf2s.mp4'],
+};
 
 const STAGE_VIDEO_PATHS = {
   1: '6639a601-4007-46d8-a058-fe2cd2086fa1/1771875320518_1_HLh9prrm_mp4.mp4',
@@ -166,6 +174,12 @@ function joinStoragePath(dir, relativePath) {
   return `${dir.replace(/\/$/, '')}/${String(relativePath).replace(/^\//, '')}`;
 }
 
+function isAllowedVideoPath(objectPath) {
+  return ALLOWED_VIDEO_PATH_PREFIXES.some(prefix =>
+    String(objectPath || '').startsWith(prefix)
+  );
+}
+
 function deriveHlsMasterPathFromMp4Path(mp4Path) {
   const p = String(mp4Path);
   if (!/\.mp4(\?|#|$)/i.test(p)) return null;
@@ -197,12 +211,14 @@ async function resolveStagePath(stage) {
   const candidates = [];
 
   if (stage === '1') {
+    candidates.push(...(STAGE_PREFERRED_PATHS['1'] || []));
     candidates.push(await pickLatestVideoPathByTitleLike('*острый*'));
     candidates.push(await pickLatestVideoPathByTitleLike('*0-2*'));
     candidates.push(await pickLatestVideoPathByTitleLike('*0–2*'));
     candidates.push(await pickLatestVideoPathByTitleLike('*0 2*'));
     candidates.push(STAGE_VIDEO_PATHS['1'] || null);
   } else if (stage === '2') {
+    candidates.push(...(STAGE_PREFERRED_PATHS['2'] || []));
     candidates.push(await pickLatestVideoPathByTitleLike('*ранний восстанов*'));
     candidates.push(await pickLatestVideoPathByTitleLike('*ранний*'));
     candidates.push(await pickLatestVideoPathByTitleLike('*2-4*'));
@@ -225,7 +241,7 @@ async function resolveStagePath(stage) {
 
   for (const candidate of candidates) {
     if (!candidate) continue;
-    if (!String(candidate).startsWith(`${INSTRUCTOR_USER_ID}/`)) continue;
+    if (!isAllowedVideoPath(candidate)) continue;
     const exists = await storageObjectExists(bucket, candidate);
     if (exists) return candidate;
   }
@@ -315,6 +331,7 @@ router.get('/meniscus/weekly-test', async (req, res) => {
     // const path = await pickLatestVideoPathByTitleLike('*еженедель*');
 
     const candidates = [
+      ...WEEKLY_TEST_PREFERRED_PATHS,
       await pickLatestVideoPathByTitleLike('*разгиб*'),
       await pickLatestVideoPathByTitleLike('*еженедель*'),
       await pickLatestVideoPathByTitleLike('*тест*'),
@@ -322,7 +339,7 @@ router.get('/meniscus/weekly-test', async (req, res) => {
 
     let path = null;
     for (const candidate of candidates) {
-      if (!String(candidate).startsWith(`${INSTRUCTOR_USER_ID}/`)) continue;
+      if (!isAllowedVideoPath(candidate)) continue;
       const exists = await storageObjectExists('videos', candidate);
       if (exists) {
         path = candidate;
@@ -393,10 +410,7 @@ router.get('/meniscus/hls/master', async (req, res) => {
     if (!auth) return;
 
     const masterPath = typeof req.query.path === 'string' ? req.query.path : '';
-    if (
-      !masterPath ||
-      !String(masterPath).startsWith(`${INSTRUCTOR_USER_ID}/`)
-    ) {
+    if (!masterPath || !isAllowedVideoPath(masterPath)) {
       return res.status(400).send('Bad Request');
     }
 
@@ -433,10 +447,7 @@ router.get('/meniscus/hls/playlist', async (req, res) => {
 
     const playlistPath =
       typeof req.query.path === 'string' ? req.query.path : '';
-    if (
-      !playlistPath ||
-      !String(playlistPath).startsWith(`${INSTRUCTOR_USER_ID}/`)
-    ) {
+    if (!playlistPath || !isAllowedVideoPath(playlistPath)) {
       return res.status(400).send('Bad Request');
     }
 

@@ -6,6 +6,20 @@ const STAGE_VIDEO_PATHS: Record<string, string> = {
   '2': '6639a601-4007-46d8-a058-fe2cd2086fa1/1774614743708_mHTR6x8C_mp4.mp4',
   '3': '6639a601-4007-46d8-a058-fe2cd2086fa1/1774895893009________________________________________________4_8________.mp4',
 };
+const STAGE_PREFERRED_PATHS: Record<string, string[]> = {
+  '1': ['My Bucket/Resection/ostry-etap-0-2-nedeli.kf2s.mp4'],
+  '2': ['My Bucket/Resection/ranniy-etap-2-4-nedeli.kf2s.mp4'],
+};
+
+async function canSignPath(
+  supabase: ReturnType<typeof createAdminClient>,
+  path: string
+) {
+  const { data, error } = await supabase.storage
+    .from('videos')
+    .createSignedUrl(path, 60);
+  return !error && !!data?.signedUrl;
+}
 
 async function resolveStagePath(
   stage: string,
@@ -14,6 +28,7 @@ async function resolveStagePath(
   const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
 
   if (stage === '1') {
+    const candidates: string[] = [...(STAGE_PREFERRED_PATHS['1'] || [])];
     const { data: acuteData, error: acuteError } = await supabase
       .from('videos')
       .select('file_path,title,created_at')
@@ -23,7 +38,7 @@ async function resolveStagePath(
       .limit(1);
 
     if (!acuteError && acuteData?.[0]?.file_path) {
-      return acuteData[0].file_path;
+      candidates.push(acuteData[0].file_path);
     }
 
     const { data: byWeeks, error: byWeeksError } = await supabase
@@ -35,13 +50,22 @@ async function resolveStagePath(
       .limit(1);
 
     if (!byWeeksError && byWeeks?.[0]?.file_path) {
-      return byWeeks[0].file_path;
+      candidates.push(byWeeks[0].file_path);
     }
 
-    return STAGE_VIDEO_PATHS['1'] || null;
+    candidates.push(STAGE_VIDEO_PATHS['1'] || '');
+
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      const exists = await canSignPath(supabase, candidate);
+      if (exists) return candidate;
+    }
+
+    return null;
   }
 
   if (stage === '3') {
+    const candidates: string[] = [];
     const { data: lateData, error: lateError } = await supabase
       .from('videos')
       .select('file_path,title,created_at')
@@ -51,7 +75,7 @@ async function resolveStagePath(
       .limit(1);
 
     if (!lateError && lateData?.[0]?.file_path) {
-      return lateData[0].file_path;
+      candidates.push(lateData[0].file_path);
     }
 
     const { data: byWeeks, error: byWeeksError } = await supabase
@@ -63,14 +87,25 @@ async function resolveStagePath(
       .limit(1);
 
     if (!byWeeksError && byWeeks?.[0]?.file_path) {
-      return byWeeks[0].file_path;
+      candidates.push(byWeeks[0].file_path);
     }
 
-    return STAGE_VIDEO_PATHS['3'] || null;
+    candidates.push(STAGE_VIDEO_PATHS['3'] || '');
+
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      const exists = await canSignPath(supabase, candidate);
+      if (exists) return candidate;
+    }
+
+    return null;
   }
 
   if (stage !== '2') {
-    return STAGE_VIDEO_PATHS[stage] || null;
+    const stagePath = STAGE_VIDEO_PATHS[stage] || null;
+    if (!stagePath) return null;
+    const exists = await canSignPath(supabase, stagePath);
+    return exists ? stagePath : null;
   }
 
   // Старый вариант (оставлен для истории): жестко заданный путь в мапе
@@ -84,10 +119,6 @@ async function resolveStagePath(
     .order('created_at', { ascending: false })
     .limit(1);
 
-  if (!strictError && strictData?.[0]?.file_path) {
-    return strictData[0].file_path;
-  }
-
   const { data: looseData, error: looseError } = await supabase
     .from('videos')
     .select('file_path,title,created_at')
@@ -96,11 +127,22 @@ async function resolveStagePath(
     .order('created_at', { ascending: false })
     .limit(1);
 
+  const candidates: string[] = [...(STAGE_PREFERRED_PATHS['2'] || [])];
+  if (!strictError && strictData?.[0]?.file_path) {
+    candidates.push(strictData[0].file_path);
+  }
   if (!looseError && looseData?.[0]?.file_path) {
-    return looseData[0].file_path;
+    candidates.push(looseData[0].file_path);
+  }
+  candidates.push(STAGE_VIDEO_PATHS['2'] || '');
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const exists = await canSignPath(supabase, candidate);
+    if (exists) return candidate;
   }
 
-  return STAGE_VIDEO_PATHS['2'] || null;
+  return null;
 }
 
 async function isAuthorized(req: NextApiRequest) {
@@ -165,11 +207,27 @@ export default async function handler(
 
   const supabase = createAdminClient();
 
-  const path = (await resolveStagePath(stage, supabase)) || fallbackPath;
+  const path = (await resolveStagePath(stage, supabase)) || null;
+
+  if (!path) {
+    return res.status(200).json({
+      success: true,
+      data: null,
+      message: 'Видео не найдено',
+    });
+  }
 
   const { data, error } = await supabase.storage
     .from('videos')
     .createSignedUrl(path, 60 * 60 * 6);
+
+  if (error?.message?.toLowerCase().includes('object not found')) {
+    return res.status(200).json({
+      success: true,
+      data: null,
+      message: 'Видео не найдено',
+    });
+  }
 
   if (error || !data?.signedUrl) {
     return res.status(500).json({

@@ -51,10 +51,17 @@ if (!local || !remote) {
   process.exit(1);
 }
 
-const url = process.env.SUPABASE_URL;
+// Старый вариант (оставлен для истории): ожидали только SUPABASE_URL
+// const url = process.env.SUPABASE_URL;
+const url =
+  process.env.SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_PROJECT_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!url || !serviceKey) {
-  console.error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY is missing in env');
+  console.error(
+    'SUPABASE_URL (или NEXT_PUBLIC_SUPABASE_URL) / SUPABASE_SERVICE_ROLE_KEY is missing in env'
+  );
   process.exit(1);
 }
 
