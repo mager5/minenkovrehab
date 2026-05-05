@@ -73,18 +73,15 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         if (videoRef.current) {
           videoRef.current.currentTime = time;
           if (!isPlaying) {
-            videoRef.current.play();
-            setIsPlaying(true);
+            videoRef.current.play().catch(() => {});
           }
         }
       },
       play: () => {
-        videoRef.current?.play();
-        setIsPlaying(true);
+        videoRef.current?.play().catch(() => {});
       },
       pause: () => {
         videoRef.current?.pause();
-        setIsPlaying(false);
       },
     }));
 
@@ -118,6 +115,9 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       const handleWaiting = () => setIsLoading(true);
       const handleCanPlay = () => setIsLoading(false);
       const handlePlaying = () => setIsLoading(false);
+      const handlePlay = () => setIsPlaying(true);
+      const handlePause = () => setIsPlaying(false);
+      const handleEnded = () => setIsPlaying(false);
 
       const isHls =
         type.toLowerCase().includes('mpegurl') ||
@@ -231,6 +231,9 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       video.addEventListener('waiting', handleWaiting);
       video.addEventListener('canplay', handleCanPlay);
       video.addEventListener('playing', handlePlaying);
+      video.addEventListener('play', handlePlay);
+      video.addEventListener('pause', handlePause);
+      video.addEventListener('ended', handleEnded);
 
       // Reset error when src changes
       setError(null);
@@ -243,6 +246,9 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         video.removeEventListener('waiting', handleWaiting);
         video.removeEventListener('canplay', handleCanPlay);
         video.removeEventListener('playing', handlePlaying);
+        video.removeEventListener('play', handlePlay);
+        video.removeEventListener('pause', handlePause);
+        video.removeEventListener('ended', handleEnded);
         if (hlsRef.current) {
           hlsRef.current.destroy();
           hlsRef.current = null;
@@ -288,9 +294,8 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         if (isPlaying) {
           videoRef.current.pause();
         } else {
-          videoRef.current.play();
+          videoRef.current.play().catch(() => {});
         }
-        setIsPlaying(!isPlaying);
       }
     };
 
@@ -406,7 +411,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
         {/* Loader */}
         {isLoading && !error && (
-          <div className='absolute inset-0 flex items-center justify-center bg-black/20 z-10'>
+          <div className='absolute inset-0 flex items-center justify-center bg-black/20 z-10 pointer-events-none'>
             <Loader2 className='h-12 w-12 text-white animate-spin' />
           </div>
         )}
@@ -424,14 +429,17 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         </video>
 
         {/* Play Button Overlay */}
-        {!isPlaying && !isLoading && !error && (
-          <div
-            className='absolute inset-0 flex items-center justify-center cursor-pointer bg-black/10 hover:bg-black/20 transition-colors z-10'
-            onClick={togglePlay}
-          >
-            <div className='w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg transform transition-transform duration-300 backdrop-blur-sm hover:scale-110'>
+        {!isPlaying && !error && (
+          <div className='absolute inset-0 flex items-center justify-center z-20'>
+            <button
+              type='button'
+              onClick={togglePlay}
+              onTouchStart={togglePlay}
+              className='w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg transform transition-transform duration-300 backdrop-blur-sm active:scale-95 hover:scale-110'
+              aria-label='Воспроизвести видео'
+            >
               <Play className='h-8 w-8 text-indigo-600 ml-1' />
-            </div>
+            </button>
           </div>
         )}
 
