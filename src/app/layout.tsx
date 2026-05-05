@@ -150,7 +150,7 @@ export default function RootLayout({
           sizes='180x180'
           href='/favicons/apple-touch-icon.png'
         />
-        <link rel='manifest' href='/favicons/site.webmanifest' />
+        <link rel='manifest' href='/manifest.json' />
         <link
           rel='mask-icon'
           href='/favicons/safari-pinned-tab.svg'

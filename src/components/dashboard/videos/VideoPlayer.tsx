@@ -251,6 +251,32 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       };
     }, [src, resolvedSrc, type]);
 
+    useEffect(() => {
+      const handleFullscreenChange = () => {
+        setIsFullscreen(!!document.fullscreenElement);
+      };
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      return () => {
+        document.removeEventListener(
+          'fullscreenchange',
+          handleFullscreenChange
+        );
+      };
+    }, []);
+
+    useEffect(() => {
+      const video = videoRef.current as any;
+      if (!video) return;
+      const onBegin = () => setIsFullscreen(true);
+      const onEnd = () => setIsFullscreen(false);
+      video.addEventListener?.('webkitbeginfullscreen', onBegin);
+      video.addEventListener?.('webkitendfullscreen', onEnd);
+      return () => {
+        video.removeEventListener?.('webkitbeginfullscreen', onBegin);
+        video.removeEventListener?.('webkitendfullscreen', onEnd);
+      };
+    }, []);
+
     const formatTime = (time: number) => {
       const minutes = Math.floor(time / 60);
       const seconds = Math.floor(time % 60);
@@ -292,15 +318,31 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     };
 
     const toggleFullscreen = () => {
-      if (!containerRef.current) return;
+      const container = containerRef.current;
+      const video = videoRef.current as any;
+      if (!container || !video) return;
 
       if (!document.fullscreenElement) {
-        containerRef.current.requestFullscreen();
-        setIsFullscreen(true);
-      } else {
-        document.exitFullscreen();
-        setIsFullscreen(false);
+        if (typeof video.requestFullscreen === 'function') {
+          video.requestFullscreen().catch(() => {});
+          setIsFullscreen(true);
+          return;
+        }
+        if (typeof video.webkitEnterFullscreen === 'function') {
+          video.webkitEnterFullscreen();
+          setIsFullscreen(true);
+          return;
+        }
+        if (typeof container.requestFullscreen === 'function') {
+          container.requestFullscreen().catch(() => {});
+          setIsFullscreen(true);
+          return;
+        }
+        return;
       }
+
+      document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
     };
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -322,12 +364,23 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       }, 3000);
     };
 
+    const handleTouchStart = () => {
+      setShowControls(true);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+      controlsTimeoutRef.current = setTimeout(() => {
+        if (isPlaying) setShowControls(false);
+      }, 3000);
+    };
+
     return (
       <div
         ref={containerRef}
         className='relative w-full bg-black rounded-lg overflow-hidden group aspect-video'
         onMouseMove={handleMouseMove}
         onMouseLeave={() => isPlaying && setShowControls(false)}
+        onTouchStart={handleTouchStart}
       >
         {error && (
           <div className='absolute inset-0 flex items-center justify-center bg-gray-900/90 z-30 p-4 text-center'>
@@ -386,7 +439,9 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         <div
           className={cn(
             'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-4 transition-opacity duration-300 z-20',
-            showControls ? 'opacity-100' : 'opacity-0'
+            showControls
+              ? 'opacity-100 pointer-events-auto'
+              : 'opacity-0 pointer-events-none'
           )}
         >
           <div className='flex justify-between items-center mb-2'>

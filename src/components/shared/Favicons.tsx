@@ -23,14 +23,14 @@ export function Favicons() {
         sizes='16x16'
         href='/favicons/favicon-16x16.png'
       />
-      <link rel='manifest' href='/favicons/site.webmanifest' />
+      <link rel='manifest' href='/manifest.json' />
       <link
         rel='mask-icon'
         href='/favicons/safari-pinned-tab.svg'
         color='#5bbad5'
       />
       <meta name='msapplication-TileColor' content='#da532c' />
-      <meta name='theme-color' content='#ffffff' />
+      <meta name='theme-color' content='#0063A5' />
     </>
   );
 }
