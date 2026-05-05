@@ -17,6 +17,7 @@ const STAGE_PREFERRED_PATHS = {
     'My Bucket/Resection/ranniy-vosstanovitelnyy-etap-2-4-nedeli.kf2s.mp4',
     'My Bucket/Resection/ranniy-etap-2-4-nedeli.kf2s.mp4',
   ],
+  3: ['My Bucket/Resection/pozdniy-vosstanovitelnyy-etap-4-8-nedel.kf2s.mp4'],
 };
 
 const STAGE_VIDEO_PATHS = {
@@ -284,6 +285,7 @@ async function resolveStagePath(stage) {
 
     candidates.push(STAGE_VIDEO_PATHS['2'] || null);
   } else if (stage === '3') {
+    candidates.push(...(STAGE_PREFERRED_PATHS['3'] || []));
     candidates.push(await pickLatestVideoPathByTitleLike('*поздний*'));
     candidates.push(await pickLatestVideoPathByTitleLike('*4-8*'));
     candidates.push(await pickLatestVideoPathByTitleLike('*4–8*'));

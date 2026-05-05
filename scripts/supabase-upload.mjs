@@ -9,6 +9,7 @@ function parseArgs(argv) {
     remote: null,
     cacheControl: '31536000',
     upsert: true,
+    mode: 'rest',
   };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
@@ -17,6 +18,7 @@ function parseArgs(argv) {
     else if (a === '--remote') args.remote = argv[++i] || null;
     else if (a === '--cacheControl') args.cacheControl = argv[++i] || args.cacheControl;
     else if (a === '--no-upsert') args.upsert = false;
+    else if (a === '--mode') args.mode = argv[++i] || args.mode;
   }
   return args;
 }
@@ -43,10 +45,10 @@ async function walk(dir) {
   return files;
 }
 
-const { bucket, local, remote, cacheControl, upsert } = parseArgs(process.argv);
+const { bucket, local, remote, cacheControl, upsert, mode } = parseArgs(process.argv);
 if (!local || !remote) {
   console.error(
-    'Usage: node scripts/supabase-upload.mjs --local <path> --remote <remotePrefix> [--bucket videos] [--cacheControl 31536000]'
+    'Usage: node scripts/supabase-upload.mjs --local <path> --remote <remotePrefix> [--bucket videos] [--cacheControl 31536000] [--mode rest|client]'
   );
   process.exit(1);
 }
@@ -72,6 +74,61 @@ if (!st) {
   process.exit(1);
 }
 
+function encodeStoragePath(objectPath) {
+  return String(objectPath)
+    .split('/')
+    .map(part => encodeURIComponent(part))
+    .join('/');
+}
+
+async function uploadViaRest({
+  url,
+  serviceKey,
+  bucket,
+  remotePath,
+  body,
+  contentType,
+  cacheControl,
+  upsert,
+}) {
+  const endpoint = `${String(url).replace(/\/$/, '')}/storage/v1/object/${bucket}/${encodeStoragePath(
+    remotePath
+  )}`;
+
+  let lastErr = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+          'Content-Type': contentType,
+          'Cache-Control': `max-age=${String(cacheControl)}`,
+          'x-upsert': upsert ? 'true' : 'false',
+        },
+        body,
+      });
+
+      if (response.ok) return;
+
+      const text = await response.text().catch(() => '');
+      throw new Error(
+        `${response.status} ${response.statusText}${
+          text ? `: ${text.slice(0, 500)}` : ''
+        }`
+      );
+    } catch (err) {
+      lastErr = err;
+      if (attempt < 3) {
+        await new Promise(r => setTimeout(r, 750 * attempt));
+        continue;
+      }
+      throw lastErr;
+    }
+  }
+}
+
 const supabase = createClient(url, serviceKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
@@ -87,14 +144,27 @@ for (const file of files) {
   const body = await readFile(file);
   const contentType = getContentType(file);
 
-  const { error } = await supabase.storage.from(bucket).upload(remotePath, body, {
-    contentType,
-    cacheControl: String(cacheControl),
-    upsert,
-  });
+  if (mode === 'client') {
+    const { error } = await supabase.storage.from(bucket).upload(remotePath, body, {
+      contentType,
+      cacheControl: String(cacheControl),
+      upsert,
+    });
 
-  if (error) {
-    throw new Error(`${remotePath}: ${error.message}`);
+    if (error) {
+      throw new Error(`${remotePath}: ${error.message}`);
+    }
+  } else {
+    await uploadViaRest({
+      url,
+      serviceKey,
+      bucket,
+      remotePath,
+      body,
+      contentType,
+      cacheControl,
+      upsert,
+    });
   }
 
   process.stdout.write(`Uploaded: ${remotePath}\n`);

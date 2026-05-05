@@ -12,6 +12,7 @@ const STAGE_PREFERRED_PATHS: Record<string, string[]> = {
     'My Bucket/Resection/ranniy-vosstanovitelnyy-etap-2-4-nedeli.kf2s.mp4',
     'My Bucket/Resection/ranniy-etap-2-4-nedeli.kf2s.mp4',
   ],
+  '3': ['My Bucket/Resection/pozdniy-vosstanovitelnyy-etap-4-8-nedel.kf2s.mp4'],
 };
 
 function toHlsMasterPath(mp4Path: string) {
@@ -82,7 +83,8 @@ async function resolveStagePath(
   }
 
   if (stage === '3') {
-    const candidates: string[] = [];
+    // Старый вариант (оставлен для истории): const candidates: string[] = [];
+    const candidates: string[] = [...(STAGE_PREFERRED_PATHS['3'] || [])];
     const { data: lateData, error: lateError } = await supabase
       .from('videos')
       .select('file_path,title,created_at')
