@@ -8,7 +8,10 @@ const STAGE_VIDEO_PATHS: Record<string, string> = {
 };
 const STAGE_PREFERRED_PATHS: Record<string, string[]> = {
   '1': ['My Bucket/Resection/ostry-etap-0-2-nedeli.kf2s.mp4'],
-  '2': ['My Bucket/Resection/ranniy-etap-2-4-nedeli.kf2s.mp4'],
+  '2': [
+    'My Bucket/Resection/ranniy-vosstanovitelnyy-etap-2-4-nedeli.kf2s.mp4',
+    'My Bucket/Resection/ranniy-etap-2-4-nedeli.kf2s.mp4',
+  ],
 };
 
 function toHlsMasterPath(mp4Path: string) {
