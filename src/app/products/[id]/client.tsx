@@ -60,8 +60,8 @@ export default function ProductClient({ product }: { product: Product }) {
   // Состояния для экспресс-консультации
   const [isAgreed, setIsAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // const [customerEmail, setCustomerEmail] = useState('');
-  // const [customerPhone, setCustomerPhone] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
 
   // Сброс состояний обработки при возврате пользователя на страницу
   useEffect(() => {
@@ -258,85 +258,53 @@ export default function ProductClient({ product }: { product: Product }) {
       console.log('🔄 Создание платежа для продукта:', product.title);
       console.log('🔄 Уровень:', level);
 
-      /*
-      const isEmailRequiredForAccess = ![
-        'consultation',
-        'express-consultation',
-        'online-training',
-      ].includes(product.id);
-
-      let email = customerEmail.trim();
-
-      // Старый вариант (оставлен для истории): всегда требовали email и блокировали оплату услуг
-      // if (!email && typeof window !== 'undefined') {
-      //   const promptedEmail =
-      //     window.prompt(
-      //       'Укажите email, на который отправить доступ к курсу:',
-      //       ''
-      //     ) || '';
-      //   email = promptedEmail.trim();
-      //   if (email) {
-      //     setCustomerEmail(email);
-      //     try {
-      //       localStorage.setItem('mr_checkout_email', email);
-      //     } catch {}
-      //   }
-      // }
-      //
-      // email = email.toLowerCase();
-      // const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-      // if (!email || !emailRegex.test(email)) {
-      //   throw new Error('Укажите корректный email для получения доступа');
-      // }
-
       const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-      if (isEmailRequiredForAccess) {
-        if (!email && typeof window !== 'undefined') {
-          const promptedEmail =
-            window.prompt(
-              'Укажите email, на который отправить доступ к курсу:',
-              ''
-            ) || '';
-          email = promptedEmail.trim();
-          if (email) {
-            setCustomerEmail(email);
-            try {
-              localStorage.setItem('mr_checkout_email', email);
-            } catch {}
-          }
-        }
+      const isEmailRequiredForAccess = product.id === 'personal-program';
+      const email = isEmailRequiredForAccess
+        ? customerEmail.trim().toLowerCase()
+        : 'noreply@minenkovrehab.ru';
+      const phone = isEmailRequiredForAccess
+        ? customerPhone.trim()
+        : '+79000000000';
 
-        email = email.toLowerCase();
+      if (isEmailRequiredForAccess) {
         if (!email || !emailRegex.test(email)) {
           throw new Error('Укажите корректный email для получения доступа');
         }
-      } else {
-        // Для услуг (консультации/тренировки) email необязателен:
-        // если введен и корректен — передаем; если пустой/некорректный — не блокируем оплату.
-        if (email) {
-          const normalized = email.toLowerCase();
-          if (emailRegex.test(normalized)) {
-            email = normalized;
-          } else {
-            email = '';
+        try {
+          localStorage.setItem('mr_checkout_email', email);
+          if (phone) {
+            localStorage.setItem('mr_checkout_phone', phone);
           }
-        }
+        } catch {}
       }
 
-      const phone = customerPhone.trim();
-      // Старый вариант (оставлен для истории): спрашивали телефон через window.prompt
-      // if (!phone && typeof window !== 'undefined') {
-      //   const promptedPhone =
-      //     window.prompt('Телефон (необязательно):', '') || '';
-      //   phone = promptedPhone.trim();
-      //   if (phone) {
-      //     setCustomerPhone(phone);
-      //     try {
-      //       localStorage.setItem('mr_checkout_phone', phone);
-      //     } catch {}
-      //   }
-      // }
-      */
+      if (false) {
+        const legacyIsEmailRequiredForAccess = ![
+          'consultation',
+          'express-consultation',
+          'online-training',
+        ].includes(product.id);
+        let legacyEmail = customerEmail.trim();
+        const legacyEmailRegex =
+          /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        if (legacyIsEmailRequiredForAccess) {
+          if (!legacyEmail && typeof window !== 'undefined') {
+            legacyEmail =
+              window.prompt(
+                'Укажите email, на который отправить доступ к курсу:',
+                ''
+              ) || '';
+            legacyEmail = legacyEmail.trim();
+          }
+          legacyEmail = legacyEmail.toLowerCase();
+          if (!legacyEmail || !legacyEmailRegex.test(legacyEmail)) {
+            throw new Error('Укажите корректный email для получения доступа');
+          }
+        }
+        const legacyPhone = customerPhone.trim();
+        console.log({ legacyEmail, legacyPhone });
+      }
 
       switch (level) {
         case 1:
@@ -367,8 +335,8 @@ export default function ProductClient({ product }: { product: Product }) {
             amount: product.price,
             productId: product.id,
             level,
-            email: 'noreply@minenkovrehab.ru',
-            phone: '+79000000000',
+            email,
+            phone,
             // Старый вариант (оставлен для истории)
             // email: 'customer@example.com',
             // phone: '+79001234567',
@@ -640,6 +608,35 @@ export default function ProductClient({ product }: { product: Product }) {
                     ? '6 000 ₽'
                     : formatPrice(product.id, product.price)}
                 </motion.div>
+
+                {product.id === 'personal-program' && (
+                  <div className='mb-4 space-y-3'>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700'>
+                        Email для доступа
+                      </label>
+                      <input
+                        type='email'
+                        value={customerEmail}
+                        onChange={e => setCustomerEmail(e.target.value)}
+                        placeholder='you@example.com'
+                        className='mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm bg-white'
+                      />
+                    </div>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700'>
+                        Телефон (необязательно)
+                      </label>
+                      <input
+                        type='tel'
+                        value={customerPhone}
+                        onChange={e => setCustomerPhone(e.target.value)}
+                        placeholder='+7...'
+                        className='mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm bg-white'
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Плашка "Не является медицинской услугой" */}
                 <motion.div
