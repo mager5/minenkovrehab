@@ -192,14 +192,6 @@ router.post('/generate-payment-url', async (req, res) => {
     // Создание параметра Receipt для фискализации
     let receiptParam = null;
 
-    const shpParams = {};
-    if (productId) {
-      shpParams.shp_product_id = sanitizeString(String(productId));
-    }
-    if (level !== undefined && level !== null && String(level).trim()) {
-      shpParams.shp_level = sanitizeString(String(level));
-    }
-
     // Если в запросе передан объект receipt, используем его
     console.log('🔍 Проверка req.body.receipt:', req.body.receipt);
     if (req.body.receipt) {
@@ -261,21 +253,12 @@ router.post('/generate-payment-url', async (req, res) => {
     }
 
     // Генерация подписи с учетом параметра Receipt (если есть)
-    // Старый вариант (оставлен для истории):
-    // const signature = generatePaymentSignature(
-    //   login,
-    //   amount,
-    //   invId,
-    //   password1,
-    //   {},
-    //   receiptParam
-    // );
     const signature = generatePaymentSignature(
       login,
       amount,
       invId,
       password1,
-      shpParams,
+      {},
       receiptParam
     );
 
@@ -299,15 +282,10 @@ router.post('/generate-payment-url', async (req, res) => {
       params.push(`Receipt=${encodeURIComponent(receiptParam)}`);
     }
 
-    // Старый вариант (оставлен для истории):
     // const shpKeys = Object.keys(shpParams).sort();
     // for (const key of shpKeys) {
     //   params.push(`${key}=${encodeURIComponent(shpParams[key])}`);
     // }
-    const shpKeys = Object.keys(shpParams).sort();
-    for (const key of shpKeys) {
-      params.push(`${key}=${encodeURIComponent(shpParams[key])}`);
-    }
 
     // Добавляем подпись в конце
     params.push(`SignatureValue=${signature}`);
