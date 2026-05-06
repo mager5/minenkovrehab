@@ -117,6 +117,10 @@ export default function DashboardClientPage() {
     return null; // Will redirect
   }
 
+  const visibleCourses = COURSES.filter(
+    course => course.slug !== 'plantar-fasciopathy'
+  );
+
   return (
     <div className='min-h-screen bg-gray-50'>
       <header className='bg-white shadow'>
@@ -130,24 +134,27 @@ export default function DashboardClientPage() {
         <div className='mx-auto max-w-7xl py-6 sm:px-6 lg:px-8'>
           <div className='px-4 py-6 sm:px-0'>
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8'>
-              <Link
-                href='/dashboard/videos'
-                className='bg-white overflow-hidden shadow rounded-lg p-6 hover:shadow-md transition-shadow group cursor-pointer block'
-              >
-                <div className='flex items-center space-x-4'>
-                  <div className='bg-indigo-100 p-3 rounded-full group-hover:bg-indigo-200 transition-colors'>
-                    <Video className='h-6 w-6 text-indigo-600' />
+              {/*
+                Видеогалерея пользователям не нужна (оставлено закомментированным по просьбе).
+                <Link
+                  href='/dashboard/videos'
+                  className='bg-white overflow-hidden shadow rounded-lg p-6 hover:shadow-md transition-shadow group cursor-pointer block'
+                >
+                  <div className='flex items-center space-x-4'>
+                    <div className='bg-indigo-100 p-3 rounded-full group-hover:bg-indigo-200 transition-colors'>
+                      <Video className='h-6 w-6 text-indigo-600' />
+                    </div>
+                    <div>
+                      <h3 className='text-lg font-medium text-gray-900'>
+                        Видеогалерея
+                      </h3>
+                      <p className='text-sm text-gray-500'>
+                        Загрузить и смотреть видео
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className='text-lg font-medium text-gray-900'>
-                      Видеогалерея
-                    </h3>
-                    <p className='text-sm text-gray-500'>
-                      Загрузить и смотреть видео
-                    </p>
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              */}
             </div>
 
             <div className='flex items-center justify-between mb-4 gap-3 flex-wrap'>
@@ -169,7 +176,36 @@ export default function DashboardClientPage() {
             </div>
 
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-              {COURSES.map(course => (
+              {/*
+                Старый вариант (оставлен для истории):
+                {COURSES.map(course => (
+                  <Link
+                    key={course.slug}
+                    href={`/dashboard/courses/${course.slug}`}
+                    className='bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300 group'
+                  >
+                    <div className='relative h-32 w-full sm:h-40'>
+                      <Image
+                        src={course.image}
+                        alt={course.title}
+                        fill
+                        sizes='(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'
+                        className='object-cover'
+                      />
+                      <div className='absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity' />
+                    </div>
+                    <div className='px-4 py-4 sm:px-5 sm:py-5'>
+                      <h3 className='text-lg font-medium text-gray-900 mb-1'>
+                        {course.title}
+                      </h3>
+                      <p className='text-sm text-gray-500 line-clamp-3'>
+                        {course.shortDescription}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              */}
+              {visibleCourses.map(course => (
                 <Link
                   key={course.slug}
                   href={`/dashboard/courses/${course.slug}`}

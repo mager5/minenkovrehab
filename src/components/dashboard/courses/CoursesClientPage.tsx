@@ -72,10 +72,21 @@ export default function CoursesClientPage() {
     return null;
   }
 
+  const visibleCourses = COURSES.filter(
+    course => course.slug !== 'plantar-fasciopathy'
+  );
+
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    itemListElement: COURSES.map((course, index) => ({
+    // Старый вариант (оставлен для истории):
+    // itemListElement: COURSES.map((course, index) => ({
+    //   '@type': 'ListItem',
+    //   position: index + 1,
+    //   url: `https://minenkovrehab.ru/dashboard/courses/${course.slug}`,
+    //   name: course.title,
+    // })),
+    itemListElement: visibleCourses.map((course, index) => ({
       '@type': 'ListItem',
       position: index + 1,
       url: `https://minenkovrehab.ru/dashboard/courses/${course.slug}`,
@@ -98,7 +109,11 @@ export default function CoursesClientPage() {
         </div>
       </header>
       <main className='max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8'>
-        <CoursesList courses={COURSES} />
+        {/*
+          Старый вариант (оставлен для истории):
+          <CoursesList courses={COURSES} />
+        */}
+        <CoursesList courses={visibleCourses} />
       </main>
       <script
         type='application/ld+json'
