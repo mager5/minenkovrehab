@@ -5,6 +5,20 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
+function getRailwayApiBaseUrl() {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return '';
+    }
+  }
+
+  return (
+    process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+    'https://minenkovrehab-production-15cc.up.railway.app'
+  );
+}
+
 export default function AuthCallbackPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -13,6 +27,30 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     let mounted = true;
     let authSubscription: { unsubscribe: () => void } | null = null;
+
+    const exchangeSupabaseSession = async (accessToken: string) => {
+      const response = await fetch(
+        `${getRailwayApiBaseUrl()}/api/auth/exchange-supabase`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ accessToken }),
+        }
+      );
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success) {
+        const message =
+          payload?.error ||
+          'Не удалось завершить авторизацию. Попробуйте позже.';
+        throw new Error(message);
+      }
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('mr-auth-changed'));
+      }
+    };
 
     const handleCallback = async () => {
       // The supabase client handles the hash fragment automatically
@@ -34,13 +72,31 @@ export default function AuthCallbackPage() {
 
       if (session) {
         // Successful login
+        try {
+          await exchangeSupabaseSession(session.access_token);
+        } catch (e: any) {
+          setError(e?.message || 'Не удалось завершить авторизацию');
+          setTimeout(() => {
+            if (mounted) router.push('/login?error=callback_failed');
+          }, 3000);
+          return;
+        }
         router.push('/dashboard');
       } else {
         // If no session found immediately, listen for auth state change
         const { data } = supabase.auth.onAuthStateChange(
           (event: AuthChangeEvent, session: Session | null) => {
             if (event === 'SIGNED_IN' && session && mounted) {
-              router.push('/dashboard');
+              exchangeSupabaseSession(session.access_token)
+                .then(() => {
+                  router.push('/dashboard');
+                })
+                .catch((e: any) => {
+                  setError(e?.message || 'Не удалось завершить авторизацию');
+                  setTimeout(() => {
+                    if (mounted) router.push('/login?error=callback_failed');
+                  }, 3000);
+                });
             }
           }
         );

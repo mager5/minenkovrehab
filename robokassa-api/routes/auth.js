@@ -63,6 +63,20 @@ async function supabaseAuthRequest(path, body) {
   return { response, data };
 }
 
+async function supabaseGetUser(accessToken) {
+  const { url, anonKey } = getSupabaseConfig();
+  const response = await fetch(`${url}/auth/v1/user`, {
+    method: 'GET',
+    headers: {
+      apikey: anonKey,
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const data = await response.json().catch(() => ({}));
+  return { response, data };
+}
+
 function authFromRequest(req) {
   const cookies = parseCookies(req.headers.cookie || '');
   const token = cookies[AUTH_COOKIE_NAME];
@@ -214,6 +228,53 @@ router.post('/signup', async (req, res) => {
     });
   } catch (error) {
     console.error('Auth signup error:', error);
+    return res
+      .status(500)
+      .json({ success: false, error: 'Внутренняя ошибка сервера' });
+  }
+});
+
+router.post('/exchange-supabase', async (req, res) => {
+  try {
+    const accessToken =
+      typeof req.body?.accessToken === 'string' ? req.body.accessToken : '';
+    if (!accessToken) {
+      return res
+        .status(400)
+        .json({ success: false, error: 'accessToken обязателен' });
+    }
+
+    const { response, data } = await supabaseGetUser(accessToken);
+    if (!response.ok || !data?.id) {
+      const message = String(
+        data?.msg || data?.error_description || data?.error || 'Invalid token'
+      );
+      return res.status(401).json({ success: false, error: message });
+    }
+
+    const jwt = signJwt(
+      {
+        sub: data.id,
+        email: data.email || null,
+        full_name:
+          data.user_metadata?.full_name || data.user_metadata?.name || null,
+      },
+      60 * 60 * 24 * 30
+    );
+    res.cookie(AUTH_COOKIE_NAME, jwt, getCookieOptions(req));
+    return res.json({
+      success: true,
+      data: {
+        user: {
+          id: data.id,
+          email: data.email || null,
+          full_name:
+            data.user_metadata?.full_name || data.user_metadata?.name || null,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Auth exchange-supabase error:', error);
     return res
       .status(500)
       .json({ success: false, error: 'Внутренняя ошибка сервера' });
