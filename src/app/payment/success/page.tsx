@@ -26,8 +26,8 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     // Получаем параметры от Robokassa
     if (searchParams) {
-      const outSum = searchParams.get('OutSum') || searchParams.get('amount');
-      const invId = searchParams.get('InvId') || searchParams.get('invId');
+      const outSum = searchParams.get('OutSum');
+      const invId = searchParams.get('InvId');
       const signatureValue = searchParams.get('SignatureValue');
 
       setPaymentData({
@@ -52,8 +52,7 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     if (!isVerifying && isValid) {
       const mock = searchParams?.get('mock');
-      const productId = searchParams?.get('productId');
-      if (mock === '1' || productId === 'personal-program') {
+      if (mock === '1') {
         setIsEmailModalOpen(true);
       }
     }
@@ -274,108 +273,68 @@ export default function PaymentSuccessPage() {
                 leaveTo='opacity-0 scale-95 translate-y-4'
               >
                 <Dialog.Panel className='w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all'>
-                  {searchParams?.get('mock') === '1' ? (
-                    <>
-                      <Dialog.Title className='text-lg font-semibold leading-6 text-gray-900'>
-                        Для доступа к личному кабинету укажите адрес электронной
-                        почты
-                      </Dialog.Title>
-                      <div className='mt-2'>
-                        <p className='text-sm text-gray-500'>
-                          На указанный email мы отправим логин, временный пароль
-                          и безопасную ссылку для входа в личный кабинет.
-                        </p>
-                      </div>
+                  <Dialog.Title className='text-lg font-semibold leading-6 text-gray-900'>
+                    Для доступа к личному кабинету укажите адрес электронной
+                    почты
+                  </Dialog.Title>
+                  <div className='mt-2'>
+                    <p className='text-sm text-gray-500'>
+                      На указанный email мы отправим логин, временный пароль и
+                      безопасную ссылку для входа в личный кабинет.
+                    </p>
+                  </div>
 
-                      <form
-                        className='mt-4 space-y-4'
-                        onSubmit={handleEmailSubmit}
+                  <form className='mt-4 space-y-4' onSubmit={handleEmailSubmit}>
+                    <div>
+                      <label
+                        htmlFor='email'
+                        className='block text-sm font-medium text-gray-700'
                       >
-                        <div>
-                          <label
-                            htmlFor='email'
-                            className='block text-sm font-medium text-gray-700'
-                          >
-                            Электронная почта
-                          </label>
-                          <input
-                            id='email'
-                            type='email'
-                            value={email}
-                            onChange={e => {
-                              setEmail(e.target.value);
-                              if (emailError) {
-                                setEmailError('');
-                              }
-                            }}
-                            placeholder='you@example.com'
-                            className='mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-                          />
-                          {emailError && (
-                            <p className='mt-1 text-xs text-red-600'>
-                              {emailError}
-                            </p>
-                          )}
-                        </div>
-
-                        {emailResultMessage && (
-                          <div className='text-xs text-gray-600 bg-gray-50 rounded-md p-2'>
-                            {emailResultMessage}
-                          </div>
-                        )}
-
-                        <div className='mt-4 flex flex-col sm:flex-row gap-3'>
-                          <button
-                            type='submit'
-                            disabled={isSubmittingEmail}
-                            className='flex-1 inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50'
-                          >
-                            {isSubmittingEmail
-                              ? 'Отправка...'
-                              : 'Получить доступ'}
-                          </button>
-                          <button
-                            type='button'
-                            onClick={() => setIsEmailModalOpen(false)}
-                            className='flex-1 inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
-                          >
-                            Позже
-                          </button>
-                        </div>
-                      </form>
-                    </>
-                  ) : (
-                    <>
-                      <Dialog.Title className='text-lg font-semibold leading-6 text-gray-900'>
-                        Доступ к курсу отправлен
-                      </Dialog.Title>
-                      <div className='mt-2 space-y-2'>
-                        <p className='text-sm text-gray-600'>
-                          Письмо с доступом и данными для входа отправлено на
-                          почту, указанную при оплате.
+                        Электронная почта
+                      </label>
+                      <input
+                        id='email'
+                        type='email'
+                        value={email}
+                        onChange={e => {
+                          setEmail(e.target.value);
+                          if (emailError) {
+                            setEmailError('');
+                          }
+                        }}
+                        placeholder='you@example.com'
+                        className='mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
+                      />
+                      {emailError && (
+                        <p className='mt-1 text-xs text-red-600'>
+                          {emailError}
                         </p>
-                        <p className='text-sm text-gray-600'>
-                          Если письма нет — проверьте папку «Спам» и попробуйте
-                          подождать несколько минут.
-                        </p>
+                      )}
+                    </div>
+
+                    {emailResultMessage && (
+                      <div className='text-xs text-gray-600 bg-gray-50 rounded-md p-2'>
+                        {emailResultMessage}
                       </div>
-                      <div className='mt-4 flex flex-col sm:flex-row gap-3'>
-                        <Link
-                          href='/login'
-                          className='flex-1 inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700'
-                        >
-                          Войти в кабинет
-                        </Link>
-                        <button
-                          type='button'
-                          onClick={() => setIsEmailModalOpen(false)}
-                          className='flex-1 inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
-                        >
-                          Закрыть
-                        </button>
-                      </div>
-                    </>
-                  )}
+                    )}
+
+                    <div className='mt-4 flex flex-col sm:flex-row gap-3'>
+                      <button
+                        type='submit'
+                        disabled={isSubmittingEmail}
+                        className='flex-1 inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50'
+                      >
+                        {isSubmittingEmail ? 'Отправка...' : 'Получить доступ'}
+                      </button>
+                      <button
+                        type='button'
+                        onClick={() => setIsEmailModalOpen(false)}
+                        className='flex-1 inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
+                      >
+                        Позже
+                      </button>
+                    </div>
+                  </form>
                 </Dialog.Panel>
               </Transition.Child>
             </div>

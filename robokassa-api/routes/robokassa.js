@@ -19,6 +19,7 @@ const {
   normalizePhone,
 } = require('../utils/validation');
 
+/*
 const crypto = require('crypto');
 
 function getSupabaseConfig() {
@@ -102,6 +103,7 @@ async function supabaseRestRequest(pathWithQuery, method, body) {
   const data = await response.json().catch(() => null);
   return { response, data };
 }
+*/
 
 // Проверка переменных окружения при загрузке модуля
 const envValidation = validateEnvironment();
@@ -148,15 +150,6 @@ router.post('/generate-payment-url', async (req, res) => {
 
     // Генерируем уникальный ID заказа (числовой, требование Robokassa)
     const invId = generateInvoiceId();
-
-    const shpParams = {};
-    if (productId === 'personal-program' && email) {
-      shpParams.shp_product_id = productId;
-      shpParams.shp_email = email;
-      if (level !== undefined && level !== null && level !== '') {
-        shpParams.shp_level = String(level);
-      }
-    }
 
     // Получение настроек Robokassa
     const isTestMode = process.env.ROBOKASSA_TEST_MODE === 'true';
@@ -265,7 +258,7 @@ router.post('/generate-payment-url', async (req, res) => {
       amount,
       invId,
       password1,
-      shpParams,
+      {},
       receiptParam
     );
 
@@ -289,10 +282,10 @@ router.post('/generate-payment-url', async (req, res) => {
       params.push(`Receipt=${encodeURIComponent(receiptParam)}`);
     }
 
-    const shpKeys = Object.keys(shpParams).sort();
-    for (const key of shpKeys) {
-      params.push(`${key}=${encodeURIComponent(shpParams[key])}`);
-    }
+    // const shpKeys = Object.keys(shpParams).sort();
+    // for (const key of shpKeys) {
+    //   params.push(`${key}=${encodeURIComponent(shpParams[key])}`);
+    // }
 
     // Добавляем подпись в конце
     params.push(`SignatureValue=${signature}`);
@@ -419,6 +412,7 @@ const handleResult = async (req, res) => {
     // await updateOrderStatus(InvId, 'paid', outSum);
     // await sendConfirmationEmail(email);
 
+    /*
     try {
       const pick = value => (Array.isArray(value) ? value[0] : value);
       const emailRaw =
@@ -434,7 +428,6 @@ const handleResult = async (req, res) => {
         console.warn('Email отсутствует в Result URL (ожидается shp_email)');
       } else {
         const password = generatePassword();
-        let createdNewUser = false;
 
         let userId = null;
         const created = await supabaseAuthAdminRequest(
@@ -452,7 +445,6 @@ const handleResult = async (req, res) => {
 
         if (created.response.ok && created.data?.user?.id) {
           userId = created.data.user.id;
-          createdNewUser = true;
         } else {
           const PER_PAGE = 200;
           for (let page = 1; page <= 10; page++) {
@@ -476,48 +468,30 @@ const handleResult = async (req, res) => {
               break;
             }
           }
-        }
 
-        const siteUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.ru';
-        const html = createdNewUser
-          ? `
-            <div style="font-family: Arial, sans-serif; line-height: 1.5;">
-              <h2>Доступ к курсу открыт</h2>
-              <p>Ваши данные для входа:</p>
-              <p><strong>Email:</strong> ${email}</p>
-              <p><strong>Пароль:</strong> ${password}</p>
-              <p>Войти можно здесь: <a href="${siteUrl}/login">${siteUrl}/login</a></p>
-            </div>
-          `
-          : `
-            <div style="font-family: Arial, sans-serif; line-height: 1.5;">
-              <h2>Доступ к курсу открыт</h2>
-              <p>Курс добавлен в ваш личный кабинет.</p>
-              <p><strong>Email:</strong> ${email}</p>
-              <p>Войти можно здесь: <a href="${siteUrl}/login">${siteUrl}/login</a></p>
-              <p>Если вы забыли пароль, воспользуйтесь восстановлением пароля на странице входа.</p>
-            </div>
-          `;
-
-        if (userId) {
-          const profileInsert = await supabaseRestRequest(
-            '/rest/v1/profiles',
-            'POST',
-            { id: userId, email, full_name: 'Покупатель' }
-          );
-          if (
-            !profileInsert.response.ok &&
-            profileInsert.response.status !== 409
-          ) {
-            console.warn('Profile insert failed:', profileInsert.data);
+          if (userId) {
+            await supabaseAuthAdminRequest(
+              `/auth/v1/admin/users/${userId}`,
+              'PUT',
+              { password }
+            );
           }
         }
 
+        const siteUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.ru';
+        const html = `
+          <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+            <h2>Доступ к курсу открыт</h2>
+            <p>Ваши данные для входа:</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Пароль:</strong> ${password}</p>
+            <p>Войти можно здесь: <a href="${siteUrl}/login">${siteUrl}/login</a></p>
+          </div>
+        `;
+
         const emailResult = await resendEmail({
           to: email,
-          subject: createdNewUser
-            ? 'Доступ к курсу открыт! Ваши данные для входа'
-            : 'Доступ к курсу открыт',
+          subject: 'Доступ к курсу открыт! Ваши данные для входа',
           html,
         });
 
@@ -592,6 +566,7 @@ const handleResult = async (req, res) => {
     } catch (e) {
       console.error('Post-payment processing error:', e);
     }
+    */
 
     // Robokassa ожидает ответ "OK{InvId}"
     res.send(`OK${InvId}`);
@@ -680,14 +655,8 @@ const handleSuccess = async (req, res) => {
     // Перенаправляем на страницу успеха
     const frontendUrl =
       process.env.FRONTEND_URL || 'https://minenkovrehab.github.io';
-    const pick = value => (Array.isArray(value) ? value[0] : value);
-    const productIdRaw = pick(shpParams.shp_product_id) || '';
-    const productId = String(productIdRaw).trim();
-    const productPart = productId
-      ? `&productId=${encodeURIComponent(productId)}`
-      : '';
     res.redirect(
-      `${frontendUrl}/payment/success?invId=${InvId}&amount=${outSum}${productPart}`
+      `${frontendUrl}/payment/success?invId=${InvId}&amount=${outSum}`
     );
   } catch (error) {
     console.error('❌ Ошибка обработки Success URL:', error);
