@@ -52,7 +52,20 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     if (!isVerifying && isValid) {
       const mock = searchParams?.get('mock');
-      if (mock === '1') {
+      const productId =
+        searchParams?.get('shp_product_id') ||
+        searchParams?.get('Shp_product_id') ||
+        searchParams?.get('Shp_Product_Id') ||
+        searchParams?.get('productId') ||
+        '';
+
+      // Старый вариант (оставлен для истории):
+      // const mock = searchParams?.get('mock');
+      // if (mock === '1') {
+      //   setIsEmailModalOpen(true);
+      // }
+
+      if (mock === '1' || productId === 'personal-program') {
         setIsEmailModalOpen(true);
       }
     }
@@ -93,6 +106,17 @@ export default function PaymentSuccessPage() {
           },
           body: JSON.stringify({
             email: email.trim(),
+            productId:
+              searchParams?.get('shp_product_id') ||
+              searchParams?.get('Shp_product_id') ||
+              searchParams?.get('Shp_Product_Id') ||
+              searchParams?.get('productId') ||
+              undefined,
+            invId:
+              paymentData.invId ||
+              searchParams?.get('InvId') ||
+              searchParams?.get('invoiceID') ||
+              undefined,
           }),
         }
       );
