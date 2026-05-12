@@ -281,6 +281,44 @@ router.post('/exchange-supabase', async (req, res) => {
   }
 });
 
+router.get('/magic', async (req, res) => {
+  try {
+    const token = typeof req.query?.token === 'string' ? req.query.token : '';
+    const nextRaw = typeof req.query?.next === 'string' ? req.query.next : '';
+    const nextPath =
+      nextRaw && nextRaw.startsWith('/') ? nextRaw : '/dashboard';
+
+    if (!token) {
+      const frontendUrl =
+        process.env.FRONTEND_URL || 'https://minenkovrehab.ru';
+      return res.redirect(`${frontendUrl}/login`);
+    }
+
+    const payload = verifyJwt(token);
+    if (!payload?.sub || payload?.typ !== 'magic') {
+      const frontendUrl =
+        process.env.FRONTEND_URL || 'https://minenkovrehab.ru';
+      return res.redirect(`${frontendUrl}/login`);
+    }
+
+    const jwt = signJwt(
+      {
+        sub: payload.sub,
+        email: payload.email || null,
+        full_name: payload.full_name || null,
+      },
+      60 * 60 * 24 * 30
+    );
+    res.cookie(AUTH_COOKIE_NAME, jwt, getCookieOptions(req));
+
+    const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.ru';
+    return res.redirect(`${frontendUrl}${nextPath}`);
+  } catch (error) {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.ru';
+    return res.redirect(`${frontendUrl}/login`);
+  }
+});
+
 router.post('/logout', async (req, res) => {
   try {
     res.clearCookie(AUTH_COOKIE_NAME, {

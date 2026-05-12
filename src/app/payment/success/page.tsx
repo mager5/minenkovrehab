@@ -12,6 +12,14 @@ interface PaymentData {
   signatureValue?: string;
 }
 
+function getRailwayApiBaseUrl() {
+  const value =
+    typeof process !== 'undefined'
+      ? (process.env.NEXT_PUBLIC_RAILWAY_API_URL || '').trim()
+      : '';
+  return value || 'https://minenkovrehab-production-15cc.up.railway.app';
+}
+
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
   const [paymentData, setPaymentData] = useState<PaymentData>({});
@@ -26,9 +34,20 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     // Получаем параметры от Robokassa
     if (searchParams) {
+      /*
+      // Старый вариант (оставлен для истории): читали только Robokassa-ключи
       const outSum = searchParams.get('OutSum');
       const invId = searchParams.get('InvId');
       const signatureValue = searchParams.get('SignatureValue');
+      */
+      const outSum =
+        searchParams.get('OutSum') || searchParams.get('outSum') || undefined;
+      const invId =
+        searchParams.get('InvId') || searchParams.get('invId') || undefined;
+      const signatureValue =
+        searchParams.get('SignatureValue') ||
+        searchParams.get('signatureValue') ||
+        undefined;
 
       setPaymentData({
         ...(outSum && { outSum }),
@@ -52,7 +71,32 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     if (!isVerifying && isValid) {
       const mock = searchParams?.get('mock');
+      /*
+      // Старый вариант (оставлен для истории): открывали попап только по mock=1
       if (mock === '1') {
+        setIsEmailModalOpen(true);
+      }
+      */
+      const product = searchParams?.get('product');
+      const invId =
+        searchParams?.get('InvId') || searchParams?.get('invId') || '';
+
+      let shouldOpen =
+        mock === '1' && String(product).trim() === 'personal-program';
+
+      if (!shouldOpen && typeof window !== 'undefined') {
+        try {
+          const lastProduct = sessionStorage.getItem('mr_last_payment_product');
+          const lastInvId = sessionStorage.getItem('mr_last_payment_inv_id');
+          shouldOpen =
+            lastProduct === 'personal-program' &&
+            Boolean(invId) &&
+            Boolean(lastInvId) &&
+            String(lastInvId) === String(invId);
+        } catch {}
+      }
+
+      if (shouldOpen) {
         setIsEmailModalOpen(true);
       }
     }
@@ -83,7 +127,8 @@ export default function PaymentSuccessPage() {
     setIsSubmittingEmail(true);
 
     try {
-      // Используем новый API на Railway
+      /*
+      // Старый вариант (оставлен для истории): всегда дергали мок-эндпоинт
       const response = await fetch(
         'https://minenkovrehab-production-15cc.up.railway.app/api/mock-payment/complete',
         {
@@ -96,6 +141,37 @@ export default function PaymentSuccessPage() {
           }),
         }
       );
+      */
+      const mock = searchParams?.get('mock');
+      const apiBaseUrl = getRailwayApiBaseUrl();
+
+      const outSum = paymentData.outSum || '';
+      const invId = paymentData.invId || '';
+      const signatureValue = paymentData.signatureValue || '';
+
+      const url =
+        mock === '1'
+          ? `${apiBaseUrl}/api/mock-payment/complete`
+          : `${apiBaseUrl}/api/robokassa/complete-personal-program`;
+
+      const payload =
+        mock === '1'
+          ? { email: email.trim() }
+          : {
+              email: email.trim(),
+              OutSum: outSum,
+              InvId: invId,
+              SignatureValue: signatureValue,
+            };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
 
       const data = await response.json();
 
@@ -114,6 +190,16 @@ export default function PaymentSuccessPage() {
       }
 
       setEmailResultMessage(finalMessage);
+
+      if (response.ok && data?.success) {
+        try {
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('mr_last_payment_product');
+            sessionStorage.removeItem('mr_last_payment_inv_id');
+          }
+        } catch {}
+        window.location.href = '/dashboard';
+      }
     } catch (error) {
       console.error('Ошибка при отправке email:', error);
       setEmailResultMessage(

@@ -403,6 +403,21 @@ export default function ProductClient({ product }: { product: Product }) {
       const result = await response.json();
 
       if (result.success && result.data?.paymentUrl) {
+        if (typeof window !== 'undefined') {
+          try {
+            if (product.id === 'personal-program' && result.data?.invoiceId) {
+              sessionStorage.setItem(
+                'mr_last_payment_product',
+                'personal-program'
+              );
+              sessionStorage.setItem(
+                'mr_last_payment_inv_id',
+                String(result.data.invoiceId)
+              );
+            }
+          } catch {}
+        }
+
         // Убираем лишние символы из URL, если они есть
         const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
         window.location.href = cleanUrl;
