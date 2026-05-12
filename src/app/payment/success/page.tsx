@@ -149,13 +149,19 @@ export default function PaymentSuccessPage() {
       const invId = paymentData.invId || '';
       const signatureValue = paymentData.signatureValue || '';
 
+      const hasSuccessSignature = Boolean(outSum && invId && signatureValue);
+      const product = searchParams?.get('product');
+
       const url =
-        mock === '1'
-          ? `${apiBaseUrl}/api/mock-payment/complete`
-          : `${apiBaseUrl}/api/robokassa/complete-personal-program`;
+        (mock === '1' &&
+          String(product).trim() === 'personal-program' &&
+          hasSuccessSignature) ||
+        mock !== '1'
+          ? `${apiBaseUrl}/api/robokassa/complete-personal-program`
+          : '/_api/mock-payment/complete';
 
       const payload =
-        mock === '1'
+        url === '/_api/mock-payment/complete'
           ? { email: email.trim() }
           : {
               email: email.trim(),

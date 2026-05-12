@@ -926,6 +926,68 @@ router.post('/complete-personal-program', async (req, res) => {
   }
 });
 
+router.get('/test-success', async (req, res) => {
+  try {
+    const secret =
+      typeof req.query?.secret === 'string' ? req.query.secret : '';
+    const expectedSecret = process.env.PAYMENT_TEST_SECRET || '';
+    if (!expectedSecret || secret !== expectedSecret) {
+      return res.status(404).send('Not Found');
+    }
+
+    const productIdRaw =
+      typeof req.query?.productId === 'string' ? req.query.productId : '';
+    const productId = String(productIdRaw || '').trim();
+    if (productId !== 'personal-program') {
+      return res.status(400).json({
+        success: false,
+        error: 'Доступен только personal-program',
+      });
+    }
+
+    const amountRaw =
+      typeof req.query?.amount === 'string' ? req.query.amount : '';
+    const amountNumber = Number.parseFloat(amountRaw || '4990');
+    const outSum = Number.isFinite(amountNumber) ? amountNumber : 4990;
+
+    const isTestMode = process.env.ROBOKASSA_TEST_MODE === 'true';
+    const password1 = isTestMode
+      ? process.env.ROBOKASSA_TEST_PASSWORD1
+      : process.env.ROBOKASSA_PASSWORD1;
+
+    if (!password1) {
+      return res.status(500).json({
+        success: false,
+        error: 'Пароль #1 Robokassa не настроен',
+      });
+    }
+
+    const invId = generateInvoiceId();
+    const signatureValue = generateSuccessSignature(
+      outSum,
+      invId,
+      password1,
+      {}
+    );
+
+    const frontendUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.ru';
+    return res.redirect(
+      `${frontendUrl}/payment/success?mock=1&product=personal-program&OutSum=${encodeURIComponent(
+        outSum.toFixed(2)
+      )}&InvId=${encodeURIComponent(String(invId))}&SignatureValue=${encodeURIComponent(
+        String(signatureValue)
+      )}&invId=${encodeURIComponent(String(invId))}&amount=${encodeURIComponent(
+        outSum.toFixed(2)
+      )}`
+    );
+  } catch (error) {
+    console.error('Robokassa test-success error:', error);
+    return res
+      .status(500)
+      .json({ success: false, error: 'Внутренняя ошибка сервера' });
+  }
+});
+
 /**
  * GET/POST /api/robokassa/success
  * Обработка Success URL от Robokassa
