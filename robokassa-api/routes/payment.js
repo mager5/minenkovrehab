@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { generateSuccessSignature, verifySignature } = require('../utils/signature');
+const {
+  generateSuccessSignature,
+  verifySignature,
+} = require('../utils/signature');
 const { validateSuccessParams } = require('../utils/validation');
 
 /**
@@ -10,9 +13,9 @@ const { validateSuccessParams } = require('../utils/validation');
 router.get('/success', (req, res) => {
   try {
     console.log('✅ Переход на страницу успешной оплаты:', req.query);
-    
+
     const { OutSum, InvId, SignatureValue } = req.query;
-    
+
     // Если есть параметры от Robokassa, проверяем подпись
     if (OutSum && InvId && SignatureValue) {
       const validation = validateSuccessParams(req.query);
@@ -37,16 +40,27 @@ router.get('/success', (req, res) => {
           </html>
         `);
       }
-      
+
       const outSum = parseFloat(OutSum);
+      const shpParams = {};
+      Object.keys(req.query).forEach(key => {
+        if (key.startsWith('shp_')) {
+          shpParams[key] = req.query[key];
+        }
+      });
       const isTestMode = process.env.ROBOKASSA_TEST_MODE === 'true';
-      const password1 = isTestMode 
-        ? process.env.ROBOKASSA_TEST_PASSWORD1 
+      const password1 = isTestMode
+        ? process.env.ROBOKASSA_TEST_PASSWORD1
         : process.env.ROBOKASSA_PASSWORD1;
-      
+
       if (password1) {
-        const expectedSignature = generateSuccessSignature(outSum, InvId, password1);
-        
+        const expectedSignature = generateSuccessSignature(
+          outSum,
+          InvId,
+          password1,
+          shpParams
+        );
+
         if (!verifySignature(SignatureValue, expectedSignature)) {
           console.error('❌ Неверная подпись Success URL');
           return res.status(400).send(`
@@ -68,15 +82,15 @@ router.get('/success', (req, res) => {
             </html>
           `);
         }
-        
+
         console.log('✅ Успешная оплата подтверждена:', {
           invoiceId: InvId,
           amount: outSum,
-          testMode: isTestMode
+          testMode: isTestMode,
         });
       }
     }
-    
+
     // Отображение страницы успешной оплаты
     res.send(`
       <!DOCTYPE html>
@@ -132,7 +146,6 @@ router.get('/success', (req, res) => {
       </body>
       </html>
     `);
-    
   } catch (error) {
     console.error('❌ Ошибка на странице успешной оплаты:', error);
     res.status(500).send(`
@@ -163,9 +176,9 @@ router.get('/success', (req, res) => {
 router.get('/fail', (req, res) => {
   try {
     console.log('❌ Переход на страницу неуспешной оплаты:', req.query);
-    
+
     const { OutSum, InvId } = req.query;
-    
+
     // Отображение страницы неуспешной оплаты
     res.send(`
       <!DOCTYPE html>
@@ -240,7 +253,6 @@ router.get('/fail', (req, res) => {
       </body>
       </html>
     `);
-    
   } catch (error) {
     console.error('❌ Ошибка на странице неуспешной оплаты:', error);
     res.status(500).send(`
