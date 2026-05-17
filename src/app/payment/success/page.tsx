@@ -170,6 +170,9 @@ export default function PaymentSuccessPage() {
       setEmailResultMessage(finalMessage);
 
       if (response.ok && data?.success) {
+        if (data?.autoLogin === false) {
+          return;
+        }
         window.location.href = '/dashboard';
       }
     } catch (error) {

@@ -868,13 +868,18 @@ router.post('/complete-personal-program', async (req, res) => {
     const apiUrl = process.env.API_PUBLIC_URL || 'https://api.minenkovrehab.ru';
     const siteUrl = process.env.FRONTEND_URL || 'https://minenkovrehab.ru';
 
-    const magicToken = signJwt(
-      { typ: 'magic', sub: userId, email, full_name: 'Покупатель' },
-      60 * 30
-    );
-    const magicUrl = `${apiUrl}/api/auth/magic?token=${encodeURIComponent(
-      magicToken
-    )}&next=${encodeURIComponent('/dashboard')}`;
+    let magicUrl = `${siteUrl}/login`;
+    let autoLogin = false;
+    try {
+      const magicToken = signJwt(
+        { typ: 'magic', sub: userId, email, full_name: 'Покупатель' },
+        60 * 30
+      );
+      magicUrl = `${apiUrl}/api/auth/magic?token=${encodeURIComponent(
+        magicToken
+      )}&next=${encodeURIComponent('/dashboard')}`;
+      autoLogin = true;
+    } catch (e) {}
 
     const html = `
       <div style="font-family: Arial, sans-serif; line-height: 1.5;">
@@ -893,15 +898,22 @@ router.post('/complete-personal-program', async (req, res) => {
       html,
     });
 
-    const sessionJwt = signJwt(
-      { sub: userId, email, full_name: 'Покупатель' },
-      60 * 60 * 24 * 30
-    );
-    res.cookie(AUTH_COOKIE_NAME, sessionJwt, getCookieOptions(req));
+    if (autoLogin) {
+      try {
+        const sessionJwt = signJwt(
+          { sub: userId, email, full_name: 'Покупатель' },
+          60 * 60 * 24 * 30
+        );
+        res.cookie(AUTH_COOKIE_NAME, sessionJwt, getCookieOptions(req));
+      } catch (e) {
+        autoLogin = false;
+      }
+    }
 
     return res.json({
       success: true,
       status: userCreated ? 'created' : 'updated',
+      autoLogin,
       emailSent: emailResult.ok,
       message: emailResult.ok
         ? 'Доступ создан. На email отправлены логин, пароль и ссылка для входа. Сейчас откроем личный кабинет.'
