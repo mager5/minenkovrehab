@@ -257,7 +257,9 @@ router.post('/generate-payment-url', async (req, res) => {
     }
 
     // Извлечение и санитизация данных
-    const email = req.body.email ? sanitizeString(req.body.email) : undefined;
+    const email = req.body.email
+      ? sanitizeString(req.body.email).trim().toLowerCase()
+      : undefined;
     const phone = req.body.phone ? normalizePhone(req.body.phone) : undefined;
     const amount = parseFloat(req.body.amount);
     // const description = sanitizeString(
@@ -265,6 +267,15 @@ router.post('/generate-payment-url', async (req, res) => {
     // ); // Убрано по требованию пользователя
     const productId = req.body.productId; // Получаем ID продукта для определения типа услуги
     const level = req.body.level; // Получаем уровень отдельным параметром
+
+    if (productId === 'personal-program' && !email) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: 'Email обязателен для получения доступа',
+        });
+    }
 
     // Генерируем уникальный ID заказа (числовой, требование Robokassa)
     const invId = generateInvoiceId();
@@ -370,13 +381,21 @@ router.post('/generate-payment-url', async (req, res) => {
       console.log('📄 Создан автоматический параметр Receipt для фискализации');
     }
 
+    const shpParams = {};
+    if (email) {
+      shpParams.shp_email = email;
+    }
+    if (productId) {
+      shpParams.shp_product_id = productId;
+    }
+
     // Генерация подписи с учетом параметра Receipt (если есть)
     const signature = generatePaymentSignature(
       login,
       amount,
       invId,
       password1,
-      {},
+      shpParams,
       receiptParam
     );
 
@@ -391,7 +410,7 @@ router.post('/generate-payment-url', async (req, res) => {
       `MerchantLogin=${encodeURIComponent(login)}`,
       `OutSum=${amount.toFixed(2)}`,
       `invoiceID=${invId}`,
-      // `InvId=${invId}`,
+      `InvId=${invId}`,
       // `Description=${encodeURIComponent(description)}`, // Убрано по требованию пользователя
     ];
 
@@ -400,10 +419,10 @@ router.post('/generate-payment-url', async (req, res) => {
       params.push(`Receipt=${encodeURIComponent(receiptParam)}`);
     }
 
-    // const shpKeys = Object.keys(shpParams).sort();
-    // for (const key of shpKeys) {
-    //   params.push(`${key}=${encodeURIComponent(shpParams[key])}`);
-    // }
+    const shpKeys = Object.keys(shpParams).sort();
+    for (const key of shpKeys) {
+      params.push(`${key}=${encodeURIComponent(shpParams[key])}`);
+    }
 
     // Добавляем подпись в конце
     params.push(`SignatureValue=${signature}`);
@@ -525,12 +544,6 @@ const handleResult = async (req, res) => {
       testMode: isTestMode,
     });
 
-    // TODO: Здесь должна быть логика обновления статуса заказа в базе данных
-    // Например:
-    // await updateOrderStatus(InvId, 'paid', outSum);
-    // await sendConfirmationEmail(email);
-
-    /*
     try {
       const pick = value => (Array.isArray(value) ? value[0] : value);
       const emailRaw =
@@ -539,12 +552,13 @@ const handleResult = async (req, res) => {
         pick(params.email) ||
         '';
       const email = String(emailRaw).trim().toLowerCase();
-      const productSlugRaw = pick(shpParams.shp_product_id) || '';
+      const productSlugRaw =
+        pick(shpParams.shp_product_id) ||
+        pick(shpParams.shp_product_slug) ||
+        '';
       const productSlug = String(productSlugRaw).trim();
 
-      if (!email) {
-        console.warn('Email отсутствует в Result URL (ожидается shp_email)');
-      } else {
+      if (email && productSlug === 'personal-program') {
         const password = generatePassword();
 
         let userId = null;
@@ -600,16 +614,16 @@ const handleResult = async (req, res) => {
         const html = `
           <div style="font-family: Arial, sans-serif; line-height: 1.5;">
             <h2>Доступ к курсу открыт</h2>
-            <p>Ваши данные для входа:</p>
+            <p><strong>Курс:</strong> Программа восстановления после резекции мениска</p>
             <p><strong>Email:</strong> ${email}</p>
             <p><strong>Пароль:</strong> ${password}</p>
-            <p>Войти можно здесь: <a href="${siteUrl}/login">${siteUrl}/login</a></p>
+            <p>Войти: <a href="${siteUrl}/login">${siteUrl}/login</a></p>
           </div>
         `;
 
         const emailResult = await resendEmail({
           to: email,
-          subject: 'Доступ к курсу открыт! Ваши данные для входа',
+          subject: 'Доступ к курсу открыт — данные для входа',
           html,
         });
 
@@ -617,8 +631,8 @@ const handleResult = async (req, res) => {
           console.warn('Email send skipped/failed:', emailResult.error);
         }
 
-        if (userId && productSlug) {
-          let productId = null;
+        if (userId) {
+          let productUuid = null;
 
           const productLookup = await supabaseRestRequest(
             `/rest/v1/products?select=id&slug=eq.${encodeURIComponent(productSlug)}&limit=1`,
@@ -629,18 +643,10 @@ const handleResult = async (req, res) => {
             Array.isArray(productLookup.data) &&
             productLookup.data[0]?.id
           ) {
-            productId = productLookup.data[0].id;
-          } else {
-            const looksLikeUuid =
-              /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-                productSlug
-              );
-            if (looksLikeUuid) {
-              productId = productSlug;
-            }
+            productUuid = productLookup.data[0].id;
           }
 
-          if (productId) {
+          if (productUuid) {
             const existing = await supabaseRestRequest(
               `/rest/v1/purchases?select=id&robokassa_invoice_id=eq.${encodeURIComponent(
                 String(InvId)
@@ -662,29 +668,23 @@ const handleResult = async (req, res) => {
                 {
                   status: 'active',
                   user_id: userId,
-                  product_id: productId,
+                  product_id: productUuid,
                 }
               );
             } else {
               await supabaseRestRequest('/rest/v1/purchases', 'POST', {
                 user_id: userId,
-                product_id: productId,
+                product_id: productUuid,
                 status: 'active',
                 robokassa_invoice_id: String(InvId),
               });
             }
-          } else {
-            console.warn(
-              'Не удалось определить product_id в Supabase для productSlug:',
-              productSlug
-            );
           }
         }
       }
     } catch (e) {
       console.error('Post-payment processing error:', e);
     }
-    */
 
     // Robokassa ожидает ответ "OK{InvId}"
     res.send(`OK${InvId}`);
