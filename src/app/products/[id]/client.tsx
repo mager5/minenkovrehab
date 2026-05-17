@@ -63,10 +63,6 @@ export default function ProductClient({ product }: { product: Product }) {
   // const [customerEmail, setCustomerEmail] = useState('');
   // const [customerPhone, setCustomerPhone] = useState('');
 
-  const [isAccessEmailModalOpen, setIsAccessEmailModalOpen] = useState(false);
-  const [accessEmail, setAccessEmail] = useState('');
-  const [accessEmailError, setAccessEmailError] = useState<string | null>(null);
-
   // Сброс состояний обработки при возврате пользователя на страницу
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -193,11 +189,6 @@ export default function ProductClient({ product }: { product: Product }) {
     if (!checkConsent()) {
       return;
     }
-    if (product.id === 'personal-program') {
-      setAccessEmailError(null);
-      setIsAccessEmailModalOpen(true);
-      return;
-    }
     await handlePayment(1);
   };
 
@@ -262,7 +253,7 @@ export default function ProductClient({ product }: { product: Product }) {
   };
 
   // Функция создания платежа через Railway API
-  const handlePayment = async (level: number, accessEmailOverride?: string) => {
+  const handlePayment = async (level: number) => {
     try {
       console.log('🔄 Создание платежа для продукта:', product.title);
       console.log('🔄 Уровень:', level);
@@ -369,20 +360,6 @@ export default function ProductClient({ product }: { product: Product }) {
           ? 'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url'
           : '/api/robokassa/generate-payment-url';
 
-      const emailForAccess =
-        product.id === 'personal-program'
-          ? String(accessEmailOverride || '')
-              .trim()
-              .toLowerCase()
-          : 'noreply@minenkovrehab.ru';
-
-      if (product.id === 'personal-program') {
-        const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-        if (!emailForAccess || !emailRegex.test(emailForAccess)) {
-          throw new Error('Укажите корректный email для получения доступа');
-        }
-      }
-
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -392,7 +369,7 @@ export default function ProductClient({ product }: { product: Product }) {
           amount: product.price,
           productId: product.id,
           level,
-          email: emailForAccess,
+          email: 'noreply@minenkovrehab.ru',
           phone: '+79000000000',
           // email: 'customer@example.com',
           // phone: '+79001234567',
@@ -426,21 +403,6 @@ export default function ProductClient({ product }: { product: Product }) {
       const result = await response.json();
 
       if (result.success && result.data?.paymentUrl) {
-        if (typeof window !== 'undefined') {
-          try {
-            if (product.id === 'personal-program' && result.data?.invoiceId) {
-              sessionStorage.setItem(
-                'mr_last_payment_product',
-                'personal-program'
-              );
-              sessionStorage.setItem(
-                'mr_last_payment_inv_id',
-                String(result.data.invoiceId)
-              );
-            }
-          } catch {}
-        }
-
         // Убираем лишние символы из URL, если они есть
         const cleanUrl = result.data.paymentUrl.replace(/%27/g, '');
         window.location.href = cleanUrl;
@@ -512,75 +474,6 @@ export default function ProductClient({ product }: { product: Product }) {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {isAccessEmailModalOpen && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8'>
-          <div className='w-full max-w-lg rounded-xl bg-white p-6 shadow-xl'>
-            <div className='mb-4 flex items-start justify-between gap-4'>
-              <div>
-                <h2 className='text-xl font-semibold text-primary'>
-                  Получение доступа
-                </h2>
-                <div className='mt-1 text-sm text-gray-600'>
-                  Укажите email, на который отправить логин и пароль
-                </div>
-              </div>
-              <button
-                type='button'
-                onClick={() => setIsAccessEmailModalOpen(false)}
-                className='rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100'
-                disabled={isPaymentProcessingLevel1}
-              >
-                Закрыть
-              </button>
-            </div>
-
-            <form
-              className='space-y-4'
-              onSubmit={async e => {
-                e.preventDefault();
-                const normalized = String(accessEmail || '')
-                  .trim()
-                  .toLowerCase();
-                const emailRegex =
-                  /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-                if (!normalized || !emailRegex.test(normalized)) {
-                  setAccessEmailError('Укажите корректный email');
-                  return;
-                }
-                setAccessEmailError(null);
-                setIsAccessEmailModalOpen(false);
-                await handlePayment(1, normalized);
-              }}
-            >
-              <input
-                type='email'
-                inputMode='email'
-                autoComplete='email'
-                placeholder='Email'
-                className='w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none focus:border-accent'
-                value={accessEmail}
-                onChange={e => setAccessEmail(e.target.value)}
-                disabled={isPaymentProcessingLevel1}
-                required
-              />
-
-              {accessEmailError ? (
-                <div className='rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700'>
-                  {accessEmailError}
-                </div>
-              ) : null}
-
-              <button
-                type='submit'
-                className='w-full rounded-lg bg-accent px-4 py-3 text-white hover:bg-accent/90 disabled:opacity-60'
-                disabled={isPaymentProcessingLevel1}
-              >
-                Перейти к оплате
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Навигация */}
         <motion.div
