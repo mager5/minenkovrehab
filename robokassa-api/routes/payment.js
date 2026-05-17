@@ -88,6 +88,24 @@ router.get('/success', (req, res) => {
           amount: outSum,
           testMode: isTestMode,
         });
+
+        const frontendUrl =
+          process.env.FRONTEND_URL || 'https://minenkovrehab.ru';
+        const redirect = new URL('/payment/success', frontendUrl);
+        redirect.searchParams.set('OutSum', String(OutSum));
+        redirect.searchParams.set('InvId', String(InvId));
+        redirect.searchParams.set('SignatureValue', String(SignatureValue));
+        Object.keys(shpParams)
+          .sort()
+          .forEach(key => {
+            const value = shpParams[key];
+            if (typeof value === 'string') {
+              redirect.searchParams.set(key, value);
+            } else if (Array.isArray(value) && value[0]) {
+              redirect.searchParams.set(key, String(value[0]));
+            }
+          });
+        return res.redirect(redirect.toString());
       }
     }
 
