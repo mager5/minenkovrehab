@@ -320,17 +320,11 @@ router.post('/generate-payment-url', async (req, res) => {
     let receiptParam = null;
 
     const providedReceipt = req.body.receipt;
-    let serviceNameFromReceipt = null;
-    if (providedReceipt && typeof providedReceipt === 'object') {
-      const itemName =
-        Array.isArray(providedReceipt.items) &&
-        providedReceipt.items[0] &&
-        typeof providedReceipt.items[0].name === 'string'
-          ? providedReceipt.items[0].name
-          : '';
-      if (itemName && itemName.trim()) {
-        serviceNameFromReceipt = sanitizeString(itemName).trim();
-      }
+    if (providedReceipt) {
+      receiptParam =
+        typeof providedReceipt === 'string'
+          ? String(providedReceipt)
+          : JSON.stringify(providedReceipt);
     }
 
     let fiscalServiceName;
@@ -358,19 +352,13 @@ router.post('/generate-payment-url', async (req, res) => {
       fiscalServiceName = 'Услуга реабилитации';
     }
 
-    const receiptServiceName = serviceNameFromReceipt || fiscalServiceName;
-    if (email || phone) {
+    if (!receiptParam && (email || phone)) {
       receiptParam = createReceiptParameter(
-        receiptServiceName,
+        fiscalServiceName,
         amount,
         email || 'noreply@minenkovrehab.ru',
         phone || '+79000000000'
       );
-    } else if (providedReceipt) {
-      receiptParam =
-        typeof providedReceipt === 'string'
-          ? String(providedReceipt)
-          : JSON.stringify(providedReceipt);
     }
 
     const shpParams = {};
