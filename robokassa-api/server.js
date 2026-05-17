@@ -42,7 +42,18 @@ if (process.env.RAILWAY_PUBLIC_DOMAIN) {
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      const isLocalhost =
+        /^https?:\/\/localhost:\d+$/.test(origin) ||
+        /^https?:\/\/127\.0\.0\.1:\d+$/.test(origin);
+      return callback(null, isLocalhost);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Range'],
