@@ -268,13 +268,6 @@ router.post('/generate-payment-url', async (req, res) => {
     const productId = req.body.productId; // Получаем ID продукта для определения типа услуги
     const level = req.body.level; // Получаем уровень отдельным параметром
 
-    if (productId === 'personal-program' && !email) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email обязателен для получения доступа',
-      });
-    }
-
     // Генерируем уникальный ID заказа (числовой, требование Robokassa)
     const invId = generateInvoiceId();
 
@@ -362,7 +355,7 @@ router.post('/generate-payment-url', async (req, res) => {
     }
 
     const shpParams = {};
-    if (email) {
+    if (email && productId !== 'personal-program') {
       shpParams.shp_email = email;
     }
     if (productId) {
@@ -706,6 +699,24 @@ router.post('/complete-personal-program', async (req, res) => {
 
     const { OutSum, InvId, SignatureValue } = params;
     const outSum = parseFloat(OutSum);
+    const shpParams = {};
+    Object.keys(params).forEach(key => {
+      if (key.startsWith('shp_')) {
+        shpParams[key] = params[key];
+      }
+    });
+    const productFromShp = Array.isArray(shpParams.shp_product_id)
+      ? shpParams.shp_product_id[0]
+      : shpParams.shp_product_id;
+    if (
+      productFromShp &&
+      String(productFromShp).trim() !== 'personal-program'
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: 'Неверный продукт для выдачи доступа',
+      });
+    }
 
     const isTestMode = process.env.ROBOKASSA_TEST_MODE === 'true';
     const password1 = isTestMode
@@ -723,7 +734,7 @@ router.post('/complete-personal-program', async (req, res) => {
       outSum,
       InvId,
       password1,
-      {}
+      shpParams
     );
     if (!verifySignature(SignatureValue, expectedSignature)) {
       return res.status(400).json({
@@ -1054,7 +1065,13 @@ const handleSuccess = async (req, res) => {
         String(SignatureValue)
       )}&invId=${encodeURIComponent(String(InvId))}&amount=${encodeURIComponent(
         String(outSum)
-      )}`
+      )}${Object.keys(shpParams)
+        .sort()
+        .map(
+          key =>
+            `&${encodeURIComponent(key)}=${encodeURIComponent(String(shpParams[key]))}`
+        )
+        .join('')}`
     );
   } catch (error) {
     console.error('❌ Ошибка обработки Success URL:', error);
