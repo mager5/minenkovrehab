@@ -355,43 +355,44 @@ export default function ProductClient({ product }: { product: Product }) {
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Используем новый API на Railway
-      const response = await fetch(
-        'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+      const apiUrl =
+        process.env.NODE_ENV === 'production'
+          ? 'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url'
+          : '/api/robokassa/generate-payment-url';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: product.price,
+          productId: product.id,
+          level,
+          email: 'noreply@minenkovrehab.ru',
+          phone: '+79000000000',
+          // Старый вариант (оставлен для истории)
+          // email: 'customer@example.com',
+          // phone: '+79001234567',
+          // Явно передаем номенклатуру для чека (фискализация)
+          receipt: {
+            sno: 'usn_income', // УСН Доходы
+            items: [
+              {
+                name:
+                  product.id === 'formula-movement' && level
+                    ? `${product.title} (Уровень ${level})`
+                    : product.title,
+                quantity: 1,
+                sum: product.price,
+                payment_method: getPaymentMethod(product.id),
+                payment_object: 'service',
+                tax: 'none',
+              },
+            ],
           },
-          body: JSON.stringify({
-            amount: product.price,
-            productId: product.id,
-            level,
-            email: 'noreply@minenkovrehab.ru',
-            phone: '+79000000000',
-            // Старый вариант (оставлен для истории)
-            // email: 'customer@example.com',
-            // phone: '+79001234567',
-            // Явно передаем номенклатуру для чека (фискализация)
-            receipt: {
-              sno: 'usn_income', // УСН Доходы
-              items: [
-                {
-                  name:
-                    product.id === 'formula-movement' && level
-                      ? `${product.title} (Уровень ${level})`
-                      : product.title,
-                  quantity: 1,
-                  sum: product.price,
-                  payment_method: getPaymentMethod(product.id),
-                  payment_object: 'service',
-                  tax: 'none',
-                },
-              ],
-            },
-          }),
-        }
-      );
+        }),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();

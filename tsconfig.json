@@ -36,5 +36,12 @@
     "out/types/**/*.ts",
     "jest.setup.js"
   ],
-  "exclude": ["node_modules", "coverage", ".next", "vite-app", "vite-heygen"]
+  "exclude": [
+    "node_modules",
+    "coverage",
+    ".next",
+    "vite-app",
+    "vite-heygen",
+    "tmp-video"
+  ]
 }
