@@ -269,12 +269,10 @@ router.post('/generate-payment-url', async (req, res) => {
     const level = req.body.level; // Получаем уровень отдельным параметром
 
     if (productId === 'personal-program' && !email) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: 'Email обязателен для получения доступа',
-        });
+      return res.status(400).json({
+        success: false,
+        error: 'Email обязателен для получения доступа',
+      });
     }
 
     // Генерируем уникальный ID заказа (числовой, требование Robokassa)
@@ -410,7 +408,6 @@ router.post('/generate-payment-url', async (req, res) => {
       `MerchantLogin=${encodeURIComponent(login)}`,
       `OutSum=${amount.toFixed(2)}`,
       `invoiceID=${invId}`,
-      `InvId=${invId}`,
       // `Description=${encodeURIComponent(description)}`, // Убрано по требованию пользователя
     ];
 
