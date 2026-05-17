@@ -125,6 +125,11 @@ export default function RootLayout({
       className={`${inter.variable} font-sans h-full overflow-x-hidden overflow-y-auto`}
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var k='mr_chunk_reload_attempted';var shouldReload=function(err){var msg='';try{msg=String((err&&err.message)||err||'')}catch(e){}return msg.includes('ChunkLoadError')||msg.includes('Loading chunk')||msg.includes('loading chunk')||msg.includes('chunk');};var reload=function(){try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');var url=new URL(window.location.href);if(!url.searchParams.get('mr_chunk_reload')){url.searchParams.set('mr_chunk_reload','1');}window.location.replace(url.toString());}catch(e){try{window.location.reload();}catch(e2){}}};window.addEventListener('error',function(e){var err=e&&e.error?e.error:e;if(shouldReload(err))reload();});window.addEventListener('unhandledrejection',function(e){var r=e&&e.reason?e.reason:e;if(shouldReload(r))reload();});}catch(e){}})();`,
+          }}
+        />
         <meta
           httpEquiv='Cache-Control'
           content='no-cache, no-store, must-revalidate'
