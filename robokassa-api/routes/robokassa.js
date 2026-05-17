@@ -827,10 +827,44 @@ router.post('/complete-personal-program', async (req, res) => {
     }
 
     if (!productId) {
-      return res.status(500).json({
-        success: false,
-        error: 'Не удалось найти продукт personal-program',
-      });
+      const createdProduct = await supabaseRestRequest(
+        '/rest/v1/products',
+        'POST',
+        {
+          slug: 'personal-program',
+          title: 'Программа восстановления после резекции мениска',
+          description:
+            'Подробный информационный материал в формате пошагового алгоритма для восстановления после операции.',
+          price: 8000,
+        }
+      );
+
+      if (
+        createdProduct.response.ok &&
+        Array.isArray(createdProduct.data) &&
+        createdProduct.data[0]?.id
+      ) {
+        productId = createdProduct.data[0].id;
+      } else {
+        const recheck = await supabaseRestRequest(
+          '/rest/v1/products?select=id&slug=eq.personal-program&limit=1',
+          'GET'
+        );
+        if (
+          recheck.response.ok &&
+          Array.isArray(recheck.data) &&
+          recheck.data[0]?.id
+        ) {
+          productId = recheck.data[0].id;
+        }
+      }
+
+      if (!productId) {
+        return res.status(500).json({
+          success: false,
+          error: 'Не удалось найти или создать продукт personal-program',
+        });
+      }
     }
 
     const existing = await supabaseRestRequest(

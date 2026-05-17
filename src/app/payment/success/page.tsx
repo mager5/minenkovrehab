@@ -153,6 +153,15 @@ export default function PaymentSuccessPage() {
         ? await response.json()
         : { success: false, message: await response.text() };
 
+      if (!response.ok || !data?.success) {
+        const message =
+          data?.error ||
+          data?.message ||
+          'Не удалось отправить доступ. Пожалуйста, попробуйте ещё раз.';
+        setEmailResultMessage(message);
+        return;
+      }
+
       const serverMessage =
         data?.message ||
         (data?.status === 'exists'
