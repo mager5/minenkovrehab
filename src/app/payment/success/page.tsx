@@ -179,6 +179,9 @@ export default function PaymentSuccessPage() {
       setEmailResultMessage(finalMessage);
 
       if (response.ok && data?.success) {
+        if (data?.emailSent === false) {
+          return;
+        }
         if (data?.autoLogin === false) {
           return;
         }
@@ -387,6 +390,19 @@ export default function PaymentSuccessPage() {
                         {emailResultMessage}
                       </div>
                     )}
+
+                    {emailResultMessage &&
+                      emailResultMessage.includes('письмо') &&
+                      emailResultMessage.includes('не') && (
+                        <div className='text-xs text-gray-600'>
+                          <Link
+                            href='/dashboard'
+                            className='text-blue-600 hover:underline'
+                          >
+                            Перейти в личный кабинет
+                          </Link>
+                        </div>
+                      )}
 
                     <div className='mt-4 flex flex-col sm:flex-row gap-3'>
                       <button

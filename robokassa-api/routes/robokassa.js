@@ -931,6 +931,9 @@ router.post('/complete-personal-program', async (req, res) => {
       subject: 'Доступ к курсу открыт! Ваши данные для входа',
       html,
     });
+    if (!emailResult.ok) {
+      console.warn('Email send failed:', emailResult.error);
+    }
 
     if (autoLogin) {
       try {
