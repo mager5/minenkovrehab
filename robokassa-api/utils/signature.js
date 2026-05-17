@@ -46,13 +46,13 @@ function generatePaymentSignature(
     signatureString += `:${receipt}`;
   }
 
+  signatureString += `:${password}`;
+
   // Добавляем shp_ параметры в алфавитном порядке, если они есть
   if (shpParams && Object.keys(shpParams).length > 0) {
     const shpString = formatShpParams(shpParams);
     signatureString += `:${shpString}`;
   }
-
-  signatureString += `:${password}`;
 
   console.log(
     'Генерация подписи для платежа:',
@@ -82,15 +82,12 @@ function generateResultSignature(outSum, invId, password2, shpParams = null) {
   // Форматируем сумму с 2 знаками после запятой для консистентности
   const formattedSum = parseFloat(outSum).toFixed(2);
 
-  let signatureString = `${formattedSum}:${invId}`;
+  let signatureString = `${formattedSum}:${invId}:${password2}`;
 
-  // Добавляем shp_ параметры в алфавитном порядке, если они есть
   if (shpParams && Object.keys(shpParams).length > 0) {
     const shpString = formatShpParams(shpParams);
     signatureString += `:${shpString}`;
   }
-
-  signatureString += `:${password2}`;
 
   console.log(
     'Генерация подписи для Result URL:',
@@ -118,15 +115,12 @@ function generateSuccessSignature(outSum, invId, password1, shpParams = null) {
   // Форматируем сумму с 2 знаками после запятой для консистентности
   const formattedSum = parseFloat(outSum).toFixed(2);
 
-  let signatureString = `${formattedSum}:${invId}`;
+  let signatureString = `${formattedSum}:${invId}:${password1}`;
 
-  // Добавляем shp_ параметры в алфавитном порядке, если они есть
   if (shpParams && Object.keys(shpParams).length > 0) {
     const shpString = formatShpParams(shpParams);
     signatureString += `:${shpString}`;
   }
-
-  signatureString += `:${password1}`;
 
   console.log(
     'Генерация подписи для Success URL:',

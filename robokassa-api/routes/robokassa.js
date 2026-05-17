@@ -319,64 +319,58 @@ router.post('/generate-payment-url', async (req, res) => {
     // Создание параметра Receipt для фискализации
     let receiptParam = null;
 
-    // Если в запросе передан объект receipt, используем его
-    console.log('🔍 Проверка req.body.receipt:', req.body.receipt);
-    if (req.body.receipt) {
-      receiptParam = JSON.stringify(req.body.receipt);
-      console.log('📄 Использован переданный параметр Receipt:', receiptParam);
-    }
-    // Иначе создаем автоматически, если есть email или phone
-    else if (email || phone) {
-      console.log('🚀 ВХОД В ЛОГИКУ ФИСКАЛИЗАЦИИ');
-      // Для фискализации определяем название услуги по productId и level
-      console.log('🔍 Отладка параметров для фискализации:', {
-        productId,
-        level,
-        typeOfProductId: typeof productId,
-        typeOfLevel: typeof level,
-      });
-      let fiscalServiceName;
-
-      // Определяем название услуги на основе productId
-      if (productId === 'formula-movement') {
-        // Для программы "Формула Движения" определяем конкретный уровень
-        // Проверяем и строковые, и числовые значения level
-        if (level === '1' || level === 1) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' 1 уровень";
-        } else if (level === '2' || level === 2) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' 2 уровень";
-        } else if (level === '3' || level === 3) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' 3 уровень";
-        } else if (level === '4' || level === 4) {
-          fiscalServiceName =
-            "Программа тренировок 'Формула Движения' 4 уровень";
-        } else {
-          // Fallback для неизвестного уровня
-          fiscalServiceName = "Программа тренировок 'Формула Движения'";
-        }
-      } else if (productId === 'consultation') {
-        fiscalServiceName = 'Онлайн-консультация';
-      } else if (productId === 'express-consultation') {
-        fiscalServiceName = 'Экспресс онлайн-консультация';
-      } else if (productId === 'personal-program') {
-        fiscalServiceName = 'Программа восстановления после резекции мениска';
-      } else if (productId === 'online-training') {
-        fiscalServiceName = 'Онлайн-тренировка';
-      } else {
-        // Fallback для неизвестных продуктов - НЕ используем "Формула Движения"
-        fiscalServiceName = 'Услуга реабилитации';
+    const providedReceipt = req.body.receipt;
+    let serviceNameFromReceipt = null;
+    if (providedReceipt && typeof providedReceipt === 'object') {
+      const itemName =
+        Array.isArray(providedReceipt.items) &&
+        providedReceipt.items[0] &&
+        typeof providedReceipt.items[0].name === 'string'
+          ? providedReceipt.items[0].name
+          : '';
+      if (itemName && itemName.trim()) {
+        serviceNameFromReceipt = sanitizeString(itemName).trim();
       }
+    }
 
+    let fiscalServiceName;
+    if (productId === 'formula-movement') {
+      if (level === '1' || level === 1) {
+        fiscalServiceName = "Программа тренировок 'Формула Движения' 1 уровень";
+      } else if (level === '2' || level === 2) {
+        fiscalServiceName = "Программа тренировок 'Формула Движения' 2 уровень";
+      } else if (level === '3' || level === 3) {
+        fiscalServiceName = "Программа тренировок 'Формула Движения' 3 уровень";
+      } else if (level === '4' || level === 4) {
+        fiscalServiceName = "Программа тренировок 'Формула Движения' 4 уровень";
+      } else {
+        fiscalServiceName = "Программа тренировок 'Формула Движения'";
+      }
+    } else if (productId === 'consultation') {
+      fiscalServiceName = 'Онлайн-консультация';
+    } else if (productId === 'express-consultation') {
+      fiscalServiceName = 'Экспресс онлайн-консультация';
+    } else if (productId === 'personal-program') {
+      fiscalServiceName = 'Программа восстановления после резекции мениска';
+    } else if (productId === 'online-training') {
+      fiscalServiceName = 'Онлайн-тренировка';
+    } else {
+      fiscalServiceName = 'Услуга реабилитации';
+    }
+
+    const receiptServiceName = serviceNameFromReceipt || fiscalServiceName;
+    if (email || phone) {
       receiptParam = createReceiptParameter(
-        fiscalServiceName,
+        receiptServiceName,
         amount,
         email || 'noreply@minenkovrehab.ru',
         phone || '+79000000000'
       );
-      console.log('📄 Создан автоматический параметр Receipt для фискализации');
+    } else if (providedReceipt) {
+      receiptParam =
+        typeof providedReceipt === 'string'
+          ? String(providedReceipt)
+          : JSON.stringify(providedReceipt);
     }
 
     const shpParams = {};
