@@ -12,6 +12,14 @@ interface PaymentData {
   signatureValue?: string;
 }
 
+function getRailwayApiBaseUrl() {
+  const value =
+    typeof process !== 'undefined'
+      ? (process.env.NEXT_PUBLIC_RAILWAY_API_URL || '').trim()
+      : '';
+  return value || 'https://minenkovrehab-production-15cc.up.railway.app';
+}
+
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
   const [paymentData, setPaymentData] = useState<PaymentData>({});
@@ -117,7 +125,15 @@ export default function PaymentSuccessPage() {
       const signatureValue = paymentData.signatureValue || '';
       const shpProductId = searchParams?.get('shp_product_id') || undefined;
 
-      const response = await fetch('/api/robokassa/complete-personal-program', {
+      const isLocalhost =
+        typeof window !== 'undefined' &&
+        (window.location.hostname === 'localhost' ||
+          window.location.hostname === '127.0.0.1');
+      const apiUrl = isLocalhost
+        ? '/api/robokassa/complete-personal-program'
+        : `${getRailwayApiBaseUrl()}/api/robokassa/complete-personal-program`;
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +148,10 @@ export default function PaymentSuccessPage() {
         }),
       });
 
-      const data = await response.json();
+      const contentType = String(response.headers.get('content-type') || '');
+      const data = contentType.includes('application/json')
+        ? await response.json()
+        : { success: false, message: await response.text() };
 
       const serverMessage =
         data?.message ||
