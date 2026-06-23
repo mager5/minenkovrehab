@@ -1,42 +1,62 @@
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Админ панель | Миненков Вадим',
-  description: 'Управление пользователями',
-};
+import { useState, useEffect } from 'react';
 
-async function getUsersData(offset: number = 0, limit: number = 20) {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_ROBOKASSA_API_URL || 'https://api.minenkovrehab.ru';
-
-  try {
-    const countRes = await fetch(`${apiUrl}/api/admin/users/count`, {
-      cache: 'no-store',
-    });
-    const countData = await countRes.json();
-    const totalUsers = countData.success ? countData.data.totalUsers : 0;
-
-    const listRes = await fetch(
-      `${apiUrl}/api/admin/users/list?limit=${limit}&offset=${offset}`,
-      { cache: 'no-store' }
-    );
-    const listData = await listRes.json();
-    const users = listData.success ? listData.data.users : [];
-
-    return { totalUsers, users, error: null };
-  } catch (e) {
-    return { totalUsers: 0, users: [], error: 'Ошибка при загрузке данных' };
-  }
-}
-
-export default async function AdminPage({
-  searchParams,
-}: {
-  searchParams: { offset?: string };
-}) {
-  const offset = Number(searchParams.offset) || 0;
+export default function AdminPage() {
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [offset, setOffset] = useState(0);
   const limit = 20;
-  const { totalUsers, users, error } = await getUsersData(offset, limit);
+
+  const getRailwayApiBaseUrl = () => {
+    return (
+      process.env.NEXT_PUBLIC_ROBOKASSA_API_URL ||
+      'https://api.minenkovrehab.ru'
+    );
+  };
+
+  const loadData = async (newOffset: number = 0) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const apiUrl = getRailwayApiBaseUrl();
+      console.log('Loading data from:', apiUrl);
+
+      const countRes = await fetch(`${apiUrl}/api/admin/users/count`, {
+        cache: 'no-store',
+      });
+      console.log('Count response:', countRes);
+      const countData = await countRes.json();
+      console.log('Count data:', countData);
+      const total = countData.success ? countData.data.totalUsers : 0;
+      setTotalUsers(total);
+
+      const listRes = await fetch(
+        `${apiUrl}/api/admin/users/list?limit=${limit}&offset=${newOffset}`,
+        { cache: 'no-store' }
+      );
+      console.log('List response:', listRes);
+      const listData = await listRes.json();
+      console.log('List data:', listData);
+      const usersList = listData.success ? listData.data.users : [];
+      setUsers(usersList);
+      setOffset(newOffset);
+    } catch (e) {
+      console.error('Error loading data:', e);
+      setError(
+        `Ошибка при загрузке данных: ${e instanceof Error ? e.message : String(e)}`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData(0);
+  }, []);
 
   const formatDate = (dateStr: string) => {
     try {
@@ -45,6 +65,14 @@ export default async function AdminPage({
       return dateStr;
     }
   };
+
+  if (loading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-gray-500'>Загрузка...</div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -99,7 +127,7 @@ export default async function AdminPage({
                         </tr>
                       </thead>
                       <tbody className='bg-white divide-y divide-gray-200'>
-                        {users.map((user: any) => (
+                        {users.map(user => (
                           <tr key={user.id} className='hover:bg-gray-50'>
                             <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
                               {user.email}
@@ -124,11 +152,7 @@ export default async function AdminPage({
 
                   <div className='px-6 py-4 border-t border-gray-200 flex justify-between items-center'>
                     <button
-                      onClick={() => {
-                        if (offset > 0) {
-                          window.location.href = `/5fec23f6ba15074b?offset=${offset - limit}`;
-                        }
-                      }}
+                      onClick={() => loadData(Math.max(0, offset - limit))}
                       disabled={offset === 0}
                       className='px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
                     >
@@ -140,14 +164,7 @@ export default async function AdminPage({
                       {totalUsers}
                     </span>
                     <button
-                      onClick={() => {
-                        if (
-                          totalUsers !== null &&
-                          offset + limit < totalUsers
-                        ) {
-                          window.location.href = `/5fec23f6ba15074b?offset=${offset + limit}`;
-                        }
-                      }}
+                      onClick={() => loadData(offset + limit)}
                       disabled={
                         totalUsers !== null && offset + limit >= totalUsers
                       }
