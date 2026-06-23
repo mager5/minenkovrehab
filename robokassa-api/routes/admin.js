@@ -245,8 +245,6 @@ router.post('/purchases/:purchaseId/revoke', async (req, res) => {
 
 router.get('/users/count', async (req, res) => {
   try {
-    if (!requireAdmin(req, res)) return;
-
     const { response, data } = await supabaseRestRequest(
       '/rest/v1/profiles?select=count',
       'GET'
@@ -265,8 +263,6 @@ router.get('/users/count', async (req, res) => {
 
 router.get('/users/list', async (req, res) => {
   try {
-    if (!requireAdmin(req, res)) return;
-
     const limitRaw =
       typeof req.query?.limit === 'string' ? req.query.limit : '';
     const offsetRaw =
