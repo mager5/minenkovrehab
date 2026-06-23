@@ -9,6 +9,7 @@ const robokassaSdkRoutes = require('./routes/robokassa-sdk');
 const paymentRoutes = require('./routes/payment');
 const authRoutes = require('./routes/auth');
 const coursesRoutes = require('./routes/courses');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -163,6 +164,7 @@ app.use('/api/robokassa', robokassaRoutes);
 app.use('/api/robokassa-sdk', robokassaSdkRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', coursesRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/payment', paymentRoutes);
 
 // Статический файл для перехватчика редиректов
