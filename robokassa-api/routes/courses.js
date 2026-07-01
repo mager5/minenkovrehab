@@ -25,6 +25,7 @@ const STAGE_VIDEO_PATHS = {
   2: '6639a601-4007-46d8-a058-fe2cd2086fa1/1774614743708_mHTR6x8C_mp4.mp4',
   3: '6639a601-4007-46d8-a058-fe2cd2086fa1/1774895893009________________________________________________4_8________.mp4',
 };
+const PRESENTATION_VIDEO_PATH = 'My Bucket/Resection/Presentation.mp4';
 
 function applyCors(req, res) {
   const origin = req.get('origin');
@@ -50,6 +51,11 @@ function applyCors(req, res) {
 }
 
 router.options('/meniscus/*', (req, res) => {
+  applyCors(req, res);
+  return res.status(204).send('');
+});
+
+router.options('/products/*', (req, res) => {
   applyCors(req, res);
   return res.status(204).send('');
 });
@@ -483,6 +489,102 @@ router.get('/meniscus/weekly-test', async (req, res) => {
       success: false,
       message: error?.message || 'Внутренняя ошибка сервера',
     });
+  }
+});
+
+router.get('/products/presentation-video', async (req, res) => {
+  try {
+    applyCors(req, res);
+
+    const exists = await storageObjectExists('videos', PRESENTATION_VIDEO_PATH);
+    if (!exists) {
+      return res.status(404).json({
+        success: false,
+        message: 'Видео не найдено',
+      });
+    }
+
+    const publicUrl = buildPublicUrl('videos', PRESENTATION_VIDEO_PATH);
+    let signedUrl = null;
+    try {
+      signedUrl = await createSignedUrl(
+        'videos',
+        PRESENTATION_VIDEO_PATH,
+        SIGNED_URL_EXPIRES_IN_SECONDS
+      );
+    } catch (e) {
+      const msg = String(e?.message || '');
+      if (msg.toLowerCase().includes('object not found')) {
+        return res.status(404).json({
+          success: false,
+          message: 'Видео не найдено',
+        });
+      }
+      throw e;
+    }
+
+    const url = `${getSelfBaseUrl(req)}/api/courses/products/presentation-video/stream`;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        url,
+        proxyUrl: url,
+        publicUrl,
+        signedUrl,
+        filePath: PRESENTATION_VIDEO_PATH,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || 'Внутренняя ошибка сервера',
+    });
+  }
+});
+
+router.get('/products/presentation-video/stream', async (req, res) => {
+  try {
+    applyCors(req, res);
+
+    const exists = await storageObjectExists('videos', PRESENTATION_VIDEO_PATH);
+    if (!exists) {
+      return res.status(404).send('Not Found');
+    }
+
+    const { url, serviceRoleKey } = getSupabaseConfig();
+    const encodedPath = encodeStoragePath(PRESENTATION_VIDEO_PATH);
+    const upstreamUrl = `${url.replace(/\/$/, '')}/storage/v1/object/videos/${encodedPath}`;
+
+    const headers = {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+    };
+    const range = req.get('range');
+    if (range) {
+      headers.Range = range;
+    }
+
+    const upstream = await fetch(upstreamUrl, { method: 'GET', headers });
+    if (!upstream.ok && upstream.status !== 206) {
+      return res.status(upstream.status).send('Upstream Error');
+    }
+
+    res.setHeader('Content-Type', 'video/mp4');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+    const contentLength = upstream.headers.get('content-length');
+    if (contentLength) res.setHeader('Content-Length', contentLength);
+    const contentRange = upstream.headers.get('content-range');
+    if (contentRange) res.setHeader('Content-Range', contentRange);
+    const acceptRanges = upstream.headers.get('accept-ranges');
+    if (acceptRanges) res.setHeader('Accept-Ranges', acceptRanges);
+
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+    return res.status(upstream.status).send(buffer);
+  } catch (_error) {
+    return res.status(500).send('Internal Server Error');
   }
 });
 

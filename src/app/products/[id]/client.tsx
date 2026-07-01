@@ -24,6 +24,30 @@ const fadeIn = {
   }),
 };
 
+function getRailwayApiBaseUrl() {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return '';
+    }
+  }
+
+  return (
+    process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'https://api.minenkovrehab.ru'
+  );
+}
+
+function getPresentationVideoEndpoint() {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return '/api/products/presentation-video';
+    }
+  }
+
+  return `${getRailwayApiBaseUrl()}/api/courses/products/presentation-video`;
+}
+
 // Клиентский компонент для страницы продукта
 export default function ProductClient({ product }: { product: Product }) {
   // Состояние для чекбоксов согласия
@@ -113,17 +137,17 @@ export default function ProductClient({ product }: { product: Product }) {
     const loadPresentationVideo = async () => {
       try {
         setIsPresentationVideoLoading(true);
-        const response = await fetch('/api/products/presentation-video');
+        const response = await fetch(getPresentationVideoEndpoint());
         const payload = await response.json().catch(() => null);
 
-        if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+        if (!response.ok || !payload?.success || !payload?.data?.url) {
           throw new Error(
             payload?.message || 'Не удалось загрузить видео презентации'
           );
         }
 
         if (!isCancelled) {
-          setPresentationVideoUrl(payload.data.signedUrl);
+          setPresentationVideoUrl(payload.data.url);
         }
       } catch {
         if (!isCancelled) {
