@@ -34,6 +34,8 @@ function applyCors(req, res) {
     'https://www.minenkovrehab.ru',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3001',
   ];
 
   if (origin && allowedOrigins.includes(origin)) {
@@ -524,6 +526,18 @@ router.get('/products/presentation-video', async (req, res) => {
     }
 
     const url = `${getSelfBaseUrl(req)}/api/courses/products/presentation-video/stream`;
+    const hlsMasterPath = deriveHlsMasterPathFromMp4Path(
+      PRESENTATION_VIDEO_PATH
+    );
+    let hlsMasterUrl = null;
+    if (hlsMasterPath) {
+      const exists = await isHlsReady('videos', hlsMasterPath);
+      if (exists) {
+        hlsMasterUrl = `${getSelfBaseUrl(
+          req
+        )}/api/courses/products/presentation-video/hls/master`;
+      }
+    }
 
     return res.status(200).json({
       success: true,
@@ -533,6 +547,8 @@ router.get('/products/presentation-video', async (req, res) => {
         publicUrl,
         signedUrl,
         filePath: PRESENTATION_VIDEO_PATH,
+        hlsMasterUrl,
+        hlsMasterPath,
       },
     });
   } catch (error) {
@@ -571,6 +587,153 @@ router.get('/products/presentation-video/stream', async (req, res) => {
     }
 
     res.setHeader('Content-Type', 'video/mp4');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+    const contentLength = upstream.headers.get('content-length');
+    if (contentLength) res.setHeader('Content-Length', contentLength);
+    const contentRange = upstream.headers.get('content-range');
+    if (contentRange) res.setHeader('Content-Range', contentRange);
+    const acceptRanges = upstream.headers.get('accept-ranges');
+    if (acceptRanges) res.setHeader('Accept-Ranges', acceptRanges);
+
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+    return res.status(upstream.status).send(buffer);
+  } catch (_error) {
+    return res.status(500).send('Internal Server Error');
+  }
+});
+
+router.get('/products/presentation-video/hls/master', async (req, res) => {
+  try {
+    applyCors(req, res);
+
+    const masterPath = deriveHlsMasterPathFromMp4Path(PRESENTATION_VIDEO_PATH);
+    if (!masterPath) {
+      return res.status(404).send('Not Found');
+    }
+
+    const exists = await storageObjectExists('videos', masterPath);
+    if (!exists) {
+      return res.status(404).send('Not Found');
+    }
+
+    const text = await fetchStorageObjectText('videos', masterPath);
+    const baseDir = getDirname(masterPath);
+    const playlistUrlBase = `${getSelfBaseUrl(
+      req
+    )}/api/courses/products/presentation-video/hls/playlist?path=`;
+    const rewritten = text
+      .split(/\r?\n/)
+      .map(line => {
+        if (!line || line.startsWith('#')) return line;
+        const variantPath = joinStoragePath(baseDir, line);
+        return `${playlistUrlBase}${encodeURIComponent(variantPath)}`;
+      })
+      .join('\n');
+
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    return res.status(200).send(rewritten);
+  } catch (_error) {
+    return res.status(500).send('Internal Server Error');
+  }
+});
+
+router.get('/products/presentation-video/hls/playlist', async (req, res) => {
+  try {
+    applyCors(req, res);
+
+    const playlistPath =
+      typeof req.query.path === 'string' ? req.query.path : '';
+    const masterPath = deriveHlsMasterPathFromMp4Path(PRESENTATION_VIDEO_PATH);
+    const baseDir = getDirname(masterPath || '');
+
+    if (
+      !playlistPath ||
+      !baseDir ||
+      !String(playlistPath).startsWith(`${baseDir}/`)
+    ) {
+      return res.status(400).send('Bad Request');
+    }
+
+    const exists = await storageObjectExists('videos', playlistPath);
+    if (!exists) {
+      return res.status(404).send('Not Found');
+    }
+
+    const text = await fetchStorageObjectText('videos', playlistPath);
+    const playlistDir = getDirname(playlistPath);
+
+    const rewrittenLines = text.split(/\r?\n/).map(line => {
+      if (!line || line.startsWith('#')) return line;
+      if (/^https?:\/\//i.test(line)) return line;
+      const segmentPath = joinStoragePath(playlistDir, line);
+      return `${getSelfBaseUrl(
+        req
+      )}/api/courses/products/presentation-video/hls/segment?path=${encodeURIComponent(
+        segmentPath
+      )}`;
+    });
+
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    return res.status(200).send(rewrittenLines.join('\n'));
+  } catch (_error) {
+    return res.status(500).send('Internal Server Error');
+  }
+});
+
+router.get('/products/presentation-video/hls/segment', async (req, res) => {
+  try {
+    applyCors(req, res);
+
+    const objectPath = typeof req.query.path === 'string' ? req.query.path : '';
+    const masterPath = deriveHlsMasterPathFromMp4Path(PRESENTATION_VIDEO_PATH);
+    const baseDir = getDirname(masterPath || '');
+
+    if (
+      !objectPath ||
+      !baseDir ||
+      !String(objectPath).startsWith(`${baseDir}/`)
+    ) {
+      return res.status(400).send('Bad Request');
+    }
+
+    const exists = await storageObjectExists('videos', objectPath);
+    if (!exists) {
+      return res.status(404).send('Not Found');
+    }
+
+    const { url, serviceRoleKey } = getSupabaseConfig();
+    const encodedPath = encodeStoragePath(objectPath);
+    const upstreamUrl = `${url.replace(/\/$/, '')}/storage/v1/object/videos/${encodedPath}`;
+
+    const headers = {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+    };
+    const range = req.get('range');
+    if (range) {
+      headers.Range = range;
+    }
+
+    const upstream = await fetch(upstreamUrl, { method: 'GET', headers });
+    if (!upstream.ok && upstream.status !== 206) {
+      return res.status(upstream.status).send('Upstream Error');
+    }
+
+    const lower = String(objectPath).toLowerCase();
+    if (lower.endsWith('.m3u8')) {
+      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    } else if (lower.endsWith('.ts')) {
+      res.setHeader('Content-Type', 'video/mp2t');
+    } else if (lower.endsWith('.mp4')) {
+      res.setHeader('Content-Type', 'video/mp4');
+    } else {
+      res.setHeader('Content-Type', 'application/octet-stream');
+    }
+
     res.setHeader('Cache-Control', 'public, max-age=300');
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
 

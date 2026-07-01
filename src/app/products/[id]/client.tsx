@@ -139,15 +139,20 @@ export default function ProductClient({ product }: { product: Product }) {
         setIsPresentationVideoLoading(true);
         const response = await fetch(getPresentationVideoEndpoint());
         const payload = await response.json().catch(() => null);
+        const nextUrl =
+          payload?.data?.hlsMasterUrl ||
+          payload?.data?.url ||
+          payload?.data?.signedUrl ||
+          payload?.data?.publicUrl;
 
-        if (!response.ok || !payload?.success || !payload?.data?.url) {
+        if (!response.ok || !payload?.success || !nextUrl) {
           throw new Error(
             payload?.message || 'Не удалось загрузить видео презентации'
           );
         }
 
         if (!isCancelled) {
-          setPresentationVideoUrl(payload.data.url);
+          setPresentationVideoUrl(nextUrl);
         }
       } catch {
         if (!isCancelled) {

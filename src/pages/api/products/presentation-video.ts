@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 const PRESENTATION_VIDEO_PATH = 'My Bucket/Resection/Presentation.mp4';
 const EXPIRES_IN_SECONDS = 60 * 60 * 6;
+const PRESENTATION_HLS_MASTER_URL =
+  'https://api.minenkovrehab.ru/api/courses/products/presentation-video/hls/master';
 
 function getSelfBaseUrl(req: NextApiRequest) {
   const host = req.headers.host;
@@ -45,6 +47,7 @@ export default async function handler(
         proxyUrl: `${getSelfBaseUrl(req)}/api/products/presentation-video/stream`,
         filePath: PRESENTATION_VIDEO_PATH,
         signedUrl: data.signedUrl,
+        hlsMasterUrl: PRESENTATION_HLS_MASTER_URL,
       },
     });
   } catch (error) {
