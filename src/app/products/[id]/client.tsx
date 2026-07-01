@@ -639,7 +639,10 @@ export default function ProductClient({ product }: { product: Product }) {
                   {isPresentationVideoLoading ? (
                     <div className='w-full aspect-video rounded-lg bg-secondary animate-pulse' />
                   ) : presentationVideoUrl ? (
-                    <VideoPlayer src={presentationVideoUrl} />
+                    <VideoPlayer
+                      src={presentationVideoUrl}
+                      poster='/images/products/personal-program-poster.jpg'
+                    />
                   ) : (
                     <div className='w-full aspect-video rounded-lg bg-secondary flex items-center justify-center px-6 text-center text-gray-600'>
                       Видео презентации временно недоступно.

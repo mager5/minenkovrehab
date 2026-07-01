@@ -35,6 +35,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
   ({ src, poster, type = 'video/mp4' }, ref) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const suppressOverlayClickRef = useRef(false);
     const [resolvedSrc, setResolvedSrc] = useState(src);
     const blobUrlRef = useRef<string | null>(null);
     const blobFallbackAttemptedRef = useRef(false);
@@ -295,14 +296,58 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
 
-    const togglePlay = () => {
-      if (videoRef.current) {
-        if (isPlaying) {
-          videoRef.current.pause();
-        } else {
-          videoRef.current.play().catch(() => {});
-        }
+    const startPlayback = async () => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      setShowControls(true);
+      setError(null);
+
+      try {
+        await video.play();
+      } catch {
+        setIsLoading(false);
       }
+    };
+
+    const togglePlay = () => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      if (isPlaying) {
+        video.pause();
+        return;
+      }
+
+      void startPlayback();
+    };
+
+    const handleOverlayPlayAction = (
+      event:
+        | React.MouseEvent<HTMLButtonElement>
+        | React.PointerEvent<HTMLButtonElement>
+    ) => {
+      event.preventDefault();
+      event.stopPropagation();
+      void startPlayback();
+    };
+
+    const handleOverlayPlayPointerUp = (
+      event: React.PointerEvent<HTMLButtonElement>
+    ) => {
+      if (event.pointerType === 'mouse') return;
+      suppressOverlayClickRef.current = true;
+      handleOverlayPlayAction(event);
+      window.setTimeout(() => {
+        suppressOverlayClickRef.current = false;
+      }, 300);
+    };
+
+    const handleOverlayPlayClick = (
+      event: React.MouseEvent<HTMLButtonElement>
+    ) => {
+      if (suppressOverlayClickRef.current) return;
+      handleOverlayPlayAction(event);
     };
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -439,12 +484,9 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
           <div className='absolute inset-0 flex items-center justify-center z-20'>
             <button
               type='button'
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                togglePlay();
-              }}
-              className='w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg transform transition-transform duration-300 backdrop-blur-sm active:scale-95 hover:scale-110'
+              onClick={handleOverlayPlayClick}
+              onPointerUp={handleOverlayPlayPointerUp}
+              className='w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg transform transition-transform duration-300 backdrop-blur-sm active:scale-95 hover:scale-110 touch-manipulation'
               aria-label='Воспроизвести видео'
             >
               <Play className='h-8 w-8 text-indigo-600 ml-1' />
