@@ -113,9 +113,15 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
       const handleLoadStart = () => setIsLoading(true);
       const handleWaiting = () => setIsLoading(true);
-      const handleCanPlay = () => setIsLoading(false);
-      const handlePlaying = () => setIsLoading(false);
-      const handlePlay = () => setIsPlaying(true);
+      const handleCanPlay = () => {
+        setIsLoading(false);
+      };
+      const handlePlaying = () => {
+        setIsLoading(false);
+      };
+      const handlePlay = () => {
+        setIsPlaying(true);
+      };
       const handlePause = () => setIsPlaying(false);
       const handleEnded = () => setIsPlaying(false);
 
