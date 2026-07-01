@@ -433,8 +433,11 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
           <div className='absolute inset-0 flex items-center justify-center z-20'>
             <button
               type='button'
-              onClick={togglePlay}
-              onTouchStart={togglePlay}
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                togglePlay();
+              }}
               className='w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg transform transition-transform duration-300 backdrop-blur-sm active:scale-95 hover:scale-110'
               aria-label='Воспроизвести видео'
             >

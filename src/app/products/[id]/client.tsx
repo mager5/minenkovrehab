@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { products, formatPrice, Product } from '../data';
+import { formatPrice, Product } from '../data';
 import { motion } from 'framer-motion';
 import ImageCarousel from '@/components/ui/ImageCarousel';
+import { VideoPlayer } from '@/components/dashboard/videos/VideoPlayer';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { MoreServicesSection } from '@/components/sections/MoreServicesSection';
+import { Mail, MessageCircleMore, Send } from 'lucide-react';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -46,6 +48,11 @@ export default function ProductClient({ product }: { product: Product }) {
   const [isOfferCheckedLevel4, setIsOfferCheckedLevel4] = useState(false);
   const [showConsentErrorLevel4, setShowConsentErrorLevel4] = useState(false);
   const [showOfferErrorLevel4, setShowOfferErrorLevel4] = useState(false);
+  const [presentationVideoUrl, setPresentationVideoUrl] = useState<
+    string | null
+  >(null);
+  const [isPresentationVideoLoading, setIsPresentationVideoLoading] =
+    useState(false);
 
   // Состояния для анимации оплаты для каждого уровня
   const [isPaymentProcessingLevel1, setIsPaymentProcessingLevel1] =
@@ -97,6 +104,44 @@ export default function ProductClient({ product }: { product: Product }) {
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
+
+  useEffect(() => {
+    if (product.id !== 'personal-program') return;
+
+    let isCancelled = false;
+
+    const loadPresentationVideo = async () => {
+      try {
+        setIsPresentationVideoLoading(true);
+        const response = await fetch('/api/products/presentation-video');
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok || !payload?.success || !payload?.data?.signedUrl) {
+          throw new Error(
+            payload?.message || 'Не удалось загрузить видео презентации'
+          );
+        }
+
+        if (!isCancelled) {
+          setPresentationVideoUrl(payload.data.signedUrl);
+        }
+      } catch {
+        if (!isCancelled) {
+          setPresentationVideoUrl(null);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsPresentationVideoLoading(false);
+        }
+      }
+    };
+
+    loadPresentationVideo();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [product.id]);
 
   // useEffect(() => {
   //   try {
@@ -535,9 +580,81 @@ export default function ProductClient({ product }: { product: Product }) {
                 </motion.div>
               )}
 
+              {/* Видео презентации программы резекции мениска */}
+              {product.id === 'personal-program' && (
+                <motion.div
+                  className='mb-6 lg:self-start'
+                  variants={fadeIn}
+                  custom={2}
+                >
+                  <motion.h2
+                    className='text-xl font-semibold text-dark mb-4'
+                    variants={fadeIn}
+                    custom={3}
+                  >
+                    Презентация программы
+                  </motion.h2>
+                  <div className='mb-4 rounded-lg border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm leading-6 text-gray-700'>
+                    <span className='mb-2 inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-800'>
+                      Важно
+                    </span>
+                    <p>
+                      Данная программа описывает ход восстановления после
+                      изолированной резекции мениска. При выполнении
+                      дополнительных вмешательств (шов мениска, пластика ПКС,
+                      операции на хряще и др.) сроки и этапы реабилитации могут
+                      существенно отличаться. Необходимо строго соблюдать
+                      рекомендации лечащего хирурга.
+                    </p>
+                  </div>
+                  {isPresentationVideoLoading ? (
+                    <div className='w-full aspect-video rounded-lg bg-secondary animate-pulse' />
+                  ) : presentationVideoUrl ? (
+                    <VideoPlayer src={presentationVideoUrl} />
+                  ) : (
+                    <div className='w-full aspect-video rounded-lg bg-secondary flex items-center justify-center px-6 text-center text-gray-600'>
+                      Видео презентации временно недоступно.
+                    </div>
+                  )}
+                  <div className='mt-4 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm'>
+                    <h3 className='inline-flex items-center gap-2 text-sm font-semibold text-dark'>
+                      <MessageCircleMore className='h-4 w-4 text-primary' />
+                      Связаться по вопросам программы
+                    </h3>
+                    <div className='mt-3 grid gap-3 sm:grid-cols-2'>
+                      <a
+                        href='mailto:minenkov.rehab@yandex.ru'
+                        className='group rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 transition-colors hover:border-primary/30 hover:bg-primary/5'
+                      >
+                        <span className='inline-flex items-center gap-2 text-sm font-medium text-dark'>
+                          <Mail className='h-4 w-4 shrink-0 text-primary' />
+                          Электронная почта
+                        </span>
+                        <span className='mt-1 block text-sm text-primary transition-colors group-hover:text-primary/80'>
+                          minenkov.rehab@yandex.ru
+                        </span>
+                      </a>
+                      <a
+                        href='https://t.me/MV_Rehab'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='group rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 transition-colors hover:border-sky-300 hover:bg-sky-100/70'
+                      >
+                        <span className='inline-flex items-center gap-2 text-sm font-medium text-dark'>
+                          <Send className='h-4 w-4 shrink-0 text-sky-600' />
+                          Telegram
+                        </span>
+                        <span className='mt-1 block text-sm text-sky-700 transition-colors group-hover:text-sky-800'>
+                          https://t.me/MV_Rehab
+                        </span>
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Карусель изображений для восстановительной программы */}
-              {(product.id === 'rehabilitation-protocols' ||
-                product.id === 'personal-program') && (
+              {product.id === 'rehabilitation-protocols' && (
                 <motion.div
                   className='mb-6 lg:self-start'
                   variants={fadeIn}
