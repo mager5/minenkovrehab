@@ -36,6 +36,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const suppressOverlayClickRef = useRef(false);
+    const suppressVideoClickRef = useRef(false);
     const [resolvedSrc, setResolvedSrc] = useState(src);
     const blobUrlRef = useRef<string | null>(null);
     const blobFallbackAttemptedRef = useRef(false);
@@ -329,6 +330,10 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     ) => {
       event.preventDefault();
       event.stopPropagation();
+      suppressVideoClickRef.current = true;
+      window.setTimeout(() => {
+        suppressVideoClickRef.current = false;
+      }, 300);
       void startPlayback();
     };
 
@@ -348,6 +353,11 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     ) => {
       if (suppressOverlayClickRef.current) return;
       handleOverlayPlayAction(event);
+    };
+
+    const handleVideoClick = () => {
+      if (suppressVideoClickRef.current) return;
+      togglePlay();
     };
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -472,7 +482,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
           src={useHlsJs ? undefined : resolvedSrc}
           poster={poster}
           className='w-full h-full object-contain'
-          onClick={togglePlay}
+          onClick={handleVideoClick}
           playsInline
           preload='metadata'
         >
