@@ -4,6 +4,16 @@ import { createAdminClient } from '@/lib/supabase/admin';
 const PRESENTATION_VIDEO_PATH = 'My Bucket/Resection/Presentation.mp4';
 const EXPIRES_IN_SECONDS = 60 * 60 * 6;
 
+function getSelfBaseUrl(req: NextApiRequest) {
+  const host = req.headers.host;
+  const forwardedProtoHeader = req.headers['x-forwarded-proto'];
+  const forwardedProto = Array.isArray(forwardedProtoHeader)
+    ? forwardedProtoHeader[0]
+    : forwardedProtoHeader?.split(',')[0]?.trim();
+  const proto = forwardedProto || 'http';
+  return `${proto}://${host}`;
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -31,6 +41,8 @@ export default async function handler(
     return res.status(200).json({
       success: true,
       data: {
+        url: `${getSelfBaseUrl(req)}/api/products/presentation-video/stream`,
+        proxyUrl: `${getSelfBaseUrl(req)}/api/products/presentation-video/stream`,
         filePath: PRESENTATION_VIDEO_PATH,
         signedUrl: data.signedUrl,
       },
