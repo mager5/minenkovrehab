@@ -9,24 +9,25 @@ import { COURSES } from '@/data/courses';
 import { MeniscusStagesDetails } from '@/components/dashboard/courses/MeniscusStagesDetails';
 import { PlantarFasciopathyDetails } from '@/components/dashboard/courses/PlantarFasciopathyDetails';
 import { ChevronDown } from 'lucide-react';
+import { getRailwayApiBaseUrl } from '@/lib/api-base';
 
 type Props = {
   slug: string;
 };
 
-function getRailwayApiBaseUrl() {
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return '';
-    }
-  }
-
-  return (
-    process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
-    'https://minenkovrehab-production-15cc.up.railway.app'
-  );
-}
+// Старый локальный helper (заменён на @/lib/api-base):
+// function getRailwayApiBaseUrl() {
+//   if (typeof window !== 'undefined') {
+//     const hostname = window.location.hostname;
+//     if (hostname === 'localhost' || hostname === '127.0.0.1') {
+//       return '';
+//     }
+//   }
+//   return (
+//     process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+//     'https://minenkovrehab-production-15cc.up.railway.app'
+//   );
+// }
 
 export default function CourseDetailClientPage({ slug }: Props) {
   const [loading, setLoading] = useState(true);

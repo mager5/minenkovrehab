@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { Dialog, Transition } from '@headlessui/react';
+import { getRailwayApiBaseUrl } from '@/lib/api-base';
 
 interface PaymentData {
   outSum?: string;
@@ -12,13 +13,14 @@ interface PaymentData {
   signatureValue?: string;
 }
 
-function getRailwayApiBaseUrl() {
-  const value =
-    typeof process !== 'undefined'
-      ? (process.env.NEXT_PUBLIC_RAILWAY_API_URL || '').trim()
-      : '';
-  return value || 'https://minenkovrehab-production-15cc.up.railway.app';
-}
+// Старый локальный helper (заменён на @/lib/api-base):
+// function getRailwayApiBaseUrl() {
+//   const value =
+//     typeof process !== 'undefined'
+//       ? (process.env.NEXT_PUBLIC_RAILWAY_API_URL || '').trim()
+//       : '';
+//   return value || 'https://minenkovrehab-production-15cc.up.railway.app';
+// }
 
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();

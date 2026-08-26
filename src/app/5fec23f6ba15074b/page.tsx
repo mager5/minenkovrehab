@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getRailwayApiBaseUrl } from '@/lib/api-base';
 
 export default function AdminPage() {
   const [totalUsers, setTotalUsers] = useState<number | null>(null);
@@ -10,12 +11,13 @@ export default function AdminPage() {
   const [offset, setOffset] = useState(0);
   const limit = 20;
 
-  const getRailwayApiBaseUrl = () => {
-    return (
-      process.env.NEXT_PUBLIC_ROBOKASSA_API_URL ||
-      'https://api.minenkovrehab.ru'
-    );
-  };
+  // Старый helper через ROBOKASSA_API_URL:
+  // const getRailwayApiBaseUrl = () => {
+  //   return (
+  //     process.env.NEXT_PUBLIC_ROBOKASSA_API_URL ||
+  //     'https://api.minenkovrehab.ru'
+  //   );
+  // };
 
   const loadData = async (newOffset: number = 0) => {
     try {

@@ -1,8 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { DEFAULT_API_BASE_URL } from '@/lib/api-base';
 
 const REMOTE_BASE =
-  process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
-  'https://minenkovrehab-production-15cc.up.railway.app';
+  process.env.NEXT_PUBLIC_RAILWAY_API_URL || DEFAULT_API_BASE_URL;
+// Старый fallback:
+// 'https://minenkovrehab-production-15cc.up.railway.app';
 
 function getRawBody(req: NextApiRequest): Promise<Buffer> {
   return new Promise((resolve, reject) => {

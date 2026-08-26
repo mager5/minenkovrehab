@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { DEFAULT_API_BASE_URL } from '@/lib/api-base';
 
 const REMOTE_BASE =
-  process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'https://api.minenkovrehab.ru';
+  process.env.NEXT_PUBLIC_RAILWAY_API_URL || DEFAULT_API_BASE_URL;
 
 function rewriteSetCookie(setCookie: string, isHttps: boolean): string {
   const parts = String(setCookie)

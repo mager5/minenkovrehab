@@ -6,6 +6,7 @@ import { Product, formatPrice } from './data';
 import { motion } from 'framer-motion';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import { getRailwayApiBaseUrl } from '@/lib/api-base';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -221,9 +222,12 @@ export default function ProductPageWrapper({
       setIsEmailSubmitting(true);
       setEmailError('');
 
-      // Используем новый API на Railway
+      // Используем API через api.minenkovrehab.ru (Cloudflare)
+      // Старый хардкод Railway:
+      // const response = await fetch(
+      //   'https://minenkovrehab-production-15cc.up.railway.app/api/mock-payment/complete',
       const response = await fetch(
-        'https://minenkovrehab-production-15cc.up.railway.app/api/mock-payment/complete',
+        `${getRailwayApiBaseUrl()}/api/mock-payment/complete`,
         {
           method: 'POST',
           headers: {

@@ -5,20 +5,21 @@ import { VideoList } from '@/components/dashboard/videos/VideoList';
 // import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getRailwayApiBaseUrl } from '@/lib/api-base';
 
-function getRailwayApiBaseUrl() {
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return '';
-    }
-  }
-
-  return (
-    process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
-    'https://minenkovrehab-production-15cc.up.railway.app'
-  );
-}
+// Старый локальный helper (заменён на @/lib/api-base):
+// function getRailwayApiBaseUrl() {
+//   if (typeof window !== 'undefined') {
+//     const hostname = window.location.hostname;
+//     if (hostname === 'localhost' || hostname === '127.0.0.1') {
+//       return '';
+//     }
+//   }
+//   return (
+//     process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+//     'https://minenkovrehab-production-15cc.up.railway.app'
+//   );
+// }
 
 export default function VideosClientPage() {
   const [loading, setLoading] = useState(true);

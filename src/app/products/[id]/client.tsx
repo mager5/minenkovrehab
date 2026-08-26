@@ -9,6 +9,10 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { MoreServicesSection } from '@/components/sections/MoreServicesSection';
 import { Mail, MessageCircleMore, Send } from 'lucide-react';
+import {
+  getRailwayApiBaseUrl,
+  getRobokassaPaymentUrl,
+} from '@/lib/api-base';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -24,18 +28,18 @@ const fadeIn = {
   }),
 };
 
-function getRailwayApiBaseUrl() {
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return '';
-    }
-  }
-
-  return (
-    process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'https://api.minenkovrehab.ru'
-  );
-}
+// Старый локальный helper (заменён на @/lib/api-base):
+// function getRailwayApiBaseUrl() {
+//   if (typeof window !== 'undefined') {
+//     const hostname = window.location.hostname;
+//     if (hostname === 'localhost' || hostname === '127.0.0.1') {
+//       return '';
+//     }
+//   }
+//   return (
+//     process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'https://api.minenkovrehab.ru'
+//   );
+// }
 
 function getPresentationVideoEndpoint() {
   if (typeof window !== 'undefined') {
@@ -429,10 +433,12 @@ export default function ProductClient({ product }: { product: Product }) {
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const apiUrl =
-        process.env.NODE_ENV === 'production'
-          ? 'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url'
-          : '/api/robokassa/generate-payment-url';
+      // Старый хардкод Railway (ломался без VPN):
+      // const apiUrl =
+      //   process.env.NODE_ENV === 'production'
+      //     ? 'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url'
+      //     : '/api/robokassa/generate-payment-url';
+      const apiUrl = getRobokassaPaymentUrl();
 
       const response = await fetch(apiUrl, {
         method: 'POST',

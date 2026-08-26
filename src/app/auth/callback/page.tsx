@@ -4,20 +4,21 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { getRailwayApiBaseUrl } from '@/lib/api-base';
 
-function getRailwayApiBaseUrl() {
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return '';
-    }
-  }
-
-  return (
-    process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
-    'https://minenkovrehab-production-15cc.up.railway.app'
-  );
-}
+// Старый локальный helper (заменён на @/lib/api-base):
+// function getRailwayApiBaseUrl() {
+//   if (typeof window !== 'undefined') {
+//     const hostname = window.location.hostname;
+//     if (hostname === 'localhost' || hostname === '127.0.0.1') {
+//       return '';
+//     }
+//   }
+//   return (
+//     process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+//     'https://minenkovrehab-production-15cc.up.railway.app'
+//   );
+// }
 
 export default function AuthCallbackPage() {
   const router = useRouter();

@@ -28,20 +28,21 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getRailwayApiBaseUrl } from '@/lib/api-base';
 
-function getRailwayApiBaseUrl() {
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return '';
-    }
-  }
-
-  return (
-    process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
-    'https://minenkovrehab-production-15cc.up.railway.app'
-  );
-}
+// Старый локальный helper (заменён на @/lib/api-base):
+// function getRailwayApiBaseUrl() {
+//   if (typeof window !== 'undefined') {
+//     const hostname = window.location.hostname;
+//     if (hostname === 'localhost' || hostname === '127.0.0.1') {
+//       return '';
+//     }
+//   }
+//   return (
+//     process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+//     'https://minenkovrehab-production-15cc.up.railway.app'
+//   );
+// }
 
 function LoginForm() {
   const [error, setError] = useState<string | null>(null);

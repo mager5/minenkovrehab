@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getRailwayApiBaseUrl } from '@/lib/api-base';
 
-function getRailwayApiBaseUrl() {
-  return (
-    process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'https://api.minenkovrehab.ru'
-  );
-}
+// Старый локальный helper (заменён на @/lib/api-base):
+// function getRailwayApiBaseUrl() {
+//   return (
+//     process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'https://api.minenkovrehab.ru'
+//   );
+// }
 
 interface User {
   id: string;
