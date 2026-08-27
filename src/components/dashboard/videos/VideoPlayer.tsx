@@ -54,7 +54,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     const [isMuted, setIsMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(Boolean(src));
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -67,6 +67,8 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       setResolvedSrc(toPlayableSrc(src));
       blobFallbackAttemptedRef.current = false;
       setUseHlsJs(false);
+      setError(null);
+      setIsLoading(Boolean(src));
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
@@ -134,9 +136,11 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       const handlePause = () => setIsPlaying(false);
       const handleEnded = () => setIsPlaying(false);
 
+      // presentation-video/hls/master без .m3u8 в URL тоже HLS
       const isHls =
         type.toLowerCase().includes('mpegurl') ||
-        /\.m3u8(\?|#|$)/i.test(String(src));
+        /\.m3u8(\?|#|$)/i.test(String(src)) ||
+        /\/hls\/(master|playlist)(\?|#|$)/i.test(String(src));
 
       if (isHls) {
         if (hlsRef.current) {
@@ -482,8 +486,11 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
         {/* Loader */}
         {isLoading && !error && (
-          <div className='absolute inset-0 flex items-center justify-center bg-black/20 z-10 pointer-events-none'>
+          <div className='absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/35 z-10 pointer-events-none'>
             <Loader2 className='h-12 w-12 text-white animate-spin' />
+            <p className='text-sm font-medium text-white/90'>
+              Загрузка видео…
+            </p>
           </div>
         )}
 
@@ -500,7 +507,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         </video>
 
         {/* Play Button Overlay */}
-        {!isPlaying && !error && (
+        {!isPlaying && !error && !isLoading && (
           <div className='absolute inset-0 flex items-center justify-center z-20'>
             <button
               type='button'

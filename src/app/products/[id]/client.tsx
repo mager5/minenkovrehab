@@ -8,7 +8,7 @@ import { VideoPlayer } from '@/components/dashboard/videos/VideoPlayer';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { MoreServicesSection } from '@/components/sections/MoreServicesSection';
-import { Mail, MessageCircleMore, Send } from 'lucide-react';
+import { Loader2, Mail, MessageCircleMore, Send } from 'lucide-react';
 import {
   getRailwayApiBaseUrl,
   getRobokassaPaymentUrl,
@@ -70,8 +70,10 @@ export default function ProductClient({ product }: { product: Product }) {
   const [presentationVideoUrl, setPresentationVideoUrl] = useState<
     string | null
   >(null);
-  const [isPresentationVideoLoading, setIsPresentationVideoLoading] =
-    useState(false);
+  // Сразу true для personal-program, иначе на первом кадре «недоступно» / пустой блок
+  const [isPresentationVideoLoading, setIsPresentationVideoLoading] = useState(
+    () => product.id === 'personal-program'
+  );
 
   // Состояния для анимации оплаты для каждого уровня
   const [isPaymentProcessingLevel1, setIsPaymentProcessingLevel1] =
@@ -635,10 +637,31 @@ export default function ProductClient({ product }: { product: Product }) {
                     </p>
                   </div>
                   {isPresentationVideoLoading ? (
-                    <div className='w-full aspect-video rounded-lg bg-secondary animate-pulse' />
+                    <div
+                      className='relative w-full aspect-video rounded-lg overflow-hidden bg-slate-200'
+                      role='status'
+                      aria-live='polite'
+                      aria-label='Загрузка видео презентации'
+                    >
+                      <div className='absolute inset-0 animate-pulse bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300' />
+                      <div className='absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center'>
+                        <Loader2
+                          className='h-10 w-10 animate-spin text-primary'
+                          aria-hidden
+                        />
+                        <p className='text-sm font-medium text-slate-700'>
+                          Загрузка видео…
+                        </p>
+                        <p className='text-xs text-slate-500 max-w-xs'>
+                          Подготавливаем презентацию программы, это может занять
+                          несколько секунд
+                        </p>
+                      </div>
+                    </div>
                   ) : presentationVideoUrl ? (
                     <VideoPlayer
                       src={presentationVideoUrl}
+                      type='application/vnd.apple.mpegurl'
                       poster='/images/products/personal-program-poster.jpg'
                     />
                   ) : (
