@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getPublicApiOrigin } from '@/lib/public-api-origin';
 
 const STAGE_VIDEO_PATHS: Record<string, string> = {
   '1': '6639a601-4007-46d8-a058-fe2cd2086fa1/1771875320518_1_HLh9prrm_mp4.mp4',
@@ -267,7 +268,8 @@ export default async function handler(
     );
     if (checks.every(Boolean)) {
       hlsMasterPath = candidateHlsMasterPath;
-      hlsMasterUrl = `/api/courses/meniscus/hls/master?path=${encodeURIComponent(
+      // Старый относительный URL: `/api/courses/meniscus/hls/master?path=...`
+      hlsMasterUrl = `${getPublicApiOrigin(req)}/api/courses/meniscus/hls/master?path=${encodeURIComponent(
         candidateHlsMasterPath
       )}`;
     }

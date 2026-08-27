@@ -12,6 +12,7 @@ import { Mail, MessageCircleMore, Send } from 'lucide-react';
 import {
   getRailwayApiBaseUrl,
   getRobokassaPaymentUrl,
+  resolveApiMediaUrl,
 } from '@/lib/api-base';
 
 // Анимации для появления элементов
@@ -29,17 +30,7 @@ const fadeIn = {
 };
 
 // Старый локальный helper (заменён на @/lib/api-base):
-// function getRailwayApiBaseUrl() {
-//   if (typeof window !== 'undefined') {
-//     const hostname = window.location.hostname;
-//     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-//       return '';
-//     }
-//   }
-//   return (
-//     process.env.NEXT_PUBLIC_RAILWAY_API_URL || 'https://api.minenkovrehab.ru'
-//   );
-// }
+// function getRailwayApiBaseUrl() { ... }
 
 function getPresentationVideoEndpoint() {
   if (typeof window !== 'undefined') {
@@ -156,7 +147,8 @@ export default function ProductClient({ product }: { product: Product }) {
         }
 
         if (!isCancelled) {
-          setPresentationVideoUrl(nextUrl);
+          // Старый вариант: setPresentationVideoUrl(nextUrl)
+          setPresentationVideoUrl(resolveApiMediaUrl(nextUrl));
         }
       } catch {
         if (!isCancelled) {
@@ -433,7 +425,7 @@ export default function ProductClient({ product }: { product: Product }) {
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Старый хардкод Railway (ломался без VPN):
+      // Старый хардкод Railway:
       // const apiUrl =
       //   process.env.NODE_ENV === 'production'
       //     ? 'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url'

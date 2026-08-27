@@ -6,7 +6,7 @@ import {
   VideoPlayer,
   VideoPlayerRef,
 } from '@/components/dashboard/videos/VideoPlayer';
-import { getRailwayApiBaseUrl } from '@/lib/api-base';
+import { getRailwayApiBaseUrl, resolveApiMediaUrl } from '@/lib/api-base';
 
 type StageId = 1 | 2 | 3 | 4 | 5;
 
@@ -625,7 +625,9 @@ export function MeniscusStagesDetails({
         setVideoUrl(null);
         return;
       }
-      setVideoUrl(nextUrl);
+      // Старый вариант: setVideoUrl(nextUrl) — относительный /api/...hls/...
+      // уходил на GitHub Pages и давал ERR_CONNECTION_TIMED_OUT.
+      setVideoUrl(resolveApiMediaUrl(nextUrl));
 
       // Старый вариант (оставлен для истории): подбор candidatePath на клиенте и publicUrl fallback.
       // Bucket videos у нас private, поэтому publicUrl не подходит для боевого статического сайта.
@@ -764,7 +766,8 @@ export function MeniscusStagesDetails({
         setWeeklyTestUrl(null);
         return;
       }
-      setWeeklyTestUrl(nextUrl);
+      // Старый вариант: setWeeklyTestUrl(nextUrl) — относительный /api/...hls/...
+      setWeeklyTestUrl(resolveApiMediaUrl(nextUrl));
 
       // Старый вариант (оставлен для истории): делали запросы к таблице videos и пытались
       // создать signed URL прямо в браузере, а потом падали в publicUrl.

@@ -18,11 +18,17 @@ import {
   Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { resolveApiMediaUrl } from '@/lib/api-base';
 
 interface VideoPlayerProps {
   src: string;
   poster?: string;
   type?: string;
+}
+
+/** Относительные /api/...hls/... на GitHub Pages таймаутятся — всегда на api.minenkovrehab.ru */
+function toPlayableSrc(src: string): string {
+  return resolveApiMediaUrl(src) || src;
 }
 
 export interface VideoPlayerRef {
@@ -57,7 +63,8 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     const [isAccessible, setIsAccessible] = useState<boolean | null>(null);
 
     useEffect(() => {
-      setResolvedSrc(src);
+      // Старый вариант: setResolvedSrc(src) — относительный HLS открывался с minenkovrehab.ru
+      setResolvedSrc(toPlayableSrc(src));
       blobFallbackAttemptedRef.current = false;
       setUseHlsJs(false);
       if (hlsRef.current) {
@@ -137,16 +144,19 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
           hlsRef.current = null;
         }
 
+        const playableSrc = toPlayableSrc(src);
+
         if (video.canPlayType('application/vnd.apple.mpegurl')) {
           setUseHlsJs(false);
-          setResolvedSrc(src);
+          setResolvedSrc(playableSrc);
         } else if (Hls.isSupported()) {
           const hls = new Hls({
             enableWorker: true,
             backBufferLength: 90,
             xhrSetup: (xhr, url) => {
               try {
-                const resolved = new URL(url, window.location.href);
+                // База — URL манифеста (api), не страница сайта (GitHub Pages)
+                const resolved = new URL(url, playableSrc);
                 const isMeniscusHlsApi = /\/api\/courses\/meniscus\/hls\//.test(
                   resolved.pathname
                 );
@@ -158,7 +168,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
           });
           hlsRef.current = hls;
           setUseHlsJs(true);
-          hls.loadSource(src);
+          hls.loadSource(playableSrc);
           hls.attachMedia(video);
           hls.on(Hls.Events.ERROR, (_event, data) => {
             if (!data?.fatal) return;

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getPublicApiOrigin } from '@/lib/public-api-origin';
 
 const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
 const WEEKLY_TEST_PREFERRED_PATHS = [
@@ -202,7 +203,8 @@ export default async function handler(
     );
     if (checks.every(Boolean)) {
       hlsMasterPath = candidateHlsMasterPath;
-      hlsMasterUrl = `/api/courses/meniscus/hls/master?path=${encodeURIComponent(
+      // Старый относительный URL: `/api/courses/meniscus/hls/master?path=...`
+      hlsMasterUrl = `${getPublicApiOrigin(req)}/api/courses/meniscus/hls/master?path=${encodeURIComponent(
         candidateHlsMasterPath
       )}`;
     }

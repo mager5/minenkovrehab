@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getPublicApiOrigin } from '@/lib/public-api-origin';
 
 const INSTRUCTOR_USER_ID = '6639a601-4007-46d8-a058-fe2cd2086fa1';
 const ALLOWED_VIDEO_PATH_PREFIXES = [`${INSTRUCTOR_USER_ID}/`, 'My Bucket/'];
@@ -101,13 +102,16 @@ export default async function handler(
 
   const text = await fetchStorageObjectText('videos', masterPath);
   const baseDir = getDirname(masterPath);
+  const apiOrigin = getPublicApiOrigin(req);
 
   const rewritten = text
     .split(/\r?\n/)
     .map(line => {
       if (!line || line.startsWith('#')) return line;
       const variantPath = joinStoragePath(baseDir, line);
-      return `/api/courses/meniscus/hls/playlist?path=${encodeURIComponent(
+      // Старый относительный путь ломал плеер на GitHub Pages:
+      // return `/api/courses/meniscus/hls/playlist?path=...`
+      return `${apiOrigin}/api/courses/meniscus/hls/playlist?path=${encodeURIComponent(
         variantPath
       )}`;
     })
