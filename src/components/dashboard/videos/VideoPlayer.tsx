@@ -24,6 +24,8 @@ interface VideoPlayerProps {
   src: string;
   poster?: string;
   type?: string;
+  /** Автозапуск после готовности (браузер может потребовать muted) */
+  autoPlay?: boolean;
 }
 
 /** Относительные /api/...hls/... на GitHub Pages таймаутятся — всегда на api.minenkovrehab.ru */
@@ -38,11 +40,12 @@ export interface VideoPlayerRef {
 }
 
 export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
-  ({ src, poster, type = 'video/mp4' }, ref) => {
+  ({ src, poster, type = 'video/mp4', autoPlay = false }, ref) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const suppressOverlayClickRef = useRef(false);
     const suppressVideoClickRef = useRef(false);
+    const autoPlayAttemptedRef = useRef(false);
     const [resolvedSrc, setResolvedSrc] = useState(src);
     const blobUrlRef = useRef<string | null>(null);
     const blobFallbackAttemptedRef = useRef(false);
@@ -51,7 +54,8 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [volume, setVolume] = useState(1);
-    const [isMuted, setIsMuted] = useState(false);
+    // Автоплей чаще проходит в muted — звук включается кнопкой
+    const [isMuted, setIsMuted] = useState(autoPlay);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(false);
     const [isLoading, setIsLoading] = useState(Boolean(src));
@@ -66,9 +70,14 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       // Старый вариант: setResolvedSrc(src) — относительный HLS открывался с minenkovrehab.ru
       setResolvedSrc(toPlayableSrc(src));
       blobFallbackAttemptedRef.current = false;
+      autoPlayAttemptedRef.current = false;
       setUseHlsJs(false);
       setError(null);
       setIsLoading(Boolean(src));
+      setIsPlaying(false);
+      if (autoPlay) {
+        setIsMuted(true);
+      }
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
@@ -77,7 +86,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         URL.revokeObjectURL(blobUrlRef.current);
         blobUrlRef.current = null;
       }
-    }, [src]);
+    }, [src, autoPlay]);
 
     useImperativeHandle(ref, () => ({
       seekTo: (time: number) => {
@@ -122,10 +131,30 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         setIsLoading(false);
       };
 
+      const tryAutoplay = async () => {
+        if (!autoPlay || autoPlayAttemptedRef.current || !video) return;
+        autoPlayAttemptedRef.current = true;
+        setShowControls(true);
+        try {
+          video.muted = false;
+          setIsMuted(false);
+          await video.play();
+        } catch {
+          try {
+            video.muted = true;
+            setIsMuted(true);
+            await video.play();
+          } catch {
+            autoPlayAttemptedRef.current = false;
+          }
+        }
+      };
+
       const handleLoadStart = () => setIsLoading(true);
       const handleWaiting = () => setIsLoading(true);
       const handleCanPlay = () => {
         setIsLoading(false);
+        void tryAutoplay();
       };
       const handlePlaying = () => {
         setIsLoading(false);
@@ -174,6 +203,9 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
           setUseHlsJs(true);
           hls.loadSource(playableSrc);
           hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            void tryAutoplay();
+          });
           hls.on(Hls.Events.ERROR, (_event, data) => {
             if (!data?.fatal) return;
             if (hlsRef.current) {
@@ -277,7 +309,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         }
         setUseHlsJs(false);
       };
-    }, [src, resolvedSrc, type]);
+    }, [src, resolvedSrc, type, autoPlay]);
 
     useEffect(() => {
       const handleFullscreenChange = () => {
@@ -501,7 +533,8 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
           className='w-full h-full object-contain'
           onClick={handleVideoClick}
           playsInline
-          preload='metadata'
+          muted={isMuted}
+          preload={autoPlay ? 'auto' : 'metadata'}
         >
           Your browser does not support the video tag.
         </video>

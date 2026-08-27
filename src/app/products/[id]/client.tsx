@@ -663,6 +663,7 @@ export default function ProductClient({ product }: { product: Product }) {
                       src={presentationVideoUrl}
                       type='application/vnd.apple.mpegurl'
                       poster='/images/products/personal-program-poster.jpg'
+                      autoPlay
                     />
                   ) : (
                     <div className='w-full aspect-video rounded-lg bg-secondary flex items-center justify-center px-6 text-center text-gray-600'>
