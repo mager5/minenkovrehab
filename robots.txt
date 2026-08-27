@@ -1,0 +1,6 @@
+# Разрешаем индексацию всех страниц всем поисковым роботам
+User-agent: *
+Allow: /
+
+# Указываем расположение карты сайта
+Sitemap: https://minenkovrehab.ru/sitemap.xml 
