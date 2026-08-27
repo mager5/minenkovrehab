@@ -199,11 +199,31 @@ async function fetchStorageObjectText(bucket, objectPath) {
 }
 
 function getSelfBaseUrl(req) {
-  // Старый вариант (оставлен для истории):
+  // Старый вариант (оставлен для истории): брал Host Railway → клиент ходил на *.up.railway.app
   // const host = req.get('host');
-  // return `${req.protocol}://${host}`;
+  // const forwardedProtoHeader = req.get('x-forwarded-proto') || '';
+  // const forwardedProto = String(forwardedProtoHeader).split(',')[0]?.trim();
+  // const proto =
+  //   forwardedProto || (req.secure ? 'https' : '') || req.protocol || 'https';
+  // return `${proto}://${host}`;
 
-  const host = req.get('host');
+  const fromEnv = String(
+    process.env.PUBLIC_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
+      ''
+  )
+    .trim()
+    .replace(/\/$/, '');
+  if (fromEnv) return fromEnv;
+
+  const forwardedHost = String(req.get('x-forwarded-host') || '')
+    .split(',')[0]
+    ?.trim();
+  const host = forwardedHost || req.get('host') || '';
+  // Клиенту нельзя отдавать railway.app — в РФ часто timeout
+  if (!host || String(host).includes('railway.app')) {
+    return 'https://api.minenkovrehab.ru';
+  }
   const forwardedProtoHeader = req.get('x-forwarded-proto') || '';
   const forwardedProto = String(forwardedProtoHeader).split(',')[0]?.trim();
   const proto =
