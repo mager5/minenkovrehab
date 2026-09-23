@@ -40,36 +40,50 @@ export default function CookieBanner() {
 
   return (
     <div
-      className='fixed bottom-0 left-0 w-full z-50 flex justify-center pointer-events-none'
+      className='fixed bottom-0 left-0 right-0 z-50 flex justify-center sm:justify-end pointer-events-none p-3 sm:p-5'
       data-testid='cookie-banner'
       role='dialog'
-      aria-label='Настройки cookie'
+      aria-labelledby='cookie-banner-title'
+      aria-describedby='cookie-banner-text'
     >
-      <div className='pointer-events-auto max-w-2xl w-full mx-4 mb-6 px-6 py-4 bg-gray-900 text-white rounded-xl shadow-lg flex flex-col sm:flex-row items-center gap-4 animate-fade-in'>
-        <span className='flex-1 text-sm sm:text-base'>
-          Мы используем cookie для работы сайта. Необязательные cookie
-          (аналитика) подключаются только после вашего выбора. Подробнее в нашей{' '}
-          <Link
-            href='/policy'
-            className='underline text-accent hover:text-accent-dark transition-colors'
-            target='_blank'
-          >
-            политике конфиденциальности
-          </Link>
-          .
-        </span>
-        <div className='flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0'>
+      <div className='pointer-events-auto isolate w-full max-w-[400px] bg-white text-dark rounded-2xl shadow-[0_16px_40px_rgba(15,23,42,0.18)] ring-1 ring-black/[0.06] px-4 py-3 sm:px-5 sm:py-3.5 animate-fade-in'>
+        <p
+          id='cookie-banner-title'
+          className='text-sm sm:text-[15px] font-semibold text-dark tracking-tight'
+        >
+          Мы используем cookie
+        </p>
+        <p
+          id='cookie-banner-text'
+          className='mt-1 text-[12.5px] sm:text-[13px] leading-[1.45] text-[#4b5563]'
+        >
+          Необходимые cookie помогают сайту работать: сохраняют вход в аккаунт и
+          ваши настройки. Аналитика может включаться только с вашего согласия.
+        </p>
+        <Link
+          href='/policy'
+          className='mt-1.5 inline-block text-[12.5px] sm:text-[13px] font-medium text-accent hover:text-accent-dark underline-offset-2 hover:underline transition-colors'
+          target='_blank'
+        >
+          Подробнее в политике конфиденциальности
+        </Link>
+        <div className='mt-3 flex flex-col sm:flex-row gap-2'>
           <button
             type='button'
             onClick={() => saveConsent('necessary')}
-            className='w-full sm:w-auto bg-transparent border border-white/40 hover:border-white text-white font-semibold px-5 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent'
+            className='flex-1 min-h-[44px] px-3 py-2 rounded-xl border border-gray-300 bg-white text-dark hover:bg-gray-50 hover:border-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-accent/40'
           >
-            Только необходимые
+            <span className='block text-[13px] font-semibold leading-tight'>
+              Только необходимые
+            </span>
+            <span className='block text-[11px] font-normal text-[#6b7280] leading-tight mt-0.5'>
+              Без аналитики
+            </span>
           </button>
           <button
             type='button'
             onClick={() => saveConsent('all')}
-            className='w-full sm:w-auto bg-accent hover:bg-accent-dark text-white font-semibold px-5 py-2 rounded-lg shadow transition-colors focus:outline-none focus:ring-2 focus:ring-accent'
+            className='flex-1 min-h-[44px] px-3 py-2 rounded-xl bg-accent hover:bg-accent-dark text-white font-semibold text-[13px] shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50'
           >
             Принять все
           </button>
@@ -79,7 +93,7 @@ export default function CookieBanner() {
         @keyframes fade-in {
           from {
             opacity: 0;
-            transform: translateY(40px);
+            transform: translateY(16px);
           }
           to {
             opacity: 1;
@@ -87,7 +101,7 @@ export default function CookieBanner() {
           }
         }
         .animate-fade-in {
-          animation: fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          animation: fade-in 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
       `}</style>
     </div>
