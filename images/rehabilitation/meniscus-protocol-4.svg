@@ -1,0 +1,85 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Фон -->
+  <rect width="400" height="300" fill="#f8fafc"/>
+  
+  <!-- Заголовок -->
+  <text x="200" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#dc2626">
+    Этап 4: Возвращение к спорту (12+ недель)
+  </text>
+  
+  <!-- Колено схематично -->
+  <g transform="translate(150, 60)">
+    <!-- Бедренная кость -->
+    <rect x="40" y="0" width="20" height="80" fill="#e5e7eb" stroke="#6b7280" stroke-width="2"/>
+    
+    <!-- Большеберцовая кость -->
+    <rect x="40" y="120" width="20" height="80" fill="#e5e7eb" stroke="#6b7280" stroke-width="2"/>
+    
+    <!-- Коленный сустав -->
+    <circle cx="50" cy="100" r="25" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/>
+    
+    <!-- Полностью восстановленный мениск -->
+    <path d="M 35 95 Q 50 85 65 95 Q 50 105 35 95" fill="#22c55e" stroke="#15803d" stroke-width="2"/>
+    
+    <!-- Знак здоровья -->
+    <path d="M 45 92 L 48 95 L 55 88" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Спортивная активность -->
+  <g transform="translate(250, 70)">
+    <!-- Человечек в прыжке -->
+    <circle cx="15" cy="5" r="8" fill="#fbbf24" stroke="#92400e" stroke-width="2"/>
+    <line x1="15" y1="13" x2="15" y2="40" stroke="#92400e" stroke-width="3"/>
+    <line x1="15" y1="25" x2="5" y2="15" stroke="#92400e" stroke-width="2"/>
+    <line x1="15" y1="25" x2="25" y2="15" stroke="#92400e" stroke-width="2"/>
+    <line x1="15" y1="40" x2="5" y2="55" stroke="#92400e" stroke-width="2"/>
+    <line x1="15" y1="40" x2="25" y2="55" stroke="#92400e" stroke-width="2"/>
+    
+    <!-- Мяч -->
+    <circle cx="35" cy="25" r="6" fill="#f97316" stroke="#ea580c" stroke-width="2"/>
+    <path d="M 32 22 Q 35 20 38 22" stroke="#ea580c" stroke-width="1" fill="none"/>
+    <path d="M 32 28 Q 35 30 38 28" stroke="#ea580c" stroke-width="1" fill="none"/>
+    
+    <!-- Линии движения -->
+    <path d="M 50 20 Q 45 15 40 20" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="3,2"/>
+    <path d="M 50 35 Q 45 40 40 35" stroke="#dc2626" stroke-width="2" fill="none" stroke-dasharray="3,2"/>
+  </g>
+  
+  <!-- Рекомендации -->
+  <g transform="translate(20, 180)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#374151">
+      Основные задачи:
+    </text>
+    <text x="0" y="20" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Спортивно-специфические упражнения
+    </text>
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Плиометрические тренировки
+    </text>
+    <text x="0" y="50" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Тестирование функции
+    </text>
+    <text x="0" y="65" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Постепенное возвращение к игре
+    </text>
+  </g>
+  
+  <!-- Иконка спорта -->
+  <g transform="translate(320, 180)">
+    <rect x="0" y="10" width="30" height="40" rx="5" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+    <circle cx="15" cy="20" r="4" fill="#f97316"/>
+    <path d="M 12 17 Q 15 15 18 17" stroke="#ea580c" stroke-width="1" fill="none"/>
+    <path d="M 12 23 Q 15 25 18 23" stroke="#ea580c" stroke-width="1" fill="none"/>
+    <line x1="15" y1="25" x2="15" y2="35" stroke="#dc2626" stroke-width="2"/>
+    <line x1="10" y1="30" x2="20" y2="30" stroke="#dc2626" stroke-width="1"/>
+    <text x="15" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">
+      Спорт
+    </text>
+  </g>
+  
+  <!-- Галочка успеха -->
+  <g transform="translate(350, 50)">
+    <circle cx="15" cy="15" r="12" fill="#22c55e" stroke="#15803d" stroke-width="2"/>
+    <path d="M 8 15 L 12 19 L 22 9" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
