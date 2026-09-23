@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { openCookieSettings } from '@/lib/cookie-consent';
 
 // Компонент с информацией о компании
 const AboutColumn = () => {
@@ -505,6 +506,17 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
               >
                 Договор-оферта
               </Link>
+            </li>
+            <li className='mt-2 sm:mt-0' role='menuitem'>
+              <button
+                type='button'
+                onClick={openCookieSettings}
+                className='text-white hover:text-accent transition-all duration-300 text-sm font-semibold focus:outline-none focus:underline'
+                style={{ color: '#d1f3ea' }}
+                aria-label='Настройки cookie'
+              >
+                Настройки cookie
+              </button>
             </li>
           </ul>
         </div>
