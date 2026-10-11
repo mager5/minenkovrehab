@@ -7,7 +7,7 @@ import {
   resetPasswordSchema,
   type ResetPasswordInput,
 } from '@/lib/validations/auth';
-import { createClient } from '@/lib/supabase/client';
+import { authPost } from '@/lib/auth-client';
 import { Button } from '@/components/ui/auth/Button';
 import { Input } from '@/components/ui/auth/Input';
 import {
@@ -31,7 +31,7 @@ function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+
 
   const {
     register,
@@ -46,13 +46,10 @@ function ResetPasswordForm() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: data.password,
-      });
-
-      if (error) {
-        throw error;
-      }
+      const token = new URLSearchParams(window.location.hash.slice(1)).get('token') || '';
+      const response = await authPost('/api/auth/reset-password',{token,password:data.password});
+      if(!response.ok) throw new Error('Ссылка недействительна или срок её действия истёк.');
+      window.history.replaceState(null,'','/reset-password');
 
       setSuccess(true);
 

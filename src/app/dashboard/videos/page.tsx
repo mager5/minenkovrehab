@@ -1,10 +1,1 @@
-import VideosClientPage from '@/components/dashboard/videos/VideosClientPage';
-
-export const metadata = {
-  title: 'Мои видео | Личный кабинет',
-  description: 'Управление видеоматериалами',
-};
-
-export default function VideosPage() {
-  return <VideosClientPage />;
-}
+export default function VideosPage(){return <main className='p-12'><h1>Личные видео</h1><p>Загрузка личных видео будет доступна после переноса хранилища.</p></main>;}

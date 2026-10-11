@@ -1,0 +1,15 @@
+.git
+node_modules
+robokassa-api/node_modules
+.env
+.env.*
+**/.env
+**/.env.*
+*.dump
+**/*.dump
+reports
+.next
+out
+backups
+*.log
+**/*.log

@@ -21,6 +21,7 @@ import {
 import { Transition } from '@headlessui/react';
 import AuthPopover from './AuthPopover';
 import { getRailwayApiBaseUrl } from '@/lib/api-base';
+import { authPost } from '@/lib/auth-client';
 // import { createClient } from '@/lib/supabase/client';
 // import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 
@@ -242,11 +243,8 @@ export function Header() {
 
   const handleLogout = async () => {
     // await supabase.auth.signOut();
-    await fetch(`${getRailwayApiBaseUrl()}/api/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-    }).catch(() => null);
+    const response = await authPost('/api/auth/logout');
+    if (!response.ok) return;
     setUser(null);
     setIsProfileDropdownOpen(false);
     setIsMobileProfileOpen(false);

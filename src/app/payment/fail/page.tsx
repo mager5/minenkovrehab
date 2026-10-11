@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { XCircleIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
@@ -11,7 +11,7 @@ interface PaymentData {
   culture?: string;
 }
 
-export default function PaymentFailPage() {
+function PaymentFailure() {
   const searchParams = useSearchParams();
   const [paymentData, setPaymentData] = useState<PaymentData>({});
 
@@ -133,3 +133,5 @@ export default function PaymentFailPage() {
     </div>
   );
 }
+
+export default function PaymentFailPage(){return <Suspense fallback={<p>Загрузка…</p>}><PaymentFailure /></Suspense>;}

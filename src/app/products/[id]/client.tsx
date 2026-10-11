@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { authPost } from '@/lib/auth-client';
 import { formatPrice, Product } from '../data';
 import { motion } from 'framer-motion';
 import ImageCarousel from '@/components/ui/ImageCarousel';
@@ -432,40 +433,12 @@ export default function ProductClient({ product }: { product: Product }) {
       //   process.env.NODE_ENV === 'production'
       //     ? 'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url'
       //     : '/api/robokassa/generate-payment-url';
+      if(!window.confirm('Подтверждаю согласие с офертой и обработкой данных для оформления заказа.')) {
+        setIsPaymentProcessingLevel1(false);setIsPaymentProcessingLevel2(false);setIsPaymentProcessingLevel3(false);setIsPaymentProcessingLevel4(false);return;
+      }
       const apiUrl = getRobokassaPaymentUrl();
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: product.price,
-          productId: product.id,
-          level,
-          email: 'noreply@minenkovrehab.ru',
-          phone: '+79000000000',
-          // email: 'customer@example.com',
-          // phone: '+79001234567',
-          // Явно передаем номенклатуру для чека (фискализация)
-          receipt: {
-            sno: 'usn_income', // УСН Доходы
-            items: [
-              {
-                name:
-                  product.id === 'formula-movement' && level
-                    ? `${product.title} (Уровень ${level})`
-                    : product.title,
-                quantity: 1,
-                sum: product.price,
-                payment_method: getPaymentMethod(product.id),
-                payment_object: 'service',
-                tax: 'none',
-              },
-            ],
-          },
-        }),
-      });
+      const response = await authPost(apiUrl, {productId:product.id,level,agreement:true});
 
       if (!response.ok) {
         const errorText = await response.text();

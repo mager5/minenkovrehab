@@ -6,7 +6,7 @@ import { Product, formatPrice } from './data';
 import { motion } from 'framer-motion';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { getRailwayApiBaseUrl } from '@/lib/api-base';
+import { authPost } from '@/lib/auth-client';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -156,16 +156,16 @@ export default function ProductPageWrapper({
     }
   };
 
-  // Имитация процесса оплаты
-  const handlePayment = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsPaymentProcessing(true);
-
-    // Имитация API запроса на оплату
-    setTimeout(() => {
-      setIsPaymentProcessing(false);
-      setPaymentSuccess(true);
-    }, 2000);
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();setIsPaymentProcessing(true);setServerMessage('');
+    try {
+      if(!window.confirm('Подтверждаю согласие с офертой и обработкой данных для оформления заказа.')) return;
+      const response=await authPost('/api/checkout',{productId:product.id,agreement:true});
+      const payload=await response.json();
+      if(!response.ok||!payload?.data?.paymentUrl)throw new Error(payload?.error||'Не удалось создать заказ.');
+      window.location.href=payload.data.paymentUrl;
+    } catch(error) {setServerMessage(error instanceof Error?error.message:'Не удалось создать заказ.');}
+    finally{setIsPaymentProcessing(false);}
   };
 
   const validateEmail = (value: string) => {
@@ -226,37 +226,8 @@ export default function ProductPageWrapper({
       // Старый хардкод Railway:
       // const response = await fetch(
       //   'https://minenkovrehab-production-15cc.up.railway.app/api/mock-payment/complete',
-      const response = await fetch(
-        `${getRailwayApiBaseUrl()}/api/mock-payment/complete`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: email.trim(),
-            name: contactInfo.name,
-            phone: contactInfo.phone,
-            productId: product?.id,
-            // Добавляем receipt для фискализации (на будущее, если этот метод будет использоваться для оплаты)
-            receipt: {
-              sno: 'usn_income',
-              items: [
-                {
-                  name: product.title,
-                  quantity: 1,
-                  sum: product.price,
-                  payment_method: product?.id
-                    ? getPaymentMethod(product.id)
-                    : 'full_payment',
-                  payment_object: 'service',
-                  tax: 'none',
-                },
-              ],
-            },
-          }),
-        }
-      );
+      if(!window.confirm('Подтверждаю согласие с офертой и обработкой данных для оформления заказа.')) return;
+      const response = await authPost('/api/checkout',{productId:product.id,agreement:true});
 
       const data = await response.json();
 
@@ -271,24 +242,8 @@ export default function ProductPageWrapper({
         return;
       }
 
-      if (data?.status === 'exists') {
-        setExistingUser(true);
-        setServerMessage(
-          data?.message ||
-            'Пользователь с таким email уже существует. Войдите в аккаунт.'
-        );
-      } else {
-        setServerMessage(
-          data?.message ||
-            'Личный кабинет создан. Проверьте почту для входа по ссылке.'
-        );
-        setExistingUser(false);
-        if (typeof window !== 'undefined') {
-          try {
-            window.sessionStorage.setItem('lastAuthEmail', email.trim());
-          } catch {}
-        }
-      }
+      if (data?.data?.paymentUrl) window.location.href=data.data.paymentUrl;
+      else setServerMessage('Не удалось создать заказ.');
     } catch (error) {
       setServerMessage('Произошла ошибка. Попробуйте еще раз позже.');
       setEmailAttempts(prev => prev + 1);

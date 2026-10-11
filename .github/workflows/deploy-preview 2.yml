@@ -11,11 +11,12 @@ permissions:
   id-token: write
 
 concurrency:
-  group: 'pages-preview-ios-26'
+  group: 'pages-preview-ios-26-${{ github.ref }}'
   cancel-in-progress: true
 
 jobs:
   build-and-deploy:
+    if: github.ref == 'refs/heads/feature/ios-26-design'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

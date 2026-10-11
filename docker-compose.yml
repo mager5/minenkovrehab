@@ -1,0 +1,43 @@
+# One private application. No automatic migrate, seed or import service.
+x-private: &private
+  MIGRATION_ENV: private
+  MIGRATION_PRIVATE_CONFIRM: Friendly-Halimede-default_db-gen_user
+  MIGRATION_PG_TLS: disabled-private
+  MIGRATION_SITE_ORIGIN: ${MIGRATION_SITE_ORIGIN:?platform HTTPS origin required}
+  MIGRATION_DATABASE_URL: ${MIGRATION_DATABASE_URL:?gen_user private URL required}
+  MIGRATION_DB_READY_CONFIRM: ${MIGRATION_DB_READY_CONFIRM:-}
+  MIGRATION_RESET_KEY: ${MIGRATION_RESET_KEY:?private key required}
+  STAGE1_TEST_PASSWORD2: ${STAGE1_TEST_PASSWORD2:?explicit test callback key required}
+services:
+  frontend:
+    build: {context: ., dockerfile: deploy/timeweb/frontend.Dockerfile}
+    ports: ['3000:3000']
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: '1'
+      MIGRATION_ENV: private
+      MIGRATION_SITE_ORIGIN: ${MIGRATION_SITE_ORIGIN:?platform HTTPS origin required}
+      MIGRATION_API_INTERNAL_URL: http://backend:3101
+    restart: unless-stopped
+    init: true
+  backend:
+    build: {context: ., dockerfile: deploy/timeweb/backend.Dockerfile}
+    command: [node, timeweb/private-boot.js, api]
+    expose: ['3101']
+    environment:
+      <<: *private
+      MIGRATION_VIDEO_PROVIDER: disabled
+      STAGE1_PORT: '3101'
+    restart: unless-stopped
+    init: true
+  worker:
+    build: {context: ., dockerfile: deploy/timeweb/worker.Dockerfile}
+    command: [node, timeweb/private-boot.js, worker]
+    expose: ['3102']
+    environment:
+      <<: *private
+      MIGRATION_MAIL_PROVIDER: test
+      MIGRATION_MAIL_NETWORK_ENABLED: 'false'
+      MIGRATION_WORKER_PORT: '3102'
+    restart: unless-stopped
+    init: true

@@ -29,6 +29,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getRailwayApiBaseUrl } from '@/lib/api-base';
+import { authPost } from '@/lib/auth-client';
 
 // Старый локальный helper (заменён на @/lib/api-base):
 // function getRailwayApiBaseUrl() {
@@ -75,18 +76,7 @@ function LoginForm() {
       //   throw error;
       // }
 
-      const response = await fetch(
-        `${getRailwayApiBaseUrl()}/api/auth/signin`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            email: data.email,
-            password: data.password,
-          }),
-        }
-      );
+      const response = await authPost('/api/auth/signin', {email:data.email,password:data.password});
 
       const payload = await response.json().catch(() => null);
       if (!response.ok || !payload?.success) {
@@ -196,213 +186,7 @@ function LoginForm() {
   );
 }
 
-function RegisterForm() {
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  // const supabase = createClient();
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
-  });
-
-  const password = watch('password', '');
-  const emailValue = watch('email');
-
-  const onSubmit = async (data: RegisterInput) => {
-    setError(null);
-    setSuccess(null);
-    setIsLoading(true);
-
-    try {
-      // const { data: authData, error } = await supabase.auth.signUp({
-      //   email: data.email,
-      //   password: data.password,
-      //   options: {
-      //     data: {
-      //       full_name: data.name,
-      //     },
-      //   },
-      // });
-      //
-      // if (error) {
-      //   throw error;
-      // }
-      //
-      // if (authData.session) {
-      //   router.push('/dashboard');
-      //   router.refresh();
-      //   // Не сбрасываем isLoading при успехе, чтобы показать спиннер до редиректа
-      // } else {
-      //   // Если сессия не создана, значит требуется подтверждение email
-      //   setSuccess(
-      //     'На вашу почту отправлено письмо для подтверждения регистрации. Пожалуйста, проверьте email.'
-      //   );
-      //   setIsLoading(false);
-      // }
-
-      const response = await fetch(
-        `${getRailwayApiBaseUrl()}/api/auth/signup`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            email: data.email,
-            password: data.password,
-            name: data.name,
-          }),
-        }
-      );
-
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.success) {
-        const message =
-          payload?.error || 'Не удалось зарегистрироваться. Попробуйте позже.';
-        throw new Error(message);
-      }
-
-      if (payload?.data?.requiresEmailConfirmation) {
-        setSuccess(
-          'На вашу почту отправлено письмо для подтверждения регистрации. Пожалуйста, проверьте email.'
-        );
-        setIsLoading(false);
-        return;
-      }
-
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('mr-auth-changed'));
-      }
-
-      router.push('/dashboard');
-      router.refresh();
-    } catch (err: any) {
-      setError(
-        err.message || 'Не удалось зарегистрироваться. Попробуйте позже.'
-      );
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-4' noValidate>
-      <AnimatePresence mode='wait'>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className='overflow-hidden'
-          >
-            <Alert variant='destructive' className='mb-4'>
-              <AlertTitle>Ошибка</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-        {success && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className='overflow-hidden'
-          >
-            <Alert variant='success' className='mb-4'>
-              <AlertTitle>Успешно</AlertTitle>
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className='space-y-2'>
-        <Input
-          id='name'
-          type='text'
-          label='Имя'
-          placeholder='Иван Иванов'
-          error={errors.name?.message || ''}
-          disabled={isLoading}
-          className='transition-all duration-300 ease-in-out'
-          {...register('name')}
-        />
-      </div>
-
-      <div className='space-y-2'>
-        <Input
-          id='email'
-          type='email'
-          label='Email'
-          placeholder='name@example.com'
-          error={errors.email?.message || ''}
-          disabled={isLoading}
-          className='transition-all duration-300 ease-in-out'
-          {...register('email')}
-          value={emailValue ?? ''}
-          autoComplete='email'
-        />
-      </div>
-
-      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-        <div className='space-y-2'>
-          <Input
-            id='password'
-            type='password'
-            label='Пароль'
-            error={errors.password?.message || ''}
-            disabled={isLoading}
-            className='transition-all duration-300 ease-in-out'
-            {...register('password')}
-            autoComplete='new-password'
-          />
-        </div>
-        <div className='space-y-2'>
-          <Input
-            id='confirmPassword'
-            type='password'
-            label='Подтвердите пароль'
-            error={errors.confirmPassword?.message || ''}
-            disabled={isLoading}
-            className='transition-all duration-300 ease-in-out'
-            {...register('confirmPassword')}
-            autoComplete='new-password'
-          />
-        </div>
-      </div>
-
-      <motion.div
-        animate={{
-          opacity: isLoading ? 0.8 : 1,
-          scale: isLoading ? 0.98 : 1,
-        }}
-        transition={{ duration: 0.3 }}
-      >
-        <Button
-          type='submit'
-          className='w-full transition-all duration-300'
-          isLoading={isLoading}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
-        </Button>
-      </motion.div>
-    </form>
-  );
-}
-
-interface AuthFormProps {
-  initialMode: 'login' | 'register';
-}
-
-export function AuthForm({ initialMode }: AuthFormProps) {
+export function AuthForm({ initialMode }: { initialMode: 'login' | 'register' }) {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const router = useRouter();
 
@@ -472,7 +256,7 @@ export function AuthForm({ initialMode }: AuthFormProps) {
             transition={{ duration: 0.2 }}
             className='w-full'
           >
-            {mode === 'login' ? <LoginForm /> : <RegisterForm />}
+            {mode === 'login' ? <LoginForm /> : <p>Регистрация новых аккаунтов пока недоступна. Для существующего аккаунта используйте вход или восстановление пароля.</p>}
           </motion.div>
         </AnimatePresence>
       </CardContent>

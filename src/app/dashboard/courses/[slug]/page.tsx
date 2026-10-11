@@ -1,3 +1,6 @@
+import { cookies } from 'next/headers';
+import Link from 'next/link';
+import { migrationBackendOrigin } from '@/lib/migration-config';
 import CourseDetailClientPage from '@/components/dashboard/courses/CourseDetailClientPage';
 import { COURSES } from '@/data/courses';
 import { Metadata } from 'next';
@@ -6,17 +9,16 @@ type Params = {
   slug: string;
 };
 
-export function generateStaticParams() {
-  return COURSES.map(course => ({ slug: course.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
 }: {
-  params: Params;
+  params: Promise<Params>;
 }): Promise<Metadata> {
+  const { slug } = await params;
   const course =
-    COURSES.find(item => item.slug === params.slug) ?? COURSES[0] ?? null;
+    COURSES.find(item => item.slug === slug) ?? COURSES[0] ?? null;
 
   if (!course) {
     return {
@@ -43,6 +45,11 @@ export async function generateMetadata({
   };
 }
 
-export default function CoursePage({ params }: { params: Params }) {
-  return <CourseDetailClientPage slug={params.slug} />;
+export default async function CoursePage({ params }: { params: Promise<Params> }) {
+  const origin=migrationBackendOrigin();
+  if(!origin)throw new Error('Migration API unavailable');
+  const response=await fetch(origin+'/api/courses/'+encodeURIComponent((await params).slug)+'/access',{headers:{cookie:(await cookies()).toString()},cache:'no-store'});
+  if(response.status===403)return <main className='p-12'><h1>Доступ к курсу закрыт</h1><p>Для просмотра нужна активная покупка этого курса.</p><Link href='/products'>Программы</Link></main>;
+  if(!response.ok)throw new Error('Course access unavailable');
+  return <CourseDetailClientPage slug={(await params).slug} />;
 }

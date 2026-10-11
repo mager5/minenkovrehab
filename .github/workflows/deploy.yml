@@ -15,11 +15,12 @@ permissions:
 
 # Позволяет запускать только один деплой и отменяет предыдущие деплои в процессе
 concurrency:
-  group: 'pages'
+  group: ${{ (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && 'pages' || format('pages-disabled-{0}', github.ref) }}
   cancel-in-progress: true
 
 jobs:
   build-and-deploy:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

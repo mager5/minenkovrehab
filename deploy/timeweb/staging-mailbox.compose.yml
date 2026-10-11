@@ -1,0 +1,14 @@
+# Optional FUTURE opt-in only: never apply without permission to send test mail.
+# Compose merge: docker-compose.yml + this file; no public token endpoints.
+services:
+  worker:
+    environment:
+      MIGRATION_MAIL_PROVIDER: staging-mailbox
+      MIGRATION_MAIL_NETWORK_ENABLED: 'true'
+      MIGRATION_TEST_MAILBOX_CONFIRM: ${MIGRATION_TEST_MAILBOX_CONFIRM:?dedicated-synthetic-mailbox required}
+      MIGRATION_TEST_MAILBOX: ${MIGRATION_TEST_MAILBOX:?private dedicated recipient required}
+      MIGRATION_MAIL_ALLOWED_RECIPIENTS: staging@example.invalid
+      MIGRATION_MAIL_NAMESPACE: ${MIGRATION_MAIL_NAMESPACE:?unique staging namespace required}
+      RUSENDER_API_TOKEN: ${RUSENDER_API_TOKEN:?dedicated staging credential required}
+      RUSENDER_KEY_ID: ${RUSENDER_KEY_ID:?staging sender key ID required}
+      RUSENDER_FROM: ${RUSENDER_FROM:?verified staging sender required}
