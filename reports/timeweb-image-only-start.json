@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "noBuild": true,
+  "noPull": true,
+  "networkInternal": true,
+  "syntheticOnly": true,
+  "frontendLive": 200,
+  "frontendReady": 503,
+  "apiAndWorker": "live200/ready503",
+  "memoryMiB": [
+    {
+      "service": "frontend",
+      "memoryMiB": 84.109375
+    },
+    {
+      "service": "backend",
+      "memoryMiB": 30.84375
+    },
+    {
+      "service": "worker",
+      "memoryMiB": 29.640625
+    }
+  ],
+  "totalMiB": 144.59375,
+  "limitsMiB": {
+    "frontend": 512,
+    "api": 128,
+    "worker": 96
+  },
+  "systemReserveEstimateMiB": 256
+}

@@ -1,0 +1,36 @@
+{
+  "status": "prepared-not-published-owner-approval-required",
+  "archiveSHA256": "0b7a1ba9d7e5bb4d20ecc1ab32d123370d59aabf083c4eaab249da04dfc4e83d",
+  "images": [
+    {
+      "role": "frontend",
+      "localTag": "rehab-frontend:prebuilt-amd64",
+      "targetTag": "ghcr.io/mager5/minenkov-rehab-frontend:timeweb-amd64-20261011",
+      "acceptedLocalIds": [
+        "sha256:a151496a4497f01949eb533bb1e957f6251f47a8e0fb61afe0731623b28b761b",
+        "sha256:9a5f7ba2ae7658ddf1e82b2a6eb989c614dba85b9ccfb4afc3302d61de1ae505"
+      ],
+      "platform": "linux/amd64"
+    },
+    {
+      "role": "api",
+      "localTag": "rehab-api:prebuilt-amd64",
+      "targetTag": "ghcr.io/mager5/minenkov-rehab-api:timeweb-amd64-20261011",
+      "acceptedLocalIds": [
+        "sha256:76c565f1726756193568ef4a9295208091799437b82e839cf7ace45c5c8164d2",
+        "sha256:86dda613c19a7ade3b5a2e69b4546e19e4d297b4db4ead32c22d88a9eff37e87"
+      ],
+      "platform": "linux/amd64"
+    },
+    {
+      "role": "worker",
+      "localTag": "rehab-worker:prebuilt-amd64",
+      "targetTag": "ghcr.io/mager5/minenkov-rehab-worker:timeweb-amd64-20261011",
+      "acceptedLocalIds": [
+        "sha256:12591f878bbbffc2b07d53f0c07dc30c19693a75a29287febd8d6f881c1f8210",
+        "sha256:1d61b1fe6d5cd4ff3af3b2723b6f8748d6ea52a0e9ef0828ff23eee9a1246dfe"
+      ],
+      "platform": "linux/amd64"
+    }
+  ]
+}

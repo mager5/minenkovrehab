@@ -7,7 +7,8 @@ const root=path.resolve(__dirname,'../../..');
 const env={PATH:process.env.PATH,HOME:process.env.HOME,
  MIGRATION_SITE_ORIGIN:'https://synthetic.example.invalid',
  MIGRATION_DATABASE_URL:'postgresql://gen_user:synthetic@192.168.10.4:5432/default_db',
- MIGRATION_RESET_KEY:'0'.repeat(64)};
+ MIGRATION_RESET_KEY:'0'.repeat(64),FRONTEND_IMAGE:'rehab-frontend:prebuilt-amd64',
+ API_IMAGE:'rehab-api:prebuilt-amd64',WORKER_IMAGE:'rehab-worker:prebuilt-amd64'};
 function compose(file){return spawnSync('docker',['compose','--env-file','/dev/null','-f',file,'config','--format','json'],{cwd:root,env,encoding:'utf8'});}
 
 test('fca4429 reproduces missing callback key before any image build',()=>{
@@ -34,8 +35,9 @@ test('fixed root Compose resolves with no callback key and keeps private gates',
   assert.ok(service.command.includes('timeweb/private-boot.js'));
   assert.equal(service.ports,undefined);
  }
- // This fix intentionally does not claim root Compose consumes local images.
- for(const service of Object.values(config.services))assert.ok(service.build);
+ for(const service of Object.values(config.services)){
+  assert.equal(service.build,undefined);assert.ok(service.image);assert.equal(service.platform,'linux/amd64');
+ }
  assert.equal(config.services.frontend.ports[0].published,'3000');
  const forbidden=new Set(['cap_add','cgroup','cgroup_parent','devices','privileged','device_cgroup_rules','volumes','ipc','pid','security_opt','userns_mode','sysctls','volumes_from','uts','extra_hosts','use_api_socket','include','extends','external','name','driver_opts']);
  function check(value){if(!value||typeof value!=='object')return;

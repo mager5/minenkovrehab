@@ -1,4 +1,6 @@
-# One private application. No automatic migrate, seed or import service.
+# Timeweb App Platform: pull prepared linux/amd64 images; no server builds or SQL.
+# Image references are supplied after approved publication, preferably @sha256.
+# No build fallback: missing/inaccessible images must fail before starting services.
 x-private: &private
   MIGRATION_ENV: private
   MIGRATION_PRIVATE_CONFIRM: Friendly-Halimede-default_db-gen_user
@@ -7,12 +9,15 @@ x-private: &private
   MIGRATION_DATABASE_URL: ${MIGRATION_DATABASE_URL:?gen_user private URL required}
   MIGRATION_DB_READY_CONFIRM: ${MIGRATION_DB_READY_CONFIRM:-}
   MIGRATION_RESET_KEY: ${MIGRATION_RESET_KEY:?private key required}
-  # Not needed by private-boot while waiting. loadConfig still requires an
-  # explicit synthetic key before API/worker can activate; no default secret.
+  # Waiting boot does not use payment handlers; active loadConfig requires the key.
   STAGE1_TEST_PASSWORD2: ${STAGE1_TEST_PASSWORD2:-}
 services:
   frontend:
-    build: {context: ., dockerfile: deploy/timeweb/frontend.Dockerfile}
+    image: ${FRONTEND_IMAGE:?published linux/amd64 image digest required}
+    platform: linux/amd64
+    mem_limit: 512m
+    memswap_limit: 512m
+    cpus: "0.50"
     ports: ['3000:3000']
     environment:
       NODE_ENV: production
@@ -23,7 +28,11 @@ services:
     restart: unless-stopped
     init: true
   backend:
-    build: {context: ., dockerfile: deploy/timeweb/backend.Dockerfile}
+    image: ${API_IMAGE:?published linux/amd64 image digest required}
+    platform: linux/amd64
+    mem_limit: 128m
+    memswap_limit: 128m
+    cpus: "0.25"
     command: [node, timeweb/private-boot.js, api]
     expose: ['3101']
     environment:
@@ -33,7 +42,11 @@ services:
     restart: unless-stopped
     init: true
   worker:
-    build: {context: ., dockerfile: deploy/timeweb/worker.Dockerfile}
+    image: ${WORKER_IMAGE:?published linux/amd64 image digest required}
+    platform: linux/amd64
+    mem_limit: 96m
+    memswap_limit: 96m
+    cpus: "0.25"
     command: [node, timeweb/private-boot.js, worker]
     expose: ['3102']
     environment:
