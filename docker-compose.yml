@@ -7,7 +7,9 @@ x-private: &private
   MIGRATION_DATABASE_URL: ${MIGRATION_DATABASE_URL:?gen_user private URL required}
   MIGRATION_DB_READY_CONFIRM: ${MIGRATION_DB_READY_CONFIRM:-}
   MIGRATION_RESET_KEY: ${MIGRATION_RESET_KEY:?private key required}
-  STAGE1_TEST_PASSWORD2: ${STAGE1_TEST_PASSWORD2:?explicit test callback key required}
+  # Not needed by private-boot while waiting. loadConfig still requires an
+  # explicit synthetic key before API/worker can activate; no default secret.
+  STAGE1_TEST_PASSWORD2: ${STAGE1_TEST_PASSWORD2:-}
 services:
   frontend:
     build: {context: ., dockerfile: deploy/timeweb/frontend.Dockerfile}
