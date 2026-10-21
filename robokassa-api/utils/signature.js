@@ -79,8 +79,8 @@ function generatePaymentSignature(
  * @returns {string} MD5 подпись в верхнем регистре
  */
 function generateResultSignature(outSum, invId, password2, shpParams = null) {
-  // Форматируем сумму с 2 знаками после запятой для консистентности
-  const formattedSum = parseFloat(outSum).toFixed(2);
+  // ResultURL signs the exact incoming decimal string, including trailing zeros.
+  const formattedSum = String(outSum);
 
   let signatureString = `${formattedSum}:${invId}:${password2}`;
 

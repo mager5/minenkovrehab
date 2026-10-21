@@ -498,7 +498,7 @@ const handleResult = async (req, res) => {
 
     // Генерация ожидаемой подписи с учетом shp_ параметров
     const expectedSignature = generateResultSignature(
-      outSum,
+      OutSum,
       InvId,
       password2,
       shpParams
@@ -1197,7 +1197,7 @@ router.post('/result', async (req, res) => {
     }
     
     // Генерация ожидаемой подписи
-    const expectedSignature = generateResultSignature(outSum, InvId, password2);
+    const expectedSignature = generateResultSignature(OutSum, InvId, password2);
     
     // Проверка подписи
     if (!verifySignature(SignatureValue, expectedSignature)) {
@@ -1249,7 +1249,7 @@ router.get('/verify-signature', (req, res) => {
         ? process.env.ROBOKASSA_TEST_PASSWORD2
         : process.env.ROBOKASSA_PASSWORD2;
       expectedSignature = generateResultSignature(
-        parseFloat(outSum),
+        outSum,
         invId,
         password2
       );
