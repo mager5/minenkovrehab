@@ -1,0 +1,59 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Фон -->
+  <rect width="400" height="300" fill="#f8fafc"/>
+  
+  <!-- Заголовок -->
+  <text x="200" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1e40af">
+    Этап 1: Острый период (0-2 недели)
+  </text>
+  
+  <!-- Колено схематично -->
+  <g transform="translate(150, 60)">
+    <!-- Бедренная кость -->
+    <rect x="40" y="0" width="20" height="80" fill="#e5e7eb" stroke="#6b7280" stroke-width="2"/>
+    
+    <!-- Большеберцовая кость -->
+    <rect x="40" y="120" width="20" height="80" fill="#e5e7eb" stroke="#6b7280" stroke-width="2"/>
+    
+    <!-- Коленный сустав -->
+    <circle cx="50" cy="100" r="25" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+    
+    <!-- Поврежденный мениск -->
+    <path d="M 35 95 Q 50 85 65 95 Q 50 105 35 95" fill="#fca5a5" stroke="#dc2626" stroke-width="2"/>
+    
+    <!-- Воспаление -->
+    <circle cx="45" cy="90" r="3" fill="#dc2626" opacity="0.7"/>
+    <circle cx="55" cy="95" r="3" fill="#dc2626" opacity="0.7"/>
+    <circle cx="50" cy="105" r="3" fill="#dc2626" opacity="0.7"/>
+  </g>
+  
+  <!-- Рекомендации -->
+  <g transform="translate(20, 180)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#374151">
+      Основные задачи:
+    </text>
+    <text x="0" y="20" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Контроль боли и отека
+    </text>
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Защита от повторной травмы
+    </text>
+    <text x="0" y="50" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Сохранение подвижности
+    </text>
+    <text x="0" y="65" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Криотерапия и покой
+    </text>
+  </g>
+  
+  <!-- Иконка льда -->
+  <g transform="translate(320, 180)">
+    <rect x="0" y="10" width="30" height="40" rx="5" fill="#bfdbfe" stroke="#3b82f6" stroke-width="2"/>
+    <circle cx="8" cy="20" r="2" fill="#ffffff"/>
+    <circle cx="15" cy="25" r="2" fill="#ffffff"/>
+    <circle cx="22" cy="30" r="2" fill="#ffffff"/>
+    <text x="15" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">
+      Лед 15-20 мин
+    </text>
+  </g>
+</svg>

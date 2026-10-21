@@ -1,0 +1,28 @@
+{
+  "name": "Миненков Вадим | Физический реабилитолог",
+  "short_name": "Minenkov",
+  "description": "Физическая реабилитация и тренировки для здоровья. Индивидуальный подход и готовые восстановительные программы.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "lang": "ru",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicons/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicons/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#0063A5",
+  "background_color": "#ffffff"
+}

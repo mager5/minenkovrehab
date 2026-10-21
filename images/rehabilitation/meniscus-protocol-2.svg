@@ -1,0 +1,74 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Фон -->
+  <rect width="400" height="300" fill="#f8fafc"/>
+  
+  <!-- Заголовок -->
+  <text x="200" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#059669">
+    Этап 2: Подострый период (2-6 недель)
+  </text>
+  
+  <!-- Колено схематично -->
+  <g transform="translate(150, 60)">
+    <!-- Бедренная кость -->
+    <rect x="40" y="0" width="20" height="80" fill="#e5e7eb" stroke="#6b7280" stroke-width="2"/>
+    
+    <!-- Большеберцовая кость -->
+    <rect x="40" y="120" width="20" height="80" fill="#e5e7eb" stroke="#6b7280" stroke-width="2"/>
+    
+    <!-- Коленный сустав -->
+    <circle cx="50" cy="100" r="25" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+    
+    <!-- Заживающий мениск -->
+    <path d="M 35 95 Q 50 85 65 95 Q 50 105 35 95" fill="#fde68a" stroke="#d97706" stroke-width="2"/>
+    
+    <!-- Уменьшенное воспаление -->
+    <circle cx="48" cy="92" r="2" fill="#f59e0b" opacity="0.5"/>
+    <circle cx="52" cy="98" r="2" fill="#f59e0b" opacity="0.5"/>
+  </g>
+  
+  <!-- Упражнения -->
+  <g transform="translate(250, 80)">
+    <!-- Человечек делает упражнение -->
+    <circle cx="15" cy="10" r="8" fill="#fbbf24" stroke="#92400e" stroke-width="2"/>
+    <line x1="15" y1="18" x2="15" y2="50" stroke="#92400e" stroke-width="3"/>
+    <line x1="15" y1="30" x2="5" y2="40" stroke="#92400e" stroke-width="2"/>
+    <line x1="15" y1="30" x2="25" y2="40" stroke="#92400e" stroke-width="2"/>
+    <line x1="15" y1="50" x2="5" y2="65" stroke="#92400e" stroke-width="2"/>
+    <line x1="15" y1="50" x2="25" y2="65" stroke="#92400e" stroke-width="2"/>
+    
+    <!-- Стрелки движения -->
+    <path d="M 30 45 L 35 40 L 30 35" stroke="#059669" stroke-width="2" fill="none"/>
+    <path d="M 30 55 L 35 60 L 30 65" stroke="#059669" stroke-width="2" fill="none"/>
+  </g>
+  
+  <!-- Рекомендации -->
+  <g transform="translate(20, 180)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#374151">
+      Основные задачи:
+    </text>
+    <text x="0" y="20" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Восстановление подвижности
+    </text>
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Изометрические упражнения
+    </text>
+    <text x="0" y="50" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Легкие движения в суставе
+    </text>
+    <text x="0" y="65" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">
+      • Укрепление четырехглавой мышцы
+    </text>
+  </g>
+  
+  <!-- Иконка упражнений -->
+  <g transform="translate(320, 180)">
+    <rect x="0" y="10" width="30" height="40" rx="5" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+    <circle cx="15" cy="20" r="3" fill="#059669"/>
+    <line x1="15" y1="23" x2="15" y2="35" stroke="#059669" stroke-width="2"/>
+    <line x1="15" y1="28" x2="10" y2="33" stroke="#059669" stroke-width="1"/>
+    <line x1="15" y1="28" x2="20" y2="33" stroke="#059669" stroke-width="1"/>
+    <text x="15" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6b7280">
+      Упражнения
+    </text>
+  </g>
+</svg>
