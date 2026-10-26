@@ -1,0 +1,79 @@
+# Minenkov Rehab на HostKey VPS (Ubuntu 24.04, 2 vCPU / 2 GB).
+# Наружу открыт только Caddy (80/443). PostgreSQL доступен лишь контейнерам backend/worker во внутренней сети.
+# Секреты — в /opt/rehab/env/*.env (chmod 600), создаются scripts/init-secrets.sh на самом сервере.
+name: rehab
+services:
+  postgres:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rehab
+      POSTGRES_USER: rehab_owner
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_owner_password
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C.UTF-8
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./secrets/pg_owner_password:/run/secrets/pg_owner_password:ro
+    networks: [db]
+    mem_limit: 384m
+    shm_size: 128m
+    command: ["postgres", "-c", "shared_buffers=96MB", "-c", "max_connections=40", "-c", "log_statement=none"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rehab_owner -d rehab"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  backend:
+    image: ${API_IMAGE:?API_IMAGE required}
+    restart: unless-stopped
+    command: [node, timeweb/private-boot.js, api]
+    env_file: [./env/backend.env, ./env/robokassa.env]
+    depends_on: { postgres: { condition: service_healthy } }
+    networks: [db, web]
+    expose: ["3101"]
+    mem_limit: 192m
+    init: true
+  worker:
+    image: ${WORKER_IMAGE:?WORKER_IMAGE required}
+    restart: unless-stopped
+    command: [node, timeweb/private-boot.js, worker]
+    env_file:
+      - ./env/worker.env
+      - { path: ./env/mail.env, required: false }
+    depends_on: { postgres: { condition: service_healthy } }
+    networks: [db, egress]
+    expose: ["3102"]
+    mem_limit: 128m
+    init: true
+  frontend:
+    image: ${FRONTEND_IMAGE:?FRONTEND_IMAGE required}
+    restart: unless-stopped
+    env_file: [./env/frontend.env]
+    depends_on: [backend]
+    networks: [web]
+    expose: ["3000"]
+    mem_limit: 512m
+    init: true
+  caddy:
+    image: rehab-caddy:2-replace
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./acme-webroot:/srv/acme:ro
+      - ./extras:/srv/rx:ro
+      - ./certs:/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      SITE_HOST: ${SITE_HOST:?SITE_HOST required}
+    networks: [web]
+    mem_limit: 96m
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+networks:
+  db: { internal: true }
+  web: {}
+  egress: {}

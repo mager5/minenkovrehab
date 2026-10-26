@@ -1,0 +1,37 @@
+// Only disposable local Docker containers and synthetic data; no target URLs accepted.
+const {spawnSync}=require('node:child_process'),fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+const {Pool}=require('pg');const {migrate}=require('../migrate');const {seedSynthetic}=require('../synthetic-seed');
+const delay=ms=>new Promise(r=>setTimeout(r,ms));const prefix='rehab-prebuilt-'+process.pid;
+const names=['db','frontend','api','worker'].map(x=>prefix+'-'+x);let pool,browser,sampler;const samples=[];let step='init';
+function docker(args){const r=spawnSync('docker',args,{encoding:'utf8',maxBuffer:8*1024*1024});if(r.status)throw Error('local_docker_command_failed');return r.stdout.trim();}
+async function wait(fn){for(let i=0;i<180;i++){try{if(await fn())return;}catch{}await delay(250);}throw Error('readiness_timeout');}
+async function main(){
+ const password=crypto.randomBytes(24).toString('hex'),key=crypto.randomBytes(32).toString('hex'),callback=crypto.randomBytes(24).toString('hex');
+ const dbPassword=crypto.randomBytes(24).toString('hex'),site='http://127.0.0.1:3310';
+ try{
+ docker(['network','create',prefix]);
+ docker(['run','-d','--name',names[0],'--platform','linux/amd64','--network',prefix,'--memory','192m','--memory-swap','192m','-p','127.0.0.1:3310:3000','-p','127.0.0.1:15439:5432','-e','POSTGRES_DB=rehab_stage1_test','-e','POSTGRES_PASSWORD='+dbPassword,'postgres:17-bookworm','-c','shared_buffers=32MB']);
+ pool=new Pool({host:'127.0.0.1',port:15439,user:'postgres',password:dbPassword,database:'rehab_stage1_test'});
+ await wait(async()=>{await pool.query('SELECT 1');return true;});await migrate(pool);await seedSynthetic(pool,password);
+ const url='postgresql://postgres:'+dbPassword+'@127.0.0.1:5432/rehab_stage1_test';
+ const env={MIGRATION_ENV:'local',MIGRATION_SITE_ORIGIN:site,MIGRATION_DATABASE_URL:url,MIGRATION_WORKER_DATABASE_URL:url,MIGRATION_RESET_KEY:key,STAGE1_TEST_PASSWORD2:callback,MIGRATION_VIDEO_PROVIDER:'disabled',MIGRATION_MAIL_PROVIDER:'test',MIGRATION_MAIL_NETWORK_ENABLED:'false',MIGRATION_API_INTERNAL_URL:'http://127.0.0.1:3101'};
+ for(const [index,tag,limit,cpu,command] of [[1,'frontend','512m','0.5',null],[2,'api','128m','0.25',['node','timeweb/private-boot.js','api']],[3,'worker','96m','0.25',['node','timeweb/private-boot.js','worker']]]){
+  const args=['run','-d','--name',names[index],'--platform','linux/amd64','--network','container:'+names[0],'--memory',limit,'--memory-swap',limit,'--cpus',cpu];for(const [k,v]of Object.entries(env))args.push('-e',k+'='+v);args.push('rehab-'+tag+':prebuilt-amd64');if(command)args.push(...command);docker(args);
+ }
+ function sample(){const values=names.slice(1).map(name=>Number(docker(['exec',name,'cat','/sys/fs/cgroup/memory.current'])));samples.push({time:Date.now(),bytes:values,total:values.reduce((a,b)=>a+b,0)});}
+ sampler=setInterval(()=>{try{sample();}catch{}},1000);sample();step='ready';await wait(async()=>(await fetch(site+'/api/health')).ok);
+ const {chromium}=require('playwright-core');browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--disable-background-networking','--disable-component-update','--no-first-run','--disable-sync']});const context=await browser.newContext();await context.route('**/*',r=>new URL(r.request().url()).origin===site?r.continue():r.abort());const page=await context.newPage();page.setDefaultTimeout(30000);page.on('dialog',d=>d.accept());
+ step='login SSR';await page.goto(site+'/login');const banner=page.getByRole('button',{name:/Только необходимые/});if(await banner.isVisible())await banner.click();await page.locator('#email').fill('staging@example.invalid');await page.locator('#password').fill(password);await page.locator('form button[type=submit]').click();await page.waitForURL('**/dashboard');await page.locator('[data-session-authenticated]').waitFor();
+ assert.equal((await context.request.get(site+'/api/courses/meniscus-resection-rehab/access')).status(),403);
+ step='checkout';await page.goto(site+'/products/personal-program');for(const c of await page.locator('input[type=checkbox]').all())await c.locator('..').click();await page.getByRole('button',{name:/Купить онлайн:/}).first().click();await page.waitForURL('**/payment/success?InvId=*');await page.getByText('Заказ ожидает подтверждения оплаты.').waitFor();
+ const {rows:[order]}=await pool.query('SELECT invoice_id,amount FROM rehab.orders');const signature=crypto.createHash('md5').update(`${order.amount}:${order.invoice_id}:${callback}`).digest('hex');
+ const notify=()=>fetch(site+'/api/robokassa/result',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({OutSum:order.amount,InvId:order.invoice_id,SignatureValue:signature,IsTest:'1'})});
+ for(const r of [await notify(),await notify()]){assert.equal(r.status,200);assert.equal(await r.text(),'OK'+order.invoice_id);}await page.reload();await page.getByText('Оплата подтверждена. Доступ открыт в личном кабинете.').waitFor();assert.equal((await context.request.get(site+'/api/courses/meniscus-resection-rehab/access')).status(),200);assert.equal((await context.request.get(site+'/api/courses/foreign-course/access')).status(),403);
+ step='worker';await wait(async()=>(await pool.query("SELECT count(*)::int n FROM rehab.mail_outbox WHERE status='sent'")).rows[0].n===1);assert.equal((await pool.query('SELECT count(*)::int n FROM rehab.payments')).rows[0].n,1);
+ step='bounded load';for(let i=0;i<10;i++){const responses=await Promise.all(Array.from({length:10},()=>context.request.get(site+'/dashboard')));assert.ok(responses.every(r=>r.status()===200));}await delay(5000);sample();clearInterval(sampler);sampler=null;
+ const containerMetrics=names.slice(1).map((name,i)=>({service:['frontend','api','worker'][i],peakBytes:Number(docker(['exec',name,'cat','/sys/fs/cgroup/memory.peak'])),events:docker(['exec',name,'cat','/sys/fs/cgroup/memory.events']),state:JSON.parse(docker(['inspect','--format','{{json .State}}',name]))}));
+ assert.ok(containerMetrics.every(x=>x.state.Running&&!x.state.OOMKilled&&!/oom_kill [1-9]/.test(x.events)));
+ const report={date:new Date().toISOString(),platform:'linux/amd64 under Docker Desktop emulation',passed:true,syntheticOnly:true,scenarios:['login','SSR dashboard','checkout pending','signed test ResultURL and repeat','purchase access','foreign course rejected','discard mail worker','100 authenticated SSR requests, concurrency 10'],limitsMiB:{frontend:512,api:128,worker:96,total:736},memoryMiB:{combinedSamplePeak:Math.max(...samples.map(s=>s.total))/1048576,systemReserveEstimate:256,totalBudget:992},containerMetrics:containerMetrics.map(({state,...m})=>({...m,running:state.Running,oomKilled:state.OOMKilled})),samples:samples.length};fs.writeFileSync(require('node:path').resolve(__dirname,'../../../reports/prebuilt-memory.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({passed:true,peakMiB:report.memoryMiB.combinedSamplePeak,oom:false}));
+ }catch(e){throw Error('prebuilt_test_failed_at_'+step+'_'+e.name);}finally{if(sampler)clearInterval(sampler);if(browser)await browser.close();if(pool)await pool.end();for(const name of names.reverse()){try{docker(['rm','-f','-v',name]);}catch{}}try{docker(['network','rm',prefix]);}catch{}}
+}
+main().catch(e=>{console.error(e.message);process.exitCode=1;});

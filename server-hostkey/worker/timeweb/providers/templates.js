@@ -1,0 +1,22 @@
+// Fixed mail templates shared by every sender. Only whitelisted kinds and same-origin one-time links.
+class DeliveryError extends Error{
+ constructor(code,{retryable=true,retryAfter=0}={}){super(code);this.code=code;this.retryable=retryable;this.retryAfter=retryAfter;}
+}
+function renderMessage(message,siteOrigin){
+ if(!/^[a-f\d-]{36}$/i.test(String(message.idempotencyKey||''))&&!/^\d+$/.test(String(message.idempotencyKey||'')))throw new DeliveryError('invalid_job',{retryable:false});
+ if(message.kind==='purchase_access'){
+  return {subject:'Покупка подтверждена — Minenkov Rehab',
+   text:`Здравствуйте!\n\nОплата прошла, покупка сохранена. Материалы доступны в личном кабинете: ${siteOrigin}/dashboard\n\n`+
+    `Вход — по адресу почты, на который оформлен заказ. Если вы ещё не задавали пароль, откройте ${siteOrigin}/forgot-password и укажите этот адрес: придёт ссылка для создания пароля.\n\n`+
+    `Вопросы — просто ответьте на это письмо.\n\nMinenkov Rehab`};
+ }
+ if(['password_reset','email_confirmation'].includes(message.kind)){
+  let url;try{url=new URL(message.url);}catch{throw new DeliveryError('invalid_reset',{retryable:false});}
+  if(url.origin!==siteOrigin||url.pathname!==(message.kind==='password_reset'?'/reset-password':'/confirm-email')||!/^#token=[a-f\d]{64}$/.test(url.hash))throw new DeliveryError('invalid_reset',{retryable:false});
+  return message.kind==='password_reset'
+   ?{subject:'Восстановление доступа — Minenkov Rehab',text:`Чтобы задать новый пароль, откройте одноразовую ссылку:\n${url.toString()}\n\nЕсли вы не запрашивали восстановление, просто проигнорируйте письмо.\n\nMinenkov Rehab`}
+   :{subject:'Подтверждение email — Minenkov Rehab',text:`Чтобы подтвердить адрес почты, откройте одноразовую ссылку:\n${url.toString()}\n\nЕсли вы не регистрировались на сайте, просто проигнорируйте письмо.\n\nMinenkov Rehab`};
+ }
+ throw new DeliveryError('invalid_template',{retryable:false});
+}
+module.exports={DeliveryError,renderMessage};

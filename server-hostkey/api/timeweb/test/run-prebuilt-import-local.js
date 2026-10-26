@@ -1,0 +1,11 @@
+// Verify pg_restore delivery using a fresh empty synthetic archive, never the backup.
+const {spawnSync}=require('node:child_process'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');const name='rehab-operator-'+process.pid,dir=fs.mkdtempSync(path.join(os.tmpdir(),'rehab-operator-'));const file=path.join(dir,'synthetic.dump');let step='start';fs.chmodSync(dir,0o755);
+function docker(args){const r=spawnSync('docker',args,{encoding:null,maxBuffer:8*1024*1024});if(r.status)throw Error('operator_local_command_failed');return r.stdout;}
+async function main(){try{
+ docker(['run','-d','--name',name,'--network','none','--platform','linux/amd64','--memory','192m','-e','POSTGRES_PASSWORD=artificial-local-only','postgres:17-bookworm','-c','shared_buffers=32MB']);let ready=false;for(let i=0;i<100;i++){const r=spawnSync('docker',['exec',name,'pg_isready','-h','127.0.0.1','-U','postgres'],{stdio:'ignore'});if(r.status===0){ready=true;break;}await new Promise(r=>setTimeout(r,200));}if(!ready)throw Error('operator_local_readiness_failed');
+ step='create';docker(['exec',name,'psql','-U','postgres','-v','ON_ERROR_STOP=1','-c',"CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid); CREATE TABLE auth.identities(id uuid); CREATE TABLE public.profiles(id uuid); CREATE TABLE public.products(id uuid); CREATE TABLE public.purchases(id uuid); CREATE TABLE public.videos(id uuid);"]);
+ step='dump';fs.writeFileSync(file,docker(['exec',name,'pg_dump','-U','postgres','-Fc','postgres']),{mode:0o444});
+ const code="const {readDump}=require('./timeweb/import/read-dump');const d=readDump('/backup/synthetic.dump','/usr/bin');if(Object.keys(d).length!==6||Object.values(d).some(v=>v.length))process.exit(1)";
+ step='read';docker(['run','--rm','--network','none','--platform','linux/amd64','--memory','256m','--mount','type=bind,source='+dir+',target=/backup,readonly','--entrypoint','node','rehab-import:prebuilt-amd64','-e',code]);console.log('operator pg_restore17 whitelist read: passed, synthetic only');
+ }finally{try{docker(['rm','-f','-v',name]);}catch{}fs.rmSync(dir,{recursive:true,force:true});}}
+main().catch(()=>{console.error('operator_local_test_failed_'+step);process.exitCode=1;});

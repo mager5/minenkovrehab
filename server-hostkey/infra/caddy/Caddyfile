@@ -1,0 +1,81 @@
+# Боевой Caddyfile: minenkovrehab.ru (сайт), www и new → редирект, api → backend (Robokassa Result URL).
+# Сертификаты выпускает lego с Мака (DNS-01 через Cloudflare), кладём в ./certs:
+#   main.crt/main.key — minenkovrehab.ru, www, api;  site.crt/site.key — new.minenkovrehab.ru.
+# Как на radar152: HTTP/3 выключен + Alt-Svc clear, grace_period. Логи запросов не пишем.
+# Кнопка «Наверх»: /_rx/rx-scroll-top.js из ./extras, подключается в HTML через replace (плагин replace-response, образ rehab-caddy).
+{
+	email <acme-email>
+	grace_period 10s
+	order replace after encode
+	servers {
+		protocols h1 h2
+	}
+}
+
+(secure) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		Alt-Svc "clear"
+		-Server
+	}
+}
+
+http://minenkovrehab.ru, http://www.minenkovrehab.ru, http://api.minenkovrehab.ru, http://new.minenkovrehab.ru {
+	handle /.well-known/acme-challenge/* {
+		root * /srv/acme
+		file_server
+	}
+	handle {
+		redir https://{host}{uri} 308
+	}
+}
+
+https://minenkovrehab.ru {
+	tls /certs/main.crt /certs/main.key
+	import secure
+	handle /_rx/* {
+		root * /srv/rx
+		uri strip_prefix /_rx
+		header Cache-Control "public, max-age=600"
+		file_server
+	}
+	handle {
+		@pages not path /_next/* /api/* *.js *.css *.json *.map *.png *.jpg *.jpeg *.webp *.avif *.gif *.svg *.ico *.woff *.woff2 *.ttf *.txt *.xml *.mp4 *.webm *.pdf
+		replace @pages stream {
+			"</body>" "<script src=\"/_rx/rx-scroll-top.js?v=1\" defer></script></body>"
+		}
+		reverse_proxy frontend:3000 {
+			header_up -Accept-Encoding
+		}
+	}
+}
+
+https://www.minenkovrehab.ru {
+	tls /certs/main.crt /certs/main.key
+	import secure
+	redir https://minenkovrehab.ru{uri} 301
+}
+
+https://api.minenkovrehab.ru {
+	tls /certs/main.crt /certs/main.key
+	import secure
+	handle /api/robokassa/* {
+		reverse_proxy backend:3101
+	}
+	handle /health/live {
+		reverse_proxy backend:3101
+	}
+	handle /payment/* {
+		redir https://minenkovrehab.ru{uri} 303
+	}
+	handle {
+		redir https://minenkovrehab.ru 302
+	}
+}
+
+https://new.minenkovrehab.ru {
+	tls /certs/site.crt /certs/site.key
+	import secure
+	redir https://minenkovrehab.ru{uri} 302
+}
