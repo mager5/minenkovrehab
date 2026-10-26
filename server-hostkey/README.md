@@ -26,6 +26,15 @@ Frontend (Next.js) сюда не входит: в образе `rehab-frontend:h
 3. **Кнопка «Наверх».** Не в коде сайта: Caddy вставляет `<script src="/_rx/rx-scroll-top.js">` перед `</body>` каждой HTML-страницы.
    Нужен образ `rehab-caddy:2-replace` (`infra/caddy/Dockerfile`). Можно позже перенести кнопку в layout Next.js и убрать замену из Caddy.
 
+## Деплой с сервера
+
+На сервере есть клон этой ветки: `/opt/rehab-src` (deploy key `hostkey-185.149.147.209`, только чтение).
+Порядок: изменения коммитятся в `server-hostkey` → на сервере
+`/opt/rehab-src/server-hostkey/infra/scripts/deploy.sh [api|worker|all]`.
+Скрипт забирает ветку, собирает образ `rehab-<api|worker>:src-<коммит>` поверх базового (`hk-dd8354d` / `hk-af5284f`, в них node_modules),
+переключает сервис, ждёт healthcheck и ответ сайта, при сбое откатывает. Журнал — `/opt/rehab/deploy.log`.
+Если меняются зависимости (`package-lock.json`), скрипт останавливается: нужна полная сборка образа.
+
 ## Чего здесь нет намеренно
 
 `env/*.env`, `secrets/`, `certs/`, `lego/`, `.env`, `import/` (дампы базы), `backups/`, `timeweb/runtime-roles.sql`.
