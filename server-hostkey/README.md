@@ -35,6 +35,19 @@ Frontend (Next.js) сюда не входит: в образе `rehab-frontend:h
 переключает сервис, ждёт healthcheck и ответ сайта, при сбое откатывает. Журнал — `/opt/rehab/deploy.log`.
 Если меняются зависимости (`package-lock.json`), скрипт останавливается: нужна полная сборка образа.
 
+## Миграции базы
+
+`migrate.js` запускается одноразовым контейнером под ролью `rehab_migrator`. `loadConfig` требует `STAGE1_TEST_PASSWORD2`,
+которого нет в `env/migrator.env`, поэтому его передают временным env-файлом:
+
+```sh
+cd /opt/rehab; X=$(mktemp); chmod 600 $X; sudo grep '^STAGE1_TEST_PASSWORD2=' env/worker.env > $X
+sudo docker run --rm --network rehab_db --env-file env/migrator.env --env-file $X "$(grep ^WORKER_IMAGE= .env | cut -d= -f2)" node timeweb/migrate.js; rm -f $X
+```
+
+Применены: 001–006. 006 (27.10.2026) — `admin_outbox` + триггер: уведомление владельцу о каждой оплате
+на `MIGRATION_ADMIN_NOTIFY_EMAIL` (в `env/worker.env`, сейчас `info@minenkovrehab.ru`).
+
 ## Чего здесь нет намеренно
 
 `env/*.env`, `secrets/`, `certs/`, `lego/`, `.env`, `import/` (дампы базы), `backups/`, `timeweb/runtime-roles.sql`.
