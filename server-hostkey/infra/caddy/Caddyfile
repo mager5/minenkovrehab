@@ -17,6 +17,9 @@
 	header {
 		Strict-Transport-Security "max-age=31536000"
 		Alt-Svc "clear"
+		Content-Security-Policy "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self' https://auth.robokassa.ru; upgrade-insecure-requests"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+		-X-Powered-By
 		-Server
 	}
 }
