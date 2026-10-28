@@ -10,14 +10,14 @@ def ogx(path):  # теги, которых нет на страницах с с�
 def esc(s): return html.escape(s, quote=True)
 products={
  '/products/formula-movement':('Программа тренировок «Формула Движения» | Миненков Вадим','Авторская программа тренировок для всего тела. Занимайтесь по готовым комплексам — улучшайте подвижность суставов, развивайте силу и укрепляйте контроль движений.'),
- '/products/personal-program':('Восстановление после резекции мениска — программа | Миненков Вадим','Подробный информационный материал в формате пошагового алгоритма для восстановления после операции.'),
+ '/products/personal-program':('Восстановление после резекции мениска — программа | Миненков Вадим','Программа восстановления после резекции мениска: 5 этапов — от первого дня после операции до возвращения в спорт. Текстовая программа на 16 страниц и видео упражнений.'),
  '/products/consultation':('Онлайн-консультация | Миненков Вадим','Индивидуальный разбор вашей ситуации: анализ текущего состояния, разъяснение ограничений и принципы корректной двигательной активности. Видеозвонок 60 минут.'),
  '/products/express-consultation':('Экспресс онлайн-консультация | Миненков Вадим','Быстрая консультация для разбора конкретного вопроса и получения рекомендаций.'),
  '/products/online-training':('Онлайн-тренировка | Миненков Вадим','Индивидуальная онлайн-тренировка в формате видеозвонка по согласованному времени. Продолжительность занятия — около 60 минут.'),
 }
 roots={
- '/about':('Обо мне | Миненков Вадим — физический реабилитолог','Персональные восстановительные программы и программы тренировок от врача ЛФК Миненкова Вадима. Восстановление после травм и операций.'),
- '/reviews':('Отзывы клиентов | Миненков Вадим','Ознакомьтесь с отзывами клиентов о методиках реабилитации, индивидуальном подходе и результатах занятий с Вадимом Миненковым.'),
+ '/about':('Обо мне | Миненков Вадим — физический реабилитолог','Вадим Миненков — специалист по физической реабилитации и спортивной тренировке, инструктор-методист ЛФК. Более 8 лет опыта, онлайн-консультации и индивидуальные программы.'),
+ '/reviews':('Отзывы клиентов | Миненков Вадим','Отзывы клиентов о занятиях с Вадимом Миненковым: восстановление после травм и операций, работа с болями в спине и шее, коррекция осанки.'),
  '/policy':('Политика конфиденциальности | Миненков Вадим','Политика конфиденциальности для клиентов физического реабилитолога Миненкова Вадима.'),
  '/offer':('Договор-оферта | Миненков Вадим','Публичная оферта на оказание услуг ИП Миненков Вадим Леонидович.'),
  '/consent':('Согласие на обработку персональных данных | Миненков Вадим','Согласие на обработку персональных данных в соответствии с 152-ФЗ.'),
@@ -36,12 +36,15 @@ L.append('\thandle {\n\t\t@pages not path /_next/* /api/* *.js *.css *.json *.ma
 names={}
 for i,p in enumerate(list(products)+list(roots)+['/products','/contacts']):
     n='p'+str(i); names[p]=n; L.append(f'\t\t@{n} path {p}\n')
+L.append('\t\t@home path /\n')
 L.append('\t\t@noindex path '+' '.join(noindex)+'\n')
 # global rules: canonical/og:url по пути страницы — до общей замены опечатки
 L.append('\t\treplace @pages stream {\n')
 L.append(pair('<link rel="canonical" href="https://minekovrehab.ru"/>','<link rel="canonical" href="https://minenkovrehab.ru{http.request.uri.path}"/>'))
 L.append(pair('<meta property="og:url" content="https://minekovrehab.ru"/>','<meta property="og:url" content="https://minenkovrehab.ru{http.request.uri.path}"/>'))
 L.append('\t\t\t"minekovrehab" "minenkovrehab"\n')
+L.append(pair(', дегенератика,',', дегенеративные изменения,'))
+L.append(pair('врача ЛФК','инструктора-методиста ЛФК'))  # он не врач (короткий шаблон: длинный не срабатывал на /login)
 G='NfKG4Obn62C9l819n4oDFJbwo7YBssE1xKy-rGZWLPM'; Y='3cabca068319b035'
 L.append(pair('<meta name="google-site-verification" content="xxxxxxxx"/>',f'<meta name="google-site-verification" content="{G}"/>'))
 L.append(pair('<meta name="yandex-verification" content="xxxxxxxx"/>',f'<meta name="yandex-verification" content="{Y}"/>'))
@@ -72,6 +75,75 @@ for p,tit in (('/products','Услуги - МиненковRehab'),('/contacts',
     L.append(f'\t\treplace @{names[p]} stream {{\n')
     L.append(pair(f'<meta property="og:title" content="{tit}"/>',f'<meta property="og:title" content="{tit}"/>'+ogx(p)))
     L.append('\t\t}\n')
+
+# ---- Тексты <title>/description прямо в HTML и в данных RSC (переход по ссылкам внутри сайта) ----
+import json
+TXT={  # путь: [(старый текст, новый)]
+ '/about':[(x+' Миненкова Вадима. Восстановление после травм и операций.',roots['/about'][1]) for x in
+           ('Персональные восстановительные программы и программы тренировок от врача ЛФК','Персональные восстановительные программы и программы тренировок от инструктора-методиста ЛФК')],
+ '/reviews':[('Отзывы | Миненков Rehab - Физическая реабилитация и лечебная физкультура',roots['/reviews'][0]),
+             ('Ознакомьтесь с отзывами клиентов о методиках реабилитации, индивидуальном подходе и результатах лечения в центре Миненков Rehab.',roots['/reviews'][1])],
+ '/products/personal-program':[('Резекция мениска. Восстановительная программа. | Миненков Вадим',products['/products/personal-program'][0]),
+             ('Подробный информационный материал в формате пошагового алгоритма для восстановления после операции.',products['/products/personal-program'][1])],
+ '/products':[('Услуги - МиненковRehab','Услуги и цены | Миненков Вадим — физический реабилитолог')],
+ '/contacts':[('Контакты - МиненковRehab','Контакты | Миненков Вадим — физический реабилитолог'),
+              ('Свяжитесь с нами для записи на консультацию или получения дополнительной информации о наших услугах.',
+               'Запись на онлайн-консультацию к Вадиму Миненкову: телефон +7 928 328-70-52, почта minenkov.rehab@yandex.ru, Telegram @MV_Rehab.')],
+}
+# ---- Структурированные данные schema.org (только факты со страниц сайта; без отзывов и рейтингов) ----
+ORG={'@type':'Organization','@id':D+'/#org','name':'МиненковRehab','url':D+'/','legalName':'ИП Миненков Вадим Леонидович',
+     'taxID':'262703733425','identifier':{'@type':'PropertyValue','propertyID':'ОГРНИП','value':'325265100067202'},
+     'telephone':'+7-928-328-70-52','email':'minenkov.rehab@yandex.ru','founder':{'@id':D+'/#person'},
+     'sameAs':['https://t.me/MV_Rehab','https://vk.com/minenkov_rehab','https://youtube.com/@mv_rehab','https://rutube.ru/channel/38070887','https://dzen.ru/id/646ca9d1fc7bc51b6ac77784']}
+PERSON={'@type':'Person','@id':D+'/#person','name':'Вадим Миненков','givenName':'Вадим','familyName':'Миненков','url':D+'/about',
+     'jobTitle':'Специалист по физической реабилитации, инструктор-методист ЛФК','worksFor':{'@id':D+'/#org'},
+     'knowsAbout':['Физическая реабилитация','Лечебная физкультура','Восстановление после травм и операций','Спортивная тренировка'],
+     'sameAs':ORG['sameAs']}
+SITE={'@type':'WebSite','@id':D+'/#site','url':D+'/','name':'МиненковRehab','inLanguage':'ru-RU','publisher':{'@id':D+'/#org'}}
+def crumbs(*items):
+    return {'@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':i+1,'name':n,'item':D+u} for i,(n,u) in enumerate(items)]}
+H=('Главная','/'); S=('Услуги','/products')
+svc={  # путь: (тип, название, цена ₽, длительность ISO или None, единица в тексте)
+ '/products/consultation':('Service','Онлайн-консультация',7000,'PT60M'),
+ '/products/express-consultation':('Service','Экспресс онлайн-консультация',4000,'PT20M'),
+ '/products/online-training':('Service','Онлайн-тренировка',5000,'PT60M'),
+ '/products/formula-movement':('Product','Программа тренировок «Формула Движения»',6000,None),
+ '/products/personal-program':('Product','Программа восстановления после резекции мениска',8000,None),
+}
+def offer(p,price):
+    return {'@type':'Offer','price':str(price),'priceCurrency':'RUB','availability':'https://schema.org/InStock','url':D+p,'seller':{'@id':D+'/#org'}}
+LD={}
+LD['/']=[SITE,ORG,PERSON]
+LD['/about']=[{'@type':'ProfilePage','@id':D+'/about','url':D+'/about','name':roots['/about'][0],'mainEntity':PERSON,'isPartOf':{'@id':D+'/#site'}},crumbs(H,('Обо мне','/about'))]
+LD['/contacts']=[{'@type':'ContactPage','url':D+'/contacts','name':'Контакты','about':ORG},crumbs(H,('Контакты','/contacts'))]
+LD['/reviews']=[crumbs(H,('Отзывы','/reviews'))]
+items=[]
+for i,(p,(typ,name,price,dur)) in enumerate(svc.items()):
+    desc=products[p][1]
+    node={'@type':typ,'name':name,'description':desc,'url':D+p,'offers':offer(p,price)}
+    if typ=='Service':
+        node.update({'serviceType':name,'provider':{'@id':D+'/#org'},'areaServed':{'@type':'Country','name':'Россия'},'availableChannel':{'@type':'ServiceChannel','serviceUrl':D+p,'name':'Видеозвонок'}})
+    else:
+        node.update({'brand':{'@type':'Brand','name':'МиненковRehab'},'image':D+'/images/og/services-og.jpg'})
+    LD[p]=[node,crumbs(H,S,(name,p))]
+    items.append({'@type':'ListItem','position':i+1,'url':D+p,'name':name})
+LD['/products']=[{'@type':'ItemList','name':'Услуги','itemListElement':items},crumbs(H,S)]
+def ldtag(nodes):
+    j=json.dumps({'@context':'https://schema.org','@graph':nodes},ensure_ascii=False,separators=(',',':'))
+    assert '`' not in j and '</' not in j
+    return '<script type="application/ld+json">'+j+'</script>'
+# Правила дописываются в конец уже существующего блока страницы: внутри блока замены идут по порядку,
+# а отдельный второй блок на тот же путь мог бы сработать раньше и сломать замены по тегам.
+for p in LD:
+    rules=[pair(a,b) for a,b in TXT.get(p,[])]+[pair('</head>',ldtag(LD[p])+'</head>')]
+    n=names.get(p) or 'home'
+    hdr=f'\t\treplace @{n} stream {{\n'
+    if hdr in L:
+        k=L.index(hdr)+1
+        while L[k]!='\t\t}\n': k+=1
+        L[k:k]=rules
+    else:
+        L+= [hdr]+rules+['\t\t}\n']
 L.append('\t\treplace @noindex stream {\n')
 L.append(pair('<meta name="robots" content="index, follow"/>','<meta name="robots" content="noindex, follow"/>'))
 L.append(pair('<meta name="googlebot" content="index, follow"/>','<meta name="googlebot" content="noindex, follow"/>'))
