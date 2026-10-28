@@ -37,6 +37,19 @@ http://minenkovrehab.ru, http://www.minenkovrehab.ru, http://api.minenkovrehab.r
 https://minenkovrehab.ru {
 	tls /certs/main.crt /certs/main.key
 	import secure
+	# Актуальная карта сайта (в коде сайта устарела).
+	handle /sitemap.xml {
+		root * /srv/rx
+		header Cache-Control "public, max-age=3600"
+		file_server
+	}
+	# Картинки превью (OG/Twitter) с правильным доменом; в образе сайта — с опечаткой.
+	@ogimg path /images/og-image.jpg /images/og/services-og.jpg /images/og/contacts-og.jpg
+	handle @ogimg {
+		root * /srv/rx
+		header Cache-Control "public, max-age=86400"
+		file_server
+	}
 	handle /_rx/* {
 		root * /srv/rx
 		uri strip_prefix /_rx
@@ -45,7 +58,22 @@ https://minenkovrehab.ru {
 	}
 	handle {
 		@pages not path /_next/* /api/* *.js *.css *.json *.map *.png *.jpg *.jpeg *.webp *.avif *.gif *.svg *.ico *.woff *.woff2 *.ttf *.txt *.xml *.mp4 *.webm *.pdf
+		@p0 path /products/formula-movement
+		@p1 path /products/personal-program
+		@p2 path /products/consultation
+		@p3 path /products/express-consultation
+		@p4 path /products/online-training
+		@p5 path /about
+		@p6 path /reviews
+		@p7 path /policy
+		@p8 path /offer
+		@p9 path /consent
+		@p10 path /products
+		@p11 path /contacts
+		@noindex path /login /forgot-password /reset-password /confirm-email /terms
 		replace @pages stream {
+			`<link rel="canonical" href="https://minekovrehab.ru"/>` `<link rel="canonical" href="https://minenkovrehab.ru{http.request.uri.path}"/>`
+			`<meta property="og:url" content="https://minekovrehab.ru"/>` `<meta property="og:url" content="https://minenkovrehab.ru{http.request.uri.path}"/>`
 			"minekovrehab" "minenkovrehab"
 			`<meta name="google-site-verification" content="xxxxxxxx"/>` `<meta name="google-site-verification" content="NfKG4Obn62C9l819n4oDFJbwo7YBssE1xKy-rGZWLPM"/>`
 			`<meta name="yandex-verification" content="xxxxxxxx"/>` `<meta name="yandex-verification" content="3cabca068319b035"/>`
@@ -53,8 +81,85 @@ https://minenkovrehab.ru {
 			`yandex-verification\",\"content\":\"xxxxxxxx` `yandex-verification\",\"content\":\"3cabca068319b035`
 			"</body>" "<script src=\"/_rx/rx-scroll-top.js?v=1\" defer></script><script src=\"/_rx/rx-metrika.js?v=1\" defer></script></body>"
 		}
+		replace @p0 stream {
+			`<meta property="og:title" content="Услуги - МиненковRehab"/>` `<meta property="og:title" content="Программа тренировок «Формула Движения» | Миненков Вадим"/><meta property="og:url" content="https://minenkovrehab.ru/products/formula-movement"/><meta property="og:type" content="website"/><meta property="og:locale" content="ru_RU"/><meta property="og:site_name" content="МиненковRehab"/>`
+			`<meta property="og:description" content="Выберите подходящую услугу для вашего восстановления и реабилитации. Онлайн-консультации, персональные программы, тренировки."/>` `<meta property="og:description" content="Авторская программа тренировок для всего тела. Занимайтесь по готовым комплексам — улучшайте подвижность суставов, развивайте силу и укрепляйте контроль движений."/>`
+			`<meta name="twitter:title" content="Услуги - МиненковRehab"/>` `<meta name="twitter:title" content="Программа тренировок «Формула Движения» | Миненков Вадим"/>`
+			`<meta name="twitter:description" content="Выберите подходящую услугу для вашего восстановления и реабилитации. Онлайн-консультации, персональные программы, тренировки."/>` `<meta name="twitter:description" content="Авторская программа тренировок для всего тела. Занимайтесь по готовым комплексам — улучшайте подвижность суставов, развивайте силу и укрепляйте контроль движений."/>`
+		}
+		replace @p1 stream {
+			`<meta property="og:title" content="Услуги - МиненковRehab"/>` `<meta property="og:title" content="Восстановление после резекции мениска — программа | Миненков Вадим"/><meta property="og:url" content="https://minenkovrehab.ru/products/personal-program"/><meta property="og:type" content="website"/><meta property="og:locale" content="ru_RU"/><meta property="og:site_name" content="МиненковRehab"/>`
+			`<meta property="og:description" content="Выберите подходящую услугу для вашего восстановления и реабилитации. Онлайн-консультации, персональные программы, тренировки."/>` `<meta property="og:description" content="Подробный информационный материал в формате пошагового алгоритма для восстановления после операции."/>`
+			`<meta name="twitter:title" content="Услуги - МиненковRehab"/>` `<meta name="twitter:title" content="Восстановление после резекции мениска — программа | Миненков Вадим"/>`
+			`<meta name="twitter:description" content="Выберите подходящую услугу для вашего восстановления и реабилитации. Онлайн-консультации, персональные программы, тренировки."/>` `<meta name="twitter:description" content="Подробный информационный материал в формате пошагового алгоритма для восстановления после операции."/>`
+		}
+		replace @p2 stream {
+			`<meta property="og:title" content="Услуги - МиненковRehab"/>` `<meta property="og:title" content="Онлайн-консультация | Миненков Вадим"/><meta property="og:url" content="https://minenkovrehab.ru/products/consultation"/><meta property="og:type" content="website"/><meta property="og:locale" content="ru_RU"/><meta property="og:site_name" content="МиненковRehab"/>`
+			`<meta property="og:description" content="Выберите подходящую услугу для вашего восстановления и реабилитации. Онлайн-консультации, персональные программы, тренировки."/>` `<meta property="og:description" content="Индивидуальный разбор вашей ситуации: анализ текущего состояния, разъяснение ограничений и принципы корректной двигательной активности. Видеозвонок 60 минут."/>`
+			`<meta name="twitter:title" content="Услуги - МиненковRehab"/>` `<meta name="twitter:title" content="Онлайн-консультация | Миненков Вадим"/>`
+			`<meta name="twitter:description" content="Выберите подходящую услугу для вашего восстановления и реабилитации. Онлайн-консультации, персональные программы, тренировки."/>` `<meta name="twitter:description" content="Индивидуальный разбор вашей ситуации: анализ текущего состояния, разъяснение ограничений и принципы корректной двигательной активности. Видеозвонок 60 минут."/>`
+			`<meta name="robots" content="index, follow"/>` `<meta name="description" content="Индивидуальный разбор вашей ситуации: анализ текущего состояния, разъяснение ограничений и принципы корректной двигательной активности. Видеозвонок 60 минут."/><meta name="robots" content="index, follow"/>`
+		}
+		replace @p3 stream {
+			`<meta property="og:title" content="Услуги - МиненковRehab"/>` `<meta property="og:title" content="Экспресс онлайн-консультация | Миненков Вадим"/><meta property="og:url" content="https://minenkovrehab.ru/products/express-consultation"/><meta property="og:type" content="website"/><meta property="og:locale" content="ru_RU"/><meta property="og:site_name" content="МиненковRehab"/>`
+			`<meta property="og:description" content="Выберите подходящую услугу для вашего восстановления и реабилитации. Онлайн-консультации, персональные программы, тренировки."/>` `<meta property="og:description" content="Быстрая консультация для разбора конкретного вопроса и получения рекомендаций."/>`
+			`<meta name="twitter:title" content="Услуги - МиненковRehab"/>` `<meta name="twitter:title" content="Экспресс онлайн-консультация | Миненков Вадим"/>`
+			`<meta name="twitter:description" content="Выберите подходящую услугу для вашего восстановления и реабилитации. Онлайн-консультации, персональные программы, тренировки."/>` `<meta name="twitter:description" content="Быстрая консультация для разбора конкретного вопроса и получения рекомендаций."/>`
+		}
+		replace @p4 stream {
+			`<meta property="og:title" content="Услуги - МиненковRehab"/>` `<meta property="og:title" content="Онлайн-тренировка | Миненков Вадим"/><meta property="og:url" content="https://minenkovrehab.ru/products/online-training"/><meta property="og:type" content="website"/><meta property="og:locale" content="ru_RU"/><meta property="og:site_name" content="МиненковRehab"/>`
+			`<meta property="og:description" content="Выберите подходящую услугу для вашего восстановления и реабилитации. Онлайн-консультации, персональные программы, тренировки."/>` `<meta property="og:description" content="Индивидуальная онлайн-тренировка в формате видеозвонка по согласованному времени. Продолжительность занятия — около 60 минут."/>`
+			`<meta name="twitter:title" content="Услуги - МиненковRehab"/>` `<meta name="twitter:title" content="Онлайн-тренировка | Миненков Вадим"/>`
+			`<meta name="twitter:description" content="Выберите подходящую услугу для вашего восстановления и реабилитации. Онлайн-консультации, персональные программы, тренировки."/>` `<meta name="twitter:description" content="Индивидуальная онлайн-тренировка в формате видеозвонка по согласованному времени. Продолжительность занятия — около 60 минут."/>`
+		}
+		replace @p5 stream {
+			`<meta property="og:title" content="МиненковRehab | Физический реабилитолог"/>` `<meta property="og:title" content="Обо мне | Миненков Вадим — физический реабилитолог"/>`
+			`<meta property="og:description" content="Профессиональный подход к физической реабилитации людей среднего и старшего возраста с травмами, операциями и дегенеративными изменениями."/>` `<meta property="og:description" content="Персональные восстановительные программы и программы тренировок от врача ЛФК Миненкова Вадима. Восстановление после травм и операций."/>`
+			`<meta name="twitter:title" content="МиненковRehab | Физический реабилитолог"/>` `<meta name="twitter:title" content="Обо мне | Миненков Вадим — физический реабилитолог"/>`
+			`<meta name="twitter:description" content="Профессиональный подход к физической реабилитации людей среднего и старшего возраста с травмами, операциями и дегенеративными изменениями."/>` `<meta name="twitter:description" content="Персональные восстановительные программы и программы тренировок от врача ЛФК Миненкова Вадима. Восстановление после травм и операций."/>`
+			`<title>Миненков Вадим | Физический реабилитолог</title>` `<title>Обо мне | Миненков Вадим — физический реабилитолог</title>`
+		}
+		replace @p6 stream {
+			`<meta property="og:title" content="МиненковRehab | Физический реабилитолог"/>` `<meta property="og:title" content="Отзывы клиентов | Миненков Вадим"/>`
+			`<meta property="og:description" content="Профессиональный подход к физической реабилитации людей среднего и старшего возраста с травмами, операциями и дегенеративными изменениями."/>` `<meta property="og:description" content="Ознакомьтесь с отзывами клиентов о методиках реабилитации, индивидуальном подходе и результатах занятий с Вадимом Миненковым."/>`
+			`<meta name="twitter:title" content="МиненковRehab | Физический реабилитолог"/>` `<meta name="twitter:title" content="Отзывы клиентов | Миненков Вадим"/>`
+			`<meta name="twitter:description" content="Профессиональный подход к физической реабилитации людей среднего и старшего возраста с травмами, операциями и дегенеративными изменениями."/>` `<meta name="twitter:description" content="Ознакомьтесь с отзывами клиентов о методиках реабилитации, индивидуальном подходе и результатах занятий с Вадимом Миненковым."/>`
+		}
+		replace @p7 stream {
+			`<meta property="og:title" content="МиненковRehab | Физический реабилитолог"/>` `<meta property="og:title" content="Политика конфиденциальности | Миненков Вадим"/>`
+			`<meta property="og:description" content="Профессиональный подход к физической реабилитации людей среднего и старшего возраста с травмами, операциями и дегенеративными изменениями."/>` `<meta property="og:description" content="Политика конфиденциальности для клиентов физического реабилитолога Миненкова Вадима."/>`
+			`<meta name="twitter:title" content="МиненковRehab | Физический реабилитолог"/>` `<meta name="twitter:title" content="Политика конфиденциальности | Миненков Вадим"/>`
+			`<meta name="twitter:description" content="Профессиональный подход к физической реабилитации людей среднего и старшего возраста с травмами, операциями и дегенеративными изменениями."/>` `<meta name="twitter:description" content="Политика конфиденциальности для клиентов физического реабилитолога Миненкова Вадима."/>`
+		}
+		replace @p8 stream {
+			`<meta property="og:title" content="МиненковRehab | Физический реабилитолог"/>` `<meta property="og:title" content="Договор-оферта | Миненков Вадим"/>`
+			`<meta property="og:description" content="Профессиональный подход к физической реабилитации людей среднего и старшего возраста с травмами, операциями и дегенеративными изменениями."/>` `<meta property="og:description" content="Публичная оферта на оказание услуг ИП Миненков Вадим Леонидович."/>`
+			`<meta name="twitter:title" content="МиненковRehab | Физический реабилитолог"/>` `<meta name="twitter:title" content="Договор-оферта | Миненков Вадим"/>`
+			`<meta name="twitter:description" content="Профессиональный подход к физической реабилитации людей среднего и старшего возраста с травмами, операциями и дегенеративными изменениями."/>` `<meta name="twitter:description" content="Публичная оферта на оказание услуг ИП Миненков Вадим Леонидович."/>`
+		}
+		replace @p9 stream {
+			`<meta property="og:title" content="МиненковRehab | Физический реабилитолог"/>` `<meta property="og:title" content="Согласие на обработку персональных данных | Миненков Вадим"/>`
+			`<meta property="og:description" content="Профессиональный подход к физической реабилитации людей среднего и старшего возраста с травмами, операциями и дегенеративными изменениями."/>` `<meta property="og:description" content="Согласие на обработку персональных данных в соответствии с 152-ФЗ."/>`
+			`<meta name="twitter:title" content="МиненковRehab | Физический реабилитолог"/>` `<meta name="twitter:title" content="Согласие на обработку персональных данных | Миненков Вадим"/>`
+			`<meta name="twitter:description" content="Профессиональный подход к физической реабилитации людей среднего и старшего возраста с травмами, операциями и дегенеративными изменениями."/>` `<meta name="twitter:description" content="Согласие на обработку персональных данных в соответствии с 152-ФЗ."/>`
+		}
+		replace @p10 stream {
+			`<meta property="og:title" content="Услуги - МиненковRehab"/>` `<meta property="og:title" content="Услуги - МиненковRehab"/><meta property="og:url" content="https://minenkovrehab.ru/products"/><meta property="og:type" content="website"/><meta property="og:locale" content="ru_RU"/><meta property="og:site_name" content="МиненковRehab"/>`
+		}
+		replace @p11 stream {
+			`<meta property="og:title" content="Контакты - МиненковRehab"/>` `<meta property="og:title" content="Контакты - МиненковRehab"/><meta property="og:url" content="https://minenkovrehab.ru/contacts"/><meta property="og:type" content="website"/><meta property="og:locale" content="ru_RU"/><meta property="og:site_name" content="МиненковRehab"/>`
+		}
+		replace @noindex stream {
+			`<meta name="robots" content="index, follow"/>` `<meta name="robots" content="noindex, follow"/>`
+			`<meta name="googlebot" content="index, follow"/>` `<meta name="googlebot" content="noindex, follow"/>`
+		}
+		# HTML всегда целиком от Next (без 304 по ETag), иначе браузер держит старую копию без вставок.
 		reverse_proxy frontend:3000 {
 			header_up -Accept-Encoding
+			header_up -If-None-Match
+			header_up -If-Modified-Since
+			header_down -ETag
+			header_down -Last-Modified
 		}
 	}
 }

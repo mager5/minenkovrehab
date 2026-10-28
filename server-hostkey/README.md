@@ -11,7 +11,9 @@
 | `api/` | образ `rehab-api:hk-dd8354d-fiscal`, `/app` без `node_modules` | backend (оплата, вход, доступ к видео). В проекте это `robokassa-api/` |
 | `worker/` | образ `rehab-worker:hk-af5284f`, `/app` без `node_modules` | отправка писем. Тот же код, но более старый коммит |
 | `infra/compose.yaml` | `/opt/rehab/compose.yaml` | сервисы: postgres, backend, worker, frontend, caddy |
-| `infra/caddy/` | `/opt/rehab/Caddyfile`, `patches/rx/Dockerfile`, `extras/rx-scroll-top.js` | Caddy с модулем `replace-response` и кнопка «Наверх» |
+| `infra/caddy/` | `/opt/rehab/Caddyfile`, `patches/rx/Dockerfile` | Caddy с модулем `replace-response` |
+| `infra/caddy/extras/` | `/opt/rehab/extras/` (в контейнере `/srv/rx`) | кнопка «Наверх», Метрика, `sitemap.xml`, картинки превью |
+| `infra/seo/` | — | генераторы SEO-блока Caddyfile и картинок превью |
 | `infra/backend-fiscal-patch/` | `/opt/rehab/patches/fiscal-names/` | как собран `rehab-api:hk-dd8354d-fiscal` поверх `hk-dd8354d` |
 | `infra/scripts/` | `/opt/rehab/scripts/` | бэкап базы, сертификаты, инициализация секретов |
 
@@ -25,6 +27,27 @@ Frontend (Next.js) сюда не входит: в образе `rehab-frontend:h
 2. **Почта на любые адреса.** Из `env/worker.env` удалена строка `MIGRATION_MAIL_ALLOWED_RECIPIENTS` (файл с секретами, в git его нет).
 3. **Кнопка «Наверх».** Не в коде сайта: Caddy вставляет `<script src="/_rx/rx-scroll-top.js">` перед `</body>` каждой HTML-страницы.
    Нужен образ `rehab-caddy:2-replace` (`infra/caddy/Dockerfile`). Можно позже перенести кнопку в layout Next.js и убрать замену из Caddy.
+
+4. **Метрика и вебмастера (27–28.10.2026).** Счётчик Метрики `113852639` — `extras/rx-metrika.js`, грузится только после согласия на cookie.
+   Коды подтверждения Яндекс.Вебмастера и Google Search Console Caddy вставляет вместо заглушек `xxxxxxxx`.
+5. **SEO и превью (28.10.2026)** — блок `https://minenkovrehab.ru` в Caddyfile генерирует `infra/seo/gen-main-block.py`:
+   - опечатка `minekovrehab.ru` → `minenkovrehab.ru` во всём HTML;
+   - `canonical` и `og:url` — адрес текущей страницы (в коде у всех страниц был адрес главной);
+   - отдельные `og:title`/`og:description`/`twitter:*` для страниц услуг, описание для `/products/consultation`;
+   - `noindex` для `/login`, `/forgot-password`, `/reset-password`, `/confirm-email`, `/terms` (`/terms` — старая оферта про стретчинг);
+   - `/sitemap.xml` — из `extras/sitemap.xml` (13 страниц, в коде сайта устаревшая карта с несуществующим `/services`);
+   - картинки превью `/images/og-image.jpg`, `/images/og/services-og.jpg`, `/images/og/contacts-og.jpg` — из `extras/images/`
+     (в образе сайта все три одинаковые и с опечаткой). Пересоздать: `infra/seo/make-og-images.py` (шрифт Inter);
+   - у прокси к frontend убраны `ETag`/`Last-Modified`: иначе браузер получал 304 и показывал HTML без вставок Caddy.
+
+### Что поправить в исходниках сайта на Mac, чтобы убрать замены из Caddy
+
+- `src/app/layout.tsx`: `metadataBase`, `canonical`, `openGraph.url`, `authors`, `twitter.creator` — `minekovrehab` → `minenkovrehab`;
+  коды `verification` вместо `xxxxxxxx`; опечатка «дегенератика» в keywords.
+- canonical/`og:url` задавать в каждой странице (`alternates.canonical: '/путь'`), а не наследовать из корневого layout.
+- `public/images/og-image.svg` и JPG-превью — взять из `infra/caddy/extras/images/`.
+- `public/sitemap.xml` — заменить на `infra/caddy/extras/sitemap.xml`; `/terms` удалить или закрыть от индексации.
+- Кнопку «Наверх» и Метрику перенести в layout.
 
 ## Деплой с сервера
 
