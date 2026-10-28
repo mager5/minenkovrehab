@@ -46,7 +46,12 @@ https://minenkovrehab.ru {
 	handle {
 		@pages not path /_next/* /api/* *.js *.css *.json *.map *.png *.jpg *.jpeg *.webp *.avif *.gif *.svg *.ico *.woff *.woff2 *.ttf *.txt *.xml *.mp4 *.webm *.pdf
 		replace @pages stream {
-			"</body>" "<script src=\"/_rx/rx-scroll-top.js?v=1\" defer></script></body>"
+			"minekovrehab" "minenkovrehab"
+			`<meta name="google-site-verification" content="xxxxxxxx"/>` `<meta name="google-site-verification" content="NfKG4Obn62C9l819n4oDFJbwo7YBssE1xKy-rGZWLPM"/>`
+			`<meta name="yandex-verification" content="xxxxxxxx"/>` `<meta name="yandex-verification" content="3cabca068319b035"/>`
+			`google-site-verification\",\"content\":\"xxxxxxxx` `google-site-verification\",\"content\":\"NfKG4Obn62C9l819n4oDFJbwo7YBssE1xKy-rGZWLPM`
+			`yandex-verification\",\"content\":\"xxxxxxxx` `yandex-verification\",\"content\":\"3cabca068319b035`
+			"</body>" "<script src=\"/_rx/rx-scroll-top.js?v=1\" defer></script><script src=\"/_rx/rx-metrika.js?v=1\" defer></script></body>"
 		}
 		reverse_proxy frontend:3000 {
 			header_up -Accept-Encoding
