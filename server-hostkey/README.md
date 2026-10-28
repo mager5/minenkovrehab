@@ -46,6 +46,9 @@ Frontend (Next.js) сюда не входит: в образе `rehab-frontend:h
    - JSON-LD schema.org перед `</head>`: главная — WebSite, Organization (ИП, ИНН, ОГРНИП, телефон, почта, соцсети), Person;
      `/about` — ProfilePage; `/contacts` — ContactPage; `/products` — ItemList; услуги — Service/Product с ценой; везде хлебные крошки.
      Цены взяты со страниц: консультация 7000, экспресс 4000, тренировка 5000, «Формула Движения» 6000, мениск 8000.
+     Логотип — `/images/logo.png`, фото специалиста — `/images/hero/blue-stripe.JPG`, у услуг — их картинки с сайта.
+     Проверено 28.10.2026: Google Rich Results — без ошибок (товар, данные продавца, крошки, организация, профиль);
+     validator.schema.org — без ошибок. Предупреждения Google только о необязательных полях (address, review, shipping, return policy).
      Отзывы и рейтинг в разметку не добавлены намеренно. **При смене цен на сайте — поправить `svc` в генераторе.**
 
 ### Что поправить в исходниках сайта на Mac, чтобы убрать замены из Caddy

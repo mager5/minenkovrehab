@@ -94,15 +94,20 @@ TXT={  # путь: [(старый текст, новый)]
 ORG={'@type':'Organization','@id':D+'/#org','name':'МиненковRehab','url':D+'/','legalName':'ИП Миненков Вадим Леонидович',
      'taxID':'262703733425','identifier':{'@type':'PropertyValue','propertyID':'ОГРНИП','value':'325265100067202'},
      'telephone':'+7-928-328-70-52','email':'minenkov.rehab@yandex.ru','founder':{'@id':D+'/#person'},
+     'logo':{'@type':'ImageObject','@id':D+'/#logo','url':D+'/images/logo.png','width':2000,'height':2000,'caption':'МиненковRehab'},'image':{'@id':D+'/#logo'},
      'sameAs':['https://t.me/MV_Rehab','https://vk.com/minenkov_rehab','https://youtube.com/@mv_rehab','https://rutube.ru/channel/38070887','https://dzen.ru/id/646ca9d1fc7bc51b6ac77784']}
 PERSON={'@type':'Person','@id':D+'/#person','name':'Вадим Миненков','givenName':'Вадим','familyName':'Миненков','url':D+'/about',
      'jobTitle':'Специалист по физической реабилитации, инструктор-методист ЛФК','worksFor':{'@id':D+'/#org'},
+     'image':D+'/images/hero/blue-stripe.JPG',
      'knowsAbout':['Физическая реабилитация','Лечебная физкультура','Восстановление после травм и операций','Спортивная тренировка'],
      'sameAs':ORG['sameAs']}
 SITE={'@type':'WebSite','@id':D+'/#site','url':D+'/','name':'МиненковRehab','inLanguage':'ru-RU','publisher':{'@id':D+'/#org'}}
 def crumbs(*items):
     return {'@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':i+1,'name':n,'item':D+u} for i,(n,u) in enumerate(items)]}
 H=('Главная','/'); S=('Услуги','/products')
+IMG={'/products/consultation':'/images/products/consultation.jpg','/products/express-consultation':'/images/products/consultation.jpg',
+     '/products/online-training':'/images/products/online_training.jpg','/products/formula-movement':'/images/products/formula-movement.jpg',
+     '/products/personal-program':'/images/hero/protocols.jpg'}
 svc={  # путь: (тип, название, цена ₽, длительность ISO или None, единица в тексте)
  '/products/consultation':('Service','Онлайн-консультация',7000,'PT60M'),
  '/products/express-consultation':('Service','Экспресс онлайн-консультация',4000,'PT20M'),
@@ -111,7 +116,7 @@ svc={  # путь: (тип, название, цена ₽, длительнос
  '/products/personal-program':('Product','Программа восстановления после резекции мениска',8000,None),
 }
 def offer(p,price):
-    return {'@type':'Offer','price':str(price),'priceCurrency':'RUB','availability':'https://schema.org/InStock','url':D+p,'seller':{'@id':D+'/#org'}}
+    return {'@type':'Offer','price':str(price),'priceCurrency':'RUB','availability':'https://schema.org/InStock','url':D+p,'seller':{'@type':'Organization','@id':D+'/#org','name':'МиненковRehab','url':D+'/'}}
 LD={}
 LD['/']=[SITE,ORG,PERSON]
 LD['/about']=[{'@type':'ProfilePage','@id':D+'/about','url':D+'/about','name':roots['/about'][0],'mainEntity':PERSON,'isPartOf':{'@id':D+'/#site'}},crumbs(H,('Обо мне','/about'))]
@@ -120,11 +125,11 @@ LD['/reviews']=[crumbs(H,('Отзывы','/reviews'))]
 items=[]
 for i,(p,(typ,name,price,dur)) in enumerate(svc.items()):
     desc=products[p][1]
-    node={'@type':typ,'name':name,'description':desc,'url':D+p,'offers':offer(p,price)}
+    node={'@type':typ,'name':name,'description':desc,'url':D+p,'image':D+IMG[p],'offers':offer(p,price)}
     if typ=='Service':
-        node.update({'serviceType':name,'provider':{'@id':D+'/#org'},'areaServed':{'@type':'Country','name':'Россия'},'availableChannel':{'@type':'ServiceChannel','serviceUrl':D+p,'name':'Видеозвонок'}})
+        node.update({'serviceType':name,'provider':{'@type':'Organization','@id':D+'/#org','name':'МиненковRehab','url':D+'/'},'areaServed':{'@type':'Country','name':'Россия'},'availableChannel':{'@type':'ServiceChannel','serviceUrl':D+p,'name':'Видеозвонок'}})
     else:
-        node.update({'brand':{'@type':'Brand','name':'МиненковRehab'},'image':D+'/images/og/services-og.jpg'})
+        node.update({'brand':{'@type':'Brand','name':'МиненковRehab'}})
     LD[p]=[node,crumbs(H,S,(name,p))]
     items.append({'@type':'ListItem','position':i+1,'url':D+p,'name':name})
 LD['/products']=[{'@type':'ItemList','name':'Услуги','itemListElement':items},crumbs(H,S)]
