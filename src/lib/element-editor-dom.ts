@@ -279,3 +279,37 @@ export function applyOverrides(overrides: ElementOverride[]): () => void {
     for (const undo of restore.reverse()) undo();
   };
 }
+
+// Resolve one visible caption, never a container with several independent texts.
+export function inlineTextTarget(
+  element: Element,
+  x?: number,
+  y?: number
+): EditTarget | null {
+  if (
+    element.closest('[data-ai-editor],input,textarea,select,script,style,svg')
+  )
+    return null;
+  if (
+    x !== undefined &&
+    y !== undefined &&
+    typeof document.elementFromPoint === 'function'
+  ) {
+    const hit = hitTarget(x, y);
+    if (hit?.kind === 'text') return hit;
+  }
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+  const texts: Text[] = [];
+  let node = walker.nextNode();
+  while (node) {
+    if (
+      node.textContent?.trim() &&
+      node.parentElement &&
+      !node.parentElement.closest('svg,[data-ai-editor],script,style')
+    )
+      texts.push(node as Text);
+    node = walker.nextNode();
+  }
+  if (texts.length === 1) return describeElement(texts[0]!);
+  return null;
+}

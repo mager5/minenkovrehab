@@ -191,19 +191,45 @@ export async function editHeading(
     !validTitle(text)
   )
     throw Error('invalid_heading');
-  const changes = validateChanges(target, [
-    { property: 'text', value: text.trim() },
-  ]);
+  return persistDirectText(target, text.trim(), revision);
+}
+
+export async function editText(
+  rawTarget: unknown,
+  text: unknown,
+  revision: unknown
+) {
+  const target = targetSchema.parse(rawTarget);
+  if (
+    target.kind !== 'text' ||
+    typeof text !== 'string' ||
+    !text.trim() ||
+    text.length > 2000 ||
+    /[<>\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(text)
+  )
+    throw Error('invalid_text');
+  return persistDirectText(target, text, revision);
+}
+
+async function persistDirectText(
+  target: EditTarget,
+  text: string,
+  revision: unknown
+) {
+  const changes = validateChanges(target, [{ property: 'text', value: text }]);
   return locked(async () => {
     const before = await readOverrides();
     checkRevision(before, revision);
-    // Supersede older text edits on this heading, preserving all style edits.
-    const sameHeading = (other: EditTarget) =>
+    // Replace only this caption's text; preserve its styles and sibling captions.
+    const sameCaption = (other: EditTarget) =>
       other.root === target.root &&
-      JSON.stringify(other.path) === JSON.stringify(target.path);
+      JSON.stringify(other.path) === JSON.stringify(target.path) &&
+      (target.kind === 'element' ||
+        other.kind === 'element' ||
+        other.textIndex === target.textIndex);
     const next = before
       .map(item =>
-        sameHeading(item.target)
+        sameCaption(item.target)
           ? {
               ...item,
               changes: item.changes.filter(
@@ -223,7 +249,7 @@ export async function editHeading(
     history.push(before);
     await atomicWrite(historyFile(), history.slice(-20));
     await atomicWrite(file(), next);
-    return { ...(await elementStatus()), reply: 'Заголовок сохранён.' };
+    return { ...(await elementStatus()), reply: 'Текст сохранён.' };
   });
 }
 

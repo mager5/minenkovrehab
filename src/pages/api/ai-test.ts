@@ -3,6 +3,7 @@ import { assertTestBranch, configureKey, keyConfigured } from '@/lib/ai-title';
 import {
   editElement,
   editHeading,
+  editText,
   elementStatus,
   undoElement,
 } from '@/lib/element-editor';
@@ -50,6 +51,8 @@ export default async function handler(
       await configureKey(body.key);
       return res.json({ configured: true });
     }
+    if (body?.action === 'text' && body.page === '/')
+      return res.json(await editText(body.target, body.text, body.revision));
     if (body?.action === 'heading')
       return res.json(await editHeading(body.target, body.text, body.revision));
     if (body?.action === 'undo')
@@ -68,6 +71,7 @@ export default async function handler(
         'Подключите API-ключ один раз — он сохранится в Связке ключей macOS.',
       key_store_unavailable:
         'Не удалось открыть Связку ключей macOS. Разрешите доступ, если система его запросила, и повторите подключение.',
+      invalid_text: 'Введите обычный текст длиной от 1 до 2000 символов.',
       invalid_heading:
         'Введите простой текст заголовка длиной от 1 до 160 символов.',
       invalid_key: 'Проверьте формат OpenAI API-ключа.',

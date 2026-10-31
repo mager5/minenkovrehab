@@ -13,6 +13,7 @@ import {
   editableRootSelector,
   describeElement,
   hitTarget,
+  inlineTextTarget,
   parentTarget,
   resolveTarget,
   targetBounds,
@@ -45,14 +46,15 @@ export default function AiElementEditor() {
   );
   const [busy, setBusy] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [headingEdit, setHeadingEdit] = useState<EditTarget | null>(null);
-  const [headingDraft, setHeadingDraft] = useState('');
-  const [headingError, setHeadingError] = useState('');
-  const headingSession = useRef<{
+  const [inlineEdit, setInlineEdit] = useState<EditTarget | null>(null);
+  const [textDraft, setTextDraft] = useState('');
+  const [textError, setTextError] = useState('');
+  const inlineSession = useRef<{
     node: HTMLElement;
     restore: () => void;
   } | null>(null);
   const [inlineVersion, setInlineVersion] = useState(0);
+  const [inlineControls, setInlineControls] = useState<Element | null>(null);
   const [recording, setRecording] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
   const recorder = useRef<MediaRecorder | null>(null);
@@ -62,12 +64,13 @@ export default function AiElementEditor() {
   const alive = useRef(true);
   const voiceRequest = useRef<AbortController | null>(null);
   const blocked = busy || recording || recognizing;
-  const finishHeading = useCallback(() => {
-    const session = headingSession.current;
+  const finishText = useCallback(() => {
+    const session = inlineSession.current;
     session?.restore();
-    headingSession.current = null;
-    setHeadingEdit(null);
-    setHeadingError('');
+    inlineSession.current = null;
+    setInlineEdit(null);
+    setInlineControls(null);
+    setTextError('');
     setInlineVersion(value => value + 1);
     session?.node.focus();
   }, []);
@@ -154,7 +157,10 @@ export default function AiElementEditor() {
       });
     };
     const observer = new MutationObserver(records => {
-      if (headingSession.current) return;
+      if (inlineSession.current) {
+        if (!inlineSession.current.node.isConnected) finishText();
+        return;
+      }
       const relevant = records.some(record => {
         const element =
           record.target instanceof Element
@@ -184,7 +190,7 @@ export default function AiElementEditor() {
       if (scheduled) cancelAnimationFrame(scheduled);
       restore();
     };
-  }, [enabled, ready, overrides, inlineVersion]);
+  }, [enabled, ready, overrides, inlineVersion, finishText]);
 
   useEffect(() => {
     if (!picking) return;
@@ -261,68 +267,74 @@ export default function AiElementEditor() {
   useEffect(() => {
     if (!enabled || !ready || picking || blocked) return;
     const open = (event: Event) => {
-      const node =
-        event.target instanceof Element
-          ? event.target.closest('h1[data-ai-inline-heading]')
-          : null;
-      if (!node || headingSession.current) return;
+      const element = event.target instanceof Element ? event.target : null;
+      if (!element || element.closest('[data-ai-editor]')) return;
+      if (inlineSession.current) {
+        if (event instanceof KeyboardEvent) {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            finishText();
+          }
+          return;
+        }
+        // Clicking inside a linked caption must place the caret without navigation.
+        if (element.closest('a,button')) event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       if (event instanceof KeyboardEvent && !['Enter', ' '].includes(event.key))
         return;
-      event.preventDefault();
-      const target = describeElement(node);
+      const target = inlineTextTarget(
+        element,
+        event instanceof MouseEvent ? event.clientX : undefined,
+        event instanceof MouseEvent ? event.clientY : undefined
+      );
       if (!target) return;
-      setHeadingEdit(target);
-      setHeadingDraft(node.textContent?.trim() || '');
-      setHeadingError('');
+      event.preventDefault();
+      event.stopPropagation();
+      setInlineEdit(target);
+      const text = resolveTarget(target);
+      setTextDraft(text instanceof Text ? text.data : target.label);
+      setTextError('');
     };
-    document.addEventListener('click', open);
-    document.addEventListener('keydown', open);
+    document.addEventListener('click', open, true);
+    document.addEventListener('keydown', open, true);
     return () => {
-      document.removeEventListener('click', open);
-      document.removeEventListener('keydown', open);
+      document.removeEventListener('click', open, true);
+      document.removeEventListener('keydown', open, true);
     };
-  }, [enabled, ready, picking, blocked]);
+  }, [enabled, ready, picking, blocked, finishText]);
   useEffect(() => {
-    if (!headingEdit) return;
-    const node = resolveTarget(headingEdit);
-    if (!(node instanceof HTMLElement)) return;
-    // Keep the actual DOM nodes so cancel and override cleanup preserve identity.
-    const snapshots: (() => void)[] = [];
-    const capture = (current: Node) => {
-      if (current instanceof Text) {
-        const value = current.data;
-        snapshots.push(() => {
-          current.data = value;
-        });
-      } else if (current instanceof Element) {
-        const children = Array.from(current.childNodes);
-        snapshots.push(() => current.replaceChildren(...children));
-        children.forEach(capture);
-      }
-    };
-    capture(node);
-    const attributes = [
-      'contenteditable',
-      'role',
-      'aria-label',
-      'data-ai-heading-editing',
-    ];
-    const previous = attributes.map(
-      name => [name, node.getAttribute(name)] as const
-    );
-    const input = () => setHeadingDraft(node.textContent || '');
+    if (!inlineEdit) return;
+    const text = resolveTarget(inlineEdit);
+    if (!(text instanceof Text) || !text.parentElement) return;
+    const original = text.data;
+    const parent = text.parentElement;
+    const anchor =
+      parent.closest('a,button') ||
+      parent.closest('h1,h2,h3,h4,h5,h6,p,li,small,figcaption,dt,dd,label') ||
+      parent;
+    const slot = document.createElement('div');
+    slot.setAttribute('data-ai-editor', '');
+    slot.style.textAlign = getComputedStyle(anchor).textAlign;
+    anchor.after(slot);
+    const node = document.createElement('span');
+    node.setAttribute('data-ai-generated', 'inline-editor');
+    node.setAttribute('data-ai-inline-editing', '');
+    parent.insertBefore(node, text);
+    node.appendChild(text);
+    const input = () => setTextDraft(node.innerText || node.textContent || '');
     const keydown = (event: KeyboardEvent) => {
       if (node.contentEditable === 'false') return;
       if (event.key === 'Escape') {
         event.preventDefault();
-        finishHeading();
+        finishText();
       }
-      if (event.key === 'Enter') event.preventDefault();
     };
     node.contentEditable = 'plaintext-only';
     node.setAttribute('role', 'textbox');
-    node.setAttribute('aria-label', 'Текст главного заголовка');
-    node.setAttribute('data-ai-heading-editing', '');
+    node.setAttribute('aria-label', 'Редактируемый текст');
+    node.tabIndex = 0;
     node.addEventListener('input', input);
     node.addEventListener('keydown', keydown);
     const session = {
@@ -330,15 +342,15 @@ export default function AiElementEditor() {
       restore: () => {
         node.removeEventListener('input', input);
         node.removeEventListener('keydown', keydown);
-        snapshots.forEach(restore => restore());
-        previous.forEach(([name, value]) =>
-          value === null
-            ? node.removeAttribute(name)
-            : node.setAttribute(name, value)
-        );
+        text.data = original;
+        node.replaceWith(text);
+        slot.remove();
       },
     };
-    headingSession.current = session;
+    // Publish the portal destination created in the DOM for this editing session.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setInlineControls(slot);
+    inlineSession.current = session;
     node.focus();
     const range = document.createRange();
     range.selectNodeContents(node);
@@ -346,49 +358,50 @@ export default function AiElementEditor() {
     selection?.removeAllRanges();
     selection?.addRange(range);
     return () => {
-      if (headingSession.current === session) {
+      if (inlineSession.current === session) {
         session.restore();
-        headingSession.current = null;
+        inlineSession.current = null;
       }
     };
-  }, [headingEdit, finishHeading]);
+  }, [inlineEdit, finishText]);
   useEffect(() => {
-    if (headingSession.current)
-      headingSession.current.node.contentEditable = busy
+    if (inlineSession.current)
+      inlineSession.current.node.contentEditable = busy
         ? 'false'
         : 'plaintext-only';
-  }, [busy, headingEdit]);
+  }, [busy, inlineEdit]);
 
   if (!enabled || !ready) return null;
-  function closeHeading() {
-    if (!busy) finishHeading();
+  function closeText() {
+    if (!busy) finishText();
   }
-  async function saveHeading(event: FormEvent) {
+  async function saveText(event: FormEvent) {
     event.preventDefault();
-    if (!headingEdit || blocked) return;
+    if (!inlineEdit || blocked) return;
     setBusy(true);
-    setHeadingError('');
+    setTextError('');
     try {
       const response = await fetch('/api/ai-test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'heading',
-          target: headingEdit,
-          text: headingDraft,
+          action: 'text',
+          page: '/',
+          target: inlineEdit,
+          text: textDraft,
           revision,
         }),
       });
       const data = await response.json();
       if (!response.ok)
-        throw Error(data.error || 'Не удалось сохранить заголовок.');
-      finishHeading();
+        throw Error(data.error || 'Не удалось сохранить текст.');
+      finishText();
       setOverrides(data.overrides);
       setRevision(data.revision);
       setCanUndo(Boolean(data.canUndo));
       setReply(data.reply);
     } catch (error) {
-      setHeadingError(
+      setTextError(
         error instanceof Error ? error.message : 'Ошибка соединения.'
       );
     } finally {
@@ -396,7 +409,7 @@ export default function AiElementEditor() {
     }
   }
   function togglePicker() {
-    if (headingEdit) return;
+    if (inlineEdit) return;
     setPicking(value => !value);
     setHover(null);
     setBox(null);
@@ -424,8 +437,8 @@ export default function AiElementEditor() {
     }
   }
   async function send(action: string) {
-    if (headingEdit) {
-      setReply('Сначала сохраните заголовок или отмените правку.');
+    if (inlineEdit) {
+      setReply('Сначала сохраните текст или отмените правку.');
       return;
     }
     if (action === 'chat' && !configured) {
@@ -680,32 +693,30 @@ export default function AiElementEditor() {
           document.body
         )}
       {toolbar && createPortal(toolbar, document.body)}
-      {headingEdit &&
-        document.querySelector('[data-ai-heading-controls]') &&
+      {inlineEdit &&
+        inlineControls &&
         createPortal(
           <form
             data-ai-editor
-            className='ai-heading-controls'
-            onSubmit={saveHeading}
+            className='ai-inline-controls'
+            onSubmit={saveText}
             onKeyDown={event => {
-              if (event.key === 'Escape') closeHeading();
+              if (event.key === 'Escape') closeText();
             }}
           >
             <button
               type='submit'
-              disabled={
-                busy || !headingDraft.trim() || headingDraft.length > 160
-              }
+              disabled={busy || !textDraft.trim() || textDraft.length > 2000}
             >
-              {busy ? 'Сохраняю…' : 'Сохранить заголовок'}
+              {busy ? 'Сохраняю…' : 'Сохранить'}
             </button>
-            <button type='button' onClick={closeHeading} disabled={busy}>
+            <button type='button' onClick={closeText} disabled={busy}>
               Отмена
             </button>
-            <span>{headingDraft.length}/160</span>
-            {headingError && <p role='alert'>{headingError}</p>}
+            <span>{textDraft.length}/2000</span>
+            {textError && <p role='alert'>{textError}</p>}
           </form>,
-          document.querySelector('[data-ai-heading-controls]')!
+          inlineControls
         )}
 
       {createPortal(

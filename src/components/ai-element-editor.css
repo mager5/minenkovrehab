@@ -222,45 +222,46 @@
   }
 }
 
-h1[data-ai-inline-heading] {
-  cursor: text;
-}
-h1[data-ai-inline-heading]:hover {
-  outline: 1px dashed #b9ccdd;
-  outline-offset: 5px;
-}
-h1[data-ai-heading-editing] {
-  outline: 2px solid #69b9fa;
-  outline-offset: 6px;
-  cursor: text;
-}
-.ai-heading-controls {
-  display: flex;
+.ai-inline-controls {
+  display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin: -6px 0 20px;
+  margin: 8px 0 12px;
+  padding: 8px;
+  border-radius: 7px;
+  border: 1px solid #b9ccdd;
+  background: white;
+  width: fit-content;
+  max-width: 100%;
   font:
     14px/1.4 system-ui,
     sans-serif;
-  color: white;
+  color: #193b4a;
 }
-.ai-heading-controls button {
+.ai-inline-controls button {
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid #b9ccdd;
   background: white;
   color: #193b4a;
 }
-.ai-heading-controls button[type='submit'] {
+.ai-inline-controls button[type='submit'] {
   background: #285d96;
   color: white;
   border-color: #b9ccdd;
 }
-.ai-heading-controls button:disabled {
+.ai-inline-controls button:disabled {
   opacity: 0.5;
 }
-.ai-heading-controls [role='alert'] {
+.ai-inline-controls [role='alert'] {
   width: 100%;
-  color: #ffe2e2;
+  color: #b91c1c;
+}
+
+[data-ai-inline-editing] {
+  outline: 2px solid #69b9fa;
+  outline-offset: 3px;
+  cursor: text;
+  white-space: pre-wrap;
 }

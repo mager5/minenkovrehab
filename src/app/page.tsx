@@ -51,29 +51,11 @@ export default function Home() {
           <div className='flex flex-col md:flex-row items-center justify-between gap-12'>
             <div className='md:w-1/2 text-white'>
               <h1
-                data-ai-inline-heading={
-                  process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1'
-                    ? ''
-                    : undefined
-                }
-                tabIndex={
-                  process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1'
-                    ? 0
-                    : undefined
-                }
-                title={
-                  process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1'
-                    ? 'Нажмите, чтобы изменить текст заголовка'
-                    : undefined
-                }
                 className='hero-title font-bold mb-6 leading-tight'
                 style={{ color: '#d1f3ea' }}
               >
                 {heading}
               </h1>
-              {process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1' && (
-                <div data-ai-heading-controls data-ai-editor />
-              )}
               <p
                 className='text-base sm:text-lg md:text-xl opacity-95 mb-8 font-medium leading-relaxed'
                 style={{ color: '#FFFFFF', opacity: 1, transform: 'none' }}

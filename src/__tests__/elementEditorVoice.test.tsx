@@ -321,17 +321,17 @@ test('clicking the homepage heading edits the same DOM element inline and saves 
   await screen.findByRole('button', { name: 'Голосовой ввод' });
   fireEvent.click(heading);
   const field = screen.getByRole('textbox', {
-    name: 'Текст главного заголовка',
+    name: 'Редактируемый текст',
   });
-  expect(field).toBe(heading);
+  expect(heading).toContainElement(field);
   expect(field.textContent).toBe('Original');
   field.textContent = 'Новый заголовок';
   fireEvent.input(field);
   expect(heading.textContent).toBe('Новый заголовок');
-  fireEvent.click(screen.getByRole('button', { name: 'Сохранить заголовок' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
   await waitFor(() =>
     expect(
-      screen.queryByRole('button', { name: 'Сохранить заголовок' })
+      screen.queryByRole('button', { name: 'Сохранить' })
     ).not.toBeInTheDocument()
   );
   await waitFor(() => expect(heading.textContent).toBe('Новый заголовок'));
@@ -343,7 +343,8 @@ test('clicking the homepage heading edits the same DOM element inline and saves 
   );
   expect(posts).toHaveLength(1);
   expect(JSON.parse(posts[0]![1].body)).toMatchObject({
-    action: 'heading',
+    action: 'text',
+    page: '/',
     text: 'Новый заголовок',
     target: { tag: 'h1', root: 'main' },
   });
@@ -355,10 +356,11 @@ test('Escape cancels heading changes without a request and picker mode keeps pri
   render(<AiElementEditor />);
   await screen.findByRole('button', { name: 'Голосовой ввод' });
   fireEvent.click(heading);
-  heading.textContent = 'Черновик';
-  fireEvent.input(heading);
+  const field = screen.getByRole('textbox', { name: 'Редактируемый текст' });
+  field.textContent = 'Черновик';
+  fireEvent.input(field);
   fireEvent.keyDown(
-    screen.getByRole('textbox', { name: 'Текст главного заголовка' }),
+    screen.getByRole('textbox', { name: 'Редактируемый текст' }),
     {
       key: 'Escape',
     }
@@ -374,3 +376,82 @@ test('Escape cancels heading changes without a request and picker mode keeps pri
   fireEvent.click(heading);
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
+
+test.each([
+  ['main', '<p id="editable">Описание программы</p>'],
+  ['header', '<a id="editable" href="/about"><svg><path/></svg>Обо мне</a>'],
+  ['footer', '<button id="editable"><svg><path/></svg>Настройки</button>'],
+  ['main', '<ul><li id="editable">Первый пункт</li><li>Другой пункт</li></ul>'],
+])(
+  'direct editing in %s preserves the element, icon and neighbors',
+  async (root, markup) => {
+    document.querySelector(root)!.insertAdjacentHTML('beforeend', markup);
+    const element = document.querySelector('#editable')!;
+    const icon = element.querySelector('svg');
+    const original = element.textContent;
+    const parent = element.parentElement!;
+    const other = Array.from(parent.children)
+      .filter(node => node !== element && !node.hasAttribute('data-ai-editor'))
+      .map(node => node.outerHTML);
+    const clicked = jest.fn();
+    element.addEventListener('click', clicked);
+    request.mockImplementation(async (_url: string, options?: RequestInit) => ({
+      ok: true,
+      json: async () => {
+        if (options?.method === 'POST') {
+          const body = JSON.parse(options.body as string);
+          return {
+            overrides: [
+              {
+                target: body.target,
+                changes: [{ property: 'text', value: body.text }],
+              },
+            ],
+            revision: 'saved',
+            canUndo: true,
+            reply: 'Текст сохранён.',
+          };
+        }
+        return {
+          configured: false,
+          overrides: [],
+          revision: 'initial',
+          canUndo: false,
+        };
+      },
+    }));
+    render(<AiElementEditor />);
+    await screen.findByRole('button', { name: 'Голосовой ввод' });
+    fireEvent.click(element);
+    const field = screen.getByRole('textbox', { name: 'Редактируемый текст' });
+    expect(element).toContainElement(field);
+    expect(field.textContent).toBe(original);
+    expect(clicked).not.toHaveBeenCalled();
+    field.textContent = 'Новая надпись';
+    fireEvent.input(field);
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('button', { name: 'Сохранить' })
+      ).not.toBeInTheDocument()
+    );
+    await waitFor(() => expect(element.textContent).toBe('Новая надпись'));
+    expect(element.querySelector('svg')).toBe(icon);
+    expect(document.querySelector('#editable')).toBe(element);
+    expect(
+      Array.from(parent.children)
+        .filter(
+          node => node !== element && !node.hasAttribute('data-ai-editor')
+        )
+        .map(node => node.outerHTML)
+    ).toEqual(other);
+    const post = request.mock.calls.find(
+      ([, options]) => options?.method === 'POST'
+    )!;
+    expect(JSON.parse(post[1].body)).toMatchObject({
+      action: 'text',
+      page: '/',
+      target: { kind: 'text', root },
+    });
+  }
+);

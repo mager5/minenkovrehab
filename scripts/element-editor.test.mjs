@@ -24,6 +24,7 @@ const { configureKey } = await import('../src/lib/ai-title.ts');
 const {
   elementStatus,
   editHeading,
+  editText,
   editElement,
   undoElement,
   proposeElementEdit,
@@ -213,5 +214,41 @@ test('direct heading rejects unsafe text, other elements, stale pages and produc
   } finally {
     process.env.NODE_ENV = 'development';
   }
+  assert.deepEqual((await elementStatus()).overrides, []);
+});
+
+test('manual captions in header/main/footer persist and preserve sibling text overrides', async () => {
+  globalThis.fetch = () => {
+    throw Error('No AI required for manual editing');
+  };
+  for (const root of ['header', 'main', 'footer', 'topbar']) {
+    const caption = { ...target, root, kind: 'text', textIndex: 1 };
+    const sibling = { ...caption, textIndex: 0 };
+    const before = [
+      { target: sibling, changes: [{ property: 'text', value: 'Sibling' }] },
+    ];
+    await writeFile(
+      'content/ai-element-overrides.json',
+      JSON.stringify(before)
+    );
+    const revision = (await elementStatus()).revision;
+    const result = await editText(caption, 'Manual caption', revision);
+    assert.deepEqual(result.overrides[0], before[0]);
+    assert.equal(result.overrides[1].changes[0].value, 'Manual caption');
+    assert.deepEqual((await undoElement(result.revision)).overrides, before);
+  }
+});
+test('manual captions reject containers, invalid text and stale revisions without writes', async () => {
+  const caption = { ...target, kind: 'text' };
+  const before = await elementStatus();
+  for (const value of ['', '<script>', 'x'.repeat(2001)])
+    await assert.rejects(() => editText(caption, value, before.revision));
+  await assert.rejects(() =>
+    editText(target, 'No container replacement', before.revision)
+  );
+  await assert.rejects(
+    () => editText(caption, 'Caption', 'stale'),
+    /stale_page/
+  );
   assert.deepEqual((await elementStatus()).overrides, []);
 });
