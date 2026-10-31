@@ -1,8 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { assertTestBranch, configureKey, keyConfigured } from '@/lib/ai-title';
-import { demoHome, editHome, homeStatus, undoHome } from '@/lib/home-editor';
+import {
+  assertTestBranch,
+  chat,
+  configureKey,
+  demoTitle,
+  keyConfigured,
+  originalTitle,
+  readTitle,
+  writeTitle,
+} from '@/lib/ai-title';
 
-export const config = { api: { bodyParser: { sizeLimit: '32kb' } } };
+export const config = { api: { bodyParser: { sizeLimit: '4kb' } } };
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,63 +32,51 @@ export default async function handler(
       .json({
         error: 'Запрос разрешён только из локальной тестовой страницы.',
       });
-  if (!['GET', 'POST'].includes(req.method || '')) {
+  if (req.method === 'GET')
+    return res.json({ configured: keyConfigured(), title: await readTitle() });
+  if (req.method !== 'POST') {
     res.setHeader('Allow', 'GET, POST');
     return res.status(405).end();
   }
   try {
-    if (req.method === 'GET')
-      return res.json({ configured: keyConfigured(), ...(await homeStatus()) });
     const body = req.body;
     if (body?.action === 'configure') {
       configureKey(body.key);
       return res.json({ configured: true });
     }
-    if (body?.action === 'undo') return res.json(await undoHome(body.revision));
-    if (body?.action === 'demo') return res.json(await demoHome(body.revision));
-    if (!['chat', 'preview'].includes(body?.action))
+    if (body?.action === 'demo' || body?.action === 'reset') {
+      const title = await writeTitle(
+        body.action === 'demo' ? demoTitle : originalTitle
+      );
+      return res.json({
+        title,
+        reply:
+          body.action === 'demo'
+            ? 'Проверка без AI: заголовок изменён в тестовом файле. Для свободных команд подключите ключ.'
+            : 'Исходный заголовок восстановлен.',
+      });
+    }
+    if (body?.action !== 'chat')
       return res.status(400).json({ error: 'Неизвестная команда.' });
-    return res.json(
-      await editHome(
-        body.message,
-        body.revision,
-        body.action === 'preview',
-        body.history
-      )
-    );
+    return res.json(await chat(body.message));
   } catch (error) {
     const code = error instanceof Error ? error.message : '';
     const errors: Record<string, string> = {
       missing_key: 'Подключите API-ключ кнопкой «Подключить AI».',
       invalid_key: 'Проверьте формат OpenAI API-ключа.',
       provider_auth: 'OpenAI отклонил ключ. Проверьте ключ и доступ к API.',
-      provider_quota:
-        'OpenAI ограничил запрос: проверьте баланс API и лимиты ключа или попробуйте позже.',
       provider_error:
-        'OpenAI временно недоступен или запрос отклонён. Страница не изменена.',
-      invalid_message: 'Введите команду длиной до 3000 символов.',
-      invalid_edit:
-        'AI предложил неподходящее изменение. Страница не изменена. Попробуйте уточнить команду.',
-      invalid_asset:
-        'AI выбрал изображение, которого нет в файлах сайта. Уточните, какое фото использовать.',
+        'OpenAI временно недоступен или запрос отклонён. Заголовок не изменён.',
+      invalid_message: 'Введите команду длиной до 1000 символов.',
+      invalid_response: 'AI вернул неподходящий ответ. Заголовок не изменён.',
       busy: 'Дождитесь завершения предыдущего запроса.',
       rate_limit: 'Не больше 10 запросов в минуту. Попробуйте позже.',
-      stale_page:
-        'Главная уже изменилась. Обновите страницу и повторите команду.',
-      no_undo: 'Пока нечего отменять.',
     };
-    const status =
-      code === 'missing_key'
-        ? 503
-        : code === 'stale_page' || code === 'busy'
-          ? 409
-          : 400;
     return res
-      .status(status)
+      .status(code === 'missing_key' ? 503 : 400)
       .json({
         error:
-          errors[code] ||
-          'Не удалось выполнить изменение. Главная сохранена. Попробуйте уточнить команду.',
+          errors[code] || 'Не удалось выполнить команду. Попробуйте ещё раз.',
       });
   }
 }

@@ -1,13 +1,7 @@
 import { Inter } from 'next/font/google';
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
-import type { HomePage } from '@/lib/home-editor-schema';
 import './globals.css';
-import {
-  HomeEditorProvider,
-  EditableSiteHeader,
-  EditableSiteFooter,
-} from '@/components/HomeEditorShell';
+import { Header } from '@/components/shared/Header';
+import Footer from '@/components/shared/Footer';
 import CookieBanner from '@/components/CookieBanner';
 // import HeyGenWidget from '@/components/shared/HeyGenWidget';
 import type { Metadata } from 'next';
@@ -120,20 +114,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialHome: HomePage | null =
-    process.env.AI_TEST_ENABLED === '1'
-      ? JSON.parse(
-          await readFile(
-            path.join(process.cwd(), 'content/ai-home-page.json'),
-            'utf8'
-          )
-        )
-      : null;
   return (
     <html
       lang='ru'
@@ -203,22 +188,20 @@ export default async function RootLayout({
         />
       </head>
       <body className='antialiased min-h-screen flex flex-col h-full overflow-x-hidden overflow-y-auto'>
-        <HomeEditorProvider initialPage={initialHome}>
-          <div className='flex flex-col min-h-screen overflow-x-hidden'>
-            <a
-              href='#main-content'
-              className='sr-only focus:not-sr-only focus:absolute focus:p-4 focus:bg-primary focus:text-white focus:z-50'
-            >
-              Перейти к основному содержанию
-            </a>
-            <EditableSiteHeader />
-            <main id='main-content' className='flex-grow' tabIndex={-1}>
-              {children}
-            </main>
-            <EditableSiteFooter />
-            <CookieBanner />
-          </div>
-        </HomeEditorProvider>
+        <div className='flex flex-col min-h-screen overflow-x-hidden'>
+          <a
+            href='#main-content'
+            className='sr-only focus:not-sr-only focus:absolute focus:p-4 focus:bg-primary focus:text-white focus:z-50'
+          >
+            Перейти к основному содержанию
+          </a>
+          <Header />
+          <main id='main-content' className='flex-grow' tabIndex={-1}>
+            {children}
+          </main>
+          <Footer />
+          <CookieBanner />
+        </div>
       </body>
     </html>
   );
