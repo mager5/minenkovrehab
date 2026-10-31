@@ -1,0 +1,408 @@
+{
+  "title": "Движение к здоровью начинается здесь",
+  "theme": {
+    "background": "#ffffff",
+    "text": "#243d36",
+    "accent": "#128164",
+    "font": "inter"
+  },
+  "sections": [
+    {
+      "id": "hero",
+      "kind": "hero",
+      "visible": true,
+      "title": "",
+      "eyebrow": "",
+      "paragraphs": [
+        "• Индивидуальный подход в подборе тренировок с учетом состояния вашего здоровья",
+        "• Программа тренировок «Формула Движения»",
+        "• Готовые восстановительные программы после травм и операций"
+      ],
+      "image": "/images/hero/hero-banner.jpg",
+      "mobileImage": "/images/hero/section-banner.jpg",
+      "imageAlt": "Физическая реабилитация",
+      "imagePosition": "background",
+      "buttons": [
+        {
+          "label": "Узнать больше",
+          "href": "/about",
+          "variant": "secondary"
+        },
+        {
+          "label": "Записаться",
+          "href": "/contacts",
+          "variant": "primary"
+        }
+      ],
+      "cards": [],
+      "stats": [],
+      "style": {
+        "background": "#3a7ca5",
+        "text": "#ffffff",
+        "titleColor": "#d1f3ea",
+        "accent": "#128164",
+        "titleSize": 56,
+        "textSize": 20,
+        "paddingY": 140,
+        "minHeight": 800,
+        "contentWidth": 1200,
+        "columns": 2,
+        "radius": 12,
+        "align": "left",
+        "imageOverlay": 0.15
+      }
+    },
+    {
+      "id": "about",
+      "kind": "split",
+      "visible": true,
+      "title": "Обо мне",
+      "eyebrow": "8+ лет опыта",
+      "paragraphs": [
+        "Я специалист по физической реабилитации (кинезоспециалист), инструктор-методист ЛФК. В своей очной практике занимаюсь восстановлением после травм, операций и различных дегенеративных состояний опорно-двигательного аппарата. Также работаю онлайн — подбираю упражнения и создаю программы, помогающие выстраивать правильную двигательную активность, с учетом индивидуальности каждого случая."
+      ],
+      "image": "/images/hero/blue-stripe.JPG",
+      "mobileImage": "",
+      "imageAlt": "Физическая реабилитация",
+      "imagePosition": "left",
+      "buttons": [],
+      "cards": [
+        {
+          "title": "Доступные цены",
+          "text": "Я предлагаю разные форматы взаимодействия: индивидуальные занятия и консультации, тренировки по программе \"Формула Движения\" и восстановительные программы при различных состояниях.",
+          "image": "",
+          "href": "",
+          "linkLabel": "Подробнее"
+        },
+        {
+          "title": "Высокое качество",
+          "text": "Я подхожу к работе с телом с максимальной точностью и заботой. Каждое занятие продумано, чтобы вы чувствовали прогресс, комфорт и уверенность в каждом движении.",
+          "image": "",
+          "href": "",
+          "linkLabel": "Подробнее"
+        }
+      ],
+      "stats": [],
+      "style": {
+        "background": "#f8faf9",
+        "text": "#243d36",
+        "titleColor": "#154b3b",
+        "accent": "#128164",
+        "titleSize": 40,
+        "textSize": 18,
+        "paddingY": 80,
+        "minHeight": 0,
+        "contentWidth": 1200,
+        "columns": 1,
+        "radius": 12,
+        "align": "left",
+        "imageOverlay": 0
+      }
+    },
+    {
+      "id": "experience",
+      "kind": "stats",
+      "visible": true,
+      "title": "",
+      "eyebrow": "",
+      "paragraphs": [],
+      "image": "",
+      "mobileImage": "",
+      "imageAlt": "",
+      "imagePosition": "none",
+      "buttons": [],
+      "cards": [],
+      "stats": [
+        {
+          "value": "500+",
+          "label": "Индивидуальных программ"
+        },
+        {
+          "value": "2000+",
+          "label": "Проведенных консультаций"
+        },
+        {
+          "value": "100+",
+          "label": "Отзывов"
+        },
+        {
+          "value": "8+",
+          "label": "Лет опыта"
+        }
+      ],
+      "style": {
+        "background": "#f8faf9",
+        "text": "#243d36",
+        "titleColor": "#154b3b",
+        "accent": "#128164",
+        "titleSize": 40,
+        "textSize": 18,
+        "paddingY": 32,
+        "minHeight": 0,
+        "contentWidth": 1200,
+        "columns": 2,
+        "radius": 12,
+        "align": "left",
+        "imageOverlay": 0
+      }
+    },
+    {
+      "id": "services",
+      "kind": "cards",
+      "visible": true,
+      "title": "Мои услуги",
+      "eyebrow": "УСЛУГИ",
+      "paragraphs": [],
+      "image": "",
+      "mobileImage": "",
+      "imageAlt": "",
+      "imagePosition": "none",
+      "buttons": [],
+      "cards": [
+        {
+          "title": "Онлайн-консультации",
+          "text": "Индивидуальный разбор вашей ситуации с подбором эффективных решений.",
+          "image": "/images/products/consultation.jpg",
+          "href": "/products/consultation",
+          "linkLabel": "Подробнее"
+        },
+        {
+          "title": "Программа тренировок \"Формула Движения\"",
+          "text": "Авторская программа тренировок для всего тела. Занимайтесь по готовым комплексам — улучшайте подвижность суставов, развивайте силу и укрепляйте контроль движений. Всего 30 МИН. в удобное для вас время.",
+          "image": "/images/hero/formula-m.jpg",
+          "href": "/products/formula-movement",
+          "linkLabel": "Подробнее"
+        },
+        {
+          "title": "Восстановительные программы",
+          "text": "Пошаговые алгоритмы с подробным объяснением и демонстрацией упражнений при различных состояниях опорно-двигательного аппарата.",
+          "image": "/images/hero/protocols.jpg",
+          "href": "/products",
+          "linkLabel": "Подробнее"
+        },
+        {
+          "title": "Онлайн-тренировки",
+          "text": "Персональные тренировки в режиме реального времени с индивидуальным подходом и коррекцией техники выполнения упражнений.",
+          "image": "/images/products/online_training.jpg",
+          "href": "/products/online-training",
+          "linkLabel": "Подробнее"
+        }
+      ],
+      "stats": [],
+      "style": {
+        "background": "#ffffff",
+        "text": "#243d36",
+        "titleColor": "#154b3b",
+        "accent": "#128164",
+        "titleSize": 40,
+        "textSize": 18,
+        "paddingY": 80,
+        "minHeight": 0,
+        "contentWidth": 1200,
+        "columns": 4,
+        "radius": 12,
+        "align": "center",
+        "imageOverlay": 0
+      }
+    },
+    {
+      "id": "help",
+      "kind": "split",
+      "visible": true,
+      "title": "Когда вы можете обратиться ко мне:",
+      "eyebrow": "",
+      "paragraphs": [],
+      "image": "/images/hero/stretch-leg.jpg",
+      "mobileImage": "",
+      "imageAlt": "Физическая реабилитация",
+      "imagePosition": "right",
+      "buttons": [],
+      "cards": [
+        {
+          "title": "После травм",
+          "text": "Помогаю восстановить подвижность, силу и контроль движений после бытовых или спортивных повреждений.",
+          "image": "",
+          "href": "",
+          "linkLabel": "Подробнее"
+        },
+        {
+          "title": "После операций",
+          "text": "Постепенное возвращение тела к движению после хирургического вмешательства, учитывая этапы заживления и индивидуальные особенности.",
+          "image": "",
+          "href": "",
+          "linkLabel": "Подробнее"
+        },
+        {
+          "title": "При ограничениях, дискомфорте и напряжении в теле",
+          "text": "Работаю с хроническими болями, скованностью и другими проявлениями дисфункций опорно-двигательного аппарата.",
+          "image": "",
+          "href": "",
+          "linkLabel": "Подробнее"
+        },
+        {
+          "title": "На старте физической активности",
+          "text": "Помогаю грамотно начать заниматься: без перегрузки, с учетом ваших целей, уровня подготовки и состояния здоровья.",
+          "image": "",
+          "href": "",
+          "linkLabel": "Подробнее"
+        }
+      ],
+      "stats": [],
+      "style": {
+        "background": "#155541",
+        "text": "#d1f3ea",
+        "titleColor": "#d1f3ea",
+        "accent": "#d1f3ea",
+        "titleSize": 36,
+        "textSize": 18,
+        "paddingY": 80,
+        "minHeight": 0,
+        "contentWidth": 1200,
+        "columns": 1,
+        "radius": 12,
+        "align": "left",
+        "imageOverlay": 0
+      }
+    },
+    {
+      "id": "contact",
+      "kind": "cta",
+      "visible": true,
+      "title": "Начните свой путь к здоровью сегодня",
+      "eyebrow": "",
+      "paragraphs": [
+        "Запишитесь на консультацию и получите профессиональную помощь в достижении ваших целей"
+      ],
+      "image": "",
+      "mobileImage": "",
+      "imageAlt": "",
+      "imagePosition": "none",
+      "buttons": [
+        {
+          "label": "Записаться на консультацию",
+          "href": "/contacts",
+          "variant": "primary"
+        }
+      ],
+      "cards": [],
+      "stats": [],
+      "style": {
+        "background": "#f8faf9",
+        "text": "#243d36",
+        "titleColor": "#154b3b",
+        "accent": "#128164",
+        "titleSize": 40,
+        "textSize": 18,
+        "paddingY": 80,
+        "minHeight": 0,
+        "contentWidth": 1200,
+        "columns": 2,
+        "radius": 12,
+        "align": "center",
+        "imageOverlay": 0
+      }
+    }
+  ],
+  "header": {
+    "visible": true,
+    "logoText": "Миненков Вадим",
+    "logoImage": "",
+    "background": "#ffffff",
+    "text": "#154b3b",
+    "accent": "#128164",
+    "height": 80,
+    "sticky": true,
+    "links": [
+      {
+        "label": "Главная",
+        "href": "/"
+      },
+      {
+        "label": "Обо мне",
+        "href": "/about"
+      },
+      {
+        "label": "Услуги",
+        "href": "/products"
+      },
+      {
+        "label": "Отзывы",
+        "href": "/reviews"
+      },
+      {
+        "label": "Контакты",
+        "href": "/contacts"
+      }
+    ],
+    "button": {
+      "label": "Записаться",
+      "href": "/contacts",
+      "variant": "primary"
+    }
+  },
+  "footer": {
+    "visible": true,
+    "title": "Миненков Вадим",
+    "description": "Профессиональный подход к тренировочному процессу с учетом индивидуальных особенностей. Помогаю восстановить подвижность, снизить дискомфорт и вернуть телу уверенность в движении.",
+    "background": "#123f31",
+    "text": "#e5f4ec",
+    "accent": "#a9e9cc",
+    "links": [
+      {
+        "label": "Все услуги",
+        "href": "/products"
+      },
+      {
+        "label": "Обо мне",
+        "href": "/about"
+      },
+      {
+        "label": "Контакты",
+        "href": "/contacts"
+      },
+      {
+        "label": "Политика конфиденциальности",
+        "href": "/policy"
+      },
+      {
+        "label": "Договор-оферта",
+        "href": "/offer"
+      },
+      {
+        "label": "Telegram",
+        "href": "https://t.me/MV_Rehab"
+      },
+      {
+        "label": "YouTube",
+        "href": "https://youtube.com/@mv_rehab"
+      },
+      {
+        "label": "Дзен",
+        "href": "https://dzen.ru/id/646ca9d1fc7bc51b6ac77784"
+      },
+      {
+        "label": "RuTube",
+        "href": "https://rutube.ru/channel/38070887"
+      },
+      {
+        "label": "ВКонтакте",
+        "href": "https://vk.com/minenkov_rehab"
+      }
+    ],
+    "contacts": [
+      {
+        "label": "+7 928 328-70-52",
+        "href": "tel:+79283287052"
+      },
+      {
+        "label": "minenkov.rehab@yandex.ru",
+        "href": "mailto:minenkov.rehab@yandex.ru"
+      },
+      {
+        "label": "Пн-Сб: 10:00–19:00",
+        "href": ""
+      }
+    ],
+    "copyright": "© 2026 ИП Миненков В.Л. Все права защищены. ИНН 262703733425 • ОГРН 325265100067202"
+  }
+}

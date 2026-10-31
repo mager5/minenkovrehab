@@ -129,10 +129,8 @@ export async function suggestTitle(
   };
 }
 
-export async function chat(message: unknown) {
+export async function withAI<T>(work: (_key: string) => Promise<T>) {
   await assertTestBranch();
-  if (typeof message !== 'string' || !message.trim() || message.length > 1000)
-    throw Error('invalid_message');
   const key = state.aiTitleKey || process.env.OPENAI_API_KEY;
   if (!key) throw Error('missing_key');
   if (state.aiTitleBusy) throw Error('busy');
@@ -144,6 +142,16 @@ export async function chat(message: unknown) {
   state.aiTitleCalls.push(now);
   state.aiTitleBusy = true;
   try {
+    return await work(key);
+  } finally {
+    state.aiTitleBusy = false;
+  }
+}
+
+export async function chat(message: unknown) {
+  if (typeof message !== 'string' || !message.trim() || message.length > 1000)
+    throw Error('invalid_message');
+  return withAI(async key => {
     const result = await suggestTitle(message, await readTitle(), key);
     if (result.action === 'set_title') {
       const title = await writeTitle(result.title!);
@@ -153,7 +161,5 @@ export async function chat(message: unknown) {
       };
     }
     return { reply: result.reply };
-  } finally {
-    state.aiTitleBusy = false;
-  }
+  });
 }
