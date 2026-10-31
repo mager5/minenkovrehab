@@ -17,17 +17,6 @@ function renderMessage(message,siteOrigin){
    ?{subject:'Восстановление доступа — Minenkov Rehab',text:`Чтобы задать новый пароль, откройте одноразовую ссылку:\n${url.toString()}\n\nЕсли вы не запрашивали восстановление, просто проигнорируйте письмо.\n\nMinenkov Rehab`}
    :{subject:'Подтверждение email — Minenkov Rehab',text:`Чтобы подтвердить адрес почты, откройте одноразовую ссылку:\n${url.toString()}\n\nЕсли вы не регистрировались на сайте, просто проигнорируйте письмо.\n\nMinenkov Rehab`};
  }
- if(message.kind==='admin_payment'){
-  const o=message.order||{};const one=v=>String(v==null?'':v).replace(/[\r\n]+/g,' ').trim();
-  const amount=Number(o.amount);if(!Number.isFinite(amount)||!o.product||!o.buyer)throw new DeliveryError('invalid_admin_notice',{retryable:false});
-  const sum=amount.toLocaleString('ru-RU',{minimumFractionDigits:0,maximumFractionDigits:2})+(o.currency&&o.currency!=='RUB'?' '+one(o.currency):' ₽');
-  const test=o.mode==='test'?'[ТЕСТ] ':'';
-  const when=o.createdAt?new Date(o.createdAt).toLocaleString('ru-RU',{timeZone:'Europe/Moscow'})+' МСК':'';
-  return {subject:one(`${test}Оплата ${sum}: ${o.product}`).slice(0,200),
-   text:`Новая оплата на сайте${o.mode==='test'?' (тестовый режим Робокассы)':''}.\n\n`+
-    `Товар: ${one(o.product)}\nСумма: ${sum}\nПокупатель: ${one(o.buyer)}\nЗаказ Робокассы №: ${one(o.invoiceId)}\n${when?`Время: ${when}\n`:''}\n`+
-    `Покупателю автоматически ушло письмо с доступом в личный кабинет (${siteOrigin}/dashboard).\n\nMinenkov Rehab`};
- }
  throw new DeliveryError('invalid_template',{retryable:false});
 }
 module.exports={DeliveryError,renderMessage};

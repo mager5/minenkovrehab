@@ -1,0 +1,770 @@
+{
+  "checked_at": "2026-10-31",
+  "timezone": "Europe/Moscow",
+  "github_base": "c680febab82a40c2d73e9e95c560485d8e05c26a",
+  "purpose": "Read-only snapshot of running HostKey API, worker and infrastructure; not a deployable current frontend source tree.",
+  "images": {
+    "frontend": "rehab-frontend:hk-dd8354d",
+    "api": "rehab-api:src-8f60be0",
+    "worker": "rehab-worker:src-3e5f89e",
+    "caddy": "rehab-caddy:2-replace"
+  },
+  "frontend": {
+    "server_build_id": "WCI2dNkmp4si4i4pGnvxd",
+    "local_build_id": "NR9yroL4acHl_NEzw-KzJ",
+    "local_candidate_commit": "dd8354ddda1d94c043d91033237b55d185d6fcad",
+    "source_provenance_verified": false,
+    "reason": "Frontend container contains compiled .next and content, no /app/src. The image tag names the local commit, but build inputs have not been verified. Local checkout has uncommitted changes and a different build ID. Root src/package.json in this snapshot inherit the old master and are NOT current production frontend sources."
+  },
+  "excluded": [
+    "environment files",
+    "secrets",
+    "certificates",
+    "database",
+    "backups",
+    "imports",
+    "runtime-roles.sql",
+    "node_modules",
+    "runtime cache"
+  ],
+  "production_mutations": false,
+  "ai_test_status": "blocked pending verified frontend source baseline",
+  "normalizations": {
+    "infra/caddy/Caddyfile": "Existing <acme-email> placeholder retained; all other text matches server.",
+    "infra/scripts/cert-renew.sh": "Existing ACME_EMAIL environment reference retained in place of live email."
+  },
+  "files": [
+    {
+      "path": "server-hostkey/api/package-lock.json",
+      "sha256": "eabcfe47019d3a3379edbd5d44c37ee1561dee97a84f7a2ba978ae64d2ea5b1a",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/package.json",
+      "sha256": "cf60131b3b911a94843c9fc30fbac0c48d7d15c095d1b6bbc9e473d17db996a9",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/README.md",
+      "sha256": "d078afb01c4974a813890e8f79cb769a2654dcf83ba8539b0f10a39e2887e1aa",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/access.js",
+      "sha256": "9728f32280b297bf6174824d7df19e856acd4b4c77965ade0644baa6f95a58a5",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/app.js",
+      "sha256": "614fc0fa908dcd1e8f21b054ad3d136da7b0850811abfd4694c88152d090074e",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/auth-mail-worker.js",
+      "sha256": "07b7980376f1e501f7ebe7365c9de296314e7db26a746001c861dbf826762231",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/auth.js",
+      "sha256": "498393153fcab9a6527316da1cadbcf355e2cb8f8c716643de39c24bb5ab6cfe",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/config.js",
+      "sha256": "12a09b28640db1fc5810d32fdf0a5ba8aae19fe616d92402c6439e7677d2497c",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/confirmation-mail-worker.js",
+      "sha256": "c600470512b8d866a9a7dffa8428b581fe27f70eaa9ab9de899dbbb426e0ff4b",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/delivery.js",
+      "sha256": "a64574722049f7862cb1a34c8ab536f19c7f97fbabce7290e28414709f716139",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/import/README.md",
+      "sha256": "19964769b7f56b6a73fff29805a3db678a1ca7ac47bc26ce16a22735545be2d3",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/import/import.js",
+      "sha256": "8f202fdc71b1c7236c837ff6a63a2427088a31a92f1d8aa2865968c31f37abb4",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/import/private-run.js",
+      "sha256": "b178d8b231bf4d1ecd3c18c29230120cc2577545b64b561f99962ce2f4e0da58",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/import/read-dump.js",
+      "sha256": "59e4591c00d62822c9a68f835b8be66d63fe2da91e855a5f15186ffda4b75f08",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/import/rehearse.js",
+      "sha256": "65e9ace11fd9396f7b5dfb51898e89d275611854b13a7487227bd489cc0e9d63",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/mail-worker.js",
+      "sha256": "eb8da83f94de4a482367d88424e9eb200f43e6df023b8a313b9b4e5d55ed7ed4",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/migrate.js",
+      "sha256": "d08162c81c9e66b9f4b7e670007b4d085ee618920a81d02683e786c5476dd04e",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/migrations/001_payment_core.sql",
+      "sha256": "c7369ff8fc037be8a16a8d40b4ad11f4ff43c8d470c7644b7c59d93cefef47e6",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/migrations/002_auth.sql",
+      "sha256": "a450a05e70e39067d75845c36d92937f09c3ae960c21254cfb1450bef6dd8d49",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/migrations/003_import.sql",
+      "sha256": "05c461f2378eb1d12fc0b4467a22392c8a01fa5ac2358dcad2f4aa1d15a8f21e",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/migrations/004_providers.sql",
+      "sha256": "9071db99d595824caa95970be094f46135fda8b46bcb948c0d396ebf721786a2",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/migrations/005_legacy_and_confirmation.sql",
+      "sha256": "68eba627ebf7890d2387772bd30f3c03dcdf1e718790d6946cd8d6cd4846877f",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/payments.js",
+      "sha256": "fb60a9ac58729d21b59a788c37bf5cca3ba2e766be9a73434075f37f8ebb25c2",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/private-boot.js",
+      "sha256": "c4c9a5a5023fe17bb1a00206d141346002f4accfb7082b616a06903bc1f2a113",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/private-target.js",
+      "sha256": "8696ed04b7c67ac43ae816503488443e5f5c2a61a85507150731af23d295eaa9",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/providers/config.js",
+      "sha256": "c0c75f3e7e9a20f76c9d78d71fc06bd4ac778b8b5fb5d2e4079eb839f58bf56f",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/providers/kinescope.js",
+      "sha256": "3db7cdb48d7d2b8b56b766abd7bf12761bf6ca3cc7ffc9e950a49913d1fa2d1d",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/providers/rusender.js",
+      "sha256": "80eb5a8d7c8499e3741d10805f121f1d830cd8ef8bfcd8e779953156ef4de7ba",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/providers/smtp.js",
+      "sha256": "ceae601fc2c9125cfca876155735a8be81639dfdd229689b05531f919a923078",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/providers/templates.js",
+      "sha256": "c2715c3c653025b18e9faaaaa6098b9145e42ba3a4a15d3f2cee46863589b8a6",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/queue-worker.js",
+      "sha256": "befceb26e5dfc37ae097d557f1dd94aee362c3999a36c9271c477b8e14217c06",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/robokassa-url.js",
+      "sha256": "4bb551694bbc181832f1c188d662e3ada69f20d6ba00887e09855d9c97c5c0ab",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/server.js",
+      "sha256": "081b47a2c8b5838c443d6cdf2d9ba7c640d563fdc065f0ce98e7ff78fee9e7d5",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/synthetic-seed.js",
+      "sha256": "5ac872e146eb68f51a9a6b03ca26b94d8f6401cfd217516fd142acdeb1625099",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/auth.test.js",
+      "sha256": "eb6ab61d44fc65af081dea44100bf3f07bda8834c7e3eb2247b28acfd6e23266",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/import.test.js",
+      "sha256": "09c34285d3327f11f1372051cb3722ebd90eecc533be601baea45043018ac93d",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/memory-sampler.js",
+      "sha256": "1a118a632e85100c6008d0d4cc0f78cc01287581e63859528a0db6879a16ef69",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/migrations.test.js",
+      "sha256": "a73f5398aa60f0ed37a136bb0fdfee30c8b535ab819b8bb90606d0be7462d764",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/payments.test.js",
+      "sha256": "77c6d8f326418ce181d6ac8fddcc7c820150479b1e8c8801379e71575bf112b9",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/private-boot.test.js",
+      "sha256": "3f555bb7de6f1301ffed895720d542c7746f9b3e191d65ff2c29d0141314fcef",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/private.test.js",
+      "sha256": "1cbee95056497b86ab6302ae1aa730035b62b15cf989a671e363643ea85e4173",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/providers.test.js",
+      "sha256": "ae6609040e0ea1ebe621556eb9a2e5094436b7a921c27ee2c9c07bc86b87e328",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/robokassa-url.test.js",
+      "sha256": "2bdd8e1c59c8f7b9b8f050176f30505747ab07f47ea3a1c86bf6674d27fe3ab8",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/run-local.js",
+      "sha256": "be588962d04fca66a4e7b58e4c7f7c329bb22d9022d6ff608d64be5194e13c32",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/run-prebuilt-import-local.js",
+      "sha256": "ad5e3e5d3b98bbdaf374dc54be6a082d0b099acc53c26377fe9fa6f127ce2df0",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/run-prebuilt-local.js",
+      "sha256": "3d0315694a35a11ef88ee1e24f0a0cb8feed37d550e8e1946e856c0c159cf863",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/run-staging-local.js",
+      "sha256": "89e62bd6e57ee85e20183c5c7ec164cdfa18f25d0155211e28d75a8ed61979f6",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/smtp.test.js",
+      "sha256": "08e3b534f3bf4fc93de7d13f52a901d7fe0e67f0856d55d32bab7a8378594f70",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/timeweb-compose-start.test.js",
+      "sha256": "85bc93871ba40902038bf5dcaeecb3a67bdcde4a1dac0af6a8da3e8c0c68bb6b",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/worker-ipc.js",
+      "sha256": "f23a9176b142626f6b587dfc0b201bc31c83974f18d23ac4c6ec2995d99720d7",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/timeweb/test/worker-smoke.js",
+      "sha256": "1ba0d0a48fd931616bb6dd56dea1bab7fe6daaba46b150984328f5c9126c9d45",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/api/utils/cookies.js",
+      "sha256": "338617b446ec201b914d7772049a99d1c0a0e0c251e5d9485c98aaa77025b2f5",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/package-lock.json",
+      "sha256": "eabcfe47019d3a3379edbd5d44c37ee1561dee97a84f7a2ba978ae64d2ea5b1a",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/package.json",
+      "sha256": "cf60131b3b911a94843c9fc30fbac0c48d7d15c095d1b6bbc9e473d17db996a9",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/README.md",
+      "sha256": "d078afb01c4974a813890e8f79cb769a2654dcf83ba8539b0f10a39e2887e1aa",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/access.js",
+      "sha256": "9728f32280b297bf6174824d7df19e856acd4b4c77965ade0644baa6f95a58a5",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/admin-mail-worker.js",
+      "sha256": "bb2d03c565a1c5b3d1d65fb5131953de698dd55e042cdd7d25bd137f3d453001",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/app.js",
+      "sha256": "9948767609ab0f345af2b37eadb4f9381a43a8cfb7303ccd9e471bc8ff1f3b3b",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/auth-mail-worker.js",
+      "sha256": "07b7980376f1e501f7ebe7365c9de296314e7db26a746001c861dbf826762231",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/auth.js",
+      "sha256": "498393153fcab9a6527316da1cadbcf355e2cb8f8c716643de39c24bb5ab6cfe",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/config.js",
+      "sha256": "12a09b28640db1fc5810d32fdf0a5ba8aae19fe616d92402c6439e7677d2497c",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/confirmation-mail-worker.js",
+      "sha256": "c600470512b8d866a9a7dffa8428b581fe27f70eaa9ab9de899dbbb426e0ff4b",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/delivery.js",
+      "sha256": "a64574722049f7862cb1a34c8ab536f19c7f97fbabce7290e28414709f716139",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/import/README.md",
+      "sha256": "19964769b7f56b6a73fff29805a3db678a1ca7ac47bc26ce16a22735545be2d3",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/import/import.js",
+      "sha256": "8f202fdc71b1c7236c837ff6a63a2427088a31a92f1d8aa2865968c31f37abb4",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/import/private-run.js",
+      "sha256": "b178d8b231bf4d1ecd3c18c29230120cc2577545b64b561f99962ce2f4e0da58",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/import/read-dump.js",
+      "sha256": "59e4591c00d62822c9a68f835b8be66d63fe2da91e855a5f15186ffda4b75f08",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/import/rehearse.js",
+      "sha256": "65e9ace11fd9396f7b5dfb51898e89d275611854b13a7487227bd489cc0e9d63",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/mail-worker.js",
+      "sha256": "eb8da83f94de4a482367d88424e9eb200f43e6df023b8a313b9b4e5d55ed7ed4",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/migrate.js",
+      "sha256": "d08162c81c9e66b9f4b7e670007b4d085ee618920a81d02683e786c5476dd04e",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/migrations/001_payment_core.sql",
+      "sha256": "c7369ff8fc037be8a16a8d40b4ad11f4ff43c8d470c7644b7c59d93cefef47e6",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/migrations/002_auth.sql",
+      "sha256": "a450a05e70e39067d75845c36d92937f09c3ae960c21254cfb1450bef6dd8d49",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/migrations/003_import.sql",
+      "sha256": "05c461f2378eb1d12fc0b4467a22392c8a01fa5ac2358dcad2f4aa1d15a8f21e",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/migrations/004_providers.sql",
+      "sha256": "9071db99d595824caa95970be094f46135fda8b46bcb948c0d396ebf721786a2",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/migrations/005_legacy_and_confirmation.sql",
+      "sha256": "68eba627ebf7890d2387772bd30f3c03dcdf1e718790d6946cd8d6cd4846877f",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/migrations/006_admin_outbox.sql",
+      "sha256": "00e001e459d2ecff3ad3106ce0e8b5823dcbfde53b120cd16941e0cfb04cc40a",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/payments.js",
+      "sha256": "fb60a9ac58729d21b59a788c37bf5cca3ba2e766be9a73434075f37f8ebb25c2",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/private-boot.js",
+      "sha256": "c4c9a5a5023fe17bb1a00206d141346002f4accfb7082b616a06903bc1f2a113",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/private-target.js",
+      "sha256": "8696ed04b7c67ac43ae816503488443e5f5c2a61a85507150731af23d295eaa9",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/providers/config.js",
+      "sha256": "8aef09221eb20ec15abbcb55326f33def0b389855d7337083b97905617b1eb18",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/providers/kinescope.js",
+      "sha256": "3db7cdb48d7d2b8b56b766abd7bf12761bf6ca3cc7ffc9e950a49913d1fa2d1d",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/providers/rusender.js",
+      "sha256": "80eb5a8d7c8499e3741d10805f121f1d830cd8ef8bfcd8e779953156ef4de7ba",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/providers/smtp.js",
+      "sha256": "ceae601fc2c9125cfca876155735a8be81639dfdd229689b05531f919a923078",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/providers/templates.js",
+      "sha256": "1870a563a633bac8356c6f1d0e23e38b6e3ca88b0d3d6b215c62316a303c1a04",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/queue-worker.js",
+      "sha256": "6f9c240a40a64307280f17642a6613e423636e4552f33cd75d859ea76cd00e99",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/robokassa-url.js",
+      "sha256": "fefd5c232f03d0408d3de63a01f919037b5679ec85e81bb7639a368d37a3c476",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/server.js",
+      "sha256": "081b47a2c8b5838c443d6cdf2d9ba7c640d563fdc065f0ce98e7ff78fee9e7d5",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/synthetic-seed.js",
+      "sha256": "5ac872e146eb68f51a9a6b03ca26b94d8f6401cfd217516fd142acdeb1625099",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/auth.test.js",
+      "sha256": "eb6ab61d44fc65af081dea44100bf3f07bda8834c7e3eb2247b28acfd6e23266",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/import.test.js",
+      "sha256": "09c34285d3327f11f1372051cb3722ebd90eecc533be601baea45043018ac93d",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/memory-sampler.js",
+      "sha256": "1a118a632e85100c6008d0d4cc0f78cc01287581e63859528a0db6879a16ef69",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/migrations.test.js",
+      "sha256": "a73f5398aa60f0ed37a136bb0fdfee30c8b535ab819b8bb90606d0be7462d764",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/payments.test.js",
+      "sha256": "77c6d8f326418ce181d6ac8fddcc7c820150479b1e8c8801379e71575bf112b9",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/private-boot.test.js",
+      "sha256": "3f555bb7de6f1301ffed895720d542c7746f9b3e191d65ff2c29d0141314fcef",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/private.test.js",
+      "sha256": "1cbee95056497b86ab6302ae1aa730035b62b15cf989a671e363643ea85e4173",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/providers.test.js",
+      "sha256": "ae6609040e0ea1ebe621556eb9a2e5094436b7a921c27ee2c9c07bc86b87e328",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/robokassa-url.test.js",
+      "sha256": "2bdd8e1c59c8f7b9b8f050176f30505747ab07f47ea3a1c86bf6674d27fe3ab8",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/run-local.js",
+      "sha256": "be588962d04fca66a4e7b58e4c7f7c329bb22d9022d6ff608d64be5194e13c32",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/run-prebuilt-import-local.js",
+      "sha256": "ad5e3e5d3b98bbdaf374dc54be6a082d0b099acc53c26377fe9fa6f127ce2df0",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/run-prebuilt-local.js",
+      "sha256": "3d0315694a35a11ef88ee1e24f0a0cb8feed37d550e8e1946e856c0c159cf863",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/run-staging-local.js",
+      "sha256": "89e62bd6e57ee85e20183c5c7ec164cdfa18f25d0155211e28d75a8ed61979f6",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/smtp.test.js",
+      "sha256": "08e3b534f3bf4fc93de7d13f52a901d7fe0e67f0856d55d32bab7a8378594f70",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/timeweb-compose-start.test.js",
+      "sha256": "85bc93871ba40902038bf5dcaeecb3a67bdcde4a1dac0af6a8da3e8c0c68bb6b",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/worker-ipc.js",
+      "sha256": "f23a9176b142626f6b587dfc0b201bc31c83974f18d23ac4c6ec2995d99720d7",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/timeweb/test/worker-smoke.js",
+      "sha256": "1ba0d0a48fd931616bb6dd56dea1bab7fe6daaba46b150984328f5c9126c9d45",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/worker/utils/cookies.js",
+      "sha256": "338617b446ec201b914d7772049a99d1c0a0e0c251e5d9485c98aaa77025b2f5",
+      "verified_against": "running container",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/caddy/Caddyfile",
+      "sha256": "ba9db2598ac4eae833ab5183b500da3f1b76de5d4723efaff0183b0ff0da0f01",
+      "verified_against": "/opt/rehab",
+      "match": "normalized service email"
+    },
+    {
+      "path": "server-hostkey/infra/compose.yaml",
+      "sha256": "aba8bdf2dfb7ff7c2c291ea848f39d90f7185cc9635cd8841ecc3c7e98a64731",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/caddy/extras/images/og/contacts-og.jpg",
+      "sha256": "2a11c386d1b0f383192d09c77206f214954da54f46a5627bc54ff85c5067c3fd",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/caddy/extras/images/og/services-og.jpg",
+      "sha256": "3136f7e453533b858b801861ecc606eaffd9de5f47a0590e5debc71e718b89c9",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/caddy/extras/images/og-image.jpg",
+      "sha256": "6bb4d062b960d41dfa45c487ada4ece8a15eeba25cd5bc0b39ac8c5e174f1ef4",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/caddy/extras/rx-metrika.js",
+      "sha256": "29c4f5b47f213e082fa38948a2fc9b41979e8168e16a92642ad9d66495b42ccb",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/caddy/extras/rx-scroll-top.js",
+      "sha256": "fa7932225ed86689338da95a79a7b2227ef61134d911a53ebf9612d023efd01d",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/caddy/extras/sitemap.xml",
+      "sha256": "ce83c2bc9e21c9f7f674f78f84a1a11b558c7ff0f3f975e25bdf78c61b939c49",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/caddy/Dockerfile",
+      "sha256": "17da4ccef502fc56c7107acf0ca7cb5e9207836362cdd11e425a1c338abf4262",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/scripts/backup-db.sh",
+      "sha256": "de620fb59e244f8cf0abba058fded0b2c218f9ed37c9b325bbc0fa215d506edf",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/scripts/cert-renew.sh",
+      "sha256": "093d18116d6a587c74305ff2d93f825470fa2aae9581325903bb6ccfe0e46139",
+      "verified_against": "/opt/rehab",
+      "match": "normalized service email"
+    },
+    {
+      "path": "server-hostkey/infra/scripts/init-roles.sh",
+      "sha256": "092a0871d8cb043fa5169d15da71dd5a412fd54c8e9b71f63a4b6dd20621ff2c",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/scripts/init-secrets.sh",
+      "sha256": "a9cc49afd46af5130e40c22da55181e9cf51085e36860b847ad42be28c1b0f31",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/scripts/install-backup-timer.sh",
+      "sha256": "9d5255335100de9f4bcd3b7fdb2b018d9d64490dc91310cc00957aba2fa3df20",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/scripts/reload-db.sh",
+      "sha256": "1774b113e17379953cc5d61e6de980f132a6820946e3b42a61f7080aff499caa",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    },
+    {
+      "path": "server-hostkey/infra/scripts/smoke-checkout.sh",
+      "sha256": "f9f23f6da597d5ca87e1418ee5c4e4c521fd2c4d7a6b7576853f0d547fff7d41",
+      "verified_against": "/opt/rehab",
+      "match": "byte-for-byte"
+    }
+  ]
+}
