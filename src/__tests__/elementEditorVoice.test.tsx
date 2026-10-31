@@ -215,3 +215,76 @@ test('selected element and command survive an editor reload without storing the 
     message: 'сделай текст красным',
   });
 });
+
+test('voice command is applied to the selected button only after explicit submission', async () => {
+  const { describeElement } = await import('@/lib/element-editor-dom');
+  const main = document.querySelector('main')!;
+  main.insertAdjacentHTML(
+    'beforeend',
+    '<button id="voice-target">Узнать больше</button><button id="neighbor">Другая кнопка</button>'
+  );
+  const button = document.querySelector('#voice-target') as HTMLButtonElement;
+  const neighbor = document.querySelector('#neighbor')!;
+  const selected = describeElement(button)!;
+  const originalNeighbor = neighbor.outerHTML;
+  sessionStorage.setItem(
+    'ai-element-draft',
+    JSON.stringify({ selected, message: '' })
+  );
+  request.mockImplementation(async (url: string, options?: RequestInit) => ({
+    ok: true,
+    json: async () =>
+      url === '/api/ai-test/transcribe'
+        ? { text: 'Сделай кнопку синей' }
+        : options?.method === 'POST'
+          ? {
+              overrides: [
+                {
+                  target: selected,
+                  changes: [{ property: 'backgroundColor', value: '#0000FF' }],
+                },
+              ],
+              revision: 'after-voice',
+              canUndo: true,
+              reply: 'Готово',
+            }
+          : {
+              configured: true,
+              overrides: [],
+              revision: 'before-voice',
+              canUndo: false,
+            },
+  }));
+  render(<AiElementEditor />);
+  fireEvent.click(
+    await screen.findByRole('button', { name: 'Голосовой ввод' })
+  );
+  fireEvent.click(
+    await screen.findByRole('button', { name: 'Остановить запись' })
+  );
+  await waitFor(() =>
+    expect(
+      screen.getByLabelText('Что изменить в выбранном элементе?')
+    ).toHaveValue('Сделай кнопку синей')
+  );
+  expect(
+    request.mock.calls.some(
+      ([url, options]) => url === '/api/ai-test' && options?.method === 'POST'
+    )
+  ).toBe(false);
+  expect(button.style.backgroundColor).toBe('');
+  fireEvent.click(screen.getByRole('button', { name: 'Применить к элементу' }));
+  await waitFor(() =>
+    expect(button.style.backgroundColor).toBe('rgb(0, 0, 255)')
+  );
+  const [, options] = request.mock.calls.find(
+    ([url, options]) => url === '/api/ai-test' && options?.method === 'POST'
+  )!;
+  const sent = JSON.parse(options.body);
+  expect(sent.action).toBe('chat');
+  expect(sent.message).toBe('Сделай кнопку синей');
+  expect(sent.target.root).toBe(selected.root);
+  expect(sent.target.path).toEqual(selected.path);
+  expect(sent.target.kind).toBe('element');
+  expect(neighbor.outerHTML).toBe(originalNeighbor);
+});
