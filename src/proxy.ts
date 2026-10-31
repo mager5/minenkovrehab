@@ -1,6 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { readMigrationSession } from '@/lib/migration-config';
 export async function proxy(request: NextRequest) {
+  if (process.env.AI_TEST_ENABLED === '1') {
+    if (request.nextUrl.pathname === '/api/ai-test') return NextResponse.next();
+    return NextResponse.json({ error: 'Этот раздел отключён в AI-эксперименте.' }, { status: 404 });
+  }
+  if (request.nextUrl.pathname.startsWith('/api/')) return NextResponse.next();
   const session = await readMigrationSession(request.headers.get('cookie') || '');
   if(session.status === 503)return new NextResponse('Сервис авторизации временно недоступен.',{status:503,headers:{'Cache-Control':'private, no-store'}});
   if(request.nextUrl.pathname.startsWith('/dashboard') && !session.user) {
@@ -14,4 +19,4 @@ export async function proxy(request: NextRequest) {
   response.headers.set('Referrer-Policy','no-referrer');
   return response;
 }
-export const config={matcher:['/dashboard/:path*','/login','/register']};
+export const config={matcher:['/api/:path*','/dashboard/:path*','/login','/register']};

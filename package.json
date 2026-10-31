@@ -26,7 +26,9 @@
     "quality:check": "node scripts/code-quality-analysis.js",
     "precommit": "npm run check",
     "prepare": "husky",
-    "build:migration": "node scripts/build-migration.cjs"
+    "build:migration": "node scripts/build-migration.cjs",
+    "ai:test": "node scripts/ai-test-start.mjs",
+    "test:ai-title": "node --test scripts/ai-title.test.mjs"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",

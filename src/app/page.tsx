@@ -9,7 +9,9 @@ import {
   HelpSection,
   CTASection,
 } from '@/components';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import AiTitleChat from '@/components/AiTitleChat';
+import titleContent from '../../content/ai-home-title.json';
 import { getHomeContent } from '@/lib/content';
 import { HomeContent } from '@/types/content';
 
@@ -27,6 +29,7 @@ const fadeInOnScroll = {
 };
 
 export default function Home() {
+  const [heading, setHeading] = useState(titleContent.title);
   useEffect(() => {
     async function loadContent() {
       try {
@@ -51,7 +54,7 @@ export default function Home() {
                 className='hero-title font-bold mb-6 leading-tight'
                 style={{ color: '#d1f3ea' }}
               >
-                Физическая реабилитация и тренировки для здоровья
+                {heading}
               </h1>
               <p
                 className='text-base sm:text-lg md:text-xl opacity-95 mb-8 font-medium leading-relaxed'
@@ -93,6 +96,7 @@ export default function Home() {
       <ServicesSection />
       <HelpSection />
       <CTASection />
+      <AiTitleChat onTitleChange={setHeading} />
     </div>
   );
 }
