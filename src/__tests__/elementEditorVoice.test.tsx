@@ -45,7 +45,7 @@ beforeEach(() => {
   process.env.NEXT_PUBLIC_AI_TEST_ENABLED = '1';
   sessionStorage.clear();
   document.body.innerHTML =
-    '<header><span data-ai-picker-slot data-ai-editor></span></header><main id="main-content"><h1>Original</h1></main><footer></footer>';
+    '<header><span data-ai-picker-slot data-ai-editor></span></header><main id="main-content"><h1>Original</h1><div data-ai-heading-controls data-ai-editor></div></main><footer></footer>';
   stopTrack.mockReset();
   getUserMedia
     .mockReset()
@@ -287,4 +287,90 @@ test('voice command is applied to the selected button only after explicit submis
   expect(sent.target.path).toEqual(selected.path);
   expect(sent.target.kind).toBe('element');
   expect(neighbor.outerHTML).toBe(originalNeighbor);
+});
+
+test('clicking the homepage heading edits the same DOM element inline and saves only its text without AI', async () => {
+  const { describeElement } = await import('@/lib/element-editor-dom');
+  const heading = document.querySelector('h1')!;
+  heading.setAttribute('data-ai-inline-heading', '');
+  heading.style.color = 'red';
+  const target = describeElement(heading)!;
+  request.mockImplementation(async (_url: string, options?: RequestInit) => ({
+    ok: true,
+    json: async () =>
+      options?.method === 'POST'
+        ? {
+            overrides: [
+              {
+                target,
+                changes: [{ property: 'text', value: 'Новый заголовок' }],
+              },
+            ],
+            revision: 'saved',
+            canUndo: true,
+            reply: 'Заголовок сохранён.',
+          }
+        : {
+            configured: false,
+            overrides: [],
+            revision: 'initial',
+            canUndo: false,
+          },
+  }));
+  render(<AiElementEditor />);
+  await screen.findByRole('button', { name: 'Голосовой ввод' });
+  fireEvent.click(heading);
+  const field = screen.getByRole('textbox', {
+    name: 'Текст главного заголовка',
+  });
+  expect(field).toBe(heading);
+  expect(field.textContent).toBe('Original');
+  field.textContent = 'Новый заголовок';
+  fireEvent.input(field);
+  expect(heading.textContent).toBe('Новый заголовок');
+  fireEvent.click(screen.getByRole('button', { name: 'Сохранить заголовок' }));
+  await waitFor(() =>
+    expect(
+      screen.queryByRole('button', { name: 'Сохранить заголовок' })
+    ).not.toBeInTheDocument()
+  );
+  await waitFor(() => expect(heading.textContent).toBe('Новый заголовок'));
+  expect(heading).not.toHaveAttribute('contenteditable');
+  expect(heading.style.color).toBe('red');
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  const posts = request.mock.calls.filter(
+    ([, options]) => options?.method === 'POST'
+  );
+  expect(posts).toHaveLength(1);
+  expect(JSON.parse(posts[0]![1].body)).toMatchObject({
+    action: 'heading',
+    text: 'Новый заголовок',
+    target: { tag: 'h1', root: 'main' },
+  });
+});
+
+test('Escape cancels heading changes without a request and picker mode keeps priority', async () => {
+  const heading = document.querySelector('h1')!;
+  heading.setAttribute('data-ai-inline-heading', '');
+  render(<AiElementEditor />);
+  await screen.findByRole('button', { name: 'Голосовой ввод' });
+  fireEvent.click(heading);
+  heading.textContent = 'Черновик';
+  fireEvent.input(heading);
+  fireEvent.keyDown(
+    screen.getByRole('textbox', { name: 'Текст главного заголовка' }),
+    {
+      key: 'Escape',
+    }
+  );
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(heading.textContent).toBe('Original');
+  expect(
+    request.mock.calls.some(([, options]) => options?.method === 'POST')
+  ).toBe(false);
+  fireEvent.click(
+    screen.getAllByRole('button', { name: 'Выделить элемент' })[0]!
+  );
+  fireEvent.click(heading);
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });

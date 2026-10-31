@@ -23,6 +23,7 @@ registerHooks({
 const { configureKey } = await import('../src/lib/ai-title.ts');
 const {
   elementStatus,
+  editHeading,
   editElement,
   undoElement,
   proposeElementEdit,
@@ -165,4 +166,52 @@ test('unsupported, empty and oversized audio is rejected before transmission', a
       () => transcribeVoice(bytes, mime, 'synthetic-key', fail),
       /invalid_audio/
     );
+});
+
+test('direct heading edits persist without a provider call, preserve styles and support undo', async () => {
+  const heading = { ...target, tag: 'h1', path: [{ tag: 'h1', index: 0 }] };
+  const existing = [
+    {
+      target: { ...heading, kind: 'text' },
+      changes: [
+        { property: 'color', value: '#FF0000' },
+        { property: 'text', value: 'Earlier title' },
+      ],
+    },
+  ];
+  await writeFile(
+    'content/ai-element-overrides.json',
+    JSON.stringify(existing)
+  );
+  globalThis.fetch = () => {
+    throw Error('Provider must not be called');
+  };
+  const before = await elementStatus();
+  const result = await editHeading(heading, 'Direct title', before.revision);
+  assert.equal(result.overrides[0].changes.length, 1);
+  assert.equal(result.overrides[0].changes[0].property, 'color');
+  assert.equal(result.overrides[1].changes[0].value, 'Direct title');
+  assert.equal((await elementStatus()).revision, result.revision);
+  assert.deepEqual((await undoElement(result.revision)).overrides, existing);
+});
+test('direct heading rejects unsafe text, other elements, stale pages and production without writes', async () => {
+  const heading = { ...target, tag: 'h1', path: [{ tag: 'h1', index: 0 }] };
+  const before = await elementStatus();
+  for (const text of ['', '<b>Title</b>', 'a'.repeat(161)])
+    await assert.rejects(() => editHeading(heading, text, before.revision));
+  await assert.rejects(() => editHeading(target, 'Title', before.revision));
+  await assert.rejects(
+    () => editHeading(heading, 'Title', 'stale'),
+    /stale_page/
+  );
+  process.env.NODE_ENV = 'production';
+  try {
+    await assert.rejects(
+      () => editHeading(heading, 'Title', before.revision),
+      /test_only/
+    );
+  } finally {
+    process.env.NODE_ENV = 'development';
+  }
+  assert.deepEqual((await elementStatus()).overrides, []);
 });

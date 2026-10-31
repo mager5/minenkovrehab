@@ -2,7 +2,7 @@ import { readFile, writeFile, rename, access } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { assertTestBranch, withAI } from './ai-title';
+import { assertTestBranch, withAI, validTitle } from './ai-title';
 import {
   editResultSchema,
   overridesSchema,
@@ -176,6 +176,57 @@ export async function editElement(
     })
   );
 }
+// Direct, local text edit: no provider call or API key is required.
+export async function editHeading(
+  rawTarget: unknown,
+  text: unknown,
+  revision: unknown
+) {
+  const target = targetSchema.parse(rawTarget);
+  if (
+    target.root !== 'main' ||
+    target.tag !== 'h1' ||
+    target.kind !== 'element' ||
+    !target.textEditable ||
+    !validTitle(text)
+  )
+    throw Error('invalid_heading');
+  const changes = validateChanges(target, [
+    { property: 'text', value: text.trim() },
+  ]);
+  return locked(async () => {
+    const before = await readOverrides();
+    checkRevision(before, revision);
+    // Supersede older text edits on this heading, preserving all style edits.
+    const sameHeading = (other: EditTarget) =>
+      other.root === target.root &&
+      JSON.stringify(other.path) === JSON.stringify(target.path);
+    const next = before
+      .map(item =>
+        sameHeading(item.target)
+          ? {
+              ...item,
+              changes: item.changes.filter(
+                change => change.property !== 'text'
+              ),
+            }
+          : item
+      )
+      .filter(item => item.changes.length);
+    const existing = next.find(
+      item => targetKey(item.target) === targetKey(target)
+    );
+    if (existing) existing.changes.push(...changes);
+    else next.push({ target, changes });
+    overridesSchema.parse(next);
+    const history = await readHistory();
+    history.push(before);
+    await atomicWrite(historyFile(), history.slice(-20));
+    await atomicWrite(file(), next);
+    return { ...(await elementStatus()), reply: 'Заголовок сохранён.' };
+  });
+}
+
 export async function undoElement(revision: unknown) {
   return locked(async () => {
     const before = await readOverrides();

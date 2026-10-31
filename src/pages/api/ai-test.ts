@@ -1,6 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { assertTestBranch, configureKey, keyConfigured } from '@/lib/ai-title';
-import { editElement, elementStatus, undoElement } from '@/lib/element-editor';
+import {
+  editElement,
+  editHeading,
+  elementStatus,
+  undoElement,
+} from '@/lib/element-editor';
 export const config = { api: { bodyParser: { sizeLimit: '16kb' } } };
 export default async function handler(
   req: NextApiRequest,
@@ -45,6 +50,8 @@ export default async function handler(
       await configureKey(body.key);
       return res.json({ configured: true });
     }
+    if (body?.action === 'heading')
+      return res.json(await editHeading(body.target, body.text, body.revision));
     if (body?.action === 'undo')
       return res.json(await undoElement(body.revision));
     if (body?.action !== 'chat')
@@ -61,6 +68,8 @@ export default async function handler(
         'Подключите API-ключ один раз — он сохранится в Связке ключей macOS.',
       key_store_unavailable:
         'Не удалось открыть Связку ключей macOS. Разрешите доступ, если система его запросила, и повторите подключение.',
+      invalid_heading:
+        'Введите простой текст заголовка длиной от 1 до 160 символов.',
       invalid_key: 'Проверьте формат OpenAI API-ключа.',
       provider_auth: 'OpenAI отклонил ключ.',
       provider_quota:
