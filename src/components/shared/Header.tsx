@@ -400,6 +400,7 @@ export function Header() {
 
       {/* Верхняя инфо-панель */}
       <div
+        data-ai-edit-root='topbar'
         className={`hidden lg:block bg-primary text-white py-2 transition-all duration-500 ease-in-out ${isScrolled ? 'transform -translate-y-full opacity-0 h-0 overflow-hidden' : 'transform translate-y-0 opacity-100'}`}
         role='complementary'
         aria-label='Контактная информация'
@@ -689,6 +690,9 @@ export function Header() {
               </div>
 
               {/* Кнопка записи */}
+              {process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1' && (
+                <span data-ai-picker-slot data-ai-editor className='mx-2' />
+              )}
               <button
                 onClick={openBookingModal}
                 className='hidden [@media(min-width:840px)]:block bg-accent hover:bg-accent-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-3 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 xl:mr-8 '
@@ -701,6 +705,9 @@ export function Header() {
 
             {/* Мобильное меню (бургер) */}
             <div className='flex items-center gap-1 [@media(min-width:840px)]:hidden'>
+              {process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1' && (
+                <span data-ai-picker-slot data-ai-editor className='mx-1' />
+              )}
               {!isAuthLoading &&
                 !user &&
                 !isAuthPage &&

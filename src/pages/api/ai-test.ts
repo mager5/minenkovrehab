@@ -1,17 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {
-  assertTestBranch,
-  chat,
-  configureKey,
-  demoTitle,
-  keyConfigured,
-  originalTitle,
-  readTitle,
-  writeTitle,
-} from '@/lib/ai-title';
-
-export const config = { api: { bodyParser: { sizeLimit: '4kb' } } };
-
+import { assertTestBranch, configureKey, keyConfigured } from '@/lib/ai-title';
+import { editElement, elementStatus, undoElement } from '@/lib/element-editor';
+export const config = { api: { bodyParser: { sizeLimit: '16kb' } } };
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -27,56 +17,69 @@ export default async function handler(
     req.headers.host !== new URL(origin).host ||
     (req.method !== 'GET' && req.headers.origin !== origin)
   )
-    return res
-      .status(403)
-      .json({
-        error: 'Запрос разрешён только из локальной тестовой страницы.',
-      });
-  if (req.method === 'GET')
-    return res.json({ configured: keyConfigured(), title: await readTitle() });
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'GET, POST');
-    return res.status(405).end();
-  }
+    return res.status(403).json({
+      error: 'Запрос разрешён только из локальной тестовой страницы.',
+    });
   try {
+    if (req.method === 'GET')
+      return res.json({
+        configured: keyConfigured(),
+        ...(await elementStatus()),
+      });
+    if (req.method !== 'POST') {
+      res.setHeader('Allow', 'GET, POST');
+      return res.status(405).end();
+    }
     const body = req.body;
     if (body?.action === 'configure') {
       configureKey(body.key);
       return res.json({ configured: true });
     }
-    if (body?.action === 'demo' || body?.action === 'reset') {
-      const title = await writeTitle(
-        body.action === 'demo' ? demoTitle : originalTitle
-      );
-      return res.json({
-        title,
-        reply:
-          body.action === 'demo'
-            ? 'Проверка без AI: заголовок изменён в тестовом файле. Для свободных команд подключите ключ.'
-            : 'Исходный заголовок восстановлен.',
-      });
-    }
+    if (body?.action === 'undo')
+      return res.json(await undoElement(body.revision));
     if (body?.action !== 'chat')
-      return res.status(400).json({ error: 'Неизвестная команда.' });
-    return res.json(await chat(body.message));
+      return res
+        .status(400)
+        .json({ error: 'Сначала выберите элемент и опишите правку.' });
+    return res.json(
+      await editElement(body.target, body.message, body.revision)
+    );
   } catch (error) {
     const code = error instanceof Error ? error.message : '';
     const errors: Record<string, string> = {
-      missing_key: 'Подключите API-ключ кнопкой «Подключить AI».',
+      missing_key: 'Подключите API-ключ.',
       invalid_key: 'Проверьте формат OpenAI API-ключа.',
-      provider_auth: 'OpenAI отклонил ключ. Проверьте ключ и доступ к API.',
+      provider_auth: 'OpenAI отклонил ключ.',
+      provider_quota:
+        'Проверьте баланс API и лимиты ключа или попробуйте позже.',
       provider_error:
-        'OpenAI временно недоступен или запрос отклонён. Заголовок не изменён.',
-      invalid_message: 'Введите команду длиной до 1000 символов.',
-      invalid_response: 'AI вернул неподходящий ответ. Заголовок не изменён.',
-      busy: 'Дождитесь завершения предыдущего запроса.',
-      rate_limit: 'Не больше 10 запросов в минуту. Попробуйте позже.',
+        'Не удалось получить ответ OpenAI. Изменения не применены.',
+      invalid_message: 'Введите команду длиной до 2000 символов.',
+      busy: 'Дождитесь предыдущего запроса.',
+      rate_limit: 'Не больше 10 запросов в минуту.',
+      stale_page: 'Список правок изменился. Обновите страницу и повторите.',
+      no_undo: 'Пока нечего отменять.',
+      select_text:
+        'Выделите конкретную надпись: в этом контейнере несколько текстов.',
+      text_style_only:
+        'Для изменения фона, отступов или размера кнопки выберите кнопку целиком кнопкой «Родитель».',
+      invalid_image: 'Нужен существующий путь изображения из файлов сайта.',
+      invalid_edit:
+        'AI предложил неподходящее свойство. Уточните правку; страница не изменена.',
     };
     return res
-      .status(code === 'missing_key' ? 503 : 400)
+      .status(
+        code === 'missing_key'
+          ? 503
+          : code === 'stale_page' || code === 'busy'
+            ? 409
+            : 400
+      )
       .json({
+        code: code === 'missing_key' ? 'missing_key' : undefined,
         error:
-          errors[code] || 'Не удалось выполнить команду. Попробуйте ещё раз.',
+          errors[code] ||
+          'Не удалось применить правку. Исходная страница сохранена.',
       });
   }
 }

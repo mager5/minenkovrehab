@@ -10,7 +10,7 @@ import {
   CTASection,
 } from '@/components';
 import { useEffect, useState } from 'react';
-import AiTitleChat from '@/components/AiTitleChat';
+import AiElementEditor from '@/components/AiElementEditor';
 import titleContent from '../../content/ai-home-title.json';
 import { getHomeContent } from '@/lib/content';
 import { HomeContent } from '@/types/content';
@@ -29,7 +29,7 @@ const fadeInOnScroll = {
 };
 
 export default function Home() {
-  const [heading, setHeading] = useState(titleContent.title);
+  const [heading] = useState(titleContent.title);
   useEffect(() => {
     async function loadContent() {
       try {
@@ -96,7 +96,7 @@ export default function Home() {
       <ServicesSection />
       <HelpSection />
       <CTASection />
-      <AiTitleChat onTitleChange={setHeading} />
+      <AiElementEditor />
     </div>
   );
 }

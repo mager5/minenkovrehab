@@ -420,7 +420,7 @@ const ScrollToTop = () => {
   }, []);
 
   return (
-    <div className='fixed bottom-8 right-8 z-50'>
+    <div data-ai-edit-root='floating' className='fixed bottom-8 right-8 z-50'>
       {isVisible && (
         <button
           onClick={scrollToTop}
