@@ -1,4 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "git": { "deploymentEnabled": { "ai-test": false } }
+  "git": { "deploymentEnabled": { "ai-test": false, "security/next-16.4.3-ai-test": false } }
 }

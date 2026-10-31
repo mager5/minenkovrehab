@@ -6,7 +6,7 @@ module.exports = {
     { protocol:'https',hostname:'*.googleusercontent.com' },
     { protocol:'https',hostname:'*.cloudinary.com' },
   ] },
-  experimental: { cpus: 2 },
+  experimental: { cpus: 2, agentUpgrade: 'security' },
   async headers(){return [{source:'/(.*)',headers:[
     {key:'X-Content-Type-Options',value:'nosniff'},
     {key:'Referrer-Policy',value:'no-referrer'},
