@@ -3,6 +3,7 @@ import { readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { loadSavedKey, saveKey } from './ai-key-store';
 
 const run = promisify(execFile);
 export const originalTitle =
@@ -11,6 +12,7 @@ export const demoTitle = 'Движение к здоровью начинает�
 const file = () => path.join(process.cwd(), 'content', 'ai-home-title.json');
 const state = globalThis as typeof globalThis & {
   aiTitleKey?: string;
+  aiTitlePersisted?: boolean;
   aiTitleBusy?: boolean;
   aiTitleCalls?: number[];
 };
@@ -27,13 +29,34 @@ export async function assertTestBranch() {
   if (stdout.trim() !== 'ai-test') throw Error('test_only');
 }
 
-export function keyConfigured() {
-  return Boolean(state.aiTitleKey || process.env.OPENAI_API_KEY);
+async function connectedKey() {
+  // Also migrate a key already connected before persistence was introduced.
+  if (state.aiTitleKey) {
+    if (!state.aiTitlePersisted) {
+      await saveKey(state.aiTitleKey);
+      state.aiTitlePersisted = true;
+    }
+    return state.aiTitleKey;
+  }
+  if (process.env.OPENAI_API_KEY) return process.env.OPENAI_API_KEY;
+  const saved = await loadSavedKey();
+  if (saved) {
+    state.aiTitleKey = saved;
+    state.aiTitlePersisted = true;
+  }
+  return saved;
 }
-export function configureKey(key: unknown) {
+export async function keyConfigured() {
+  await assertTestBranch();
+  return Boolean(await connectedKey());
+}
+export async function configureKey(key: unknown) {
+  await assertTestBranch();
   if (typeof key !== 'string' || !/^sk-[A-Za-z0-9_-]{16,300}$/.test(key))
     throw Error('invalid_key');
+  await saveKey(key);
   state.aiTitleKey = key;
+  state.aiTitlePersisted = true;
 }
 
 export function validTitle(value: unknown): value is string {
@@ -131,7 +154,7 @@ export async function suggestTitle(
 
 export async function withAI<T>(work: (_key: string) => Promise<T>) {
   await assertTestBranch();
-  const key = state.aiTitleKey || process.env.OPENAI_API_KEY;
+  const key = await connectedKey();
   if (!key) throw Error('missing_key');
   if (state.aiTitleBusy) throw Error('busy');
   const now = Date.now();

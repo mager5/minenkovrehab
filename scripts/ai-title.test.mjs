@@ -4,15 +4,33 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import {
+import { registerHooks } from 'node:module';
+registerHooks({
+  resolve(specifier, context, next) {
+    try {
+      return next(specifier, context);
+    } catch (error) {
+      if (
+        error.code === 'ERR_MODULE_NOT_FOUND' &&
+        specifier.startsWith('.') &&
+        !path.extname(specifier)
+      )
+        return next(specifier + '.ts', context);
+      throw error;
+    }
+  },
+});
+const {
   assertTestBranch,
+  configureKey,
+  keyConfigured,
   chat,
   originalTitle,
   readTitle,
   suggestTitle,
   validTitle,
   writeTitle,
-} from '../src/lib/ai-title.ts';
+} = await import('../src/lib/ai-title.ts');
 
 const previous = process.cwd();
 const root = await mkdtemp(path.join(tmpdir(), 'minenkov-ai-test-'));
@@ -25,6 +43,7 @@ await writeFile(
 process.chdir(root);
 process.env.NODE_ENV = 'development';
 process.env.AI_TEST_ENABLED = '1';
+process.env.AI_TEST_KEYCHAIN = '0';
 delete process.env.OPENAI_API_KEY;
 after(async () => {
   process.chdir(previous);
@@ -143,5 +162,18 @@ test('provider errors, refusals and malformed edits are rejected', async () => {
         ),
       /invalid_response/
     );
+  }
+});
+
+test('production cannot access or configure the local credential store', async () => {
+  process.env.NODE_ENV = 'production';
+  try {
+    await assert.rejects(
+      () => configureKey('sk-' + 'synthetic'.repeat(4)),
+      /test_only/
+    );
+    await assert.rejects(keyConfigured, /test_only/);
+  } finally {
+    process.env.NODE_ENV = 'development';
   }
 });

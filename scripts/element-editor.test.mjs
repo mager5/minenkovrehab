@@ -36,7 +36,8 @@ await mkdir(path.join(root, 'content'));
 process.chdir(root);
 process.env.NODE_ENV = 'development';
 process.env.AI_TEST_ENABLED = '1';
-configureKey('sk-' + 'synthetic'.repeat(4));
+process.env.AI_TEST_KEYCHAIN = '0';
+await configureKey('sk-' + 'synthetic'.repeat(4));
 const target = {
   root: 'main',
   path: [{ tag: 'a', index: 0 }],

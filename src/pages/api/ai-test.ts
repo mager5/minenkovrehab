@@ -21,18 +21,28 @@ export default async function handler(
       error: 'Запрос разрешён только из локальной тестовой страницы.',
     });
   try {
-    if (req.method === 'GET')
+    if (req.method === 'GET') {
+      let configured = false;
+      let configurationError: string | undefined;
+      try {
+        configured = await keyConfigured();
+      } catch {
+        configurationError =
+          'Не удалось открыть Связку ключей macOS. Проверьте разрешение системы и повторите подключение.';
+      }
       return res.json({
-        configured: keyConfigured(),
+        configured,
+        configurationError,
         ...(await elementStatus()),
       });
+    }
     if (req.method !== 'POST') {
       res.setHeader('Allow', 'GET, POST');
       return res.status(405).end();
     }
     const body = req.body;
     if (body?.action === 'configure') {
-      configureKey(body.key);
+      await configureKey(body.key);
       return res.json({ configured: true });
     }
     if (body?.action === 'undo')
@@ -47,7 +57,10 @@ export default async function handler(
   } catch (error) {
     const code = error instanceof Error ? error.message : '';
     const errors: Record<string, string> = {
-      missing_key: 'Подключите API-ключ.',
+      missing_key:
+        'Подключите API-ключ один раз — он сохранится в Связке ключей macOS.',
+      key_store_unavailable:
+        'Не удалось открыть Связку ключей macOS. Разрешите доступ, если система его запросила, и повторите подключение.',
       invalid_key: 'Проверьте формат OpenAI API-ключа.',
       provider_auth: 'OpenAI отклонил ключ.',
       provider_quota:

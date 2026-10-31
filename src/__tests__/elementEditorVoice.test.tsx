@@ -177,7 +177,7 @@ test('a missing AI connection opens setup instead of silently disabling the comm
   fireEvent.click(apply);
   expect(await screen.findByLabelText('OpenAI API-ключ')).toBeVisible();
   expect(command).toHaveValue('сделай текст красным');
-  expect(screen.getByRole('status')).toHaveTextContent('после перезапуска');
+  expect(screen.getByRole('status')).toHaveTextContent('Связке ключей macOS');
   expect(
     request.mock.calls.some(([, options]) => options?.method === 'POST')
   ).toBe(false);

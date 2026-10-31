@@ -73,6 +73,7 @@ export default function AiElementEditor() {
             Array.from(document.querySelectorAll('[data-ai-picker-slot]'))
           );
           setConfigured(Boolean(data.configured));
+          if (data.configurationError) setReply(data.configurationError);
           setOverrides(data.overrides || []);
           setRevision(data.revision || '');
           setCanUndo(Boolean(data.canUndo));
@@ -264,7 +265,7 @@ export default function AiElementEditor() {
     if (action === 'chat' && !configured) {
       setSettings(true);
       setReply(
-        'AI не подключён: после перезапуска сервера ключ нужно подключить снова. Выбор элемента и команда сохранены.'
+        'Подключите AI один раз. Ключ сохранится в Связке ключей macOS и будет доступен после перезапуска. Выбор элемента и команда сохранены.'
       );
       return;
     }
@@ -302,7 +303,9 @@ export default function AiElementEditor() {
         setConfigured(true);
         setSettings(false);
         setKey('');
-        setReply('AI подключён. Выберите элемент и опишите правку.');
+        setReply(
+          'AI подключён. Ключ сохранён в Связке ключей macOS; повторный ввод после перезапуска не нужен.'
+        );
       } else {
         setOverrides(data.overrides);
         setRevision(data.revision);
@@ -641,8 +644,13 @@ export default function AiElementEditor() {
                     value={key}
                     onChange={event => setKey(event.target.value)}
                   />
-                  <small>Ключ хранится в памяти локального сервера.</small>
-                  <button disabled={blocked || !key}>Подключить</button>
+                  <small>
+                    Ключ сохраняется в Связке ключей macOS на этом компьютере. В
+                    Git и браузере его нет.
+                  </small>
+                  <button disabled={blocked || !key}>
+                    Сохранить и подключить
+                  </button>
                 </form>
               )}
             </>

@@ -1,5 +1,5 @@
 import { execFileSync, spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -18,6 +18,23 @@ if (
   throw Error(
     'This isolated copy must not contain environment files. Configure the API key in the local UI.'
   );
+if (process.platform === 'darwin') {
+  const source = path.join(root, 'scripts/ai-keychain.swift');
+  const directory = path.join(root, '.ai-runtime');
+  const binary = path.join(directory, 'ai-keychain');
+  mkdirSync(directory, { recursive: true, mode: 0o700 });
+  if (
+    !existsSync(binary) ||
+    statSync(source).mtimeMs > statSync(binary).mtimeMs
+  )
+    execFileSync('/usr/bin/swiftc', [source, '-o', binary], {
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        CLANG_MODULE_CACHE_PATH: path.join(directory, 'module-cache'),
+      },
+    });
+}
 const env = {};
 for (const name of ['PATH', 'HOME', 'TMPDIR', 'LANG', 'LC_ALL', 'SYSTEMROOT'])
   if (process.env[name]) env[name] = process.env[name];

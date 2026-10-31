@@ -44,3 +44,5 @@ next-env.d.ts
 # local video artifacts
 /tmp-video/
 /.ai-element-history.json
+
+/.ai-runtime/
