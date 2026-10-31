@@ -455,3 +455,43 @@ test.each([
     });
   }
 );
+
+test('one click switches to another caption, discards only the unsaved draft and preserves button behavior', async () => {
+  const main = document.querySelector('main')!;
+  main.insertAdjacentHTML(
+    'beforeend',
+    '<a id="first-caption" href="/about"><svg><path/></svg>Первая кнопка</a><p id="next-caption">Второй текст</p>'
+  );
+  const first = document.querySelector('#first-caption')!;
+  const second = document.querySelector('#next-caption')!;
+  const icon = first.querySelector('svg');
+  render(<AiElementEditor />);
+  await screen.findByRole('button', { name: 'Голосовой ввод' });
+  fireEvent.click(first);
+  let field = screen.getByRole('textbox', { name: 'Редактируемый текст' });
+  field.textContent = 'Несохранённый черновик';
+  fireEvent.input(field);
+  // Clicking the surrounding button keeps the current draft.
+  fireEvent.click(first);
+  expect(screen.getByRole('textbox', { name: 'Редактируемый текст' })).toBe(
+    field
+  );
+  expect(field.textContent).toBe('Несохранённый черновик');
+  fireEvent.click(second);
+  field = screen.getByRole('textbox', { name: 'Редактируемый текст' });
+  expect(second).toContainElement(field);
+  expect(field.textContent).toBe('Второй текст');
+  expect(first.textContent).toBe('Первая кнопка');
+  expect(first.querySelector('svg')).toBe(icon);
+  expect(screen.getAllByRole('button', { name: 'Сохранить' })).toHaveLength(1);
+  expect(
+    request.mock.calls.some(([, options]) => options?.method === 'POST')
+  ).toBe(false);
+  fireEvent.click(first);
+  field = screen.getByRole('textbox', { name: 'Редактируемый текст' });
+  expect(first).toContainElement(field);
+  expect(field.textContent).toBe('Первая кнопка');
+  fireEvent.click(screen.getByRole('button', { name: 'Отмена' }));
+  expect(first.textContent).toBe('Первая кнопка');
+  expect(second.textContent).toBe('Второй текст');
+});

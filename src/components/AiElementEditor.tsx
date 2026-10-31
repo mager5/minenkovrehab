@@ -277,10 +277,12 @@ export default function AiElementEditor() {
           }
           return;
         }
-        // Clicking inside a linked caption must place the caret without navigation.
-        if (element.closest('a,button')) event.preventDefault();
-        event.stopPropagation();
-        return;
+        // Keep caret clicks inside the current caption; other captions can take over.
+        if (inlineSession.current.node.contains(element)) {
+          if (element.closest('a,button')) event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
       }
       if (event instanceof KeyboardEvent && !['Enter', ' '].includes(event.key))
         return;
@@ -292,8 +294,13 @@ export default function AiElementEditor() {
       if (!target) return;
       event.preventDefault();
       event.stopPropagation();
-      setInlineEdit(target);
       const text = resolveTarget(target);
+      if (inlineSession.current) {
+        // Clicking the same button's padding must not discard its draft.
+        if (text && inlineSession.current.node.contains(text)) return;
+        finishText();
+      }
+      setInlineEdit(target);
       setTextDraft(text instanceof Text ? text.data : target.label);
       setTextError('');
     };
