@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { authPost } from '@/lib/auth-client';
+import { useGuestEmailDialog } from '@/components/shared/GuestEmailDialog';
 import { formatPrice, Product } from '../data';
 import { motion } from 'framer-motion';
 import ImageCarousel from '@/components/ui/ImageCarousel';
@@ -11,7 +12,6 @@ import { useState, useEffect } from 'react';
 import { MoreServicesSection } from '@/components/sections/MoreServicesSection';
 import { Loader2, Mail, MessageCircleMore, Send } from 'lucide-react';
 import {
-  getRailwayApiBaseUrl,
   getRobokassaPaymentUrl,
   resolveApiMediaUrl,
 } from '@/lib/api-base';
@@ -34,18 +34,12 @@ const fadeIn = {
 // function getRailwayApiBaseUrl() { ... }
 
 function getPresentationVideoEndpoint() {
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return '/api/products/presentation-video';
-    }
-  }
-
-  return `${getRailwayApiBaseUrl()}/api/courses/products/presentation-video`;
+  return '/api/courses/products/presentation-video';
 }
 
 // Клиентский компонент для страницы продукта
 export default function ProductClient({ product }: { product: Product }) {
+  const guestEmailDialog = useGuestEmailDialog();
   // Состояние для чекбоксов согласия
   const [isConsentChecked, setIsConsentChecked] = useState(false);
   const [isOfferChecked, setIsOfferChecked] = useState(false);
@@ -138,6 +132,7 @@ export default function ProductClient({ product }: { product: Product }) {
         const response = await fetch(getPresentationVideoEndpoint());
         const payload = await response.json().catch(() => null);
         const nextUrl =
+          payload?.data?.embedUrl ||
           payload?.data?.hlsMasterUrl ||
           payload?.data?.url ||
           payload?.data?.signedUrl ||
@@ -433,12 +428,21 @@ export default function ProductClient({ product }: { product: Product }) {
       //   process.env.NODE_ENV === 'production'
       //     ? 'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url'
       //     : '/api/robokassa/generate-payment-url';
-      if(!window.confirm('Подтверждаю согласие с офертой и обработкой данных для оформления заказа.')) {
-        setIsPaymentProcessingLevel1(false);setIsPaymentProcessingLevel2(false);setIsPaymentProcessingLevel3(false);setIsPaymentProcessingLevel4(false);return;
-      }
+      // Согласие с офертой и обработкой данных подтверждается галочками перед кнопкой оплаты.
       const apiUrl = getRobokassaPaymentUrl();
 
-      const response = await authPost(apiUrl, {productId:product.id,level,agreement:true});
+      // Без входа покупка тоже возможна: спрашиваем email, на который придёт доступ.
+      let guestEmail: string | undefined;
+      const me = await fetch('/api/auth/me', { credentials: 'same-origin', cache: 'no-store' }).catch(() => null);
+      if (!me || me.status === 401) {
+        const email = await guestEmailDialog.ask();
+        if (!email) {
+          setIsPaymentProcessingLevel1(false);setIsPaymentProcessingLevel2(false);setIsPaymentProcessingLevel3(false);setIsPaymentProcessingLevel4(false);
+          return;
+        }
+        guestEmail = email;
+      }
+      const response = await authPost(apiUrl, {productId:product.id,level,agreement:true,...(guestEmail?{email:guestEmail}:{})});
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -515,6 +519,8 @@ export default function ProductClient({ product }: { product: Product }) {
   */
 
   return (
+    <>
+    {guestEmailDialog.dialog}
     <motion.div
       className='py-12'
       initial={{ opacity: 0 }}
@@ -631,6 +637,8 @@ export default function ProductClient({ product }: { product: Product }) {
                         </p>
                       </div>
                     </div>
+                  ) : presentationVideoUrl && presentationVideoUrl.startsWith('https://kinescope.io/embed/') ? (
+                    <iframe title='Презентация программы' src={presentationVideoUrl} referrerPolicy='no-referrer' allow='autoplay; fullscreen; encrypted-media; picture-in-picture' allowFullScreen className='aspect-video w-full border-0 rounded-lg' />
                   ) : presentationVideoUrl ? (
                     <VideoPlayer
                       src={presentationVideoUrl}
@@ -1912,5 +1920,6 @@ export default function ProductClient({ product }: { product: Product }) {
       {/* Секция "Еще услуги" */}
       <MoreServicesSection currentProductId={product.id} />
     </motion.div>
+    </>
   );
 }

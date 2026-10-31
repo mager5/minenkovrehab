@@ -1,9 +1,16 @@
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/shared/Header';
 import Footer from '@/components/shared/Footer';
 import CookieBanner from '@/components/CookieBanner';
 // import HeyGenWidget from '@/components/shared/HeyGenWidget';
 import type { Metadata } from 'next';
+
+const inter = Inter({
+  subsets: ['latin', 'cyrillic'],
+  variable: '--font-inter',
+  display: 'swap',
+});
 
 // Альтернативная конфигурация с явными fallback-шрифтами, если понадобится вернуться:
 // const inter = Inter({
@@ -115,7 +122,7 @@ export default function RootLayout({
   return (
     <html
       lang='ru'
-      className={`font-sans h-full overflow-x-hidden overflow-y-auto`}
+      className={`${inter.variable} font-sans h-full overflow-x-hidden overflow-y-auto`}
     >
       <head>
         <script

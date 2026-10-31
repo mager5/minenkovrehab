@@ -7,5 +7,8 @@ export function resolveApiMediaUrl(url: string | null | undefined): string | nul
   const value=url.trim();
   // No automatic public Railway/Supabase/working API fallback.
   if(value.startsWith('/api/'))return value;
+  if(/^https:\/\/kinescope\.io\/embed\/[A-Za-z0-9_-]{4,64}(\?[A-Za-z0-9_.~%=&-]*)?$/.test(value))return value;
   return null;
 }
+
+export const isKinescopeEmbed=(url: string | null | undefined): boolean => !!url && url.startsWith('https://kinescope.io/embed/');

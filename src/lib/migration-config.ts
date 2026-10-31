@@ -1,6 +1,6 @@
 // Shared by Edge middleware, SSR and API proxy. No production fallbacks.
 export function migrationBackendOrigin(): string | null {
-  if (!['local', 'staging', 'private'].includes(process.env.MIGRATION_ENV || '')) return null;
+  if (!['local', 'staging', 'private', 'vps'].includes(process.env.MIGRATION_ENV || '')) return null;
   const value = process.env.MIGRATION_API_INTERNAL_URL;
   const site = process.env.MIGRATION_SITE_ORIGIN;
   if (!value || !site) return null;

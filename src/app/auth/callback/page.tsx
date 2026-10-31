@@ -1,2 +1,9 @@
-import Link from 'next/link';
-export default function AuthCallback() { return <main className='p-12'><p>Для входа используйте email и пароль. Старые ссылки авторизации не поддерживаются.</p><Link href='/login'>Войти</Link></main>; }
+import NoticePage from '@/components/shared/NoticePage';
+
+export default function AuthCallback() {
+  return (
+    <NoticePage title='Ссылка больше не действует' primary={{ href: '/login', label: 'Войти' }} secondary={{ href: '/forgot-password', label: 'Восстановить пароль' }}>
+      Для входа используйте email и пароль. Старые ссылки авторизации не поддерживаются.
+    </NoticePage>
+  );
+}

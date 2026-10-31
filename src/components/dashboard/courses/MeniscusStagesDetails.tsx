@@ -1472,7 +1472,7 @@ export function MeniscusStagesDetails({
                     <h4 className='font-medium text-gray-900 mb-3'>
                       Еженедельный тест
                     </h4>
-                    <VideoPlayer src={weeklyTestUrl} ref={weeklyTestRef} />
+                    {weeklyTestUrl.startsWith('https://kinescope.io/embed/') ? <iframe title='Еженедельный тест' src={weeklyTestUrl} referrerPolicy='no-referrer' allow='autoplay; fullscreen; encrypted-media; picture-in-picture' allowFullScreen className='aspect-video w-full border-0 rounded-lg' /> : <VideoPlayer src={weeklyTestUrl} ref={weeklyTestRef} />}
                     <div className='mt-4'>
                       <p className='text-base text-gray-700 mb-3'>
                         Еженедельный ТЕСТ — отслеживание динамики восстановления

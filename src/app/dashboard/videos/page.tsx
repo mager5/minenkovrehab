@@ -1,1 +1,9 @@
-export default function VideosPage(){return <main className='p-12'><h1>Личные видео</h1><p>Загрузка личных видео будет доступна после переноса хранилища.</p></main>;}
+import NoticePage from '@/components/shared/NoticePage';
+
+export default function VideosPage() {
+  return (
+    <NoticePage title='Личные видео' secondary={{ href: '/dashboard', label: 'В личный кабинет' }}>
+      Загрузка личных видео будет доступна после переноса хранилища.
+    </NoticePage>
+  );
+}
