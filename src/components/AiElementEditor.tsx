@@ -317,20 +317,38 @@ export default function AiElementEditor() {
     if (!(text instanceof Text) || !text.parentElement) return;
     const original = text.data;
     const parent = text.parentElement;
-    const anchor =
-      parent.closest('a,button') ||
-      parent.closest('h1,h2,h3,h4,h5,h6,p,li,small,figcaption,dt,dd,label') ||
-      parent;
     const slot = document.createElement('div');
     slot.setAttribute('data-ai-editor', '');
-    slot.style.textAlign = getComputedStyle(anchor).textAlign;
-    anchor.after(slot);
+    slot.className = 'ai-inline-control-slot';
+    document.body.appendChild(slot);
     const node = document.createElement('span');
     node.setAttribute('data-ai-generated', 'inline-editor');
     node.setAttribute('data-ai-inline-editing', '');
     parent.insertBefore(node, text);
     node.appendChild(text);
-    const input = () => setTextDraft(node.innerText || node.textContent || '');
+    const button = parent.closest('a,button');
+    const position = () => {
+      const bounds = (button || node).getBoundingClientRect();
+      const panel = slot.getBoundingClientRect();
+      slot.style.left = `${Math.max(8, Math.min(bounds.left, window.innerWidth - panel.width - 8))}px`;
+      const top =
+        button && bounds.bottom + panel.height + 16 < window.innerHeight
+          ? bounds.bottom + 8
+          : bounds.top >= panel.height + 16
+            ? bounds.top - panel.height - 8
+            : bounds.bottom + 8;
+      slot.style.top = `${Math.max(8, Math.min(top, window.innerHeight - panel.height - 8))}px`;
+    };
+    const input = () => {
+      setTextDraft(node.innerText || node.textContent || '');
+      position();
+    };
+    const observer = new ResizeObserver(position);
+    observer.observe(slot);
+    observer.observe(node);
+    window.addEventListener('scroll', position, true);
+    window.addEventListener('resize', position);
+    const frame = requestAnimationFrame(position);
     const keydown = (event: KeyboardEvent) => {
       if (node.contentEditable === 'false') return;
       if (event.key === 'Escape') {
@@ -349,6 +367,10 @@ export default function AiElementEditor() {
       restore: () => {
         node.removeEventListener('input', input);
         node.removeEventListener('keydown', keydown);
+        observer.disconnect();
+        cancelAnimationFrame(frame);
+        window.removeEventListener('scroll', position, true);
+        window.removeEventListener('resize', position);
         text.data = original;
         node.replaceWith(text);
         slot.remove();
@@ -720,7 +742,12 @@ export default function AiElementEditor() {
             <button type='button' onClick={closeText} disabled={busy}>
               Отмена
             </button>
-            <span>{textDraft.length}/2000</span>
+            <span
+              className='ai-inline-count'
+              title={`${textDraft.length} из 2000 символов`}
+            >
+              {textDraft.length}
+            </span>
             {textError && <p role='alert'>{textError}</p>}
           </form>,
           inlineControls
