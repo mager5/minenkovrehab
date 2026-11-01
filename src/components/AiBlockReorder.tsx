@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { GripVertical, X } from 'lucide-react';
+import { GripVertical, X, Copy } from 'lucide-react';
 import { describeElement } from '@/lib/element-editor-dom';
 import type { EditTarget } from '@/lib/element-editor-schema';
 
@@ -30,6 +30,11 @@ type Props = {
     _group: string,
     _order: number[]
   ) => Promise<void>;
+  onDuplicate?: (
+    _target: EditTarget,
+    _group: string,
+    _index: number
+  ) => Promise<void>;
   onDelete?: (
     _target: EditTarget,
     _group: string,
@@ -48,6 +53,7 @@ export default function AiBlockReorder({
   disabled,
   onMove,
   onDelete,
+  onDuplicate,
   onNotice,
 }: Props) {
   const [active, setActive] = useState(false);
@@ -389,6 +395,24 @@ export default function AiBlockReorder({
                   >
                     <GripVertical size={13} strokeWidth={1.6} />
                   </button>
+                  {onDuplicate &&
+                    item.group.dataset.aiSortableGroup !== 'home-sections' && (
+                      <button
+                        data-ai-editor
+                        type='button'
+                        className='ai-block-copy'
+                        aria-label={`Дублировать: ${item.label}`}
+                        title='Дублировать существующий блок'
+                        onClick={() => {
+                          const target = describeElement(item.group),
+                            group = item.group.dataset.aiSortableGroup;
+                          if (target && group)
+                            void onDuplicate(target, group, item.id);
+                        }}
+                      >
+                        <Copy size={12} strokeWidth={1.6} />
+                      </button>
+                    )}
                   {onDelete && (
                     <button
                       data-ai-editor

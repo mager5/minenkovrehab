@@ -27,6 +27,8 @@ const {
   editText,
   reorderGroup,
   deleteBlock,
+  duplicateBlock,
+  editDirect,
   editElement,
   undoElement,
   proposeElementEdit,
@@ -406,4 +408,163 @@ test('deletion rejects invalid indices, other roots, stale revisions and product
     process.env.NODE_ENV = 'development';
   }
   assert.deepEqual((await elementStatus()).overrides, []);
+});
+
+test('duplication copies saved overrides and subsequent edits stay independent', async () => {
+  const container = { ...target, tag: 'div', path: [{ tag: 'div', index: 0 }] };
+  const caption = {
+    ...target,
+    kind: 'text',
+    path: [...container.path, { tag: 'a', index: 0 }],
+  };
+  const initial = await elementStatus();
+  const edited = await editText(caption, 'Client caption', initial.revision);
+  const copied = await duplicateBlock(
+    container,
+    'hero-actions',
+    0,
+    edited.revision
+  );
+  assert.deepEqual(copied.overrides.find(item => item.layout)?.layout.copies, [
+    { id: 2, source: 0 },
+  ]);
+  assert.deepEqual(
+    copied.overrides.find(item => item.layout)?.layout.order,
+    [0, 2, 1]
+  );
+  const copyCaption = {
+    ...caption,
+    path: [...container.path, { tag: 'a', index: 2 }],
+  };
+  const customized = await editText(
+    copyCaption,
+    'Independent copy',
+    copied.revision
+  );
+  assert.equal(
+    customized.overrides.find(
+      item =>
+        item.target.path.at(-1)?.index === 0 && item.target.kind === 'text'
+    ).changes[0].value,
+    'Client caption'
+  );
+  assert.equal(
+    customized.overrides.find(
+      item =>
+        item.target.path.at(-1)?.index === 2 && item.target.kind === 'text'
+    ).changes[0].value,
+    'Independent copy'
+  );
+  const moved = await reorderGroup(
+    container,
+    'hero-actions',
+    [2, 1, 0],
+    customized.revision
+  );
+  const deleted = await deleteBlock(
+    container,
+    'hero-actions',
+    2,
+    moved.revision
+  );
+  assert.deepEqual(deleted.overrides.find(item => item.layout)?.layout.hidden, [
+    2,
+  ]);
+  const restored = await undoElement(deleted.revision);
+  assert.deepEqual(restored.overrides, moved.overrides);
+  const undoMove = await undoElement(restored.revision);
+  const undoText = await undoElement(undoMove.revision);
+  assert.deepEqual(
+    (await undoElement(undoText.revision)).overrides,
+    edited.overrides
+  );
+});
+test('manual appearance settings validate and undo only requested properties', async () => {
+  const before = await elementStatus();
+  const edited = await editDirect(
+    target,
+    [
+      { property: 'color', value: '#123456' },
+      { property: 'borderRadius', value: '12px' },
+    ],
+    before.revision
+  );
+  assert.equal(edited.overrides[0].changes.length, 2);
+  await assert.rejects(() =>
+    editDirect(
+      target,
+      [{ property: 'color', value: 'url(javascript:x)' }],
+      edited.revision
+    )
+  );
+  await assert.rejects(() =>
+    editDirect(
+      target,
+      [{ property: 'text', value: 'not settings' }],
+      edited.revision
+    )
+  );
+  assert.deepEqual((await undoElement(edited.revision)).overrides, []);
+});
+test('image replacement normalizes a local upload and undo preserves original content', async () => {
+  const sharp = (await import('sharp')).default;
+  const { replaceImage } = await import('../src/lib/ai-image.ts');
+  const image = { ...target, tag: 'img', textEditable: false };
+  const before = await elementStatus();
+  const bytes = await sharp({
+    create: { width: 40, height: 30, channels: 3, background: '#123456' },
+  })
+    .png()
+    .toBuffer();
+  const saved = await replaceImage(image, bytes, before.revision);
+  const source = saved.overrides[0].changes[0].value;
+  assert.match(source, /^\/uploads\/ai-test\/[a-f0-9-]+\.webp$/);
+  const metadata = await sharp(
+    await readFile(path.join('public', source))
+  ).metadata();
+  assert.equal(metadata.format, 'webp');
+  assert.equal(metadata.width, 40);
+  assert.deepEqual((await undoElement(saved.revision)).overrides, []);
+  await assert.rejects(
+    () =>
+      replaceImage(
+        image,
+        new TextEncoder().encode('<svg>not a raster image</svg>'),
+        before.revision
+      ),
+    /invalid_image/
+  );
+});
+
+test('preview framing exception is scoped to the development-only preview route', async () => {
+  const { createRequire } = await import('node:module');
+  const require = createRequire(import.meta.url);
+  const config = require('../next.config.js');
+  const previousNode = process.env.NODE_ENV,
+    previousTest = process.env.AI_TEST_ENABLED;
+  try {
+    process.env.NODE_ENV = 'production';
+    process.env.AI_TEST_ENABLED = '1';
+    const production = await config.headers();
+    assert.equal(production.length, 1);
+    assert.equal(
+      production[0].headers.find(header => header.key === 'X-Frame-Options')
+        .value,
+      'DENY'
+    );
+    process.env.NODE_ENV = 'development';
+    process.env.AI_TEST_ENABLED = '0';
+    assert.equal((await config.headers()).length, 1);
+    process.env.AI_TEST_ENABLED = '1';
+    const preview = await config.headers();
+    assert.equal(preview.length, 2);
+    assert.equal(preview[1].source, '/');
+    assert.deepEqual(preview[1].has, [
+      { type: 'query', key: 'ai-preview', value: 'phone' },
+    ]);
+    assert.equal(preview[1].headers[0].value, 'SAMEORIGIN');
+  } finally {
+    process.env.NODE_ENV = previousNode;
+    process.env.AI_TEST_ENABLED = previousTest;
+  }
 });

@@ -28,19 +28,27 @@ import {
 } from '@/lib/element-editor-dom';
 import {
   targetSchema,
+  targetKey,
   type EditTarget,
   type ElementOverride,
 } from '@/lib/element-editor-schema';
 import './ai-element-editor.css';
 import AiBlockReorder from './AiBlockReorder';
+import AiPreviewWidget from './AiPreviewWidget';
+import AiElementInspector, { type EditorResult } from './AiElementInspector';
 import {
   setLayoutOrders,
   setLayoutHidden,
+  setLayoutCopies,
   withLayoutVisibilityRestored,
 } from '@/lib/ai-layout-store';
 
 export default function AiElementEditor() {
   const enabled = process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1';
+  const previewOnly =
+    typeof window !== 'undefined' &&
+    (window.self !== window.top ||
+      new URLSearchParams(window.location.search).has('ai-preview'));
   const [ready, setReady] = useState(false);
   const [slots, setSlots] = useState<Element[]>([]);
   const [picking, setPicking] = useState(false);
@@ -133,7 +141,7 @@ export default function AiElementEditor() {
   }, [enabled]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || previewOnly) return;
     try {
       sessionStorage.setItem(
         'ai-element-draft',
@@ -142,7 +150,13 @@ export default function AiElementEditor() {
     } catch {
       /* The draft can still be used without browser storage. */
     }
-  }, [ready, selected, message]);
+  }, [ready, selected, message, previewOnly]);
+
+  useEffect(() => {
+    if (!previewOnly) return;
+    document.documentElement.setAttribute('data-ai-preview', '');
+    return () => document.documentElement.removeAttribute('data-ai-preview');
+  }, [previewOnly]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -160,6 +174,13 @@ export default function AiElementEditor() {
 
   useEffect(() => {
     if (!enabled || !ready) return;
+    setLayoutCopies(
+      Object.fromEntries(
+        overrides.flatMap(item =>
+          item.layout ? [[item.layout.group, item.layout.copies || []]] : []
+        )
+      )
+    );
     setLayoutOrders(
       Object.fromEntries(
         overrides.flatMap(item =>
@@ -177,6 +198,7 @@ export default function AiElementEditor() {
   }, [enabled, ready, overrides]);
   useEffect(
     () => () => {
+      setLayoutCopies({});
       setLayoutOrders({});
       setLayoutHidden({});
     },
@@ -234,6 +256,17 @@ export default function AiElementEditor() {
       withLayoutVisibilityRestored(restore);
     };
   }, [enabled, ready, overrides, inlineVersion, finishText]);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() =>
+      setSelected(previous => {
+        if (!previous) return previous;
+        const node = resolveTarget(previous);
+        return node ? describeElement(node) || previous : previous;
+      })
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [overrides]);
 
   useEffect(() => {
     if (!picking) return;
@@ -308,7 +341,7 @@ export default function AiElementEditor() {
   }, []);
 
   useEffect(() => {
-    if (!enabled || !ready || picking || blocked) return;
+    if (!enabled || !ready || picking || blocked || previewOnly) return;
     const open = (event: Event) => {
       const element = event.target instanceof Element ? event.target : null;
       if (!element || element.closest('[data-ai-editor]')) return;
@@ -329,6 +362,29 @@ export default function AiElementEditor() {
       }
       if (event instanceof KeyboardEvent && !['Enter', ' '].includes(event.key))
         return;
+      const picture = element.closest('img');
+      const section = element.closest('section');
+      const background =
+        !picture &&
+        section &&
+        getComputedStyle(section).backgroundImage !== 'none' &&
+        !inlineTextTarget(element)
+          ? section
+          : null;
+      if (picture || background) {
+        const target = describeElement(picture || background!);
+        if (target) {
+          if (inlineSession.current) finishText();
+          event.preventDefault();
+          event.stopPropagation();
+          setSelected(target);
+          setCollapsed(false);
+          setReply(
+            'Изображение выбрано. Нажмите «Заменить изображение» в редакторе.'
+          );
+        }
+        return;
+      }
       const target = inlineTextTarget(
         element,
         event instanceof MouseEvent ? event.clientX : undefined,
@@ -353,7 +409,7 @@ export default function AiElementEditor() {
       document.removeEventListener('click', open, true);
       document.removeEventListener('keydown', open, true);
     };
-  }, [enabled, ready, picking, blocked, finishText]);
+  }, [enabled, ready, picking, blocked, finishText, previewOnly]);
   useEffect(() => {
     if (!inlineEdit) return;
     const text = resolveTarget(inlineEdit);
@@ -443,7 +499,7 @@ export default function AiElementEditor() {
         : 'plaintext-only';
   }, [busy, inlineEdit]);
 
-  if (!enabled || !ready) return null;
+  if (!enabled || !ready || previewOnly) return null;
   function closeText() {
     if (!busy) finishText();
   }
@@ -507,6 +563,39 @@ export default function AiElementEditor() {
       setHover(parent);
       setBox(targetBounds(parent));
       setFrozen(true);
+    }
+  }
+  function acceptEdit(data: EditorResult) {
+    setOverrides(data.overrides);
+    setRevision(data.revision);
+    setCanUndo(Boolean(data.canUndo));
+    setActions(data.actions || []);
+    if (data.reply) setReply(data.reply);
+  }
+  async function copyBlock(target: EditTarget, group: string, index: number) {
+    if (blocked || inlineEdit || picking) return;
+    setBusy(true);
+    try {
+      const response = await fetch('/api/ai-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'duplicate-block',
+          page: '/',
+          target,
+          group,
+          index,
+          revision,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw Error(data.error || 'Не удалось дублировать блок.');
+      acceptEdit(data);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : 'Ошибка соединения.');
+    } finally {
+      setBusy(false);
     }
   }
   async function moveBlocks(
@@ -812,6 +901,7 @@ export default function AiElementEditor() {
     ) : null;
   return (
     <>
+      <AiPreviewWidget />
       {slots.map((slot, index) =>
         createPortal(selectButton, slot, String(index))
       )}
@@ -971,10 +1061,20 @@ export default function AiElementEditor() {
                 вводе — также запись. Распознанный текст можно проверить перед
                 применением.
               </p>
+              <AiElementInspector
+                key={`${selected ? targetKey(selected) : 'none'}:${revision}`}
+                selected={selected}
+                revision={revision}
+                disabled={blocked || Boolean(inlineEdit) || picking}
+                onBusy={setBusy}
+                onSaved={acceptEdit}
+                onError={setReply}
+              />
               <AiBlockReorder
                 disabled={blocked || Boolean(inlineEdit) || picking}
                 onMove={moveBlocks}
                 onDelete={removeBlock}
+                onDuplicate={copyBlock}
                 onNotice={setReply}
               />
               <div className='ai-element-actions'>

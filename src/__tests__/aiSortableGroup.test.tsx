@@ -9,6 +9,8 @@ import { useState } from 'react';
 import AiSortableGroup from '@/components/AiSortableGroup';
 import {
   getLayoutOrders,
+  getLayoutCopies,
+  setLayoutCopies,
   setLayoutOrders,
   getLayoutHidden,
   setLayoutHidden,
@@ -25,6 +27,7 @@ const originalFlag = process.env.NEXT_PUBLIC_AI_TEST_ENABLED;
 beforeEach(() => {
   process.env.NEXT_PUBLIC_AI_TEST_ENABLED = '1';
   act(() => {
+    setLayoutCopies({});
     setLayoutOrders({});
     setLayoutHidden({});
   });
@@ -32,6 +35,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   act(() => {
+    setLayoutCopies({});
     setLayoutOrders({});
     setLayoutHidden({});
   });
@@ -80,6 +84,7 @@ test('React reorder preserves element state and baseline editor paths without wr
   expect(second.style.color).toBe('');
   restore();
   act(() => {
+    setLayoutCopies({});
     setLayoutOrders({});
     setLayoutHidden({});
   });
@@ -101,6 +106,7 @@ test('invalid orders fail closed and default markup keeps the native p/div hiera
 test('production ignores stored orders and adds no sorting metadata', () => {
   process.env.NEXT_PUBLIC_AI_TEST_ENABLED = '0';
   act(() => {
+    setLayoutCopies({ 'hero-actions': [{ id: 2, source: 0 }] });
     setLayoutOrders({ 'hero-actions': [1, 0] });
     setLayoutHidden({ 'hero-actions': [0, 1] });
   });
@@ -111,6 +117,8 @@ test('production ignores stored orders and adds no sorting metadata', () => {
   expect(first).not.toHaveAttribute('data-ai-order-index');
   expect(getLayoutOrders()).toEqual({});
   expect(getLayoutHidden()).toEqual({});
+  expect(getLayoutCopies()).toEqual({});
+  expect(first.parentElement!.children).toHaveLength(2);
   expect(first).toBeVisible();
 });
 
@@ -194,4 +202,137 @@ test('invalid hidden masks fail closed and a throwing style transaction still re
   ).toThrow('synthetic');
   expect(first).not.toBeVisible();
   expect(first.style.display).toBe('none');
+});
+
+test('copies use original props with independent React identity and retain original target paths', () => {
+  render(<Fixture />);
+  const first = screen.getByRole('button', { name: 'A:0' });
+  const second = screen.getByRole('button', { name: 'B:0' });
+  const parent = first.parentElement!;
+  fireEvent.click(first);
+  fireEvent.click(first);
+  const originalTarget = describeElement(first)!;
+  act(() => setLayoutCopies({ 'hero-actions': [{ id: 2, source: 0 }] }));
+  const copy = parent.querySelector<HTMLElement>('[data-ai-order-index="2"]')!;
+  expect(parent.children).toHaveLength(3);
+  expect(copy).not.toBe(first);
+  expect(copy.textContent).toBe('A:0');
+  expect(first.textContent).toBe('A:2');
+  fireEvent.click(copy);
+  expect(copy.textContent).toBe('A:1');
+  expect(first.textContent).toBe('A:2');
+  const copyTarget = describeElement(copy)!;
+  expect(targetKey(copyTarget)).not.toBe(targetKey(originalTarget));
+  expect(resolveTarget(originalTarget)).toBe(first);
+  act(() => setLayoutOrders({ 'hero-actions': [2, 1, 0] }));
+  expect(parent.children[0]).toBe(copy);
+  expect(parent.children[1]).toBe(second);
+  expect(parent.children[2]).toBe(first);
+  expect(resolveTarget(originalTarget)).toBe(first);
+  expect(resolveTarget(copyTarget)).toBe(copy);
+  expect(targetKey(describeElement(copy)!)).toBe(targetKey(copyTarget));
+  const restore = withLayoutVisibilityRestored(() =>
+    applyOverrides([
+      {
+        target: copyTarget,
+        changes: [{ property: 'text', value: 'Copy-only text' }],
+      },
+    ])
+  );
+  expect(copy.textContent).toBe('Copy-only text');
+  expect(first.textContent).toBe('A:2');
+  withLayoutVisibilityRestored(restore);
+  act(() => {
+    setLayoutCopies({});
+    setLayoutOrders({});
+    setLayoutHidden({});
+  });
+  expect(parent.children).toHaveLength(2);
+  expect(parent.children[0]).toBe(first);
+  expect(parent.children[1]).toBe(second);
+  expect(first.textContent).toBe('A:2');
+  expect(resolveTarget(originalTarget)).toBe(first);
+  expect(resolveTarget(copyTarget)).toBeNull();
+});
+
+test('copied items participate in hidden masks and hide-all without being unmounted', () => {
+  render(<Fixture />);
+  const first = screen.getByRole('button', { name: 'A:0' });
+  const parent = first.parentElement!;
+  act(() => setLayoutCopies({ 'hero-actions': [{ id: 2, source: 1 }] }));
+  const copy = parent.querySelector<HTMLElement>('[data-ai-order-index="2"]')!;
+  expect(copy.textContent).toBe('B:0');
+  act(() => {
+    setLayoutOrders({ 'hero-actions': [2, 0, 1] });
+    setLayoutHidden({ 'hero-actions': [2] });
+  });
+  expect(copy).not.toBeVisible();
+  expect(parent.children[0]).toBe(copy);
+  expect(parent.children).toHaveLength(3);
+  expect(first).toBeVisible();
+  act(() => setLayoutHidden({ 'hero-actions': [0, 1, 2] }));
+  expect(parent).not.toBeVisible();
+  expect(parent).toHaveAttribute('data-ai-layout-hidden');
+  act(() => setLayoutHidden({}));
+  expect(parent).toBeVisible();
+  expect(parent.children[0]).toBe(copy);
+  expect(copy).toBeVisible();
+  act(() => setLayoutCopies({}));
+  expect(getLayoutHidden()).toEqual({});
+  expect(parent.children).toHaveLength(2);
+  expect(parent).not.toHaveAttribute('data-ai-layout-hidden');
+});
+
+test('copy validation rejects nested groups, copy sources, duplicate ids and invalid permutations', async () => {
+  const { validLayoutCopies, validLayoutOrder, validLayoutHidden } =
+    await import('@/lib/ai-layout-schema');
+  const copies = [{ id: 2, source: 0 }];
+  expect(validLayoutCopies('hero-actions', copies)).toBe(true);
+  expect(validLayoutCopies('hero-actions', [{ id: 3, source: 0 }])).toBe(false);
+  expect(
+    validLayoutCopies('hero-actions', [
+      { id: 2, source: 0 },
+      { id: 4, source: 1 },
+    ])
+  ).toBe(false);
+  expect(
+    validLayoutCopies(
+      'hero-actions',
+      Array.from({ length: 20 }, (_, index) => ({
+        id: 2 + index,
+        source: index % 2,
+      }))
+    )
+  ).toBe(true);
+  expect(validLayoutOrder('hero-actions', [2, 0, 1], copies)).toBe(true);
+  expect(validLayoutOrder('hero-actions', [0, 1], copies)).toBe(false);
+  expect(validLayoutOrder('hero-actions', [0, 1, 3], copies)).toBe(false);
+  expect(validLayoutHidden('hero-actions', [2], copies)).toBe(true);
+  expect(validLayoutHidden('hero-actions', [3], copies)).toBe(false);
+  expect(validLayoutCopies('home-sections', [{ id: 5, source: 0 }])).toBe(
+    false
+  );
+  for (const value of [
+    [{ id: 2, source: 2 }],
+    [{ id: 1, source: 0 }],
+    [{ id: 22, source: 0 }],
+    [
+      { id: 2, source: 0 },
+      { id: 2, source: 1 },
+    ],
+    Array(1),
+  ]) {
+    expect(validLayoutCopies('hero-actions', value)).toBe(false);
+    act(() => setLayoutCopies({ 'hero-actions': value }));
+    expect(getLayoutCopies()).toEqual({});
+  }
+  render(<Fixture />);
+  const parent = screen.getByRole('button', { name: 'A:0' }).parentElement!;
+  const input = [{ id: 2, source: 0 }];
+  act(() => setLayoutCopies({ 'hero-actions': input }));
+  input[0]!.source = 1;
+  expect(getLayoutCopies()['hero-actions']![0]!.source).toBe(0);
+  act(() => setLayoutOrders({ 'hero-actions': [0, 1] }));
+  expect(parent.children).toHaveLength(3);
+  expect(parent.children[2]).toHaveAttribute('data-ai-order-index', '2');
 });

@@ -10,9 +10,16 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { LAYOUT_GROUPS, validLayoutOrder } from '@/lib/ai-layout-schema';
+import {
+  LAYOUT_GROUPS,
+  validLayoutOrder,
+  validLayoutCopies,
+  layoutItemIds,
+} from '@/lib/ai-layout-schema';
 import {
   useLayoutOrders,
+  useLayoutCopies,
+  getLayoutCopies,
   useLayoutHidden,
   getLayoutHidden,
   registerLayoutVisibility,
@@ -77,7 +84,8 @@ function visibilityLayer(
           node instanceof HTMLElement &&
           node.hasAttribute('data-ai-order-index')
       );
-      if (direct.length !== LAYOUT_GROUPS[group]?.count) return;
+      const expected = layoutItemIds(group, getLayoutCopies()[group] || []);
+      if (!expected || direct.length !== expected.length) return;
       for (const node of direct)
         if (mask.includes(Number(node.dataset.aiOrderIndex))) hide(node);
       if (mask.length === direct.length) hide(root);
@@ -100,22 +108,36 @@ export default function AiSortableGroup({
 }: AiSortableGroupProps) {
   const root = useRef<HTMLDivElement & HTMLParagraphElement>(null);
   const orders = useLayoutOrders();
+  const copies = useLayoutCopies();
   useLayoutHidden();
   const visibility = useRef<LayoutVisibilityLayer | null>(null);
   const enabled = process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1';
   const nodes = Children.toArray(children);
   const sortable = enabled && LAYOUT_GROUPS[group]?.count === nodes.length;
+  const requestedCopies = copies[group] || [];
+  const groupCopies =
+    sortable && validLayoutCopies(group, requestedCopies)
+      ? requestedCopies
+      : [];
+  const members =
+    layoutItemIds(group, groupCopies) || nodes.map((_, index) => index);
   const requested = orders[group];
   const order =
-    sortable && validLayoutOrder(group, requested)
+    sortable && validLayoutOrder(group, requested, groupCopies)
       ? requested
-      : nodes.map((_, index) => index);
-  const keyed = nodes.map((node, index) =>
-    isValidElement(node) ? (
-      cloneElement(node, { key: `${group}:${index}` })
-    ) : (
-      <Fragment key={`${group}:${index}`}>{node}</Fragment>
-    )
+      : members;
+  const sources = new Map(groupCopies.map(copy => [copy.id, copy.source]));
+  const keyed = new Map(
+    members.map(id => {
+      const source = id < nodes.length ? id : sources.get(id);
+      const node = source === undefined ? null : nodes[source];
+      const child = isValidElement(node) ? (
+        cloneElement(node, { key: `${group}:${id}` })
+      ) : (
+        <Fragment key={`${group}:${id}`}>{node}</Fragment>
+      );
+      return [id, child];
+    })
   );
 
   // Keys preserve React identity. Original indices preserve existing DOM target paths.
@@ -158,7 +180,7 @@ export default function AiSortableGroup({
       ref={root}
       data-ai-sortable-group={sortable ? group : undefined}
     >
-      {sortable ? order.map(index => keyed[index]) : children}
+      {sortable ? order.map(index => keyed.get(index)) : children}
     </Tag>
   );
 }

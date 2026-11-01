@@ -3,9 +3,11 @@ import { readMigrationSession } from '@/lib/migration-config';
 export async function proxy(request: NextRequest) {
   if (process.env.AI_TEST_ENABLED === '1') {
     if (
-      ['/api/ai-test', '/api/ai-test/transcribe'].includes(
-        request.nextUrl.pathname
-      )
+      [
+        '/api/ai-test',
+        '/api/ai-test/transcribe',
+        '/api/ai-test/image',
+      ].includes(request.nextUrl.pathname)
     )
       return NextResponse.next();
     return NextResponse.json(

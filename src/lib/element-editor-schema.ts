@@ -64,7 +64,12 @@ export type ElementOverride = {
   target: EditTarget;
   changes: ElementChange[];
   layout?:
-    | { group: string; order: number[]; hidden?: number[] | undefined }
+    | {
+        group: string;
+        order: number[];
+        hidden?: number[] | undefined;
+        copies?: { id: number; source: number }[] | undefined;
+      }
     | undefined;
 };
 export const overrideSchema = z.strictObject({
@@ -73,6 +78,15 @@ export const overrideSchema = z.strictObject({
   layout: z
     .strictObject({
       group: z.string().max(60),
+      copies: z
+        .array(
+          z.strictObject({
+            id: z.number().int().min(0).max(100),
+            source: z.number().int().min(0).max(100),
+          })
+        )
+        .max(20)
+        .optional(),
       hidden: z.array(z.number().int().min(0).max(100)).max(100).optional(),
       order: z.array(z.number().int().min(0).max(100)).min(2).max(100),
     })

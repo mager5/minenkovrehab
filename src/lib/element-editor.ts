@@ -2,7 +2,11 @@ import { readFile, writeFile, rename, access } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { LAYOUT_GROUPS } from './ai-layout-schema';
+import {
+  LAYOUT_GROUPS,
+  validLayoutOrder,
+  layoutItemIds,
+} from './ai-layout-schema';
 import { assertTestBranch, withAI, validTitle } from './ai-title';
 import {
   editResultSchema,
@@ -44,6 +48,8 @@ function actionLabel(before: ElementOverride[], after: ElementOverride[]) {
     const earlier = before.find(
       entry => entry.layout?.group === item.layout?.group
     )?.layout;
+    if ((item.layout.copies?.length || 0) > (earlier?.copies?.length || 0))
+      return `Копия блока · ${LAYOUT_GROUPS[item.layout.group]?.label || 'Главная'}`;
     if (
       (item.layout.hidden || []).some(
         index => !(earlier?.hidden || []).includes(index)
@@ -219,6 +225,62 @@ export async function editElement(
   );
 }
 // Direct, local text edit: no provider call or API key is required.
+export async function editDirect(
+  rawTarget: unknown,
+  rawChanges: unknown,
+  revision: unknown
+) {
+  await assertTestBranch();
+  const target = targetSchema.parse(rawTarget);
+  const changes = validateChanges(target, rawChanges);
+  if (
+    !changes.length ||
+    changes.some(change =>
+      ['text', 'href', 'display'].includes(change.property)
+    )
+  )
+    throw Error('invalid_edit');
+  for (const change of changes)
+    if (
+      ['src', 'backgroundImage'].includes(change.property) &&
+      change.value !== 'none'
+    ) {
+      try {
+        await access(path.join(process.cwd(), 'public', change.value));
+      } catch {
+        throw Error('invalid_image');
+      }
+    }
+  return locked(async () => {
+    const before = await readOverrides();
+    checkRevision(before, revision);
+    const next = structuredClone(before);
+    const existing = next.find(
+      item => targetKey(item.target) === targetKey(target)
+    );
+    if (existing) {
+      const merged = new Map(
+        existing.changes.map(change => [change.property, change])
+      );
+      for (const change of changes) merged.set(change.property, change);
+      existing.changes = [...merged.values()];
+    } else next.push({ target, changes });
+    overridesSchema.parse(next);
+    const history = await readHistory();
+    history.push(before);
+    await atomicWrite(historyFile(), history.slice(-20));
+    await atomicWrite(file(), next);
+    return {
+      ...(await elementStatus()),
+      reply: changes.some(change =>
+        ['src', 'backgroundImage'].includes(change.property)
+      )
+        ? 'Изображение заменено.'
+        : 'Настройки элемента сохранены.',
+    };
+  });
+}
+
 export async function editHeading(
   rawTarget: unknown,
   text: unknown,
@@ -311,17 +373,6 @@ export async function reorderGroup(
     throw Error('invalid_order');
   const definition = LAYOUT_GROUPS[group as keyof typeof LAYOUT_GROUPS];
   if (!definition) throw Error('invalid_order');
-  const indices = z
-    .array(
-      z
-        .number()
-        .int()
-        .min(0)
-        .max(definition.count - 1)
-    )
-    .length(definition.count)
-    .parse(order);
-  if (new Set(indices).size !== definition.count) throw Error('invalid_order');
   return locked(async () => {
     const before = await readOverrides();
     checkRevision(before, revision);
@@ -331,6 +382,9 @@ export async function reorderGroup(
         item.layout?.group === group ||
         targetKey(item.target) === targetKey(target)
     );
+    if (!validLayoutOrder(group, order, existing?.layout?.copies))
+      throw Error('invalid_order');
+    const indices = order;
     const previousOrder =
       existing?.layout?.order || indices.map((_, index) => index);
     if (JSON.stringify(previousOrder) === JSON.stringify(indices))
@@ -365,13 +419,7 @@ export async function deleteBlock(
   )
     throw Error('invalid_order');
   const definition = LAYOUT_GROUPS[group];
-  if (
-    !definition ||
-    typeof index !== 'number' ||
-    !Number.isInteger(index) ||
-    index < 0 ||
-    index >= definition.count
-  )
+  if (!definition || typeof index !== 'number' || !Number.isInteger(index))
     throw Error('invalid_order');
   return locked(async () => {
     const before = await readOverrides();
@@ -382,10 +430,13 @@ export async function deleteBlock(
         item.layout?.group === group ||
         targetKey(item.target) === targetKey(target)
     );
+    if (!layoutItemIds(group, existing?.layout?.copies)?.includes(index))
+      throw Error('invalid_order');
     const hidden = existing?.layout?.hidden || [];
     if (hidden.includes(index))
       return { ...(await elementStatus()), reply: 'Этот блок уже удалён.' };
     const layout = {
+      ...existing?.layout,
       group,
       order:
         existing?.layout?.order ||
@@ -403,6 +454,91 @@ export async function deleteBlock(
       ...(await elementStatus()),
       reply:
         'Блок удалён. Нажмите «Отменить», чтобы вернуть его вместе с содержимым.',
+    };
+  });
+}
+
+export async function duplicateBlock(
+  rawTarget: unknown,
+  group: unknown,
+  index: unknown,
+  revision: unknown
+) {
+  const target = targetSchema.parse(rawTarget);
+  const tags: Record<string, string> = {
+    'hero-points': 'span',
+    'hero-actions': 'a',
+    services: 'a',
+    'help-items': 'div',
+    'about-stats': 'div',
+  };
+  if (
+    target.root !== 'main' ||
+    target.kind !== 'element' ||
+    typeof group !== 'string' ||
+    !Object.hasOwn(tags, group) ||
+    typeof index !== 'number' ||
+    !Number.isInteger(index)
+  )
+    throw Error('invalid_order');
+  return locked(async () => {
+    const before = await readOverrides();
+    checkRevision(before, revision);
+    const next = structuredClone(before);
+    let existing = next.find(
+      item =>
+        item.layout?.group === group ||
+        targetKey(item.target) === targetKey(target)
+    );
+    const copies = existing?.layout?.copies || [];
+    const all = layoutItemIds(group, copies);
+    if (
+      !all ||
+      !all.includes(index) ||
+      existing?.layout?.hidden?.includes(index) ||
+      copies.length >= 20
+    )
+      throw Error('invalid_order');
+    const id = Math.max(...all) + 1;
+    const source = copies.find(copy => copy.id === index)?.source ?? index;
+    const order = [...(existing?.layout?.order || all)];
+    order.splice(order.indexOf(index) + 1, 0, id);
+    const layout = {
+      ...existing?.layout,
+      group,
+      order,
+      copies: [...copies, { id, source }],
+    };
+    if (existing) existing.layout = layout;
+    else {
+      existing = { target, changes: [], layout };
+      next.push(existing);
+    }
+    const prefix = [...target.path, { tag: tags[group]!, index }];
+    for (const item of before)
+      if (
+        item.target.root === target.root &&
+        prefix.every(
+          (part, position) =>
+            JSON.stringify(item.target.path[position]) === JSON.stringify(part)
+        )
+      ) {
+        const cloned = structuredClone(item);
+        cloned.target.path[prefix.length - 1] = {
+          tag: tags[group]!,
+          index: id,
+        };
+        next.push(cloned);
+      }
+    overridesSchema.parse(next);
+    const history = await readHistory();
+    history.push(before);
+    await atomicWrite(historyFile(), history.slice(-20));
+    await atomicWrite(file(), next);
+    return {
+      ...(await elementStatus()),
+      reply:
+        'Копия блока добавлена рядом с исходным. Тексты и оформление можно менять независимо.',
     };
   });
 }

@@ -6,6 +6,8 @@ import {
   editText,
   reorderGroup,
   deleteBlock,
+  editDirect,
+  duplicateBlock,
   elementStatus,
   undoElement,
 } from '@/lib/element-editor';
@@ -49,6 +51,14 @@ export default async function handler(
       return res.status(405).end();
     }
     const body = req.body;
+    if (body?.action === 'settings' && body.page === '/')
+      return res.json(
+        await editDirect(body.target, body.changes, body.revision)
+      );
+    if (body?.action === 'duplicate-block' && body.page === '/')
+      return res.json(
+        await duplicateBlock(body.target, body.group, body.index, body.revision)
+      );
     if (body?.action === 'configure') {
       await configureKey(body.key);
       return res.json({ configured: true });
