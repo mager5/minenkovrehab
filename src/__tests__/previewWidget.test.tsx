@@ -14,6 +14,12 @@ function start(device = 'Телефон') {
   fireEvent.click(screen.getByRole('button', { name: device }));
   return frame();
 }
+function chooseSize(label: string) {
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Предустановленный размер' })
+  );
+  fireEvent.click(screen.getByRole('menuitemradio', { name: label }));
+}
 function dimensions(width: number, height: number) {
   expect(frame()).toHaveAttribute('width', String(width));
   expect(frame()).toHaveAttribute('height', String(height));
@@ -102,7 +108,7 @@ test('phone preview has a real 390 by 844 viewport and a fitted display scale', 
   ).toHaveFocus();
 });
 
-test('device categories change actual iframe dimensions and preset choices without remounting it', () => {
+test('device categories and presets reload the iframe at the selected dimensions', () => {
   const originalFrame = start();
   fireEvent.click(screen.getByRole('button', { name: 'Планшет' }));
   dimensions(768, 1024);
@@ -110,36 +116,24 @@ test('device categories change actual iframe dimensions and preset choices witho
     'aria-pressed',
     'true'
   );
-  expect(
-    screen.getByRole('option', { name: '800 × 1280' })
-  ).toBeInTheDocument();
-  expect(
-    screen.queryByRole('option', { name: '414 × 896' })
-  ).not.toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText('Предустановленный размер'), {
-    target: { value: '820x1180' },
-  });
+
+  chooseSize('820 × 1180');
   dimensions(820, 1180);
   fireEvent.click(screen.getByRole('button', { name: 'Компьютер' }));
   dimensions(1536, 864);
-  fireEvent.change(screen.getByLabelText('Предустановленный размер'), {
-    target: { value: '2560x1440' },
-  });
+  chooseSize('2560 × 1440');
   dimensions(2560, 1440);
-  expect(frame()).toBe(originalFrame);
+  expect(frame()).not.toBe(originalFrame);
   expect(frame()).toHaveAttribute('src', '/?ai-preview=phone');
-  expect(
-    screen.getByRole('option', { name: '1440 × 900' })
-  ).toBeInTheDocument();
+  chooseSize('1440 × 900');
+  dimensions(1440, 900);
   fireEvent.click(screen.getByRole('button', { name: 'Телефон' }));
   dimensions(390, 844);
-  fireEvent.change(screen.getByLabelText('Предустановленный размер'), {
-    target: { value: '414x896' },
-  });
+  chooseSize('414 × 896');
   dimensions(414, 896);
 });
 
-test('custom dimensions preserve partial typing, update valid viewport values and clamp on blur', () => {
+test('custom dimensions reload only on commit and clamp on blur', () => {
   start();
   const width = screen.getByLabelText('Ширина, px');
   const height = screen.getByLabelText('Высота, px');
@@ -147,11 +141,14 @@ test('custom dimensions preserve partial typing, update valid viewport values an
   expect(width).toHaveValue(1);
   dimensions(390, 844);
   fireEvent.change(width, { target: { value: '1280' } });
+  dimensions(390, 844);
+  fireEvent.blur(width);
   dimensions(1280, 844);
   fireEvent.change(height, { target: { value: '900' } });
+  fireEvent.blur(height);
   dimensions(1280, 900);
-  expect(screen.getByLabelText('Предустановленный размер')).toHaveValue(
-    'custom'
+  expect(screen.getByLabelText('Предустановленный размер')).toHaveTextContent(
+    'Свой размер'
   );
   fireEvent.change(width, { target: { value: '100' } });
   fireEvent.blur(width);
@@ -169,9 +166,10 @@ test('custom dimensions preserve partial typing, update valid viewport values an
 });
 
 test('rotate swaps actual dimensions and respects each axis bounds', () => {
-  start();
+  const beforeRotation = start();
   fireEvent.click(screen.getByRole('button', { name: 'Повернуть экран' }));
   dimensions(844, 390);
+  expect(frame()).not.toBe(beforeRotation);
   expect(screen.getByLabelText('Ширина, px')).toHaveValue(844);
   expect(screen.getByLabelText('Высота, px')).toHaveValue(390);
   fireEvent.change(screen.getByLabelText('Ширина, px'), {
@@ -185,7 +183,7 @@ test('rotate swaps actual dimensions and respects each axis bounds', () => {
 });
 
 test('fit responds to available space, and 100 percent changes scaling rather than the media viewport', () => {
-  start('Компьютер');
+  const originalFrame = start('Компьютер');
   dimensions(1536, 864);
   expect(frame().style.transform).toBe(`scale(${950 / 1536})`);
   stageSize = { width: 600, height: 400 };
@@ -198,6 +196,49 @@ test('fit responds to available space, and 100 percent changes scaling rather th
   dimensions(1536, 864);
   fireEvent.click(screen.getByRole('button', { name: /^Вписать/ }));
   expect(frame().style.transform).toBe(`scale(${550 / 1536})`);
+  expect(frame()).toBe(originalFrame);
+});
+
+test('size menu uses custom controls, keyboard navigation, dismissal and custom input focus', () => {
+  start();
+  const trigger = screen.getByRole('button', {
+    name: 'Предустановленный размер',
+  });
+  expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+  fireEvent.click(trigger);
+  expect(
+    screen.getByRole('menuitemradio', { name: '390 × 844' })
+  ).toHaveFocus();
+  fireEvent.keyDown(document.activeElement!, { key: 'Home' });
+  expect(
+    screen.getByRole('menuitemradio', { name: '414 × 896' })
+  ).toHaveFocus();
+  fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
+  expect(
+    screen.getByRole('menuitemradio', { name: '360 × 800' })
+  ).toHaveFocus();
+  fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+  expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  expect(screen.getByRole('dialog')).toBeInTheDocument();
+  expect(trigger).toHaveFocus();
+  fireEvent.click(trigger);
+  fireEvent.pointerDown(document.body);
+  expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  chooseSize('Свой размер');
+  expect(screen.getByLabelText('Ширина, px')).toHaveFocus();
+});
+
+test('custom input does not reload while typing and commits reload exactly once', () => {
+  const originalFrame = start();
+  const width = screen.getByLabelText('Ширина, px');
+  fireEvent.change(width, { target: { value: '360' } });
+  expect(frame()).toBe(originalFrame);
+  fireEvent.blur(width);
+  const updatedFrame = frame();
+  expect(updatedFrame).not.toBe(originalFrame);
+  dimensions(360, 844);
+  fireEvent.blur(width);
+  expect(frame()).toBe(updatedFrame);
 });
 
 test('closing preview restores the parent scrolling state and the selected device trigger focus', () => {

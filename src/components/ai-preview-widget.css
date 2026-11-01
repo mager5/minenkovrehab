@@ -102,15 +102,61 @@
   color: #e5edf7;
   font: inherit;
 }
-.ai-preview-presets {
+.ai-preview-header .ai-preview-size-menu .ai-preview-presets {
   width: 140px;
   min-height: 34px;
   padding: 6px 8px;
   cursor: pointer;
+  justify-content: space-between;
 }
-.ai-preview-presets option {
-  color: #e5edf7;
-  background: #152337;
+.ai-preview-size-menu {
+  position: relative;
+  flex: none;
+}
+.ai-preview-presets svg {
+  color: #91a6bf;
+  transition: transform 160ms ease;
+}
+.ai-preview-presets[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+.ai-preview-size-options {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  z-index: 2;
+  width: 190px;
+  max-height: min(360px, 60vh);
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid rgb(146 178 211 / 25%);
+  border-radius: 11px;
+  background: #18283d;
+  box-shadow: 0 12px 35px rgb(0 0 0 / 35%);
+}
+.ai-preview-menu-caption {
+  display: block;
+  padding: 7px 9px;
+  color: #91a6bf;
+  font-size: 10px;
+}
+.ai-preview-header .ai-preview-size-menu .ai-preview-size-options button {
+  width: 100%;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  padding: 8px 9px;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.ai-preview-header .ai-preview-size-menu .ai-preview-size-options button[aria-checked='true'] {
+  color: #b9dcff;
+  background: rgb(73 135 200 / 20%);
+}
+.ai-preview-header .ai-preview-size-menu .ai-preview-size-options button:last-child {
+  margin-top: 5px;
+  border-top: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 0 0 6px 6px;
 }
 .ai-preview-size {
   display: inline-flex;

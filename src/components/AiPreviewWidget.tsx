@@ -9,6 +9,8 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  Check,
+  ChevronDown,
   Maximize2,
   Monitor,
   RotateCw,
@@ -62,6 +64,130 @@ function draftValue(draft: string, axis: keyof Size, fallback: number) {
   return draft.trim() && Number.isFinite(value)
     ? bounded(value, axis)
     : fallback;
+}
+
+function SizeMenu({
+  device,
+  value,
+  onChange,
+}: {
+  device: Device;
+  value: string;
+  onChange: (_value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const options = [
+    ...presets[device].map(size => ({
+      value: sizeKey(size),
+      label: `${size.width} × ${size.height}`,
+    })),
+    { value: 'custom', label: 'Свой размер' },
+  ];
+  useEffect(() => {
+    if (!open) return;
+    const dismiss = (event: PointerEvent) => {
+      if (!root.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', dismiss);
+    root.current
+      ?.querySelector<HTMLButtonElement>('[aria-checked="true"]')
+      ?.focus();
+    return () => document.removeEventListener('pointerdown', dismiss);
+  }, [open]);
+  return (
+    <div
+      className='ai-preview-size-menu'
+      ref={root}
+      onBlur={event => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+          setOpen(false);
+      }}
+      onKeyDown={event => {
+        if (event.key === 'Escape' && open) {
+          event.preventDefault();
+          event.stopPropagation();
+          setOpen(false);
+          trigger.current?.focus();
+        }
+        if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+          event.preventDefault();
+          if (!open) {
+            setOpen(true);
+            return;
+          }
+          const buttons = Array.from(
+            root.current?.querySelectorAll<HTMLButtonElement>(
+              '[role="menuitemradio"]'
+            ) || []
+          );
+          const current = buttons.indexOf(
+            document.activeElement as HTMLButtonElement
+          );
+          const index =
+            event.key === 'Home'
+              ? 0
+              : event.key === 'End'
+                ? buttons.length - 1
+                : (current +
+                    (event.key === 'ArrowDown' ? 1 : -1) +
+                    buttons.length) %
+                  buttons.length;
+          buttons[index]?.focus();
+        }
+      }}
+    >
+      <button
+        ref={trigger}
+        type='button'
+        className='ai-preview-presets'
+        aria-label='Предустановленный размер'
+        aria-haspopup='menu'
+        aria-expanded={open}
+        onClick={() => setOpen(previous => !previous)}
+      >
+        <span>
+          {options.find(option => option.value === value)?.label ||
+            'Свой размер'}
+        </span>
+        <ChevronDown size={15} aria-hidden='true' />
+      </button>
+      {open && (
+        <div
+          className='ai-preview-size-options'
+          role='menu'
+          aria-label='Размеры экрана'
+        >
+          <span className='ai-preview-menu-caption' aria-hidden='true'>
+            Размер экрана
+          </span>
+          {options.map(option => (
+            <button
+              key={option.value}
+              type='button'
+              role='menuitemradio'
+              aria-checked={option.value === value}
+              onClick={() => {
+                onChange(option.value);
+                setOpen(false);
+                if (option.value === 'custom')
+                  root.current?.parentElement
+                    ?.querySelector<HTMLInputElement>(
+                      '[aria-label="Ширина, px"]'
+                    )
+                    ?.focus();
+                else trigger.current?.focus();
+              }}
+            >
+              <span>{option.label}</span>
+              {option.value === value && <Check size={14} aria-hidden='true' />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 /** A true iframe viewport. Scaling changes its display size, never its media queries. */
@@ -187,15 +313,7 @@ export default function AiPreviewWidget() {
     if (axis === 'width') setWidthDraft(value);
     else setHeightDraft(value);
     setPreset('custom');
-    const number = Number(value);
-    // Preserve partial typing; clamp only on blur rather than replacing the first digit.
-    if (
-      value.trim() &&
-      Number.isFinite(number) &&
-      number >= limits[axis][0] &&
-      number <= limits[axis][1]
-    )
-      setSize(previous => ({ ...previous, [axis]: Math.round(number) }));
+    // Reload only once the user commits an input, never midway through typing.
   }
   function commitDraft(axis: keyof Size) {
     const value = draftValue(
@@ -288,19 +406,12 @@ export default function AiPreviewWidget() {
         >
           {tabs(false)}
         </div>
-        <select
-          className='ai-preview-presets'
-          aria-label='Предустановленный размер'
+        <SizeMenu
+          key={device}
+          device={device}
           value={preset}
-          onChange={event => choosePreset(event.target.value)}
-        >
-          {presets[device].map(candidate => (
-            <option key={sizeKey(candidate)} value={sizeKey(candidate)}>
-              {candidate.width} × {candidate.height}
-            </option>
-          ))}
-          <option value='custom'>Свой размер</option>
-        </select>
+          onChange={choosePreset}
+        />
         <div
           className='ai-preview-size'
           role='group'
@@ -380,6 +491,7 @@ export default function AiPreviewWidget() {
             style={{ width: size.width * scale, height: size.height * scale }}
           >
             <iframe
+              key={sizeKey(size)}
               className='ai-preview-frame'
               src='/?ai-preview=phone'
               width={size.width}

@@ -211,7 +211,8 @@ test('selected element and command survive an editor reload without storing the 
     await screen.findByRole('button', { name: 'Применить к элементу' })
   ).toBeEnabled();
   expect(JSON.parse(sessionStorage.getItem('ai-element-draft')!)).toEqual({
-    selected,
+    // The editor refreshes computed styles from the current DOM after loading.
+    selected: { ...selected, styles: expect.any(Object) },
     message: 'сделай текст красным',
   });
 });
