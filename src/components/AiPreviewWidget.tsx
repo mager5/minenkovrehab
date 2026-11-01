@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Maximize2,
   Monitor,
+  MonitorSmartphone,
   RotateCw,
   Smartphone,
   Tablet,
@@ -208,10 +209,7 @@ export default function AiPreviewWidget({
   );
   const [fit, setFit] = useState(true);
   const [available, setAvailable] = useState<Size>({ width: 0, height: 0 });
-  const hostButtons = useRef<Partial<Record<Device, HTMLButtonElement | null>>>(
-    {}
-  );
-  const focusDevice = useRef<Device>('desktop');
+  const previewTrigger = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const overlay = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -226,7 +224,7 @@ export default function AiPreviewWidget({
   useEffect(() => {
     if (!previewOpen) {
       if (returnFocus.current) {
-        hostButtons.current[focusDevice.current]?.focus();
+        previewTrigger.current?.focus();
         returnFocus.current = false;
       }
       return;
@@ -300,9 +298,7 @@ export default function AiPreviewWidget({
     setPreset(nextPreset);
   }
   function chooseDevice(next: Device) {
-    focusDevice.current = next;
-    if (!previewOpen || next !== device)
-      replaceSize(defaults[next], sizeKey(defaults[next]));
+    if (next !== device) replaceSize(defaults[next], sizeKey(defaults[next]));
     setDevice(next);
     setFit(true);
     setPreviewOpen(true);
@@ -361,27 +357,19 @@ export default function AiPreviewWidget({
           available.height / size.height
         )
       : 1;
-  const tabs = (host: boolean) =>
-    devices.map(({ id, name, Icon }) => (
-      <button
-        key={id}
-        ref={
-          host
-            ? node => {
-                hostButtons.current[id] = node;
-              }
-            : undefined
-        }
-        type='button'
-        aria-label={name}
-        title={name}
-        aria-pressed={host ? id === 'desktop' : device === id}
-        onClick={() => chooseDevice(id)}
-      >
-        <Icon size={15} aria-hidden='true' />
-        <span className='ai-preview-device-label'>{name}</span>
-      </button>
-    ));
+  const tabs = devices.map(({ id, name, Icon }) => (
+    <button
+      key={id}
+      type='button'
+      aria-label={name}
+      title={name}
+      aria-pressed={device === id}
+      onClick={() => chooseDevice(id)}
+    >
+      <Icon size={15} aria-hidden='true' />
+      <span className='ai-preview-device-label'>{name}</span>
+    </button>
+  ));
 
   if (!previewOpen)
     return createPortal(
@@ -398,13 +386,26 @@ export default function AiPreviewWidget({
         {pickerControl && (
           <span className='ai-editor-dock-divider' aria-hidden='true' />
         )}
-        <div
-          className='ai-editor-device-controls'
-          role='group'
-          aria-label='Устройство для просмотра главной'
+        <button
+          ref={previewTrigger}
+          type='button'
+          className='ai-preview-open'
+          aria-label='Просмотр на устройствах'
+          aria-haspopup='dialog'
+          aria-expanded={false}
+          title='Посмотреть сайт на телефоне, планшете и компьютере'
+          onClick={() => {
+            setWidthDraft(String(size.width));
+            setHeightDraft(String(size.height));
+            setPreviewOpen(true);
+          }}
         >
-          {tabs(true)}
-        </div>
+          <MonitorSmartphone size={16} aria-hidden='true' />
+          <span className='ai-preview-open-label'>Просмотр на устройствах</span>
+          <span className='ai-preview-open-short' aria-hidden='true'>
+            Устройства
+          </span>
+        </button>
       </section>,
       document.body
     );
@@ -425,7 +426,7 @@ export default function AiPreviewWidget({
           role='group'
           aria-label='Устройство предпросмотра'
         >
-          {tabs(false)}
+          {tabs}
         </div>
         <SizeMenu
           key={device}

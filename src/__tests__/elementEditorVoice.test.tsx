@@ -101,16 +101,17 @@ test('picker is in the external device dock and keeps working when the chat is c
   expect(
     screen.getAllByRole('button', { name: 'Выделить элемент' })
   ).toHaveLength(1);
-  expect(within(dock).getByRole('button', { name: 'Телефон' })).toHaveAttribute(
-    'title',
-    'Телефон'
-  );
+  expect(
+    within(dock).getByRole('button', { name: 'Просмотр на устройствах' })
+  ).toHaveAttribute('aria-haspopup', 'dialog');
   fireEvent.click(screen.getByRole('button', { name: 'Свернуть редактор' }));
   fireEvent.click(picker);
   expect(
     screen.getByRole('button', { name: 'Завершить выбор' })
   ).toHaveAttribute('aria-pressed', 'true');
-  expect(screen.getByRole('button', { name: 'Свернуть редактор' })).toBeVisible();
+  expect(
+    screen.getByRole('button', { name: 'Свернуть редактор' })
+  ).toBeVisible();
   fireEvent.keyDown(document, { key: 'Escape' });
   expect(
     screen.getByRole('button', { name: 'Выделить элемент' })

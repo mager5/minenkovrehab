@@ -11,6 +11,9 @@ function frame() {
 }
 function start(device = 'Телефон') {
   render(<AiPreviewWidget />);
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Просмотр на устройствах' })
+  );
   fireEvent.click(screen.getByRole('button', { name: device }));
   return frame();
 }
@@ -59,27 +62,32 @@ afterEach(() => {
   else process.env.NEXT_PUBLIC_AI_TEST_ENABLED = originalFlag;
 });
 
-test('the test-only host widget has three device buttons without altering the parent viewport', () => {
+test('the test-only dock has one preview action and no device switches', () => {
   process.env.NEXT_PUBLIC_AI_TEST_ENABLED = '0';
   const view = render(<AiPreviewWidget />);
   expect(
-    screen.queryByRole('button', { name: 'Телефон' })
+    screen.queryByRole('button', { name: 'Просмотр на устройствах' })
   ).not.toBeInTheDocument();
   process.env.NEXT_PUBLIC_AI_TEST_ENABLED = '1';
   view.rerender(<AiPreviewWidget />);
+  const trigger = screen.getByRole('button', {
+    name: 'Просмотр на устройствах',
+  });
+  expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
+  expect(trigger).toHaveAttribute(
+    'title',
+    'Посмотреть сайт на телефоне, планшете и компьютере'
+  );
+  for (const name of ['Компьютер', 'Планшет', 'Телефон']) {
+    expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+  }
+  expect(document.querySelector('iframe')).not.toBeInTheDocument();
+  fireEvent.click(trigger);
+  dimensions(1536, 864);
   expect(screen.getByRole('button', { name: 'Компьютер' })).toHaveAttribute(
     'aria-pressed',
     'true'
   );
-  expect(screen.getByRole('button', { name: 'Планшет' })).toHaveAttribute(
-    'aria-pressed',
-    'false'
-  );
-  expect(screen.getByRole('button', { name: 'Телефон' })).toHaveAttribute(
-    'aria-pressed',
-    'false'
-  );
-  expect(document.querySelector('iframe')).not.toBeInTheDocument();
 });
 
 test('phone preview has a real 390 by 844 viewport and a fitted display scale', () => {
@@ -241,35 +249,79 @@ test('custom input does not reload while typing and commits reload exactly once'
   expect(frame()).toBe(updatedFrame);
 });
 
-test('closing preview restores the parent scrolling state and the selected device trigger focus', () => {
+test('closing returns focus to the sole trigger and reopening preserves device, custom size and scale', () => {
   document.body.style.overflow = 'auto';
   start('Планшет');
   fireEvent.click(screen.getByRole('button', { name: 'Закрыть предпросмотр' }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(document.querySelector('iframe')).not.toBeInTheDocument();
   expect(document.body.style.overflow).toBe('auto');
-  expect(screen.getByRole('button', { name: 'Планшет' })).toHaveFocus();
-  expect(screen.getByRole('button', { name: 'Компьютер' })).toHaveAttribute(
+  expect(
+    screen.getByRole('button', { name: 'Просмотр на устройствах' })
+  ).toHaveFocus();
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Просмотр на устройствах' })
+  );
+  dimensions(768, 1024);
+  expect(screen.getByRole('button', { name: 'Планшет' })).toHaveAttribute(
     'aria-pressed',
     'true'
+  );
+  fireEvent.change(screen.getByLabelText('Ширина, px'), {
+    target: { value: '900' },
+  });
+  fireEvent.blur(screen.getByLabelText('Ширина, px'));
+  fireEvent.click(screen.getByRole('button', { name: '100%' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Закрыть предпросмотр' }));
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Просмотр на устройствах' })
+  );
+  dimensions(900, 1024);
+  expect(frame().style.transform).toBe('scale(1)');
+  expect(screen.getByLabelText('Предустановленный размер')).toHaveTextContent(
+    'Свой размер'
   );
 });
 
 test('Escape works from the toolbar and inside the iframe; unmount restores scrolling', () => {
   const view = render(<AiPreviewWidget />);
-  fireEvent.click(screen.getByRole('button', { name: 'Телефон' }));
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Просмотр на устройствах' })
+  );
   fireEvent.keyDown(
     screen.getByRole('button', { name: 'Закрыть предпросмотр' }),
     { key: 'Escape' }
   );
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Телефон' }));
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Просмотр на устройствах' })
+  );
   fireEvent.load(frame());
   fireEvent.keyDown(frame().contentDocument!, { key: 'Escape' });
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Компьютер' }));
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Просмотр на устройствах' })
+  );
   view.unmount();
   expect(document.body.style.overflow).toBe('');
+});
+
+test('reopening discards uncommitted dimensions and keeps the last applied viewport', () => {
+  start('Планшет');
+  fireEvent.click(screen.getByRole('button', { name: 'Повернуть экран' }));
+  dimensions(1024, 768);
+  const width = screen.getByLabelText('Ширина, px');
+  fireEvent.change(width, { target: { value: '1200' } });
+  fireEvent.keyDown(width, { key: 'Escape' });
+  expect(
+    screen.getByRole('button', { name: 'Просмотр на устройствах' })
+  ).toHaveFocus();
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Просмотр на устройствах' })
+  );
+  dimensions(1024, 768);
+  expect(screen.getByLabelText('Ширина, px')).toHaveValue(1024);
+  expect(screen.getByLabelText('Высота, px')).toHaveValue(768);
 });
 
 test('device controls are always external to the landing content', () => {
@@ -283,7 +335,9 @@ test('device controls are always external to the landing content', () => {
   expect(landing).not.toContainElement(
     screen.getByRole('region', { name: 'Устройство для просмотра главной' })
   );
-  fireEvent.click(screen.getByRole('button', { name: 'Телефон' }));
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Просмотр на устройствах' })
+  );
   expect(landing).not.toContainElement(screen.getByRole('dialog'));
   expect(landing.textContent).toBe('Исходный заголовок');
 });
