@@ -50,7 +50,6 @@ export default function AiElementEditor() {
     (window.self !== window.top ||
       new URLSearchParams(window.location.search).has('ai-preview'));
   const [ready, setReady] = useState(false);
-  const [slots, setSlots] = useState<Element[]>([]);
   const [picking, setPicking] = useState(false);
   const [hover, setHover] = useState<EditTarget | null>(null);
   const [box, setBox] = useState<DOMRect | null>(null);
@@ -65,7 +64,7 @@ export default function AiElementEditor() {
   const [key, setKey] = useState('');
   const [message, setMessage] = useState('');
   const [reply, setReply] = useState(
-    'Нажмите «Выделить элемент» в шапке, наведите курсор и добавьте элемент в чат.'
+    'Нажмите «Выделить элемент» на панели внизу слева, наведите курсор и добавьте элемент в чат.'
   );
   const [busy, setBusy] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -119,9 +118,6 @@ export default function AiElementEditor() {
             /* An unavailable browser store must not block the editor. */
           }
           setReady(true);
-          setSlots(
-            Array.from(document.querySelectorAll('[data-ai-picker-slot]'))
-          );
           setConfigured(Boolean(data.configured));
           if (data.configurationError) setReply(data.configurationError);
           setOverrides(data.overrides || []);
@@ -850,11 +846,17 @@ export default function AiElementEditor() {
       data-ai-editor
       type='button'
       aria-label={picking ? 'Завершить выбор' : 'Выделить элемент'}
-      className={`ai-pick-header ${picking ? 'ai-active' : ''}`}
+      className='ai-editor-pick'
       onClick={togglePicker}
       aria-pressed={picking}
+      disabled={blocked || Boolean(inlineEdit)}
+      title={
+        inlineEdit
+          ? 'Сохраните или отмените редактирование текста'
+          : 'Выбрать элемент на странице (Esc — завершить выбор)'
+      }
     >
-      <MousePointer2 size={15} />
+      <MousePointer2 size={15} aria-hidden='true' />
       <span>{picking ? 'Завершить выбор' : 'Выделить элемент'}</span>
     </button>
   );
@@ -901,10 +903,7 @@ export default function AiElementEditor() {
     ) : null;
   return (
     <>
-      <AiPreviewWidget />
-      {slots.map((slot, index) =>
-        createPortal(selectButton, slot, String(index))
-      )}
+      <AiPreviewWidget pickerControl={selectButton} />
       {picking &&
         box &&
         createPortal(
@@ -1003,12 +1002,7 @@ export default function AiElementEditor() {
                     <X size={14} />
                   </button>
                 </div>
-              ) : (
-                <button className='ai-element-select' onClick={togglePicker}>
-                  <MousePointer2 size={15} />
-                  Выделить элемент
-                </button>
-              )}
+              ) : null}
               <p role='status' aria-live='polite' className='ai-element-reply'>
                 {busy ? 'Применяю правку…' : reply}
               </p>

@@ -6,6 +6,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -191,7 +192,11 @@ function SizeMenu({
 }
 
 /** A true iframe viewport. Scaling changes its display size, never its media queries. */
-export default function AiPreviewWidget() {
+export default function AiPreviewWidget({
+  pickerControl,
+}: {
+  pickerControl?: ReactNode;
+}) {
   const enabled = process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1';
   const [previewOpen, setPreviewOpen] = useState(false);
   const [device, setDevice] = useState<Device>('desktop');
@@ -368,11 +373,13 @@ export default function AiPreviewWidget() {
             : undefined
         }
         type='button'
+        aria-label={name}
+        title={name}
         aria-pressed={host ? id === 'desktop' : device === id}
         onClick={() => chooseDevice(id)}
       >
         <Icon size={15} aria-hidden='true' />
-        {name}
+        <span className='ai-preview-device-label'>{name}</span>
       </button>
     ));
 
@@ -381,9 +388,23 @@ export default function AiPreviewWidget() {
       <section
         data-ai-editor
         className='ai-preview-widget'
-        aria-label='Устройство для просмотра главной'
+        aria-label={
+          pickerControl
+            ? 'Инструменты редактора'
+            : 'Устройство для просмотра главной'
+        }
       >
-        {tabs(true)}
+        {pickerControl}
+        {pickerControl && (
+          <span className='ai-editor-dock-divider' aria-hidden='true' />
+        )}
+        <div
+          className='ai-editor-device-controls'
+          role='group'
+          aria-label='Устройство для просмотра главной'
+        >
+          {tabs(true)}
+        </div>
       </section>,
       document.body
     );

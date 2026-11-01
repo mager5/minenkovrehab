@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import AiElementEditor from '@/components/AiElementEditor';
 
@@ -45,7 +46,7 @@ beforeEach(() => {
   process.env.NEXT_PUBLIC_AI_TEST_ENABLED = '1';
   sessionStorage.clear();
   document.body.innerHTML =
-    '<header><span data-ai-picker-slot data-ai-editor></span></header><main id="main-content"><h1>Original</h1><div data-ai-heading-controls data-ai-editor></div></main><footer></footer>';
+    '<header><a href="/">Logo</a><button>Войти</button></header><main id="main-content"><h1>Original</h1><div data-ai-heading-controls data-ai-editor></div></main><footer></footer>';
   stopTrack.mockReset();
   getUserMedia
     .mockReset()
@@ -84,6 +85,40 @@ afterEach(() => {
   if (originalFlag === undefined)
     delete process.env.NEXT_PUBLIC_AI_TEST_ENABLED;
   else process.env.NEXT_PUBLIC_AI_TEST_ENABLED = originalFlag;
+});
+
+test('picker is in the external device dock and keeps working when the chat is collapsed', async () => {
+  const header = document.querySelector('header')!;
+  const originalHeader = header.outerHTML;
+  render(<AiElementEditor />);
+  const picker = await screen.findByRole('button', {
+    name: 'Выделить элемент',
+  });
+  const dock = screen.getByRole('region', { name: 'Инструменты редактора' });
+  expect(dock).toContainElement(picker);
+  expect(dock.parentElement).toBe(document.body);
+  expect(header.outerHTML).toBe(originalHeader);
+  expect(
+    screen.getAllByRole('button', { name: 'Выделить элемент' })
+  ).toHaveLength(1);
+  expect(within(dock).getByRole('button', { name: 'Телефон' })).toHaveAttribute(
+    'title',
+    'Телефон'
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Свернуть редактор' }));
+  fireEvent.click(picker);
+  expect(
+    screen.getByRole('button', { name: 'Завершить выбор' })
+  ).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.getByRole('button', { name: 'Свернуть редактор' })).toBeVisible();
+  fireEvent.keyDown(document, { key: 'Escape' });
+  expect(
+    screen.getByRole('button', { name: 'Выделить элемент' })
+  ).toHaveAttribute('aria-pressed', 'false');
+  expect(header.outerHTML).toBe(originalHeader);
+  expect(
+    request.mock.calls.some(([, options]) => options?.method === 'POST')
+  ).toBe(false);
 });
 
 test('microphone starts only on click and recognized speech fills the draft without applying any edit', async () => {

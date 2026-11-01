@@ -44,6 +44,46 @@
   outline: 2px solid #69b9fa;
   outline-offset: 2px;
 }
+.ai-editor-device-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.ai-editor-dock-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 5px;
+  background: rgb(53 81 109 / 18%);
+}
+.ai-preview-widget .ai-editor-pick {
+  color: #285d96;
+  font-weight: 600;
+}
+.ai-preview-widget .ai-editor-pick[aria-pressed='true'] {
+  background: #285d96;
+  color: white;
+}
+.ai-preview-widget .ai-editor-device-controls button[aria-pressed='true'] {
+  color: #35516d;
+  background: rgb(40 93 150 / 8%);
+}
+.ai-preview-widget button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+@media (max-width: 1100px) {
+  .ai-preview-widget .ai-preview-device-label {
+    display: none;
+  }
+  .ai-preview-widget .ai-editor-device-controls button {
+    padding: 8px;
+  }
+}
+@media (max-width: 360px) {
+  .ai-preview-widget .ai-editor-pick > span {
+    display: none;
+  }
+}
 .ai-preview-overlay {
   position: fixed;
   inset: 0;
@@ -149,11 +189,17 @@
   text-align: left;
   font-variant-numeric: tabular-nums;
 }
-.ai-preview-header .ai-preview-size-menu .ai-preview-size-options button[aria-checked='true'] {
+.ai-preview-header
+  .ai-preview-size-menu
+  .ai-preview-size-options
+  button[aria-checked='true'] {
   color: #b9dcff;
   background: rgb(73 135 200 / 20%);
 }
-.ai-preview-header .ai-preview-size-menu .ai-preview-size-options button:last-child {
+.ai-preview-header
+  .ai-preview-size-menu
+  .ai-preview-size-options
+  button:last-child {
   margin-top: 5px;
   border-top: 1px solid rgb(255 255 255 / 10%);
   border-radius: 0 0 6px 6px;
