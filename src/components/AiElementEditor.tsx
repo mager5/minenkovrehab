@@ -7,7 +7,15 @@ import {
   type FormEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { Mic, Square, MousePointer2, Undo2, X, ChevronUp } from 'lucide-react';
+import {
+  Mic,
+  Square,
+  MousePointer2,
+  Undo2,
+  X,
+  ChevronUp,
+  Check,
+} from 'lucide-react';
 import {
   applyOverrides,
   editableRootSelector,
@@ -735,19 +743,29 @@ export default function AiElementEditor() {
           >
             <button
               type='submit'
+              className='ai-inline-save'
               disabled={busy || !textDraft.trim() || textDraft.length > 2000}
             >
+              <Check size={14} aria-hidden='true' />
               {busy ? 'Сохраняю…' : 'Сохранить'}
             </button>
-            <button type='button' onClick={closeText} disabled={busy}>
-              Отмена
-            </button>
-            <span
-              className='ai-inline-count'
-              title={`${textDraft.length} из 2000 символов`}
+            <button
+              type='button'
+              className='ai-inline-cancel'
+              onClick={closeText}
+              disabled={busy}
+              aria-label='Отмена'
+              title='Отменить изменения (Esc)'
             >
-              {textDraft.length}
-            </span>
+              <X size={16} aria-hidden='true' />
+            </button>
+            {textDraft.length >= 1800 && (
+              <span className='ai-inline-count' aria-live='polite'>
+                {textDraft.length <= 2000
+                  ? `Осталось ${2000 - textDraft.length}`
+                  : `${textDraft.length - 2000} сверх лимита`}
+              </span>
+            )}
             {textError && <p role='alert'>{textError}</p>}
           </form>,
           inlineControls
