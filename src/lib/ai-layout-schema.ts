@@ -23,7 +23,25 @@ export function validLayoutOrder(
       Array.isArray(value) &&
       value.length === definition.count &&
       new Set(value).size === definition.count &&
-      value.every(
+      Array.from(value).every(
+        index =>
+          Number.isInteger(index) && index >= 0 && index < definition.count
+      )
+  );
+}
+
+// Hidden indices are a subset; the order must still contain every original item.
+export function validLayoutHidden(
+  group: string,
+  value: unknown
+): value is number[] {
+  const definition = LAYOUT_GROUPS[group];
+  return Boolean(
+    definition &&
+      Array.isArray(value) &&
+      value.length <= definition.count &&
+      new Set(value).size === value.length &&
+      Array.from(value).every(
         index =>
           Number.isInteger(index) && index >= 0 && index < definition.count
       )

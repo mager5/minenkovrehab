@@ -38,12 +38,53 @@ async function atomicWrite(name: string, data: unknown) {
   await writeFile(temporary, JSON.stringify(data, null, 2) + '\n');
   await rename(temporary, name);
 }
+function actionLabel(before: ElementOverride[], after: ElementOverride[]) {
+  for (const item of after) {
+    if (!item.layout) continue;
+    const earlier = before.find(
+      entry => entry.layout?.group === item.layout?.group
+    )?.layout;
+    if (
+      (item.layout.hidden || []).some(
+        index => !(earlier?.hidden || []).includes(index)
+      )
+    )
+      return `Удаление блока · ${LAYOUT_GROUPS[item.layout.group]?.label || 'Главная'}`;
+    if (
+      JSON.stringify(item.layout.order) !==
+      JSON.stringify(
+        earlier?.order || item.layout.order.map((_, index) => index)
+      )
+    )
+      return `Перестановка · ${LAYOUT_GROUPS[item.layout.group]?.label || 'Главная'}`;
+  }
+  for (const item of after) {
+    const old = before.find(
+      entry => targetKey(entry.target) === targetKey(item.target)
+    );
+    const text = item.changes.find(change => change.property === 'text');
+    if (
+      text &&
+      old?.changes.find(change => change.property === 'text')?.value !==
+        text.value
+    )
+      return `Текст: ${text.value.slice(0, 65)}`;
+  }
+  return 'Оформление элемента';
+}
 export async function elementStatus() {
   const overrides = await readOverrides();
+  const history = await readHistory();
   return {
     overrides,
     revision: revisionOf(overrides),
-    canUndo: (await readHistory()).length > 0,
+    canUndo: history.length > 0,
+    actions: history
+      .map((before, index) => ({
+        step: index + 1,
+        label: actionLabel(before, history[index + 1] || overrides),
+      }))
+      .reverse(),
   };
 }
 async function locked<T>(work: () => Promise<T>) {
@@ -294,7 +335,7 @@ export async function reorderGroup(
       existing?.layout?.order || indices.map((_, index) => index);
     if (JSON.stringify(previousOrder) === JSON.stringify(indices))
       return { ...(await elementStatus()), reply: 'Порядок не изменён.' };
-    const layout = { group, order: indices };
+    const layout = { ...existing?.layout, group, order: indices };
     if (existing) existing.layout = layout;
     else next.push({ target, changes: [], layout });
     overridesSchema.parse(next);
@@ -305,6 +346,63 @@ export async function reorderGroup(
     return {
       ...(await elementStatus()),
       reply: 'Порядок блоков сохранён. Можно отменить последнюю перестановку.',
+    };
+  });
+}
+
+export async function deleteBlock(
+  rawTarget: unknown,
+  group: unknown,
+  index: unknown,
+  revision: unknown
+) {
+  const target = targetSchema.parse(rawTarget);
+  if (
+    target.root !== 'main' ||
+    target.kind !== 'element' ||
+    typeof group !== 'string' ||
+    !Object.hasOwn(LAYOUT_GROUPS, group)
+  )
+    throw Error('invalid_order');
+  const definition = LAYOUT_GROUPS[group];
+  if (
+    !definition ||
+    typeof index !== 'number' ||
+    !Number.isInteger(index) ||
+    index < 0 ||
+    index >= definition.count
+  )
+    throw Error('invalid_order');
+  return locked(async () => {
+    const before = await readOverrides();
+    checkRevision(before, revision);
+    const next = structuredClone(before);
+    const existing = next.find(
+      item =>
+        item.layout?.group === group ||
+        targetKey(item.target) === targetKey(target)
+    );
+    const hidden = existing?.layout?.hidden || [];
+    if (hidden.includes(index))
+      return { ...(await elementStatus()), reply: 'Этот блок уже удалён.' };
+    const layout = {
+      group,
+      order:
+        existing?.layout?.order ||
+        Array.from({ length: definition.count }, (_, position) => position),
+      hidden: [...hidden, index].sort((left, right) => left - right),
+    };
+    if (existing) existing.layout = layout;
+    else next.push({ target, changes: [], layout });
+    overridesSchema.parse(next);
+    const history = await readHistory();
+    history.push(before);
+    await atomicWrite(historyFile(), history.slice(-20));
+    await atomicWrite(file(), next);
+    return {
+      ...(await elementStatus()),
+      reply:
+        'Блок удалён. Нажмите «Отменить», чтобы вернуть его вместе с содержимым.',
     };
   });
 }

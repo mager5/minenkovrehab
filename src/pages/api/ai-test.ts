@@ -5,6 +5,7 @@ import {
   editHeading,
   editText,
   reorderGroup,
+  deleteBlock,
   elementStatus,
   undoElement,
 } from '@/lib/element-editor';
@@ -52,6 +53,14 @@ export default async function handler(
       await configureKey(body.key);
       return res.json({ configured: true });
     }
+    if (
+      body?.action === 'delete-block' &&
+      body.page === '/' &&
+      body.confirmed === true
+    )
+      return res.json(
+        await deleteBlock(body.target, body.group, body.index, body.revision)
+      );
     if (body?.action === 'reorder' && body.page === '/')
       return res.json(
         await reorderGroup(body.target, body.group, body.order, body.revision)

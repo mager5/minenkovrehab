@@ -26,6 +26,7 @@ const {
   editHeading,
   editText,
   reorderGroup,
+  deleteBlock,
   editElement,
   undoElement,
   proposeElementEdit,
@@ -313,6 +314,92 @@ test('reorder rejects cross-group, malformed permutation, stale page and product
   try {
     await assert.rejects(
       () => reorderGroup(container, 'hero-actions', [1, 0], first.revision),
+      /test_only/
+    );
+  } finally {
+    process.env.NODE_ENV = 'development';
+  }
+  assert.deepEqual((await elementStatus()).overrides, []);
+});
+
+test('delete is its own persisted history step and undo restores order, content and styles', async () => {
+  const container = { ...target, tag: 'div', path: [{ tag: 'div', index: 0 }] };
+  const caption = {
+    ...target,
+    kind: 'text',
+    path: [
+      { tag: 'div', index: 0 },
+      { tag: 'a', index: 0 },
+    ],
+  };
+  const original = await elementStatus();
+  const edited = await editText(caption, 'Saved caption', original.revision);
+  const moved = await reorderGroup(
+    container,
+    'hero-actions',
+    [1, 0],
+    edited.revision
+  );
+  const deleted = await deleteBlock(
+    container,
+    'hero-actions',
+    0,
+    moved.revision
+  );
+  assert.deepEqual(deleted.overrides.find(item => item.layout)?.layout, {
+    group: 'hero-actions',
+    order: [1, 0],
+    hidden: [0],
+  });
+  assert.deepEqual((await elementStatus()).overrides, deleted.overrides);
+  assert.match(deleted.actions[0].label, /Удаление блока/);
+  assert.match(deleted.actions[1].label, /Перестановка/);
+  assert.match(deleted.actions[2].label, /Saved caption/);
+  const movedAgain = await reorderGroup(
+    container,
+    'hero-actions',
+    [0, 1],
+    deleted.revision
+  );
+  assert.deepEqual(
+    movedAgain.overrides.find(item => item.layout)?.layout.hidden,
+    [0]
+  );
+  const undoMove = await undoElement(movedAgain.revision);
+  assert.deepEqual(undoMove.overrides, deleted.overrides);
+  const undoDelete = await undoElement(undoMove.revision);
+  assert.deepEqual(undoDelete.overrides, moved.overrides);
+  assert.equal(undoDelete.actions.length, 2);
+  const undoOrder = await undoElement(undoDelete.revision);
+  assert.deepEqual(undoOrder.overrides, edited.overrides);
+  assert.deepEqual((await undoElement(undoOrder.revision)).overrides, []);
+});
+test('deletion rejects invalid indices, other roots, stale revisions and production without writes', async () => {
+  const container = { ...target, tag: 'div' };
+  const before = await elementStatus();
+  for (const index of [-1, 2, 0.5, '0'])
+    await assert.rejects(() =>
+      deleteBlock(container, 'hero-actions', index, before.revision)
+    );
+  await assert.rejects(() =>
+    deleteBlock(container, 'other', 0, before.revision)
+  );
+  await assert.rejects(() =>
+    deleteBlock(
+      { ...container, root: 'header' },
+      'hero-actions',
+      0,
+      before.revision
+    )
+  );
+  await assert.rejects(
+    () => deleteBlock(container, 'hero-actions', 0, 'stale'),
+    /stale_page/
+  );
+  process.env.NODE_ENV = 'production';
+  try {
+    await assert.rejects(
+      () => deleteBlock(container, 'hero-actions', 0, before.revision),
       /test_only/
     );
   } finally {

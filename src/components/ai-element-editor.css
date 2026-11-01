@@ -436,3 +436,161 @@
     sans-serif;
   box-shadow: 0 4px 15px #0003;
 }
+
+.ai-block-tools {
+  position: fixed;
+  width: 28px;
+  height: 32px;
+  z-index: 2147483300;
+}
+.ai-block-tools .ai-block-handle {
+  position: relative;
+}
+.ai-block-delete {
+  position: absolute;
+  left: -24px;
+  top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #526b81;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    background-color 120ms ease;
+}
+.ai-block-tools[data-edge='edge'] .ai-block-delete {
+  left: 28px;
+}
+.ai-block-tools[data-surface='dark'] .ai-block-delete {
+  color: #e6f0fa;
+}
+.ai-block-tools:hover .ai-block-delete,
+.ai-block-tools:focus-within .ai-block-delete {
+  opacity: 0.75;
+  pointer-events: auto;
+}
+.ai-block-tools .ai-block-delete:hover {
+  color: #f78080;
+  opacity: 1;
+  background: #a52a2a12;
+}
+.ai-block-delete:focus-visible {
+  outline: 2px solid #65b3ff;
+  outline-offset: 2px;
+  opacity: 1;
+}
+.ai-delete-candidate {
+  position: fixed;
+  z-index: 2147483350;
+  border: 1px solid #dc7777;
+  border-radius: 5px;
+  pointer-events: none;
+}
+.ai-delete-confirm {
+  position: fixed;
+  z-index: 2147483450;
+  width: 280px;
+  max-width: calc(100vw - 16px);
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ffffff20;
+  background: #11263df5;
+  color: #f3f7fc;
+  box-shadow: 0 8px 25px #06132033;
+  font:
+    12px/1.4 system-ui,
+    sans-serif;
+}
+.ai-delete-confirm strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.ai-delete-confirm p {
+  margin: 7px 0;
+  overflow-wrap: anywhere;
+}
+.ai-delete-confirm small {
+  color: #bdccdc;
+}
+.ai-delete-confirm > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 12px;
+}
+.ai-delete-confirm button {
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #ffffff12;
+  color: #f3f7fc;
+}
+.ai-delete-confirm button:focus-visible {
+  outline: 2px solid #a5d4ff;
+  outline-offset: 2px;
+}
+.ai-delete-confirm .ai-delete-confirm-action {
+  background: #b84d50;
+}
+.ai-delete-confirm .ai-delete-confirm-action:hover {
+  background: #cd5c5f;
+}
+.ai-action-history {
+  margin-top: 10px;
+  border-top: 1px solid #e2e9ef;
+  padding-top: 8px;
+  font-size: 12px;
+}
+.ai-action-history summary {
+  cursor: pointer;
+  color: #47637a;
+}
+.ai-action-history > p {
+  color: #6a7f90;
+  font-size: 11px;
+  margin: 6px 0;
+}
+.ai-action-history ol {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  max-height: 160px;
+  overflow: auto;
+}
+.ai-action-history li {
+  display: flex;
+  gap: 7px;
+  padding: 5px 0;
+  overflow-wrap: anywhere;
+}
+.ai-action-history li span {
+  color: #8193a1;
+  min-width: 18px;
+  font-variant-numeric: tabular-nums;
+}
+@media (pointer: coarse) {
+  .ai-block-tools {
+    width: 40px;
+    height: 40px;
+  }
+  .ai-block-delete {
+    width: 32px;
+    height: 40px;
+    left: -32px;
+    opacity: 0.75;
+    pointer-events: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-block-delete {
+    transition: none;
+  }
+}

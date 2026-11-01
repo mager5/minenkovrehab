@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, X } from 'lucide-react';
 import { describeElement } from '@/lib/element-editor-dom';
 import type { EditTarget } from '@/lib/element-editor-schema';
 
@@ -30,6 +30,11 @@ type Props = {
     _group: string,
     _order: number[]
   ) => Promise<void>;
+  onDelete?: (
+    _target: EditTarget,
+    _group: string,
+    _index: number
+  ) => Promise<void>;
   onNotice: (_text: string) => void;
 };
 const siblings = (group: Element) =>
@@ -39,10 +44,42 @@ const siblings = (group: Element) =>
   );
 const ids = (nodes: HTMLElement[]) =>
   nodes.map(node => Number(node.dataset.aiOrderIndex));
-export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
+export default function AiBlockReorder({
+  disabled,
+  onMove,
+  onDelete,
+  onNotice,
+}: Props) {
   const [active, setActive] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [preview, setPreview] = useState<Preview | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Item | null>(null);
+  const cancelDelete = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!pendingDelete) return;
+    cancelDelete.current?.focus();
+    const outside = (event: PointerEvent) => {
+      if (
+        event.target instanceof Element &&
+        !event.target.closest(
+          '[data-ai-delete-confirm],[data-ai-delete-button]'
+        )
+      )
+        setPendingDelete(null);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setPendingDelete(null);
+      }
+    };
+    document.addEventListener('pointerdown', outside, true);
+    document.addEventListener('keydown', escape, true);
+    return () => {
+      document.removeEventListener('pointerdown', outside, true);
+      document.removeEventListener('keydown', escape, true);
+    };
+  }, [pendingDelete]);
   const cancel = useRef<(() => void) | null>(null);
   useEffect(() => {
     if (!active || disabled) {
@@ -58,7 +95,9 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
           'main#main-content [data-ai-sortable-group]'
         )
         .forEach(group => {
-          for (const node of siblings(group)) {
+          for (const node of siblings(group).filter(
+            node => !node.closest('[data-ai-layout-hidden]')
+          )) {
             const rect = node.getBoundingClientRect();
             if (
               rect.width > 10 &&
@@ -126,21 +165,28 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
     )
       return;
     event.preventDefault();
-    const order = ids(siblings(item.group)),
+    setPendingDelete(null);
+    const all = siblings(item.group);
+    const order = ids(
+        all.filter(node => !node.closest('[data-ai-layout-hidden]'))
+      ),
       from = order.indexOf(item.id);
     const to = from + (['ArrowUp', 'ArrowLeft'].includes(event.key) ? -1 : 1);
     if (to < 0 || to >= order.length) return;
-    order.splice(from, 1);
-    order.splice(to, 0, item.id);
+    const neighbor = order[to]!;
+    const complete = ids(all).filter(id => id !== item.id);
+    const destination = complete.indexOf(neighbor) + (to > from ? 1 : 0);
+    complete.splice(destination, 0, item.id);
     const target = describeElement(item.group),
       group = item.group.dataset.aiSortableGroup;
-    if (target && group) void onMove(target, group, order);
+    if (target && group) void onMove(target, group, complete);
   }
   function begin(event: React.PointerEvent, item: Item) {
     if (event.button !== 0 || disabled) return;
     event.preventDefault();
     event.stopPropagation();
     cancel.current?.();
+    setPendingDelete(null);
     const startX = event.clientX,
       startY = event.clientY;
     const nodes = siblings(item.group),
@@ -157,8 +203,11 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
       moved = true;
       pointer.preventDefault();
       const bounds = item.group.getBoundingClientRect();
-      const first = nodes[0]?.getBoundingClientRect(),
-        second = nodes[1]?.getBoundingClientRect();
+      const candidates = nodes.filter(
+        node => !node.closest('[data-ai-layout-hidden]')
+      );
+      const first = candidates[0]?.getBoundingClientRect(),
+        second = candidates[1]?.getBoundingClientRect();
       const horizontal = Boolean(
         first &&
           second &&
@@ -174,7 +223,7 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
         pointer.clientY <= bounds.bottom;
       let line: Marker | null = null;
       if (valid) {
-        let hit = nodes.find(node => {
+        let hit = candidates.find(node => {
           const r = node.getBoundingClientRect();
           return (
             pointer.clientX >= r.left &&
@@ -198,7 +247,7 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
             );
             return x * x + y * y;
           };
-          hit = [...nodes].sort(
+          hit = [...candidates].sort(
             (left, right) => distance(left) - distance(right)
           )[0];
         }
@@ -288,14 +337,14 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
         title={
           disabled
             ? 'Завершите редактирование текста или выбор элемента'
-            : 'Показать ручки для перестановки соседних блоков'
+            : 'Показать управление порядком и удалением блоков'
         }
         aria-pressed={active}
         onClick={() => {
           setActive(!active);
           if (!active)
             onNotice(
-              'Тяните за ручку с точками. Блоки перемещаются только внутри своего контейнера. Стрелки на ручке тоже меняют порядок.'
+              'Точки — переместить блок. Крестик при наведении — удалить с подтверждением. Стрелки на ручке тоже меняют порядок.'
             );
         }}
       >
@@ -305,36 +354,126 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
       {visible &&
         createPortal(
           <div data-ai-editor className='ai-layout-layer'>
-            {items.map(item => (
-              <button
-                data-ai-editor
-                type='button'
-                key={`${item.group.dataset.aiSortableGroup}:${item.id}`}
-                className='ai-block-handle'
-                data-surface={item.surface}
-                style={{
-                  left: Math.max(
-                    2,
-                    item.above ? item.rect.left + 4 : item.rect.left - 34
-                  ),
-                  top: Math.max(
-                    84,
-                    item.above
-                      ? item.rect.top - 28
-                      : item.rect.top +
-                          (item.node.matches('a,button')
-                            ? Math.max(0, (item.rect.height - 32) / 2)
-                            : 0)
-                  ),
-                }}
-                aria-label={`Переместить: ${item.label}`}
-                title='Потяните за точки или используйте стрелки'
-                onPointerDown={event => begin(event, item)}
-                onKeyDown={event => keyboard(event, item)}
-              >
-                <GripVertical size={13} strokeWidth={1.6} />
-              </button>
-            ))}
+            {items.map(item => {
+              const left = Math.max(
+                2,
+                item.above ? item.rect.left + 4 : item.rect.left - 34
+              );
+              const top = Math.max(
+                84,
+                item.above
+                  ? item.rect.top - 28
+                  : item.rect.top +
+                      (item.node.matches('a,button')
+                        ? Math.max(0, (item.rect.height - 32) / 2)
+                        : 0)
+              );
+              return (
+                <div
+                  data-ai-editor
+                  className='ai-block-tools'
+                  data-surface={item.surface}
+                  data-edge={left < 28 ? 'edge' : 'normal'}
+                  key={`${item.group.dataset.aiSortableGroup}:${item.id}`}
+                  style={{ left, top }}
+                >
+                  <button
+                    data-ai-editor
+                    type='button'
+                    className='ai-block-handle'
+                    data-surface={item.surface}
+                    aria-label={`Переместить: ${item.label}`}
+                    title='Потяните за точки или используйте стрелки'
+                    onPointerDown={event => begin(event, item)}
+                    onKeyDown={event => keyboard(event, item)}
+                  >
+                    <GripVertical size={13} strokeWidth={1.6} />
+                  </button>
+                  {onDelete && (
+                    <button
+                      data-ai-editor
+                      data-ai-delete-button
+                      type='button'
+                      className='ai-block-delete'
+                      aria-label={`Удалить: ${item.label}`}
+                      title='Удалить блок'
+                      onClick={() => {
+                        cancel.current?.();
+                        setPendingDelete(item);
+                      }}
+                    >
+                      <X size={13} strokeWidth={1.6} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+            {pendingDelete && onDelete && (
+              <>
+                <div
+                  className='ai-delete-candidate'
+                  style={{
+                    left: pendingDelete.rect.left,
+                    top: pendingDelete.rect.top,
+                    width: pendingDelete.rect.width,
+                    height: pendingDelete.rect.height,
+                  }}
+                />
+                <div
+                  data-ai-editor
+                  data-ai-delete-confirm
+                  role='dialog'
+                  aria-labelledby='ai-delete-title'
+                  aria-describedby='ai-delete-description'
+                  className='ai-delete-confirm'
+                  style={{
+                    left: Math.max(
+                      8,
+                      Math.min(pendingDelete.rect.left, window.innerWidth - 300)
+                    ),
+                    top: Math.max(
+                      8,
+                      Math.min(
+                        pendingDelete.rect.top + 34,
+                        window.innerHeight - 175
+                      )
+                    ),
+                  }}
+                >
+                  <strong id='ai-delete-title'>Удалить блок?</strong>
+                  <p id='ai-delete-description'>
+                    «{pendingDelete.label}»
+                    {pendingDelete.group.dataset.aiSortableGroup ===
+                    'home-sections'
+                      ? ' — вместе с содержимым'
+                      : ''}
+                  </p>
+                  <small>Можно вернуть через «Отменить».</small>
+                  <div>
+                    <button
+                      type='button'
+                      ref={cancelDelete}
+                      onClick={() => setPendingDelete(null)}
+                    >
+                      Отмена
+                    </button>
+                    <button
+                      type='button'
+                      className='ai-delete-confirm-action'
+                      onClick={async () => {
+                        const target = describeElement(pendingDelete.group),
+                          group = pendingDelete.group.dataset.aiSortableGroup;
+                        if (target && group)
+                          await onDelete(target, group, pendingDelete.id);
+                        setPendingDelete(null);
+                      }}
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
             {preview && (
               <>
                 <div

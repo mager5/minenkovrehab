@@ -1,11 +1,16 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
-import { LAYOUT_GROUPS, validLayoutOrder } from './ai-layout-schema';
+import {
+  LAYOUT_GROUPS,
+  validLayoutOrder,
+  validLayoutHidden,
+} from './ai-layout-schema';
 
 export type LayoutOrders = Readonly<Record<string, readonly number[]>>;
 const EMPTY: LayoutOrders = Object.freeze({});
 let orders: LayoutOrders = EMPTY;
+let hidden: LayoutOrders = EMPTY;
 const listeners = new Set<() => void>();
 
 export function getLayoutOrders(): LayoutOrders {
@@ -42,4 +47,58 @@ export function useLayoutOrders(): LayoutOrders {
     getLayoutOrders,
     () => EMPTY
   );
+}
+
+export function getLayoutHidden(): LayoutOrders {
+  return hidden;
+}
+
+export function setLayoutHidden(next: Record<string, number[]>): void {
+  const normalized: Record<string, readonly number[]> = {};
+  if (process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1') {
+    for (const group of Object.keys(LAYOUT_GROUPS)) {
+      const value = next[group];
+      if (validLayoutHidden(group, value) && value.length)
+        normalized[group] = Object.freeze(
+          [...value].sort((left, right) => left - right)
+        );
+    }
+  }
+  if (JSON.stringify(normalized) === JSON.stringify(hidden)) return;
+  hidden = Object.freeze(normalized);
+  for (const listener of listeners) listener();
+}
+
+export function useLayoutHidden(): LayoutOrders {
+  return useSyncExternalStore(
+    subscribeLayoutOrders,
+    getLayoutHidden,
+    () => EMPTY
+  );
+}
+
+export interface LayoutVisibilityLayer {
+  restore: () => void;
+  apply: () => void;
+}
+const visibilityLayers = new Set<LayoutVisibilityLayer>();
+
+export function registerLayoutVisibility(
+  layer: LayoutVisibilityLayer
+): () => void {
+  visibilityLayers.add(layer);
+  return () => {
+    visibilityLayers.delete(layer);
+  };
+}
+
+// Visibility is a temporary layer. Never let text/style undo snapshot our display:none.
+export function withLayoutVisibilityRestored<T>(work: () => T): T {
+  const layers = [...visibilityLayers];
+  for (const layer of layers) layer.restore();
+  try {
+    return work();
+  } finally {
+    for (const layer of layers) layer.apply();
+  }
 }

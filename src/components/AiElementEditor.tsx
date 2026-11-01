@@ -33,7 +33,11 @@ import {
 } from '@/lib/element-editor-schema';
 import './ai-element-editor.css';
 import AiBlockReorder from './AiBlockReorder';
-import { setLayoutOrders } from '@/lib/ai-layout-store';
+import {
+  setLayoutOrders,
+  setLayoutHidden,
+  withLayoutVisibilityRestored,
+} from '@/lib/ai-layout-store';
 
 export default function AiElementEditor() {
   const enabled = process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1';
@@ -47,6 +51,7 @@ export default function AiElementEditor() {
   const [overrides, setOverrides] = useState<ElementOverride[]>([]);
   const [revision, setRevision] = useState('');
   const [canUndo, setCanUndo] = useState(false);
+  const [actions, setActions] = useState<{ step: number; label: string }[]>([]);
   const [configured, setConfigured] = useState(false);
   const [settings, setSettings] = useState(false);
   const [key, setKey] = useState('');
@@ -114,6 +119,7 @@ export default function AiElementEditor() {
           setOverrides(data.overrides || []);
           setRevision(data.revision || '');
           setCanUndo(Boolean(data.canUndo));
+          setActions(data.actions || []);
         })
         .catch(() => {
           if (!cancelled)
@@ -161,8 +167,21 @@ export default function AiElementEditor() {
         )
       )
     );
+    setLayoutHidden(
+      Object.fromEntries(
+        overrides.flatMap(item =>
+          item.layout ? [[item.layout.group, item.layout.hidden || []]] : []
+        )
+      )
+    );
   }, [enabled, ready, overrides]);
-  useEffect(() => () => setLayoutOrders({}), []);
+  useEffect(
+    () => () => {
+      setLayoutOrders({});
+      setLayoutHidden({});
+    },
+    []
+  );
 
   useEffect(() => {
     if (!enabled || !ready) return;
@@ -170,8 +189,10 @@ export default function AiElementEditor() {
     let scheduled = 0;
     const apply = () => {
       observer?.disconnect();
-      restore();
-      restore = applyOverrides(overrides);
+      restore = withLayoutVisibilityRestored(() => {
+        restore();
+        return applyOverrides(overrides);
+      });
       observer?.observe(document.body, {
         childList: true,
         characterData: true,
@@ -210,7 +231,7 @@ export default function AiElementEditor() {
     return () => {
       observer.disconnect();
       if (scheduled) cancelAnimationFrame(scheduled);
-      restore();
+      withLayoutVisibilityRestored(restore);
     };
   }, [enabled, ready, overrides, inlineVersion, finishText]);
 
@@ -450,6 +471,7 @@ export default function AiElementEditor() {
       setOverrides(data.overrides);
       setRevision(data.revision);
       setCanUndo(Boolean(data.canUndo));
+      setActions(data.actions || []);
       setReply(data.reply);
     } catch (error) {
       setTextError(
@@ -513,6 +535,37 @@ export default function AiElementEditor() {
       setOverrides(data.overrides);
       setRevision(data.revision);
       setCanUndo(Boolean(data.canUndo));
+      setActions(data.actions || []);
+      setReply(data.reply);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : 'Ошибка соединения.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function removeBlock(target: EditTarget, group: string, index: number) {
+    if (blocked || inlineEdit || picking) return;
+    setBusy(true);
+    try {
+      const response = await fetch('/api/ai-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-block',
+          page: '/',
+          confirmed: true,
+          target,
+          group,
+          index,
+          revision,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw Error(data.error || 'Не удалось удалить блок.');
+      setOverrides(data.overrides);
+      setRevision(data.revision);
+      setCanUndo(Boolean(data.canUndo));
+      setActions(data.actions || []);
       setReply(data.reply);
     } catch (error) {
       setReply(error instanceof Error ? error.message : 'Ошибка соединения.');
@@ -573,6 +626,7 @@ export default function AiElementEditor() {
         setOverrides(data.overrides);
         setRevision(data.revision);
         setCanUndo(Boolean(data.canUndo));
+        setActions(data.actions || []);
         setReply(data.reply);
         if (action === 'chat') setMessage('');
       }
@@ -920,6 +974,7 @@ export default function AiElementEditor() {
               <AiBlockReorder
                 disabled={blocked || Boolean(inlineEdit) || picking}
                 onMove={moveBlocks}
+                onDelete={removeBlock}
                 onNotice={setReply}
               />
               <div className='ai-element-actions'>
@@ -937,6 +992,22 @@ export default function AiElementEditor() {
                   {configured ? 'Настроить AI' : 'Подключить AI'}
                 </button>
               </div>
+              {actions.length > 0 && (
+                <details className='ai-action-history'>
+                  <summary>История действий · {actions.length}</summary>
+                  <p>
+                    Последние 20 действий. «Отменить» возвращает предыдущий шаг.
+                  </p>
+                  <ol>
+                    {actions.map(action => (
+                      <li key={action.step}>
+                        <span>{action.step}</span>
+                        {action.label}
+                      </li>
+                    ))}
+                  </ol>
+                </details>
+              )}
               {settings && (
                 <form
                   className='ai-element-key'

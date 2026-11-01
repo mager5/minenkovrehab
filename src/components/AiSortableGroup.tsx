@@ -11,7 +11,79 @@ import {
   type ReactNode,
 } from 'react';
 import { LAYOUT_GROUPS, validLayoutOrder } from '@/lib/ai-layout-schema';
-import { useLayoutOrders } from '@/lib/ai-layout-store';
+import {
+  useLayoutOrders,
+  useLayoutHidden,
+  getLayoutHidden,
+  registerLayoutVisibility,
+  type LayoutVisibilityLayer,
+} from '@/lib/ai-layout-store';
+
+type DisplaySnapshot = {
+  value: string;
+  priority: string;
+  hadStyle: boolean;
+  marker: string | null;
+};
+
+function visibilityLayer(
+  root: HTMLElement,
+  group: string
+): LayoutVisibilityLayer {
+  const snapshots = new Map<HTMLElement, DisplaySnapshot>();
+  const capture = (node: HTMLElement): DisplaySnapshot => ({
+    value: node.style.getPropertyValue('display'),
+    priority: node.style.getPropertyPriority('display'),
+    hadStyle: node.hasAttribute('style'),
+    marker: node.getAttribute('data-ai-layout-hidden'),
+  });
+  const restore = () => {
+    for (const [node, previous] of snapshots) {
+      // React may have updated this child's own display since the last commit.
+      const current =
+        node.style.getPropertyValue('display') !== 'none' ||
+        node.style.getPropertyPriority('display') !== 'important'
+          ? { ...capture(node), marker: previous.marker }
+          : previous;
+      if (current.value)
+        node.style.setProperty('display', current.value, current.priority);
+      else node.style.removeProperty('display');
+      if (!current.hadStyle && !node.getAttribute('style')?.trim())
+        node.removeAttribute('style');
+      if (current.marker === null)
+        node.removeAttribute('data-ai-layout-hidden');
+      else node.setAttribute('data-ai-layout-hidden', current.marker);
+    }
+    snapshots.clear();
+  };
+  const hide = (node: HTMLElement) => {
+    snapshots.set(node, capture(node));
+    node.style.setProperty('display', 'none', 'important');
+    node.setAttribute('data-ai-layout-hidden', '');
+  };
+  return {
+    restore,
+    apply: () => {
+      restore();
+      if (
+        process.env.NEXT_PUBLIC_AI_TEST_ENABLED !== '1' ||
+        root.dataset.aiSortableGroup !== group
+      )
+        return;
+      const mask = getLayoutHidden()[group] || [];
+      if (!mask.length) return;
+      const direct = Array.from(root.children).filter(
+        (node): node is HTMLElement =>
+          node instanceof HTMLElement &&
+          node.hasAttribute('data-ai-order-index')
+      );
+      if (direct.length !== LAYOUT_GROUPS[group]?.count) return;
+      for (const node of direct)
+        if (mask.includes(Number(node.dataset.aiOrderIndex))) hide(node);
+      if (mask.length === direct.length) hide(root);
+    },
+  };
+}
 
 interface AiSortableGroupProps extends HTMLAttributes<HTMLElement> {
   group: string;
@@ -28,6 +100,8 @@ export default function AiSortableGroup({
 }: AiSortableGroupProps) {
   const root = useRef<HTMLDivElement & HTMLParagraphElement>(null);
   const orders = useLayoutOrders();
+  useLayoutHidden();
+  const visibility = useRef<LayoutVisibilityLayer | null>(null);
   const enabled = process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1';
   const nodes = Children.toArray(children);
   const sortable = enabled && LAYOUT_GROUPS[group]?.count === nodes.length;
@@ -55,12 +129,27 @@ export default function AiSortableGroup({
     );
     if (!sortable || direct.length !== order.length) {
       for (const child of direct) child.removeAttribute('data-ai-order-index');
+      visibility.current?.apply();
       return;
     }
     direct.forEach((child, position) =>
       child.setAttribute('data-ai-order-index', String(order[position]))
     );
+    visibility.current?.apply();
   });
+
+  useLayoutEffect(() => {
+    if (!root.current) return;
+    const layer = visibilityLayer(root.current, group);
+    visibility.current = layer;
+    const unregister = registerLayoutVisibility(layer);
+    layer.apply();
+    return () => {
+      unregister();
+      layer.restore();
+      if (visibility.current === layer) visibility.current = null;
+    };
+  }, [group]);
 
   const Tag = as;
   return (

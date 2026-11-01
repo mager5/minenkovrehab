@@ -63,7 +63,9 @@ export type ElementChange = z.infer<typeof changeSchema>;
 export type ElementOverride = {
   target: EditTarget;
   changes: ElementChange[];
-  layout?: { group: string; order: number[] } | undefined;
+  layout?:
+    | { group: string; order: number[]; hidden?: number[] | undefined }
+    | undefined;
 };
 export const overrideSchema = z.strictObject({
   target: targetSchema,
@@ -71,6 +73,7 @@ export const overrideSchema = z.strictObject({
   layout: z
     .strictObject({
       group: z.string().max(60),
+      hidden: z.array(z.number().int().min(0).max(100)).max(100).optional(),
       order: z.array(z.number().int().min(0).max(100)).min(2).max(100),
     })
     .optional(),
