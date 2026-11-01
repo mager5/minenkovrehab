@@ -2,6 +2,7 @@ import { readFile, writeFile, rename, access } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { z } from 'zod';
+import { LAYOUT_GROUPS } from './ai-layout-schema';
 import { assertTestBranch, withAI, validTitle } from './ai-title';
 import {
   editResultSchema,
@@ -238,7 +239,7 @@ async function persistDirectText(
             }
           : item
       )
-      .filter(item => item.changes.length);
+      .filter(item => item.changes.length || item.layout);
     const existing = next.find(
       item => targetKey(item.target) === targetKey(target)
     );
@@ -250,6 +251,61 @@ async function persistDirectText(
     await atomicWrite(historyFile(), history.slice(-20));
     await atomicWrite(file(), next);
     return { ...(await elementStatus()), reply: 'Текст сохранён.' };
+  });
+}
+
+export async function reorderGroup(
+  rawTarget: unknown,
+  group: unknown,
+  order: unknown,
+  revision: unknown
+) {
+  const target = targetSchema.parse(rawTarget);
+  if (
+    target.root !== 'main' ||
+    target.kind !== 'element' ||
+    typeof group !== 'string' ||
+    !Object.hasOwn(LAYOUT_GROUPS, group)
+  )
+    throw Error('invalid_order');
+  const definition = LAYOUT_GROUPS[group as keyof typeof LAYOUT_GROUPS];
+  if (!definition) throw Error('invalid_order');
+  const indices = z
+    .array(
+      z
+        .number()
+        .int()
+        .min(0)
+        .max(definition.count - 1)
+    )
+    .length(definition.count)
+    .parse(order);
+  if (new Set(indices).size !== definition.count) throw Error('invalid_order');
+  return locked(async () => {
+    const before = await readOverrides();
+    checkRevision(before, revision);
+    const next = structuredClone(before);
+    const existing = next.find(
+      item =>
+        item.layout?.group === group ||
+        targetKey(item.target) === targetKey(target)
+    );
+    const previousOrder =
+      existing?.layout?.order || indices.map((_, index) => index);
+    if (JSON.stringify(previousOrder) === JSON.stringify(indices))
+      return { ...(await elementStatus()), reply: 'Порядок не изменён.' };
+    const layout = { group, order: indices };
+    if (existing) existing.layout = layout;
+    else next.push({ target, changes: [], layout });
+    overridesSchema.parse(next);
+    const history = await readHistory();
+    history.push(before);
+    await atomicWrite(historyFile(), history.slice(-20));
+    await atomicWrite(file(), next);
+    return {
+      ...(await elementStatus()),
+      reply: 'Порядок блоков сохранён. Можно отменить последнюю перестановку.',
+    };
   });
 }
 

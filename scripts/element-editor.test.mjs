@@ -25,6 +25,7 @@ const {
   elementStatus,
   editHeading,
   editText,
+  reorderGroup,
   editElement,
   undoElement,
   proposeElementEdit,
@@ -250,5 +251,72 @@ test('manual captions reject containers, invalid text and stale revisions withou
     () => editText(caption, 'Caption', 'stale'),
     /stale_page/
   );
+  assert.deepEqual((await elementStatus()).overrides, []);
+});
+
+test('reorder and text edits share revisions and undo without losing each other', async () => {
+  const container = { ...target, tag: 'div', path: [{ tag: 'div', index: 0 }] };
+  const first = await elementStatus();
+  const moved = await reorderGroup(
+    container,
+    'hero-actions',
+    [1, 0],
+    first.revision
+  );
+  assert.deepEqual(moved.overrides[0].layout, {
+    group: 'hero-actions',
+    order: [1, 0],
+  });
+  const caption = {
+    ...target,
+    kind: 'text',
+    path: [
+      { tag: 'div', index: 0 },
+      { tag: 'a', index: 1 },
+    ],
+  };
+  const edited = await editText(caption, 'Second caption', moved.revision);
+  assert.deepEqual(
+    edited.overrides.find(item => item.layout)?.layout.order,
+    [1, 0]
+  );
+  const undoText = await undoElement(edited.revision);
+  assert.deepEqual(undoText.overrides, moved.overrides);
+  assert.deepEqual((await undoElement(undoText.revision)).overrides, []);
+});
+test('reorder rejects cross-group, malformed permutation, stale page and production', async () => {
+  const container = { ...target, tag: 'div' };
+  const first = await elementStatus();
+  for (const [group, order] of [
+    ['other', [1, 0]],
+    ['hero-actions', [0, 0]],
+    ['hero-actions', [0, 1, 2]],
+    ['hero-actions', [-1, 0]],
+    ['hero-actions', [2, 0]],
+  ])
+    await assert.rejects(() =>
+      reorderGroup(container, group, order, first.revision)
+    );
+  await assert.rejects(() =>
+    reorderGroup(
+      { ...container, root: 'header' },
+      'hero-actions',
+      [1, 0],
+      first.revision
+    )
+  );
+  await assert.rejects(
+    () => reorderGroup(container, 'hero-actions', [1, 0], 'stale'),
+    /stale_page/
+  );
+  process.env.NODE_ENV = 'production';
+  try {
+    await assert.rejects(
+      () => reorderGroup(container, 'hero-actions', [1, 0], first.revision),
+      /test_only/
+    );
+  } finally {
+    process.env.NODE_ENV = 'development';
+  }
   assert.deepEqual((await elementStatus()).overrides, []);
 });

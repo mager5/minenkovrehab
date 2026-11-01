@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { homeContent } from '@/data/content';
+import AiSortableGroup from '@/components/AiSortableGroup';
 
 export function HelpSection() {
   return (
@@ -35,7 +36,7 @@ export function HelpSection() {
               </motion.span>
             </motion.h2>
 
-            <div className='space-y-6'>
+            <AiSortableGroup group='help-items' className='space-y-6'>
               {homeContent.help.items.map((item, index) => (
                 <motion.div
                   key={index}
@@ -85,7 +86,7 @@ export function HelpSection() {
                   </div>
                 </motion.div>
               ))}
-            </div>
+            </AiSortableGroup>
           </motion.div>
 
           <motion.div

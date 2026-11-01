@@ -32,6 +32,8 @@ import {
   type ElementOverride,
 } from '@/lib/element-editor-schema';
 import './ai-element-editor.css';
+import AiBlockReorder from './AiBlockReorder';
+import { setLayoutOrders } from '@/lib/ai-layout-store';
 
 export default function AiElementEditor() {
   const enabled = process.env.NEXT_PUBLIC_AI_TEST_ENABLED === '1';
@@ -149,6 +151,18 @@ export default function AiElementEditor() {
     window.addEventListener('focus', refresh);
     return () => window.removeEventListener('focus', refresh);
   }, [enabled]);
+
+  useEffect(() => {
+    if (!enabled || !ready) return;
+    setLayoutOrders(
+      Object.fromEntries(
+        overrides.flatMap(item =>
+          item.layout ? [[item.layout.group, item.layout.order]] : []
+        )
+      )
+    );
+  }, [enabled, ready, overrides]);
+  useEffect(() => () => setLayoutOrders({}), []);
 
   useEffect(() => {
     if (!enabled || !ready) return;
@@ -471,6 +485,39 @@ export default function AiElementEditor() {
       setHover(parent);
       setBox(targetBounds(parent));
       setFrozen(true);
+    }
+  }
+  async function moveBlocks(
+    target: EditTarget,
+    group: string,
+    order: number[]
+  ) {
+    if (blocked || inlineEdit || picking) return;
+    setBusy(true);
+    try {
+      const response = await fetch('/api/ai-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reorder',
+          page: '/',
+          target,
+          group,
+          order,
+          revision,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw Error(data.error || 'Не удалось переставить блоки.');
+      setOverrides(data.overrides);
+      setRevision(data.revision);
+      setCanUndo(Boolean(data.canUndo));
+      setReply(data.reply);
+    } catch (error) {
+      setReply(error instanceof Error ? error.message : 'Ошибка соединения.');
+    } finally {
+      setBusy(false);
     }
   }
   async function send(action: string) {
@@ -870,6 +917,11 @@ export default function AiElementEditor() {
                 вводе — также запись. Распознанный текст можно проверить перед
                 применением.
               </p>
+              <AiBlockReorder
+                disabled={blocked || Boolean(inlineEdit) || picking}
+                onMove={moveBlocks}
+                onNotice={setReply}
+              />
               <div className='ai-element-actions'>
                 <button
                   disabled={blocked || !canUndo}

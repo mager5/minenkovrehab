@@ -60,10 +60,20 @@ export const editResultSchema = z.strictObject({
   changes: z.array(changeSchema).max(20),
 });
 export type ElementChange = z.infer<typeof changeSchema>;
-export type ElementOverride = { target: EditTarget; changes: ElementChange[] };
+export type ElementOverride = {
+  target: EditTarget;
+  changes: ElementChange[];
+  layout?: { group: string; order: number[] } | undefined;
+};
 export const overrideSchema = z.strictObject({
   target: targetSchema,
   changes: z.array(changeSchema).max(40),
+  layout: z
+    .strictObject({
+      group: z.string().max(60),
+      order: z.array(z.number().int().min(0).max(100)).min(2).max(100),
+    })
+    .optional(),
 });
 export const overridesSchema = z.array(overrideSchema).max(200);
 export const targetKey = (target: EditTarget) =>

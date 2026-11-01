@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Counter } from '@/components';
 import { homeContent } from '@/data/content';
+import AiSortableGroup from '@/components/AiSortableGroup';
 
 export function AboutSection() {
   return (
@@ -168,7 +169,10 @@ export function AboutSection() {
         </div>
 
         {/* Статистика */}
-        <div className='mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 text-center'>
+        <AiSortableGroup
+          group='about-stats'
+          className='mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 text-center'
+        >
           <Counter
             value={homeContent.stats.satisfiedClients}
             label={homeContent.stats.satisfiedClientsLabel}
@@ -193,7 +197,7 @@ export function AboutSection() {
             plus={true}
             delay={0.3}
           />
-        </div>
+        </AiSortableGroup>
       </div>
     </section>
   );

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { homeContent } from '@/data/content';
+import AiSortableGroup from '@/components/AiSortableGroup';
 
 export function ServicesSection() {
   return (
@@ -43,7 +44,10 @@ export function ServicesSection() {
           ></motion.div>
         </motion.div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8'>
+        <AiSortableGroup
+          group='services'
+          className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8'
+        >
           {homeContent.services.items
             .filter(service => service.title !== 'Экспресс онлайн-консультация')
             .map((service, index) => (
@@ -65,7 +69,7 @@ export function ServicesSection() {
                 delay={0.1 * (index + 1)}
               />
             ))}
-        </div>
+        </AiSortableGroup>
       </div>
     </section>
   );

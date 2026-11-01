@@ -15,7 +15,22 @@ const rootSelectors = {
 const editableRoot = (element: Element) =>
   element.closest(editableRootSelector);
 function children(element: Element) {
-  return Array.from(element.children).filter(child => !excluded(child));
+  const direct = Array.from(element.children).filter(child => !excluded(child));
+  if (!element.hasAttribute('data-ai-sortable-group')) return direct;
+  const indices = direct.map(child =>
+    child.getAttribute('data-ai-order-index')
+  );
+  // Incomplete metadata must never silently address another React child.
+  if (
+    indices.some(index => index === null || !/^\d+$/.test(index)) ||
+    new Set(indices).size !== direct.length
+  )
+    return direct;
+  return direct.sort(
+    (left, right) =>
+      Number(left.getAttribute('data-ai-order-index')) -
+      Number(right.getAttribute('data-ai-order-index'))
+  );
 }
 function textNodes(element: Element): Text[] {
   return Array.from(element.childNodes).flatMap(node =>
