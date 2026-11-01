@@ -179,3 +179,46 @@ test('an outside release cancels even if its coordinates differ from the last po
     expect.stringContaining('Перенос отменён')
   );
 });
+
+test('vertical dragging in the external handle lane shows insertion feedback and reorders', () => {
+  document.querySelector('#group-b')!.remove();
+  // eslint-disable-next-line no-unused-vars -- TypeScript receiver annotation, not a runtime argument.
+  geometry.mockImplementation(function (this: HTMLElement) {
+    if (this.id === 'group-a') return rectangle(100, 190, 200, 200);
+    if (this.hasAttribute('data-ai-order-index'))
+      return rectangle(
+        100,
+        200 + Number(this.dataset.aiOrderIndex) * 60,
+        180,
+        40
+      );
+    return rectangle(0, 0, 0, 0);
+  });
+  const handle = enable();
+  fireEvent.pointerDown(handle, { button: 0, clientX: 80, clientY: 210 });
+  fireEvent.pointerMove(window, { clientX: 80, clientY: 350 });
+  expect(document.querySelector('.ai-layout-insertion')).not.toBeNull();
+  fireEvent.pointerUp(window, { clientX: 80, clientY: 350 });
+  expect(onMove).toHaveBeenCalledWith(groupTarget, 'hero-actions', [1, 2, 0]);
+});
+
+test('vertical dragging far outside the handle lane remains cancelled', () => {
+  document.querySelector('#group-b')!.remove();
+  // eslint-disable-next-line no-unused-vars -- TypeScript receiver annotation, not a runtime argument.
+  geometry.mockImplementation(function (this: HTMLElement) {
+    if (this.id === 'group-a') return rectangle(100, 190, 200, 200);
+    if (this.hasAttribute('data-ai-order-index'))
+      return rectangle(
+        100,
+        200 + Number(this.dataset.aiOrderIndex) * 60,
+        180,
+        40
+      );
+    return rectangle(0, 0, 0, 0);
+  });
+  const handle = enable();
+  fireEvent.pointerDown(handle, { button: 0, clientX: 80, clientY: 210 });
+  fireEvent.pointerMove(window, { clientX: 20, clientY: 350 });
+  fireEvent.pointerUp(window, { clientX: 20, clientY: 350 });
+  expect(onMove).not.toHaveBeenCalled();
+});

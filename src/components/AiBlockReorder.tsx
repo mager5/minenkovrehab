@@ -157,10 +157,20 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
       moved = true;
       pointer.preventDefault();
       const bounds = item.group.getBoundingClientRect();
+      const first = nodes[0]?.getBoundingClientRect(),
+        second = nodes[1]?.getBoundingClientRect();
+      const horizontal = Boolean(
+        first &&
+          second &&
+          Math.abs(first.top - second.top) < 12 &&
+          Math.abs(first.left - second.left) > 12
+      );
+      // Handles sit outside the content: accept their narrow drag lane as well.
+      // Otherwise a straight vertical drag stays to the left of the container.
       valid =
-        pointer.clientX >= bounds.left &&
+        pointer.clientX >= bounds.left - (horizontal ? 0 : 40) &&
         pointer.clientX <= bounds.right &&
-        pointer.clientY >= bounds.top &&
+        pointer.clientY >= bounds.top - (horizontal ? 36 : 0) &&
         pointer.clientY <= bounds.bottom;
       let line: Marker | null = null;
       if (valid) {
@@ -194,14 +204,6 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
         }
         if (hit && hit !== item.node) {
           const r = hit.getBoundingClientRect();
-          const first = nodes[0]?.getBoundingClientRect(),
-            second = nodes[1]?.getBoundingClientRect();
-          const horizontal = Boolean(
-            first &&
-              second &&
-              Math.abs(first.top - second.top) < 12 &&
-              Math.abs(first.left - second.left) > 12
-          );
           const after = horizontal
             ? pointer.clientX > r.left + r.width / 2
             : pointer.clientY > r.top + r.height / 2;
