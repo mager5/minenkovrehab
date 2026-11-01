@@ -11,6 +11,8 @@ type Item = {
   id: number;
   rect: DOMRect;
   label: string;
+  surface: 'light' | 'dark';
+  above: boolean;
 };
 type Marker = { left: number; top: number; width: number; height: number };
 type Preview = {
@@ -69,6 +71,15 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
                 node,
                 id: Number(node.dataset.aiOrderIndex),
                 rect,
+                above:
+                  node.matches('a,button') &&
+                  getComputedStyle(group).display === 'flex' &&
+                  getComputedStyle(group).flexDirection === 'row',
+                surface: node
+                  .closest('section')
+                  ?.matches('.hero-section,[class*="bg-primary"]')
+                  ? 'dark'
+                  : 'light',
                 label: (
                   node.getAttribute('aria-label') ||
                   node.textContent ||
@@ -298,16 +309,28 @@ export default function AiBlockReorder({ disabled, onMove, onNotice }: Props) {
                 type='button'
                 key={`${item.group.dataset.aiSortableGroup}:${item.id}`}
                 className='ai-block-handle'
+                data-surface={item.surface}
                 style={{
-                  left: Math.max(4, item.rect.left - 20),
-                  top: Math.max(88, item.rect.top + 5),
+                  left: Math.max(
+                    2,
+                    item.above ? item.rect.left + 4 : item.rect.left - 34
+                  ),
+                  top: Math.max(
+                    84,
+                    item.above
+                      ? item.rect.top - 28
+                      : item.rect.top +
+                          (item.node.matches('a,button')
+                            ? Math.max(0, (item.rect.height - 32) / 2)
+                            : 0)
+                  ),
                 }}
                 aria-label={`Переместить: ${item.label}`}
                 title='Потяните за точки или используйте стрелки'
                 onPointerDown={event => begin(event, item)}
                 onKeyDown={event => keyboard(event, item)}
               >
-                <GripVertical size={15} />
+                <GripVertical size={13} strokeWidth={1.6} />
               </button>
             ))}
             {preview && (

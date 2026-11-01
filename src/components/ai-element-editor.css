@@ -352,22 +352,52 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 26px;
-  border: 1px solid rgb(40 93 150 / 25%);
+  width: 28px;
+  height: 32px;
+  padding: 0;
+  border: 0;
   border-radius: 6px;
-  color: #285d96;
-  background: rgb(255 255 255 / 92%);
-  box-shadow: 0 2px 7px #132d491a;
+  color: #526b81;
+  opacity: 0.6;
+  background: transparent;
+  box-shadow: none;
   cursor: grab;
   touch-action: none;
+  transition:
+    opacity 120ms ease,
+    background-color 120ms ease;
+}
+.ai-block-handle[data-surface='dark'] {
+  color: #e6f0fa;
+  opacity: 0.65;
+}
+.ai-block-handle:hover {
+  opacity: 1;
+  background: rgb(40 93 150 / 7%);
+}
+.ai-block-handle[data-surface='dark']:hover {
+  background: rgb(255 255 255 / 8%);
 }
 .ai-block-handle:active {
   cursor: grabbing;
+  opacity: 1;
 }
 .ai-block-handle:focus-visible {
+  opacity: 1;
   outline: 2px solid #65b3ff;
   outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .ai-block-handle {
+    width: 40px;
+    height: 40px;
+    transform: translate(-6px, -4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-block-handle {
+    transition: none;
+  }
 }
 .ai-layout-bounds,
 .ai-layout-source,
