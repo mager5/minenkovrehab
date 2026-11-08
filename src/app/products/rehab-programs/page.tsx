@@ -27,6 +27,7 @@ export default function RehabProgramsPage() {
     description: item.description,
     price: priceLabel(item),
     image: item.image,
+    tag: 'Восстановительная программа',
   }));
 
   return (
@@ -44,6 +45,11 @@ export default function RehabProgramsPage() {
         title='Восстановительные программы'
         description='Пошаговые алгоритмы с подробным объяснением и демонстрацией упражнений при различных состояниях опорно-двигательного аппарата'
         services={services}
+        crumbs={[
+          { label: 'Главная', href: '/' },
+          { label: 'Услуги', href: '/products' },
+          { label: 'Восстановительные программы' },
+        ]}
       />
     </>
   );

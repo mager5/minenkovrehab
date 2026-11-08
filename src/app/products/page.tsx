@@ -15,13 +15,26 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function ProductsPage() {
-  const services = catalog.map(item => ({
-    href: productPath(item),
-    title: item.title,
-    description: item.description,
-    price: priceLabel(item),
-    image: item.image,
-  }));
+  const services = catalog.map(item => {
+    const isProgram = item.kind === 'program' || item.id === 'formula-movement';
+    return {
+      href: productPath(item),
+      title: item.title,
+      description: item.description,
+      price: priceLabel(item),
+      image: item.image,
+      group: isProgram ? ('programs' as const) : ('online' as const),
+      ...(isProgram
+        ? {
+            tag:
+              item.kind === 'program'
+                ? 'Восстановительная программа'
+                : 'Программа тренировок',
+          }
+        : {}),
+      ...(item.id === 'formula-movement' ? { featured: true } : {}),
+    };
+  });
 
   return (
     <>
@@ -35,6 +48,8 @@ export default function ProductsPage() {
         title='Услуги'
         description='Выберите подходящую услугу для вашего восстановления и реабилитации'
         services={services}
+        crumbs={[{ label: 'Главная', href: '/' }, { label: 'Услуги' }]}
+        grouped
       />
     </>
   );

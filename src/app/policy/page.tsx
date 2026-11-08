@@ -11,14 +11,14 @@ export const metadata: Metadata = pageMetadata({
 
 export default function PolicyPage() {
   return (
-    <div className='py-12 bg-white min-h-screen'>
-      <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='max-w-3xl mx-auto'>
-          <h1 className='text-3xl font-bold text-primary mb-8'>
+    <div className='ds pt-6 dsk:pt-10'>
+      <div className='ds-wrap'>
+        <div className='max-w-[880px] mx-auto'>
+          <h1 className='ds-h2 mb-6 dsk:mb-8'>
             Политика в отношении обработки персональных данных
           </h1>
 
-          <div className='bg-white rounded-lg shadow-md p-8 prose prose-lg max-w-none text-dark'>
+          <div className='ds-card ds-legal p-6 dsk:p-12'>
             <p className='mb-4'>
               Настоящая Политика в отношении обработки персональных данных
               (далее – «Политика») определяет порядок и условия обработки ИП
@@ -76,7 +76,7 @@ export default function PolicyPage() {
               обращение по электронной почте: minenkov.rehab@yandex.ru.
             </p>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               1. Основные понятия
             </h2>
             <p className='mb-4'>
@@ -158,7 +158,7 @@ export default function PolicyPage() {
               оказывает Оператор.
             </p>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               2. Общие положения
             </h2>
             <p className='mb-4'>
@@ -213,7 +213,7 @@ export default function PolicyPage() {
               информации.
             </p>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               3. Цель обработки и состав информации о субъектах персональных
               данных, которую получает и обрабатывает Оператор
             </h2>
@@ -446,7 +446,7 @@ export default function PolicyPage() {
               действия.
             </p>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               4. Правовые основания обработки персональных данных
             </h2>
             <p className='mb-4'>
@@ -501,7 +501,7 @@ export default function PolicyPage() {
               </li>
             </ul>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               5. Права субъектов персональных данных
             </h2>
             <p className='mb-4'>
@@ -522,7 +522,7 @@ export default function PolicyPage() {
               <li>право на отзыв согласия.</li>
             </ul>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               6. Запрос дополнительной информации для идентификации субъекта
               персональных данных
             </h2>
@@ -537,7 +537,7 @@ export default function PolicyPage() {
               Субъекта персональных данных, если в ответ на запрос он не
               предоставите дополнительную информацию для своей идентификации.
             </p>
-            <h3 className='text-lg font-semibold text-primary mt-6 mb-3'>
+            <h3 className='text-lg font-semibold text-navy mt-6 mb-3'>
               Условия предоставления информации по правам Субъекта персональных
               данных
             </h3>
@@ -549,7 +549,7 @@ export default function PolicyPage() {
               ответа, либо взимать плату за предоставление запрашиваемой
               информации.
             </p>
-            <h3 className='text-lg font-semibold text-primary mt-6 mb-3'>
+            <h3 className='text-lg font-semibold text-navy mt-6 mb-3'>
               Право на доступ к персональным данным
             </h3>
             <p className='mb-4'>
@@ -602,7 +602,7 @@ export default function PolicyPage() {
               </li>
             </ul>
 
-            <h3 className='text-lg font-semibold text-primary mt-6 mb-3'>
+            <h3 className='text-lg font-semibold text-navy mt-6 mb-3'>
               Право на уточнение персональных данных
             </h3>
             <p className='mb-4'>
@@ -618,7 +618,7 @@ export default function PolicyPage() {
               данных.
             </p>
 
-            <h3 className='text-lg font-semibold text-primary mt-6 mb-3'>
+            <h3 className='text-lg font-semibold text-navy mt-6 mb-3'>
               Право на блокирование и удаление персональных данных
             </h3>
             <p className='mb-4'>
@@ -639,7 +639,7 @@ export default function PolicyPage() {
               персональных данных с об этом.
             </p>
 
-            <h3 className='text-lg font-semibold text-primary mt-6 mb-3'>
+            <h3 className='text-lg font-semibold text-navy mt-6 mb-3'>
               Право на обжалование действий или бездействия Оператора
             </h3>
             <p className='mb-4'>
@@ -649,7 +649,7 @@ export default function PolicyPage() {
               обратиться в территориальный орган Роскомнадзора в своем регионе.
             </p>
 
-            <h3 className='text-lg font-semibold text-primary mt-6 mb-3'>
+            <h3 className='text-lg font-semibold text-navy mt-6 mb-3'>
               Право на отзыв согласия
             </h3>
             <p className='mb-4'>
@@ -657,7 +657,7 @@ export default function PolicyPage() {
               основании согласия, то он имеет право отозвать его.
             </p>
 
-            <h3 className='text-lg font-semibold text-primary mt-6 mb-3'>
+            <h3 className='text-lg font-semibold text-navy mt-6 mb-3'>
               Порядок отзыва согласия на обработку персональных данных,
               актуализация и исправления персональных данных, ответы на запросы
               на доступ к персональным данным
@@ -703,7 +703,7 @@ export default function PolicyPage() {
               персональных данных.
             </p>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               7. Случаи, когда Оператор не может реализовать права Субъекта
               персональных данных
             </h2>
@@ -757,7 +757,7 @@ export default function PolicyPage() {
               </li>
             </ul>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               8. Безопасность данных
             </h2>
             <p className='mb-4'>
@@ -798,7 +798,7 @@ export default function PolicyPage() {
               передачу персональных данных.
             </p>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               9. Регламент реагирования на запросы/обращения субъектов
               персональных данных и их представителей, уполномоченных органов
             </h2>
@@ -863,7 +863,7 @@ export default function PolicyPage() {
               данные, относящиеся к другим Субъектам персональных данных.
             </p>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               10. Cookie и автоматическое логирование
             </h2>
             <p className='mb-4'>
@@ -888,7 +888,7 @@ export default function PolicyPage() {
               некоторые временные технические данные в своих лог-файлах.
             </p>
 
-            <h2 className='text-xl font-semibold text-primary mt-8 mb-4'>
+            <h2 className='text-xl font-semibold text-navy mt-8 mb-4'>
               11. Заключительные положения
             </h2>
             <p className='mb-4'>
@@ -906,14 +906,14 @@ export default function PolicyPage() {
             </p>
 
             <div className='mt-8 pt-6 border-t border-gray-200'>
-              <p className='text-sm text-gray-600'>
+              <p className='text-sm text-muted'>
                 Последнее обновление: {new Date().toLocaleDateString('ru-RU')}
               </p>
-              <p className='text-sm text-gray-600 mt-2'>
+              <p className='text-sm text-muted mt-2'>
                 По всем вопросам обращайтесь:{' '}
                 <a
                   href='mailto:minenkov.rehab@yandex.ru'
-                  className='text-primary hover:underline'
+                  className='text-navy hover:underline'
                 >
                   minenkov.rehab@yandex.ru
                 </a>

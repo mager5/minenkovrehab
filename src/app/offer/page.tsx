@@ -11,22 +11,22 @@ export const metadata: Metadata = pageMetadata({
 
 export default function OfferPage() {
   return (
-    <div className='py-12 bg-white min-h-screen'>
-      <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='max-w-3xl mx-auto'>
-          <h1 className='text-3xl font-bold text-primary mb-8'>
+    <div className='ds pt-6 dsk:pt-10'>
+      <div className='ds-wrap'>
+        <div className='max-w-[880px] mx-auto'>
+          <h1 className='ds-h2 mb-6 dsk:mb-8'>
             Договор - публичная оферта на оказание услуг
           </h1>
 
-          <div className='bg-white rounded-lg shadow-md p-8 prose prose-lg max-w-none text-dark'>
+          <div className='ds-card ds-legal p-6 dsk:p-12'>
             <p className='mb-4 text-left'>г. Железноводск</p>
 
             <div className='mb-8'>
-              <h2 className='text-2xl font-bold text-gray-800 mb-6'>
+              <h2 className='text-2xl font-bold text-navy mb-6'>
                 1. Общие положения
               </h2>
 
-              <div className='space-y-4 text-gray-700 leading-relaxed'>
+              <div className='space-y-4 text-ink leading-relaxed'>
                 <p>
                   <strong>1.1.</strong> Настоящий публичный договор (далее –
                   «Оферта») представляет собой предложение ИП Миненков Вадим
@@ -120,11 +120,11 @@ export default function OfferPage() {
             </p>
 
             <div className='mb-8'>
-              <h2 className='text-2xl font-bold text-gray-800 mb-6'>
+              <h2 className='text-2xl font-bold text-navy mb-6'>
                 2. Термины и определения
               </h2>
 
-              <div className='space-y-4 text-gray-700 leading-relaxed'>
+              <div className='space-y-4 text-ink leading-relaxed'>
                 <p className='text-left'>
                   <strong>2.1.</strong> Договор-публичная оферта – настоящий
                   документ, опубликованный в сети Интернет, а также направляемый
@@ -158,7 +158,7 @@ export default function OfferPage() {
                   информации в сети Интернет по сетевому адресу:{' '}
                   <a
                     href='https://minenkovrehab.ru'
-                    className='text-blue-600 hover:text-blue-800 underline'
+                    className='text-brand hover:text-navy underline'
                   >
                     https://minenkovrehab.ru
                   </a>
@@ -180,11 +180,11 @@ export default function OfferPage() {
             </div>
 
             <div className='mb-8'>
-              <h2 className='text-2xl font-bold text-gray-800 mb-6'>
+              <h2 className='text-2xl font-bold text-navy mb-6'>
                 3. Предмет договора оферты
               </h2>
 
-              <div className='space-y-4 text-gray-700 leading-relaxed'>
+              <div className='space-y-4 text-ink leading-relaxed'>
                 <p>
                   <strong>3.1.</strong> Предметом настоящей Оферты является
                   возмездное оказание информационно-консультационных Услуг путем
@@ -220,7 +220,7 @@ export default function OfferPage() {
                   опубликованы на Сайте Исполнителя:{' '}
                   <a
                     href='https://minenkovrehab.ru/products'
-                    className='text-blue-600 hover:text-blue-800 underline'
+                    className='text-brand hover:text-navy underline'
                     target='_blank'
                     rel='noopener noreferrer'
                   >
@@ -236,10 +236,10 @@ export default function OfferPage() {
 
                 <div className='ml-6 space-y-4'>
                   <div className='p-4 rounded-lg'>
-                    <p className='font-semibold text-gray-800 mb-2'>
+                    <p className='font-semibold text-navy mb-2'>
                       Онлайн консультация
                     </p>
-                    <p className='text-gray-700'>
+                    <p className='text-ink'>
                       консультация специалиста с использованием
                       видеоконференцсвязи (ВКС). На данной встрече Исполнитель
                       проводит разбор текущего состояния, определяет направление
@@ -254,10 +254,10 @@ export default function OfferPage() {
                   </div>
 
                   <div className='p-4 rounded-lg'>
-                    <p className='font-semibold text-gray-800 mb-2'>
+                    <p className='font-semibold text-navy mb-2'>
                       Экспресс онлайн консультация
                     </p>
-                    <p className='text-gray-700'>
+                    <p className='text-ink'>
                       консультация специалиста с использованием
                       видеоконференцсвязи (ВКС). На данной встрече Исполнитель
                       проводит разбор текущего состояния, определяет направление
@@ -272,10 +272,10 @@ export default function OfferPage() {
                   </div>
 
                   <div className='p-4 rounded-lg'>
-                    <p className='font-semibold text-gray-800 mb-2'>
+                    <p className='font-semibold text-navy mb-2'>
                       Программа восстановления после резекции мениска
                     </p>
-                    <p className='text-gray-700'>
+                    <p className='text-ink'>
                       программа поддержки организма и улучшения общего
                       самочувствия. Исполнитель предоставляет Заказчику доступ к
                       общему (неперсонализированному) закрытому информационному
@@ -296,10 +296,10 @@ export default function OfferPage() {
                   </div>
 
                   <div className='p-4 rounded-lg'>
-                    <p className='font-semibold text-gray-800 mb-2'>
+                    <p className='font-semibold text-navy mb-2'>
                       Программа тренировок «Формула движений»
                     </p>
-                    <p className='text-gray-700'>
+                    <p className='text-ink'>
                       это программа подразумевает предоставление доступа к
                       общему (неперсонализированному) закрытому информационному
                       ресурсу, содержащему последовательный комплекс упражнений
@@ -318,10 +318,10 @@ export default function OfferPage() {
                   </div>
 
                   <div className='p-4 rounded-lg'>
-                    <p className='font-semibold text-gray-800 mb-2'>
+                    <p className='font-semibold text-navy mb-2'>
                       Онлайн-тренировка
                     </p>
-                    <p className='text-gray-700'>
+                    <p className='text-ink'>
                       индивидуальная онлайн тренировки в формате
                       видеоконференцсвязи. Продолжительность тренировки – 60
                       минут. Данная услуга доступна только после прохождения
@@ -351,21 +351,21 @@ export default function OfferPage() {
               закрытому информационному ресурсу.
             </p>
             <div className='mb-8'>
-              <h2 className='text-xl font-semibold mb-6 text-gray-800 border-b border-gray-200 pb-2'>
+              <h2 className='text-xl font-semibold mb-6 text-navy border-b border-gray-200 pb-2'>
                 4. Права и обязанности сторон
               </h2>
               <div className='space-y-6'>
                 <div className='p-4 rounded-lg'>
-                  <h3 className='text-lg font-semibold mb-4 text-gray-800'>
+                  <h3 className='text-lg font-semibold mb-4 text-navy'>
                     4.1. Исполнитель обязуется:
                   </h3>
                   <div className='space-y-3'>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.1.1.</strong> Довести до сведения Заказчика
                       информацию о сроках оказания Услуг, а также о времени
                       оказания Услуг по выбранной Программе.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.1.2.</strong> Организовать и провести
                       информационно-консультационную Услугу согласно описанию
                       Программы на Сайте. Информация о времени и месте
@@ -373,13 +373,13 @@ export default function OfferPage() {
                       согласовывается с Заказчиком через мессенджер или по
                       звонку от Исполнителя.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.1.3.</strong> Сохранять конфиденциальную
                       информацию, полученную от Заказчика, при оказании
                       информационно-консультационных Услуг по настоящему
                       Договору.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.1.4.</strong> Соблюдать требования
                       законодательства, касающиеся обработки, передачи и защиты
                       персональных данных Заказчика.
@@ -388,22 +388,22 @@ export default function OfferPage() {
                 </div>
 
                 <div className='p-4 rounded-lg'>
-                  <h3 className='text-lg font-semibold mb-4 text-gray-800'>
+                  <h3 className='text-lg font-semibold mb-4 text-navy'>
                     4.2. Исполнитель вправе:
                   </h3>
                   <div className='space-y-3'>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.2.1.</strong> Изменять в одностороннем порядке
                       Программы, а также их стоимость.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.2.2.</strong> В любой момент изменять условия
                       настоящей Оферты в одностороннем порядке без
                       предварительного согласования с Заказчиком, обеспечивая
                       при этом публикацию изменённых условий на Сайте не менее
                       чем за один день до их введения в действие.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.2.3.</strong> Исполнитель имеет право требовать
                       от Заказчика надлежащего исполнения принятых на себя
                       обязательств: своевременное подключение к конференции в
@@ -419,12 +419,12 @@ export default function OfferPage() {
                       тренировке более чем на 15 минут, Услуга считается
                       оказанной в полном объеме.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.2.4.</strong> В одностороннем порядке
                       расторгнуть настоящий Договор в случае существенного
                       нарушения Заказчиком его условий.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.2.5.</strong> Не оказывать услуги Заказчику в
                       случае нарушения условий оплаты Услуг или поступлением на
                       счет Исполнителя суммы в меньшем размере стоимости
@@ -434,34 +434,34 @@ export default function OfferPage() {
                 </div>
 
                 <div className='p-4 rounded-lg'>
-                  <h3 className='text-lg font-semibold mb-4 text-gray-800'>
+                  <h3 className='text-lg font-semibold mb-4 text-navy'>
                     4.3. Заказчик обязуется:
                   </h3>
                   <div className='space-y-3'>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.3.1.</strong> Оплачивать Услуги в порядке,
                       предусмотренном Офертой.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.3.2.</strong> После принятия условий настоящей
                       публичной Оферты и оплаты в полном объеме Услуг Заказчик
                       обязуется придерживаться установленной программы,
                       выполнять рекомендации и требования Исполнителя в рамках
                       оказания Услуг по настоящему Договору.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.3.3.</strong> Предоставить Исполнителю
                       актуальную информацию и документацию необходимую для
                       предоставления информационно-консультационных Услуг
                       Исполнителем.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.3.4.</strong> Соблюдать правила поведения в
                       мессенджере/электронной почте, на онлайн платформе, где
                       проходит оказание Услуг и проявлять уважение к
                       Исполнителю.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.3.5.</strong> Не осуществлять запись встреч с
                       Исполнителем, не копировать, не передавать или не
                       перепродавать третьим лицам) в коммерческих или
@@ -479,36 +479,36 @@ export default function OfferPage() {
                       запрещено и влечет за собой ответственность в соответствии
                       с законодательством РФ.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.3.6.</strong> Самостоятельно следить за всеми и
                       любыми обновлениями информации, размещаемой на Сайте
                       Исполнителя.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.3.7.</strong> Не распространять или передавать
                       третьим лицам номер телефона, а также иные персональные
                       данные Исполнителя, которые стали ему известны в ходе
                       оказания Услуг.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.3.8.</strong> Своевременное подключение к
                       конференции - за 5 минут до времени начала
                       консультации/Онлайн тренировки. Продолжительность
                       консультации/онлайн тренировки фиксирована и не подлежит
                       увеличению в случае опоздания Заказчика.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.3.9.</strong> Для получения Услуг по настоящему
                       Договору Заказчик должен иметь персональный компьютер или
                       смартфон с доступом в сеть Интернет, оборудованный
                       наушниками и микрофоном, а также с установленным ПО, если
                       этого требует соответствующая услуга.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.3.10.</strong> Соблюдать следующие правила
                       поведения при получении Услуг:
                     </p>
-                    <ul className='list-disc pl-6 space-y-2 text-gray-700'>
+                    <ul className='list-disc pl-6 space-y-2 text-ink'>
                       <li>
                         соблюдать дисциплину и общепринятые нормы поведения, в
                         частности, проявлять уважение к Исполнителю, не посягать
@@ -531,26 +531,26 @@ export default function OfferPage() {
                 </div>
 
                 <div className='p-4 rounded-lg'>
-                  <h3 className='text-lg font-semibold mb-4 text-gray-800'>
+                  <h3 className='text-lg font-semibold mb-4 text-navy'>
                     4.4. Заказчик вправе:
                   </h3>
                   <div className='space-y-3'>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.4.1.</strong> Требовать от Исполнителя
                       предоставления информации по вопросам организации и
                       обеспечения надлежащего оказания Услуг.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.4.2.</strong> Требовать надлежащего и
                       своевременного оказания Услуг Исполнителем.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.4.3.</strong> Отказаться от исполнения Договора
                       при условии оплаты Исполнителю фактически понесенных
                       расходов, связанных с оказанием Услуг по настоящему
                       Договору.
                     </p>
-                    <p className='text-gray-700 leading-relaxed'>
+                    <p className='text-ink leading-relaxed'>
                       <strong>4.4.4.</strong> Обращаться к Исполнителю по всем
                       вопросам, связанным с оказанием Услуг.
                     </p>
@@ -560,17 +560,17 @@ export default function OfferPage() {
             </div>
 
             <div className='mb-8'>
-              <h2 className='text-xl font-semibold mb-6 text-gray-800 border-b border-gray-200 pb-2'>
+              <h2 className='text-xl font-semibold mb-6 text-navy border-b border-gray-200 pb-2'>
                 5. Ответственность сторон
               </h2>
               <div className='space-y-4'>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>5.1.</strong> Исполнитель не несет ответственности за
                   невозможность оказания Услуг Заказчику по причинам, не
                   зависящим от Исполнителя, в частности: нарушение работы
                   Интернета, оборудования или ПО со стороны Заказчика.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>5.2.</strong> Никакая информация, материалы и/или
                   рекомендации, предоставляемые Исполнителем в рамках оказания
                   Услуг по настоящему Договору, не могут рассматриваться как
@@ -579,14 +579,14 @@ export default function OfferPage() {
                   предоставленных Исполнителем в рамках исполнения своих
                   обязательств по настоящему Договору.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>5.3.</strong> Заказчик понимает и соглашается с тем,
                   что Услуга оказывается Исполнителем исходя из информации,
                   предоставленной Заказчиком. В случае предоставления Заказчиком
                   искаженной, неточной, недостоверной информации, Исполнитель не
                   несет ответственности за качество оказанных Услуг.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>5.4.</strong> Никакая информация, содержащаяся в
                   Услугах Исполнителя, не носит медицинский характер,
                   Исполнитель не несет ответственность за состояние здоровья и
@@ -594,7 +594,7 @@ export default function OfferPage() {
                   состояние своего здоровья, а также за эмоциональное и
                   психологическое здоровье.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>5.5.</strong> Исполнителем не гарантируется абсолютная
                   бесперебойность предоставления Услуг по настоящему Договору.
                   Несмотря на то, что Исполнитель будет предпринимать все
@@ -604,7 +604,7 @@ export default function OfferPage() {
                   по настоящему Договору может быть перенесено на более поздний
                   срок.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>5.6.</strong> Стороны освобождаются от ответственности
                   за неисполнение или ненадлежащее исполнение обязательств по
                   настоящему Договору на время действия обстоятельств
@@ -612,13 +612,13 @@ export default function OfferPage() {
                   взаимных претензий, и каждая из сторон принимает на себя свой
                   риск последствия обстоятельств непреодолимой силы.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>5.7.</strong> Если Заказчик не может присутствовать в
                   согласованное время для проведения Исполнителем
                   консультации/тренировки, Заказчик должен уведомить Исполнителя
                   об этом не менее чем за 3 часа до начала оказания Услуг.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>5.8.</strong> Заказчик самостоятельно обеспечивает
                   безопасность тренировок. Если Заказчик заметит ухудшение
                   состояния здоровья, то он незамедлительно должен сообщить об
@@ -628,40 +628,40 @@ export default function OfferPage() {
             </div>
             {/* Раздел 6: Порядок оплаты и возврата */}
             <div className='mb-8'>
-              <h2 className='text-xl font-semibold mb-6 text-gray-800 border-b border-gray-200 pb-2'>
+              <h2 className='text-xl font-semibold mb-6 text-navy border-b border-gray-200 pb-2'>
                 6. Порядок оплаты и возврата
               </h2>
               <div className='space-y-4'>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>6.1.</strong> Оплата Услуг осуществляется путем
                   внесения 100% предоплаты.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>6.2.</strong> Датой оплаты признается поступление
                   денежных средств на счет Исполнителя.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>6.3.</strong> Оплата Услуг осуществляется на Сайте
                   Исполнителя через онлайн-кассу. Платеж на Сайте проходит
                   выбранным способом (банковскими картами, СБП,
                   онлайн-кошельками или другими). После оплаты система
                   автоматически формирует и отправляет кассовый чек Заказчику.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>6.4.</strong> Заказчик несет ответственность за
                   корректность внесенных данных при оплате Услуг.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>6.5.</strong> Возврат денежных средств может быть
                   инициирован как Заказчиком, так и Исполнителем.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>6.6.</strong> Если Заказчик желает вернуть денежные
                   средства до проведения консультации, возврат возможен за
                   вычетом фактически понесенных Исполнителем расходов, связанных
                   с исполнением обязательств по данному Договору.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>6.7.</strong> Для оформления возврата Заказчик должен
                   направить письменное заявление на электронную почту
                   Исполнителя: minenkov.rehab@yandex.ru. Исполнитель
@@ -671,7 +671,7 @@ export default function OfferPage() {
                   Исполнителем данного заявления. В случае отказа Исполнитель
                   направляет Заказчику мотивированное уведомление.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>6.8.</strong> Если при оказании Услуг Заказчик нарушил
                   п.4.3.10. настоящей Оферты, возврат денежных средств не
                   производится.
@@ -681,16 +681,16 @@ export default function OfferPage() {
 
             {/* Раздел 7: Прочие условия */}
             <div className='mb-8'>
-              <h2 className='text-xl font-semibold mb-6 text-gray-800 border-b border-gray-200 pb-2'>
+              <h2 className='text-xl font-semibold mb-6 text-navy border-b border-gray-200 pb-2'>
                 7. Прочие условия
               </h2>
               <div className='space-y-4'>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>7.1.</strong> Настоящий Договор вступает в силу с
                   момента акцепта Заказчика в соответствии с п. 1.3. договора и
                   действует до полного исполнения обязательств сторонами.
                 </p>
-                <p className='text-gray-700 leading-relaxed'>
+                <p className='text-ink leading-relaxed'>
                   <strong>7.2.</strong> Все споры и разногласия сторон
                   разрешаются в соответствии с действующим законодательством РФ.
                 </p>
@@ -699,49 +699,49 @@ export default function OfferPage() {
 
             {/* Раздел 8: Реквизиты Исполнителя */}
             <div className='mb-8'>
-              <h2 className='text-xl font-semibold mb-6 text-gray-800 border-b border-gray-200 pb-2'>
+              <h2 className='text-xl font-semibold mb-6 text-navy border-b border-gray-200 pb-2'>
                 8. Реквизиты Исполнителя
               </h2>
-              <div className='bg-blue-50 p-6 rounded-lg border border-blue-200'>
+              <div className='bg-sky p-6 rounded-lg border border-[#BFD3E4]'>
                 <div className='space-y-3'>
-                  <p className='text-gray-800 font-semibold text-lg'>
+                  <p className='text-navy font-semibold text-lg'>
                     ИП Миненков Вадим Леонидович
                   </p>
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div>
-                      <p className='text-gray-700'>
+                      <p className='text-ink'>
                         <span className='font-medium'>Место жительства:</span>{' '}
                         г. Железноводск
                       </p>
-                      <p className='text-gray-700'>
+                      <p className='text-ink'>
                         <span className='font-medium'>ИНН:</span> 262703733425
                       </p>
-                      <p className='text-gray-700'>
+                      <p className='text-ink'>
                         <span className='font-medium'>ОГРНИП:</span>{' '}
                         325265100067202
                       </p>
                     </div>
                   </div>
-                  <div className='mt-6 pt-4 border-t border-blue-300'>
-                    <p className='text-gray-800 font-semibold mb-3'>
+                  <div className='mt-6 pt-4 border-t border-[#BFD3E4]'>
+                    <p className='text-navy font-semibold mb-3'>
                       Банковские реквизиты:
                     </p>
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                      <p className='text-gray-700'>
+                      <p className='text-ink'>
                         <span className='font-medium'>Расчетный счет:</span>{' '}
                         40802810100008270450
                       </p>
-                      <p className='text-gray-700'>
+                      <p className='text-ink'>
                         <span className='font-medium'>Название банка:</span> АО
                         «ТБанк»
                       </p>
-                      <p className='text-gray-700'>
+                      <p className='text-ink'>
                         <span className='font-medium'>
                           Корреспондентский счет:
                         </span>{' '}
                         30101810145250000974
                       </p>
-                      <p className='text-gray-700'>
+                      <p className='text-ink'>
                         <span className='font-medium'>БИК банка:</span>{' '}
                         044525974
                       </p>

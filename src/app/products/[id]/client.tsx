@@ -4,37 +4,463 @@ import Link from 'next/link';
 import { authPost } from '@/lib/auth-client';
 import { useGuestEmailDialog } from '@/components/shared/GuestEmailDialog';
 import { formatPrice, Product } from '../data';
-import { motion } from 'framer-motion';
 import ImageCarousel from '@/components/ui/ImageCarousel';
 import { VideoPlayer } from '@/components/dashboard/videos/VideoPlayer';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { MoreServicesSection } from '@/components/sections/MoreServicesSection';
-import { Loader2, Mail, MessageCircleMore, Send } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import {
-  getRobokassaPaymentUrl,
-  resolveApiMediaUrl,
-} from '@/lib/api-base';
-
-// Анимации для появления элементов
-const fadeIn = {
-  hidden: { y: 20 },
-  visible: (custom: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: custom * 0.1,
-      duration: 0.8,
-      ease: [0.25, 0.1, 0.25, 1.0],
-    },
-  }),
-};
+  PageHead,
+  Badge,
+  ButtonLink,
+  Checkbox,
+  CutoutCard,
+  Plaque,
+  ServiceCard,
+  SectionHead,
+  Faq,
+  Icon,
+  IconBox,
+  CheckList,
+  type Crumb,
+} from '@/components/ds';
+import {
+  productPageContent,
+  moreCards,
+  type ProgramPageContent,
+  type ServicePageContent,
+} from '@/data/content';
+import {
+  getCatalogItemById,
+  productPath,
+  REHAB_PROGRAMS_PATH,
+} from '../catalog';
+import { getRobokassaPaymentUrl, resolveApiMediaUrl } from '@/lib/api-base';
 
 // Старый локальный helper (заменён на @/lib/api-base):
 // function getRailwayApiBaseUrl() { ... }
 
 function getPresentationVideoEndpoint() {
   return '/api/courses/products/presentation-video';
+}
+
+/* ===================== Оформление (редизайн): презентационные компоненты ===================== */
+
+function splitPrice(label: string) {
+  const i = label.indexOf(' / ');
+  return i === -1
+    ? { price: label, unit: '' }
+    : { price: label.slice(0, i), unit: label.slice(i + 1) };
+}
+
+function Spinner() {
+  return (
+    <svg
+      className='animate-spin h-5 w-5'
+      xmlns='http://www.w3.org/2000/svg'
+      fill='none'
+      viewBox='0 0 24 24'
+      aria-hidden='true'
+    >
+      <circle
+        className='opacity-25'
+        cx='12'
+        cy='12'
+        r='10'
+        stroke='currentColor'
+        strokeWidth='4'
+      ></circle>
+      <path
+        className='opacity-75'
+        fill='currentColor'
+        d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+      ></path>
+    </svg>
+  );
+}
+
+const NotMedical = () => (
+  <p className='m-0 flex items-center gap-2.5 px-3.5 py-3 rounded-[14px] bg-sky text-[15px] font-semibold text-navy'>
+    <Icon name='info' size={18} color='var(--c-blue)' />
+    Не является медицинской услугой
+  </p>
+);
+
+/**
+ * Карточка покупки: цена, согласия, «Купить онлайн», «Связаться в Telegram».
+ * Состояние и обработчики приходят из ProductClient — поведение прежнее, изменён только вид.
+ */
+function BuyCard({
+  heading,
+  priceLabel,
+  consentId,
+  offerId,
+  consentName,
+  offerName,
+  consent,
+  offer,
+  onConsent,
+  onOffer,
+  consentError,
+  offerError,
+  processing,
+  onPay,
+  onTelegram,
+  payAria,
+  children,
+  as: Tag = 'aside',
+  className = '',
+  headingLevel = 2,
+}: {
+  heading: string;
+  priceLabel: string;
+  consentId: string;
+  offerId: string;
+  consentName: string;
+  offerName: string;
+  consent: boolean;
+  offer: boolean;
+  onConsent: (checked: boolean) => void;
+  onOffer: (checked: boolean) => void;
+  consentError: boolean;
+  offerError: boolean;
+  processing: boolean;
+  onPay: () => void;
+  onTelegram: (e: React.MouseEvent) => void;
+  payAria: string;
+  children?: React.ReactNode;
+  as?: 'aside' | 'article';
+  className?: string;
+  headingLevel?: 2 | 3;
+}) {
+  const { price, unit } = splitPrice(priceLabel);
+  const H = `h${headingLevel}` as 'h2';
+  return (
+    <Tag className={`ds-card p-6 dsk:p-8 flex flex-col gap-4 ${className}`}>
+      <div>
+        <H className='m-0 text-[16px] font-bold text-muted'>{heading}</H>
+        <p className='m-0 mt-1 flex items-baseline gap-2.5 flex-wrap'>
+          <span className='text-[34px] dsk:text-[40px] font-extrabold text-navy leading-[1.1]'>
+            {price}
+          </span>
+          {unit ? (
+            <span className='text-[17px] dsk:text-[18px] text-muted'>
+              {unit}
+            </span>
+          ) : null}
+        </p>
+      </div>
+      <NotMedical />
+      <Checkbox
+        id={consentId}
+        name={consentName}
+        checked={consent}
+        onChange={e => onConsent(e.target.checked)}
+        error={
+          consentError
+            ? 'Пожалуйста, отметьте согласие на обработку персональных данных для продолжения'
+            : undefined
+        }
+      >
+        Я даю{' '}
+        <Link href='/consent' target='_blank' rel='noopener noreferrer'>
+          согласие на обработку персональных данных
+        </Link>{' '}
+        в соответствии с{' '}
+        <Link href='/policy' target='_blank' rel='noopener noreferrer'>
+          политикой конфиденциальности
+        </Link>
+      </Checkbox>
+      <Checkbox
+        id={offerId}
+        name={offerName}
+        checked={offer}
+        onChange={e => onOffer(e.target.checked)}
+        error={
+          offerError
+            ? 'Пожалуйста, согласитесь с условиями договора оферты для продолжения'
+            : undefined
+        }
+      >
+        Я согласен с условиями{' '}
+        <a href='/offer' target='_blank' rel='noopener noreferrer'>
+          договора оферты
+        </a>
+      </Checkbox>
+      <button
+        type='button'
+        onClick={onPay}
+        disabled={!consent || !offer || processing}
+        aria-label={payAria}
+        className='ds-btn ds-btn-lg ds-btn-primary ds-btn-block'
+      >
+        {processing ? (
+          <>
+            <Spinner />
+            <span>Обработка...</span>
+          </>
+        ) : (
+          'Купить онлайн'
+        )}
+      </button>
+      {consent && offer ? (
+        <Link
+          href='https://t.me/MV_Rehab'
+          target='_blank'
+          rel='noopener noreferrer'
+          className='ds-btn ds-btn-md ds-btn-outline ds-btn-block'
+        >
+          <Icon name='send' size={20} strokeWidth={2} />
+          Связаться в Telegram
+        </Link>
+      ) : (
+        <button
+          type='button'
+          onClick={onTelegram}
+          aria-disabled='true'
+          className='ds-btn ds-btn-md ds-btn-outline ds-btn-block'
+        >
+          <Icon name='send' size={20} strokeWidth={2} />
+          Связаться в Telegram
+        </button>
+      )}
+      {!consent || !offer ? (
+        <p className='ds-hint m-0 -mt-1'>
+          Чтобы купить или написать в Telegram, отметьте оба согласия.
+        </p>
+      ) : null}
+      {children}
+    </Tag>
+  );
+}
+
+function MobilePriceBar({ priceLabel }: { priceLabel: string }) {
+  const { price, unit } = splitPrice(priceLabel);
+  return (
+    <section className='ds-wrap dsk:hidden pt-4' aria-label='Стоимость'>
+      <div className='ds-card flex items-center justify-between gap-3 py-4 px-[18px]'>
+        <span className='leading-[1.3]'>
+          <strong className='block text-[24px] font-extrabold text-navy'>
+            {price}
+          </strong>
+          {unit ? <span className='text-[15px] text-muted'>{unit}</span> : null}
+        </span>
+        <a
+          href='#buy'
+          className='ds-btn ds-btn-primary min-h-[52px] px-6 text-[17px] font-extrabold'
+        >
+          Купить
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function ContactBox() {
+  return (
+    <div className='ds-card p-6 flex flex-col gap-2'>
+      <p className='m-0 font-extrabold text-navy'>
+        Связаться по вопросам программы
+      </p>
+      <a
+        href='mailto:minenkov.rehab@yandex.ru'
+        className='flex items-center gap-2.5 text-[16px] text-brand hover:text-navy min-h-[44px] break-all'
+      >
+        <Icon name='mail' size={20} strokeWidth={2} color='var(--c-blue)' />
+        minenkov.rehab@yandex.ru
+      </a>
+      <a
+        href='https://t.me/MV_Rehab'
+        target='_blank'
+        rel='noopener noreferrer'
+        className='flex items-center gap-2.5 text-[16px] text-brand hover:text-navy min-h-[44px]'
+      >
+        <Icon name='send' size={20} strokeWidth={2} color='var(--c-blue)' />
+        t.me/MV_Rehab
+      </a>
+    </div>
+  );
+}
+
+function MoreSection({ title, ids }: { title: string; ids: string[] }) {
+  const cards = ids
+    .map(id => moreCards[id])
+    .filter((c): c is NonNullable<typeof c> => !!c);
+  if (!cards.length) return null;
+  return (
+    <section className='ds-wrap ds-sec' aria-labelledby='more-title'>
+      <SectionHead
+        id='more-title'
+        title={title}
+        right={
+          <ButtonLink
+            href='/products'
+            variant='secondary'
+            size='md'
+            className='self-start'
+          >
+            Все услуги
+          </ButtonLink>
+        }
+      />
+      {/* Телефон: горизонтальная карусель со snap; десктоп: сетка из трёх карточек */}
+      <div className='flex dsk:grid dsk:grid-cols-3 gap-4 dsk:gap-6 overflow-x-auto dsk:overflow-visible snap-x snap-mandatory -mx-4 px-4 dsk:mx-0 dsk:px-0 pb-3 dsk:pb-0 ds-hscroll'>
+        {cards.map(c => (
+          <div key={c.href} className='flex-[0_0_84%] dsk:flex-auto snap-start'>
+            <ServiceCard
+              title={c.title}
+              text={c.text}
+              price={c.price}
+              unit={c.unit}
+              href={c.href}
+              {...(c.featured ? { featured: true } : {})}
+            />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Stages({
+  title,
+  text,
+  stages,
+}: {
+  title: string;
+  text: string;
+  stages: string[];
+}) {
+  const n = stages.length;
+  return (
+    <div className='ds-card p-6 dsk:p-10'>
+      <h2 className='ds-h2 ds-h2-sm'>{title}</h2>
+      <p className='mt-3 mb-7 text-muted'>{text}</p>
+      <div className='relative'>
+        <div
+          aria-hidden='true'
+          className='hidden dsk:block absolute top-[25px] h-[3px] bg-[#BFD3E4] rounded-sm'
+          style={{ left: `${50 / n}%`, right: `${50 / n}%` }}
+        />
+        <ol
+          className={`relative list-none m-0 p-0 grid gap-x-4 gap-y-6 grid-cols-2 ds-stages-${n}`}
+          style={{ ['--n' as string]: n } as React.CSSProperties}
+        >
+          {stages.map((l, i) => {
+            const strong = i === 0 || i === n - 1;
+            return (
+              <li
+                key={i}
+                className='flex flex-col items-center text-center gap-3'
+              >
+                <span
+                  className='relative z-[1] w-[52px] h-[52px] rounded-full font-extrabold text-[20px] flex items-center justify-center'
+                  style={{
+                    background: strong ? 'var(--c-blue)' : '#fff',
+                    color: strong ? '#fff' : 'var(--c-blue)',
+                    boxShadow: 'inset 0 0 0 3px var(--c-blue)',
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <span
+                  className='text-[16px] leading-[1.35]'
+                  style={{
+                    fontWeight: strong ? 700 : 600,
+                    color: strong ? 'var(--c-navy)' : 'var(--c-muted)',
+                  }}
+                >
+                  {l}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+      <style>{`@media (min-width: 901px){.ds-stages-${n}{grid-template-columns:repeat(${n},minmax(0,1fr))}}`}</style>
+    </div>
+  );
+}
+
+function Includes({ c }: { c: ProgramPageContent }) {
+  const [showAll, setShowAll] = useState(false);
+  let counter = 0;
+  const total = c.includes.reduce((a, g) => a + (g.items?.length ?? 0), 0);
+  return (
+    <div className='ds-card p-6 dsk:p-10'>
+      <h2 className='ds-h2 ds-h2-sm'>{c.includesTitle}</h2>
+      {c.includes.map(g => (
+        <div key={g.title} className='flex gap-4 items-start mt-7'>
+          <IconBox name={g.icon} tone='sky' className='hidden sm:flex' />
+          <div className='min-w-0 flex-1'>
+            <h3 className='ds-h3' style={{ fontSize: 21 }}>
+              {g.title}
+            </h3>
+            {g.text ? (
+              <p className='mt-1 mb-4 text-[17px] text-muted'>{g.text}</p>
+            ) : (
+              <div className='h-3' />
+            )}
+            {g.items?.length ? (
+              <ul className='list-none m-0 p-0 grid gap-x-6 gap-y-3 dsk:grid-cols-2 text-[17px]'>
+                {g.items.map(t => {
+                  const k = counter++;
+                  return (
+                    <li
+                      key={t}
+                      className={`${k >= 5 && !showAll ? 'hidden dsk:flex' : 'flex'} gap-3 items-start`}
+                    >
+                      <span
+                        aria-hidden='true'
+                        className='flex-none w-[26px] h-[26px] rounded-full bg-mint flex items-center justify-center mt-[2px]'
+                      >
+                        <Icon
+                          name='check'
+                          size={14}
+                          strokeWidth={3.2}
+                          color='var(--c-mint-ink)'
+                        />
+                      </span>
+                      <span>{t}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
+          </div>
+        </div>
+      ))}
+      {total > 5 ? (
+        <button
+          type='button'
+          className='dsk:hidden ds-btn ds-btn-sm ds-btn-tertiary mt-4'
+          aria-expanded={showAll}
+          onClick={() => setShowAll(v => !v)}
+        >
+          {showAll ? 'Свернуть' : `Показать все ${total} пунктов`}
+        </button>
+      ) : null}
+      {c.extras.length ? (
+        <div className='grid gap-4 dsk:grid-cols-2 mt-7'>
+          {c.extras.map(x => (
+            <div
+              key={x.text}
+              className='flex gap-4 items-start p-5 dsk:p-[22px] rounded-[20px] bg-canvas'
+            >
+              <IconBox
+                name={x.icon}
+                tone='sky'
+                size={48}
+                radius={14}
+                iconSize={22}
+              />
+              <p className='m-0 text-[17px] font-semibold text-ink'>{x.text}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 // Клиентский компонент для страницы продукта
@@ -433,16 +859,27 @@ export default function ProductClient({ product }: { product: Product }) {
 
       // Без входа покупка тоже возможна: спрашиваем email, на который придёт доступ.
       let guestEmail: string | undefined;
-      const me = await fetch('/api/auth/me', { credentials: 'same-origin', cache: 'no-store' }).catch(() => null);
+      const me = await fetch('/api/auth/me', {
+        credentials: 'same-origin',
+        cache: 'no-store',
+      }).catch(() => null);
       if (!me || me.status === 401) {
         const email = await guestEmailDialog.ask();
         if (!email) {
-          setIsPaymentProcessingLevel1(false);setIsPaymentProcessingLevel2(false);setIsPaymentProcessingLevel3(false);setIsPaymentProcessingLevel4(false);
+          setIsPaymentProcessingLevel1(false);
+          setIsPaymentProcessingLevel2(false);
+          setIsPaymentProcessingLevel3(false);
+          setIsPaymentProcessingLevel4(false);
           return;
         }
         guestEmail = email;
       }
-      const response = await authPost(apiUrl, {productId:product.id,level,agreement:true,...(guestEmail?{email:guestEmail}:{})});
+      const response = await authPost(apiUrl, {
+        productId: product.id,
+        level,
+        agreement: true,
+        ...(guestEmail ? { email: guestEmail } : {}),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -518,1445 +955,596 @@ export default function ProductClient({ product }: { product: Product }) {
   };
   */
 
+  /* ---------- Данные для оформления ---------- */
+  const catalogItem = getCatalogItemById(product.id);
+  const content = productPageContent[product.id];
+  const isProgram = content?.template === 'program';
+  const programContent = isProgram ? (content as ProgramPageContent) : null;
+  const serviceContent =
+    content?.template === 'service' ? (content as ServicePageContent) : null;
+  const mainPriceLabel =
+    product.id === 'formula-movement'
+      ? formatPrice('formula-movement', 6000)
+      : formatPrice(product.id, product.price);
+  const lead = catalogItem?.description || product.shortDescription;
+  const crumbs: Crumb[] =
+    catalogItem?.kind === 'program'
+      ? [
+          { label: 'Главная', href: '/' },
+          { label: 'Услуги', href: '/products' },
+          { label: 'Восстановительные программы', href: REHAB_PROGRAMS_PATH },
+          { label: catalogItem.title },
+        ]
+      : [
+          { label: 'Главная', href: '/' },
+          { label: 'Услуги', href: '/products' },
+          { label: catalogItem?.title ?? product.title },
+        ];
+  void productPath;
+
+  const mainBuyCard = (
+    <BuyCard
+      heading={product.id === 'formula-movement' ? '1-й уровень' : 'Стоимость'}
+      priceLabel={mainPriceLabel}
+      consentId='consent-checkbox'
+      offerId='offer-checkbox'
+      consentName='consent'
+      offerName='offer'
+      consent={isConsentChecked}
+      offer={isOfferChecked}
+      onConsent={checked => {
+        setIsConsentChecked(checked);
+        if (checked) setShowConsentError(false);
+      }}
+      onOffer={checked => {
+        setIsOfferChecked(checked);
+        if (checked) setShowOfferError(false);
+      }}
+      consentError={showConsentError}
+      offerError={showOfferError}
+      processing={isPaymentProcessingLevel1}
+      onPay={handlePaymentLevel1}
+      onTelegram={handleTelegramClick}
+      payAria={`Купить онлайн: ${product.title}`}
+    >
+      {product.id === 'formula-movement' ? (
+        <button
+          type='button'
+          onClick={() => setShowAllLevels(!showAllLevels)}
+          className='ds-btn ds-btn-md ds-btn-tertiary ds-btn-block'
+          aria-expanded={showAllLevels}
+          aria-controls='formula-levels'
+        >
+          {showAllLevels ? 'Свернуть' : 'Показать все уровни'}
+        </button>
+      ) : null}
+    </BuyCard>
+  );
+
+  /* ---------- Правая колонка шапки ---------- */
+  let headRight: React.ReactNode = null;
+  if (product.id === 'personal-program') {
+    headRight = (
+      <div>
+        <h2 className='sr-only'>Презентация программы</h2>
+        <div className='rounded-[24px] dsk:rounded-[28px] overflow-hidden shadow-[0_24px_48px_rgba(13,60,99,.18)] bg-navy'>
+          {isPresentationVideoLoading ? (
+            <div
+              className='relative w-full aspect-video'
+              style={{
+                background: 'linear-gradient(160deg, #16639E 0%, #0D3C63 100%)',
+              }}
+              role='status'
+              aria-live='polite'
+              aria-label='Загрузка видео презентации'
+            >
+              <div className='absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center text-white'>
+                <Loader2 className='h-10 w-10 animate-spin' aria-hidden />
+                <p className='m-0 text-[16px] font-semibold'>Загрузка видео…</p>
+                <p className='m-0 text-[15px] opacity-80 max-w-xs'>
+                  Подготавливаем презентацию программы, это может занять
+                  несколько секунд
+                </p>
+              </div>
+            </div>
+          ) : presentationVideoUrl &&
+            presentationVideoUrl.startsWith('https://kinescope.io/embed/') ? (
+            <iframe
+              title='Презентация программы'
+              src={presentationVideoUrl}
+              referrerPolicy='no-referrer'
+              allow='autoplay; fullscreen; encrypted-media; picture-in-picture'
+              allowFullScreen
+              className='aspect-video w-full border-0 block'
+            />
+          ) : presentationVideoUrl ? (
+            <VideoPlayer
+              src={presentationVideoUrl}
+              type='application/vnd.apple.mpegurl'
+              poster='/images/products/personal-program-poster.jpg'
+            />
+          ) : (
+            <div
+              className='w-full aspect-video flex flex-col items-center justify-center gap-3 px-6 text-center text-white'
+              style={{
+                background: 'linear-gradient(160deg, #16639E 0%, #0D3C63 100%)',
+              }}
+            >
+              <Icon name='play' size={34} color='#fff' />
+              <p className='m-0 text-[16px] font-semibold'>
+                Видео презентации временно недоступно.
+              </p>
+            </div>
+          )}
+        </div>
+        <p className='m-0 mt-3 text-[16px] font-bold text-navy'>
+          Презентация программы
+        </p>
+      </div>
+    );
+  } else if (programContent && product.image) {
+    headRight = (
+      <Image
+        src={product.image}
+        alt={product.title}
+        width={1600}
+        height={873}
+        priority
+        sizes='(max-width: 900px) 100vw, 460px'
+        className='ds-photo aspect-[16/11] h-auto shadow-[0_24px_48px_rgba(13,60,99,.14)]'
+      />
+    );
+  } else if (serviceContent) {
+    headRight = (
+      <CutoutCard
+        h={500}
+        cardH={380}
+        hM={380}
+        cardHM={280}
+        priority
+        plaque={
+          <Plaque
+            title={serviceContent.plaque.title}
+            sub={serviceContent.plaque.sub}
+            className='left-[-8px] bottom-4 dsk:left-[-24px] dsk:bottom-7'
+          />
+        }
+      />
+    );
+  }
+
+  const headExtra = programContent ? (
+    <div className='flex flex-wrap gap-2.5 mt-6'>
+      <Badge>{programContent.tag}</Badge>
+      <Badge tone='navy'>{programContent.access}</Badge>
+    </div>
+  ) : serviceContent ? (
+    <div className='grid gap-3 sm:grid-cols-3 mt-7'>
+      {serviceContent.facts.map(f => (
+        <div
+          key={f.text}
+          className='flex items-center gap-3 p-3.5 rounded-[18px] bg-white'
+        >
+          <IconBox
+            name={f.icon}
+            tone='sky'
+            size={40}
+            radius={12}
+            iconSize={20}
+          />
+          <span className='text-[16px] font-bold leading-[1.3] text-navy'>
+            {f.text}
+          </span>
+        </div>
+      ))}
+    </div>
+  ) : null;
+
   return (
     <>
-    {guestEmailDialog.dialog}
-    <motion.div
-      className='py-12'
-      initial={false}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
-        {/* Навигация */}
-        <motion.div
-          className='mb-8'
-          initial={{ x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Link
-            href='/products'
-            className='text-primary hover:underline inline-flex items-center'
-          >
-            <motion.span whileHover={{ x: -3 }} transition={{ duration: 0.2 }}>
-              ←
-            </motion.span>{' '}
-            Вернуться к продуктам
-          </Link>
-        </motion.div>
+      {guestEmailDialog.dialog}
+      <div className='ds'>
+        <PageHead
+          crumbs={crumbs}
+          title={product.title}
+          lead={lead}
+          right={headRight}
+          extra={headExtra}
+        />
+        <MobilePriceBar priceLabel={mainPriceLabel} />
 
-        {/* Содержимое страницы */}
-        <motion.div
-          className='bg-white p-6 rounded-lg shadow-md'
-          initial={{ y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.07)' }}
-        >
-          <div className='flex flex-col lg:flex-row lg:items-start'>
-            {/* Информация о продукте */}
-            <motion.div
-              className='lg:w-2/3 lg:pr-8'
-              initial='hidden'
-              animate='visible'
-              variants={fadeIn}
-              custom={0}
-            >
-              <motion.h1
-                className='text-3xl font-bold text-primary mb-4'
-                variants={fadeIn}
-                custom={1}
-              >
-                {product.title}
-              </motion.h1>
-
-              {/* Основное изображение продукта - скрыто только для personal-program */}
-              {product.image && product.id !== 'personal-program' && (
-                <motion.div
-                  className='mb-6 relative h-64 md:h-80 rounded-lg overflow-hidden'
-                  variants={fadeIn}
-                  custom={2}
-                >
-                  <Image
-                    src={product.image}
-                    alt={product.title}
-                    fill
-                    className='object-cover'
-                    priority
-                    sizes='(min-width: 1024px) 66vw, 100vw'
-                  />
-                </motion.div>
-              )}
-
-              {/* Видео презентации программы резекции мениска */}
-              {product.id === 'personal-program' && (
-                <motion.div
-                  className='mb-6 lg:self-start'
-                  variants={fadeIn}
-                  custom={2}
-                >
-                  <motion.h2
-                    className='text-xl font-semibold text-dark mb-4'
-                    variants={fadeIn}
-                    custom={3}
-                  >
-                    Презентация программы
-                  </motion.h2>
-                  <div className='mb-4 rounded-lg border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm leading-6 text-gray-700'>
-                    <span className='mb-2 inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-800'>
-                      Важно
-                    </span>
-                    <p>
-                      Данная программа описывает ход восстановления после
-                      изолированной резекции мениска. При выполнении
-                      дополнительных вмешательств (шов мениска, пластика ПКС,
-                      операции на хряще и др.) сроки и этапы реабилитации могут
-                      существенно отличаться. Необходимо строго соблюдать
-                      рекомендации лечащего хирурга.
-                    </p>
-                  </div>
-                  {isPresentationVideoLoading ? (
+        <section className='ds-wrap ds-sec'>
+          <div className='grid gap-6 dsk:gap-8 dsk:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] items-start'>
+            <div className='flex flex-col gap-5 dsk:gap-6 min-w-0'>
+              {/* ---------- Программа ---------- */}
+              {programContent ? (
+                <>
+                  {programContent.important ? (
                     <div
-                      className='relative w-full aspect-video rounded-lg overflow-hidden bg-slate-200'
-                      role='status'
-                      aria-live='polite'
-                      aria-label='Загрузка видео презентации'
+                      className='flex gap-4 p-5 dsk:px-7 dsk:py-6 rounded-[24px] bg-warn-bg'
+                      style={{ boxShadow: 'inset 0 0 0 1px #F3DDB0' }}
                     >
-                      <div className='absolute inset-0 animate-pulse bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300' />
-                      <div className='absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center'>
-                        <Loader2
-                          className='h-10 w-10 animate-spin text-primary'
-                          aria-hidden
-                        />
-                        <p className='text-sm font-medium text-slate-700'>
-                          Загрузка видео…
-                        </p>
-                        <p className='text-xs text-slate-500 max-w-xs'>
-                          Подготавливаем презентацию программы, это может занять
-                          несколько секунд
-                        </p>
-                      </div>
-                    </div>
-                  ) : presentationVideoUrl && presentationVideoUrl.startsWith('https://kinescope.io/embed/') ? (
-                    <iframe title='Презентация программы' src={presentationVideoUrl} referrerPolicy='no-referrer' allow='autoplay; fullscreen; encrypted-media; picture-in-picture' allowFullScreen className='aspect-video w-full border-0 rounded-lg' />
-                  ) : presentationVideoUrl ? (
-                    <VideoPlayer
-                      src={presentationVideoUrl}
-                      type='application/vnd.apple.mpegurl'
-                      poster='/images/products/personal-program-poster.jpg'
-                    />
-                  ) : (
-                    <div className='w-full aspect-video rounded-lg bg-secondary flex items-center justify-center px-6 text-center text-gray-600'>
-                      Видео презентации временно недоступно.
-                    </div>
-                  )}
-                  <div className='mt-4 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm'>
-                    <h3 className='inline-flex items-center gap-2 text-sm font-semibold text-dark'>
-                      <MessageCircleMore className='h-4 w-4 text-primary' />
-                      Связаться по вопросам программы
-                    </h3>
-                    <div className='mt-3 grid gap-3 sm:grid-cols-2'>
-                      <a
-                        href='mailto:minenkov.rehab@yandex.ru'
-                        className='group rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 transition-colors hover:border-primary/30 hover:bg-primary/5'
-                      >
-                        <span className='inline-flex items-center gap-2 text-sm font-medium text-dark'>
-                          <Mail className='h-4 w-4 shrink-0 text-primary' />
-                          Электронная почта
-                        </span>
-                        <span className='mt-1 block text-sm text-primary transition-colors group-hover:text-primary/80'>
-                          minenkov.rehab@yandex.ru
-                        </span>
-                      </a>
-                      <a
-                        href='https://t.me/MV_Rehab'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='group rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 transition-colors hover:border-sky-300 hover:bg-sky-100/70'
-                      >
-                        <span className='inline-flex items-center gap-2 text-sm font-medium text-dark'>
-                          <Send className='h-4 w-4 shrink-0 text-sky-600' />
-                          Telegram
-                        </span>
-                        <span className='mt-1 block text-sm text-sky-700 transition-colors group-hover:text-sky-800'>
-                          https://t.me/MV_Rehab
-                        </span>
-                      </a>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Карусель изображений для восстановительной программы */}
-              {product.id === 'rehabilitation-protocols' && (
-                <motion.div
-                  className='mb-6 lg:self-start'
-                  variants={fadeIn}
-                  custom={2}
-                >
-                  <motion.h2
-                    className='text-xl font-semibold text-dark mb-4'
-                    variants={fadeIn}
-                    custom={3}
-                  >
-                    Этапы реабилитации
-                  </motion.h2>
-                  <ImageCarousel
-                    images={[
-                      {
-                        src: '/images/products/IMAGE 2025-07-22 23:23:43.jpg',
-                        alt: 'Этап 1: Острый период (0-2 недели)',
-                        title: 'Острый период',
-                      },
-                      {
-                        src: '/images/products/IMAGE 2025-07-22 23:23:54.jpg',
-                        alt: 'Этап 2: Подострый период (2-6 недель)',
-                        title: 'Подострый период',
-                      },
-                      {
-                        src: '/images/products/IMAGE 2025-07-22 23:24:03.jpg',
-                        alt: 'Этап 3: Функциональное восстановление (6-12 недель)',
-                        title: 'Функциональное восстановление',
-                      },
-                      {
-                        src: '/images/products/IMAGE 2025-07-22 23:24:15.jpg',
-                        alt: 'Этап 4: Возвращение к спорту (12+ недель)',
-                        title: 'Возвращение к спорту',
-                      },
-                    ]}
-                  />
-                </motion.div>
-              )}
-
-              <motion.div className='mb-6' variants={fadeIn} custom={5}>
-                <motion.h2
-                  className='text-xl font-semibold text-dark mb-4'
-                  variants={fadeIn}
-                  custom={6}
-                >
-                  Описание
-                </motion.h2>
-                <motion.p
-                  className='text-dark mb-4'
-                  variants={fadeIn}
-                  custom={7}
-                >
-                  {product.shortDescription}
-                </motion.p>
-                <ul className='list-disc pl-5 space-y-2'>
-                  {product.fullDescription.map(
-                    (item: string, index: number) => (
-                      <motion.li
-                        key={index}
-                        className='text-dark'
-                        variants={fadeIn}
-                        custom={8 + index * 0.5}
-                      >
-                        {item}
-                      </motion.li>
-                    )
-                  )}
-                </ul>
-              </motion.div>
-            </motion.div>
-
-            {/* Блок цены и контактов */}
-            <motion.div
-              className={`lg:w-1/3 mt-8 lg:mt-0 lg:self-start ${
-                product.id === 'personal-program' ? 'lg:pt-16' : ''
-              }`}
-              initial={{ x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-            >
-              <motion.div
-                className='bg-secondary p-6 rounded-lg'
-                whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
-              >
-                <motion.h2
-                  className='text-xl font-semibold text-primary mb-4'
-                  initial={false}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                >
-                  Стоимость услуги
-                </motion.h2>
-                <motion.div
-                  className='text-2xl font-bold text-accent mb-6'
-                  initial={{ scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.5 }}
-                >
-                  {product.id === 'formula-movement'
-                    ? '6 000 ₽'
-                    : formatPrice(product.id, product.price)}
-                </motion.div>
-
-                {/* Плашка "Не является медицинской услугой" */}
-                <motion.div
-                  initial={{ y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.55 }}
-                  className='mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md'
-                >
-                  <div className='flex items-center space-x-2'>
-                    <svg
-                      className='w-4 h-4 text-blue-600 flex-shrink-0'
-                      fill='currentColor'
-                      viewBox='0 0 20 20'
-                    >
-                      <path
-                        fillRule='evenodd'
-                        d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z'
-                        clipRule='evenodd'
+                      <IconBox
+                        name='alert'
+                        tone='warn'
+                        size={44}
+                        radius={14}
+                        iconSize={22}
                       />
-                    </svg>
-                    <span className='text-sm text-blue-800 font-medium'>
-                      Не является медицинской услугой
-                    </span>
-                  </div>
-                </motion.div>
-
-                {/* Чекбоксы согласия */}
-                <motion.div
-                  initial={{ y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.6 }}
-                  className='mb-4 space-y-3'
-                >
-                  {/* Чекбокс согласия на обработку персональных данных */}
-                  <div
-                    className={`p-3 rounded-md transition-all ${
-                      showConsentError
-                        ? 'bg-red-50 border border-red-200'
-                        : 'bg-gray-50'
-                    }`}
-                  >
-                    <label
-                      htmlFor='consent-checkbox'
-                      className='flex items-center space-x-3 cursor-pointer group'>
-                      <div className='relative'>
-                        <input
-                          type='checkbox'
-                          id='consent-checkbox'
-                          name='consent'
-                          checked={isConsentChecked}
-                          onChange={e => {
-                            setIsConsentChecked(e.target.checked);
-                            if (e.target.checked) setShowConsentError(false);
-                          }}
-                          className='sr-only peer'
-                        />
-                        <div
-                          className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
-                            isConsentChecked
-                              ? 'bg-primary border-primary shadow-md'
-                              : 'bg-white border-gray-300 group-hover:border-primary/50'
-                          }`}
-                        >
-                          {isConsentChecked && (
-                            <svg
-                              className='w-3 h-3 text-white'
-                              fill='currentColor'
-                              viewBox='0 0 20 20'
-                            >
-                              <path
-                                fillRule='evenodd'
-                                d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                                clipRule='evenodd'
-                              />
-                            </svg>
-                          )}
-                        </div>
+                      <div>
+                        <h2 className='m-0 mb-1.5 text-[19px] font-extrabold text-[#5C3900]'>
+                          Важно
+                        </h2>
+                        <p className='m-0 text-[17px] text-[#4A3A1A]'>
+                          {programContent.important}
+                        </p>
                       </div>
-                      <span className='text-xs text-gray-600 leading-relaxed'>
-                        Я даю{' '}
+                    </div>
+                  ) : null}
+                  <div className='ds-card p-6 dsk:p-10'>
+                    <h2 className='ds-h2 ds-h2-sm'>О программе</h2>
+                    <div className='ds-prose mt-4'>
+                      {programContent.about.map(t => (
+                        <p key={t}>{t}</p>
+                      ))}
+                    </div>
+                  </div>
+                  <StagesWrap c={programContent} />
+                  <Includes c={programContent} />
+                  <div>
+                    <h2 className='ds-h2 ds-h2-sm mb-5'>Частые вопросы</h2>
+                    <Faq
+                      idPrefix={`faq-${product.id}`}
+                      items={programContent.faq.map(f => ({
+                        q: f.q,
+                        a: f.html ? (
+                          <p
+                            className='m-0'
+                            dangerouslySetInnerHTML={{ __html: f.a }}
+                          />
+                        ) : (
+                          <p className='m-0'>{f.a}</p>
+                        ),
+                      }))}
+                    />
+                  </div>
+                </>
+              ) : null}
+
+              {/* ---------- Услуга ---------- */}
+              {serviceContent
+                ? serviceContent.sections.map(sec => (
+                    <div key={sec.title} className='ds-card p-6 dsk:p-10'>
+                      <h2 className='ds-h2 ds-h2-sm'>{sec.title}</h2>
+                      {sec.kind === 'text' ? (
+                        <div className='ds-prose mt-4'>
+                          {sec.paragraphs.map(t => (
+                            <p key={t}>{t}</p>
+                          ))}
+                        </div>
+                      ) : sec.kind === 'list' ? (
+                        <ul className='list-none mt-6 mb-0 p-0 grid gap-3 dsk:grid-cols-2'>
+                          {sec.items.map(t => (
+                            <li
+                              key={t}
+                              className='flex gap-3.5 items-start p-5 rounded-[20px] bg-canvas'
+                            >
+                              <IconBox
+                                name='check'
+                                size={36}
+                                radius={12}
+                                iconSize={18}
+                              />
+                              <span className='text-[17px] font-semibold'>
+                                {t}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className='grid gap-5 dsk:grid-cols-2 mt-6'>
+                          {sec.items.map(it => (
+                            <div
+                              key={it.text}
+                              className='flex gap-4 items-start'
+                            >
+                              <IconBox name={it.icon} tone='sky' />
+                              <p className='m-0 text-[17px]'>{it.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                : null}
+
+              {/* Онлайн-консультация: дополнительно — экспресс-консультация («Показать еще») */}
+              {product.id === 'consultation' ? (
+                <div
+                  className='ds-card p-6 dsk:px-8 dsk:py-7 flex flex-col gap-5'
+                  style={{ background: 'var(--g-featured)' }}
+                >
+                  <div className='flex flex-col dsk:flex-row dsk:items-center gap-4 dsk:gap-5'>
+                    <IconBox name='clock' />
+                    <div className='flex-1'>
+                      <h2 className='m-0 text-[21px] font-extrabold text-navy'>
+                        Нужен короткий разбор одного вопроса?
+                      </h2>
+                      <p className='mt-1 mb-0 text-[17px] text-muted'>
                         <Link
-                          href='/consent'
-                          className='text-primary hover:underline'
-                          target='_blank'
-                          rel='noopener noreferrer'
+                          href='/products/express-consultation'
+                          className='ds-link'
                         >
-                          согласие на обработку персональных данных
+                          Экспресс онлайн-консультация
                         </Link>{' '}
-                        в соответствии с{' '}
-                        <Link
-                          href='/policy'
-                          className='text-primary hover:underline'
-                          target='_blank'
-                          rel='noopener noreferrer'
-                        >
-                          политикой конфиденциальности
-                        </Link>
-                      </span>
-                    </label>
-                    {showConsentError && (
-                      <motion.div
-                        initial={{ y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className='mt-2 text-xs text-red-600 font-medium'
-                      >
-                        ⚠️ Пожалуйста, отметьте согласие на обработку
-                        персональных данных для продолжения
-                      </motion.div>
-                    )}
-                  </div>
-
-                  {/* Чекбокс согласия с договором оферты */}
-                  <div
-                    className={`p-3 rounded-md transition-all ${
-                      showOfferError
-                        ? 'bg-red-50 border border-red-200'
-                        : 'bg-gray-50'
-                    }`}
-                  >
-                    <label
-                      htmlFor='offer-checkbox'
-                      className='flex items-center space-x-3 cursor-pointer group'>
-                      <div className='relative'>
-                        <input
-                          type='checkbox'
-                          id='offer-checkbox'
-                          name='offer'
-                          checked={isOfferChecked}
-                          onChange={e => {
-                            setIsOfferChecked(e.target.checked);
-                            if (e.target.checked) setShowOfferError(false);
-                          }}
-                          className='sr-only peer'
-                        />
-                        <div
-                          className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
-                            isOfferChecked
-                              ? 'bg-primary border-primary shadow-md'
-                              : 'bg-white border-gray-300 group-hover:border-primary/50'
-                          }`}
-                        >
-                          {isOfferChecked && (
-                            <svg
-                              className='w-3 h-3 text-white'
-                              fill='currentColor'
-                              viewBox='0 0 20 20'
-                            >
-                              <path
-                                fillRule='evenodd'
-                                d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                                clipRule='evenodd'
-                              />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                      <span className='text-xs text-gray-600 leading-relaxed'>
-                        Я согласен с условиями{' '}
-                        <a
-                          href='/offer'
-                          className='text-primary hover:underline'
-                          target='_blank'
-                          rel='noopener noreferrer'
-                        >
-                          договора оферты
-                        </a>
-                      </span>
-                    </label>
-                    {showOfferError && (
-                      <motion.div
-                        initial={{ y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className='mt-2 text-xs text-red-600 font-medium'
-                      >
-                        ⚠️ Пожалуйста, согласитесь с условиями договора оферты
-                        для продолжения
-                      </motion.div>
-                    )}
-                  </div>
-                </motion.div>
-
-                {/* Кнопка покупки */}
-                <motion.div
-                  initial={{ y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.7 }}
-                  whileHover={{
-                    scale: isConsentChecked && isOfferChecked ? 1.05 : 1,
-                  }}
-                  whileTap={{
-                    scale: isConsentChecked && isOfferChecked ? 0.95 : 1,
-                  }}
-                  className='mb-4'
-                >
-                  <button
-                    onClick={handlePaymentLevel1}
-                    disabled={
-                      !isConsentChecked ||
-                      !isOfferChecked ||
-                      isPaymentProcessingLevel1
-                    }
-                    aria-label={`Купить онлайн: ${product.title}`}
-                    className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg flex items-center justify-center space-x-2 ${
-                      isConsentChecked &&
-                      isOfferChecked &&
-                      !isPaymentProcessingLevel1
-                        ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
-                        : 'bg-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {isPaymentProcessingLevel1 ? (
-                      <>
-                        <svg
-                          className='animate-spin h-5 w-5 text-white'
-                          xmlns='http://www.w3.org/2000/svg'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                        >
-                          <circle
-                            className='opacity-25'
-                            cx='12'
-                            cy='12'
-                            r='10'
-                            stroke='currentColor'
-                            strokeWidth='4'
-                          ></circle>
-                          <path
-                            className='opacity-75'
-                            fill='currentColor'
-                            d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                          ></path>
-                        </svg>
-                        <span>Обработка...</span>
-                      </>
-                    ) : (
-                      'Купить онлайн'
-                    )}
-                  </button>
-                </motion.div>
-
-                {/* Кнопка связи в Telegram */}
-                <motion.div
-                  initial={{ y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.8 }}
-                  whileHover={{
-                    scale: isConsentChecked && isOfferChecked ? 1.05 : 1,
-                  }}
-                  whileTap={{
-                    scale: isConsentChecked && isOfferChecked ? 0.95 : 1,
-                  }}
-                  className='mb-4'
-                >
-                  {isConsentChecked && isOfferChecked ? (
-                    <Link
-                      href='https://t.me/MV_Rehab'
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-primary hover:bg-primary-dark hover:border-primary/20 cursor-pointer'
-                    >
-                      Связаться в Telegram
-                    </Link>
-                  ) : (
+                        — 20 минут, 4 000 ₽
+                      </p>
+                    </div>
                     <button
-                      onClick={handleTelegramClick}
-                      className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-gray-400 cursor-not-allowed'
-                    >
-                      Связаться в Telegram
-                    </button>
-                  )}
-                </motion.div>
-
-                {/* Кнопка показать все уровни для Формулы движения */}
-                {product.id === 'formula-movement' && (
-                  <motion.div
-                    initial={{ y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.9 }}
-                    className='mb-4'
-                  >
-                    <button
-                      onClick={() => setShowAllLevels(!showAllLevels)}
-                      className='block w-full text-primary text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-primary hover:bg-primary hover:text-white'
-                    >
-                      {showAllLevels ? 'Свернуть' : 'Показать все уровни'}
-                    </button>
-                  </motion.div>
-                )}
-
-                {/* Кнопка показать еще для консультации */}
-                {product.id === 'consultation' && (
-                  <motion.div
-                    initial={{ y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.9 }}
-                    className='mb-4'
-                  >
-                    <button
+                      type='button'
                       onClick={() =>
                         setShowMoreConsultation(!showMoreConsultation)
                       }
-                      className='block w-full text-primary text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-primary hover:bg-primary hover:text-white'
+                      className='ds-btn ds-btn-md ds-btn-tertiary'
+                      aria-expanded={showMoreConsultation}
+                      aria-controls='express-more'
                     >
                       {showMoreConsultation ? 'Свернуть' : 'Показать еще'}
                     </button>
-                  </motion.div>
-                )}
-              </motion.div>
-            </motion.div>
-          </div>
-
-          {/* Карточка оплаты экспресс-онлайн-консультации */}
-          {product.id === 'consultation' && showMoreConsultation && (
-            <motion.div
-              initial={{ height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.5 }}
-              className='mt-8'
-            >
-              <div className='bg-secondary p-6 rounded-lg border border-gray-200'>
-                <h3 className='text-2xl font-bold text-primary mb-3'>
-                  Экспресс онлайн-консультация
-                </h3>
-                <p className='text-gray-700 mb-4'>
-                  Быстрая консультация для разбора конкретного вопроса и
-                  получения рекомендаций.
-                </p>
-
-                <div className='space-y-4 mb-6'>
-                  <div>
-                    <h4 className='font-semibold text-primary mb-2'>
-                      Что включает:
-                    </h4>
-                    <ul className='list-disc list-inside space-y-1 text-sm text-gray-700'>
-                      <li>Разбор истории вашего состояния</li>
-                      <li>Ответы на все ваши вопросы</li>
-                      <li>Определение целей и задач</li>
-                      <li>Выбор вектора действий по решению вашего вопроса</li>
-                    </ul>
                   </div>
-                </div>
 
-                {/* Плашка "Не является медицинской услугой" */}
-                <div className='bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6'>
-                  <p className='text-sm text-yellow-800 font-medium'>
-                    ⚠️ Не является медицинской услугой
-                  </p>
-                </div>
-
-                {/* Цена */}
-                <div className='mb-6'>
-                  <div className='text-2xl font-bold text-primary'>
-                    {formatPrice('express-consultation', 3000)}
-                  </div>
-                </div>
-
-                {/* Чекбокс согласия */}
-                <div className='mb-6'>
-                  <label
-                      htmlFor='agreement-checkbox'
-                      className='flex items-center space-x-3 cursor-pointer group'>
-                    <div className='relative'>
-                      <input
-                        type='checkbox'
-                          id='agreement-checkbox'
-                          name='agreement'
+                  {showMoreConsultation && (
+                    <div
+                      id='express-more'
+                      className='rounded-[20px] bg-white p-5 dsk:p-7 flex flex-col gap-4'
+                    >
+                      <h3 className='ds-h3'>Экспресс онлайн-консультация</h3>
+                      <p className='m-0 text-[17px] text-muted'>
+                        Быстрая консультация для разбора конкретного вопроса и
+                        получения рекомендаций.
+                      </p>
+                      <div>
+                        <h4 className='m-0 mb-3 text-[17px] font-extrabold text-navy'>
+                          Что включает:
+                        </h4>
+                        <CheckList
+                          className='text-[17px]'
+                          items={[
+                            'Разбор истории вашего состояния',
+                            'Ответы на все ваши вопросы',
+                            'Определение целей и задач',
+                            'Выбор вектора действий по решению вашего вопроса',
+                          ]}
+                        />
+                      </div>
+                      <NotMedical />
+                      <p className='m-0 text-[28px] font-extrabold text-navy'>
+                        {formatPrice('express-consultation', 3000)}
+                      </p>
+                      <Checkbox
+                        id='agreement-checkbox'
+                        name='agreement'
                         checked={isAgreed}
                         onChange={e => setIsAgreed(e.target.checked)}
-                        className='absolute opacity-0 w-5 h-5 cursor-pointer'
                         required
-                        aria-required='true'
-                      />
-                      <div
-                        className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-all duration-300 flex-shrink-0 
-                        ${isAgreed ? 'bg-accent border-accent' : 'bg-white border-gray-300 group-hover:border-accent'}`}
-                        aria-hidden='true'
                       >
-                        {isAgreed && (
-                          <svg
-                            className='w-3 h-3 text-white'
-                            fill='none'
-                            stroke='currentColor'
-                            viewBox='0 0 24 24'
-                            aria-hidden='true'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth='3'
-                              d='M5 13l4 4L19 7'
-                            ></path>
-                          </svg>
-                        )}
+                        Я даю{' '}
+                        <Link href='/consent'>
+                          согласие на обработку персональных данных
+                        </Link>{' '}
+                        в соответствии с{' '}
+                        <Link href='/policy'>политикой конфиденциальности</Link>{' '}
+                        и согласен с условиями{' '}
+                        <Link href='/terms'>договора оферты</Link>.
+                      </Checkbox>
+                      <div className='flex flex-col sm:flex-row gap-3'>
+                        <button
+                          type='button'
+                          onClick={async () => {
+                            if (!isAgreed) {
+                              alert(
+                                'Пожалуйста, дайте согласие на обработку персональных данных'
+                              );
+                              return;
+                            }
+                            setIsLoading(true);
+                            try {
+                              console.log(
+                                '🧪 Демонстрационный режим: оплата для экспресс-консультации'
+                              );
+                              await new Promise(resolve =>
+                                setTimeout(resolve, 800)
+                              );
+                              if (typeof window !== 'undefined') {
+                                window.location.href =
+                                  '/payment/success?mock=1&product=express-consultation';
+                              }
+                            } finally {
+                              setIsLoading(false);
+                            }
+                          }}
+                          disabled={!isAgreed || isLoading}
+                          aria-label='Купить онлайн экспресс-консультацию'
+                          className='ds-btn ds-btn-md ds-btn-primary flex-1'
+                        >
+                          {isLoading ? 'Обработка...' : 'Купить онлайн'}
+                        </button>
+                        <Link
+                          href={isAgreed ? 'https://t.me/MV_Rehab' : '#'}
+                          target={isAgreed ? '_blank' : '_self'}
+                          rel={isAgreed ? 'noopener noreferrer' : ''}
+                          className='ds-btn ds-btn-md ds-btn-outline flex-1'
+                          aria-disabled={!isAgreed}
+                          {...(!isAgreed && {
+                            onClick: (e: React.MouseEvent) =>
+                              e.preventDefault(),
+                          })}
+                        >
+                          Связаться в Telegram
+                        </Link>
                       </div>
                     </div>
-                    <span className='text-sm text-gray-700'>
-                      Я даю{' '}
-                      <Link
-                        href='/consent'
-                        className='text-primary hover:underline'
-                      >
-                        согласие на обработку персональных данных
-                      </Link>{' '}
-                      в соответствии с{' '}
-                      <Link
-                        href='/policy'
-                        className='text-primary hover:underline'
-                      >
-                        политикой конфиденциальности
-                      </Link>{' '}
-                      и согласен с условиями{' '}
-                      <Link
-                        href='/terms'
-                        className='text-primary hover:underline'
-                      >
-                        договора оферты
-                      </Link>
-                      .
-                    </span>
-                  </label>
+                  )}
                 </div>
+              ) : null}
 
-                {/* Кнопки */}
-                <div className='flex flex-col sm:flex-row gap-4'>
-                  <button
-                    onClick={async () => {
-                      if (!isAgreed) {
-                        alert(
-                          'Пожалуйста, дайте согласие на обработку персональных данных'
-                        );
-                        return;
-                      }
-                      setIsLoading(true);
-                      try {
-                        console.log(
-                          '🧪 Демонстрационный режим: оплата для экспресс-консультации'
-                        );
-                        await new Promise(resolve => setTimeout(resolve, 800));
-                        if (typeof window !== 'undefined') {
-                          window.location.href =
-                            '/payment/success?mock=1&product=express-consultation';
-                        }
-                      } finally {
-                        setIsLoading(false);
-                      }
-                    }}
-                    disabled={!isAgreed || isLoading}
-                    aria-label='Купить онлайн экспресс-консультацию'
-                    className='flex-1 bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-                  >
-                    {isLoading ? 'Обработка...' : 'Купить онлайн'}
-                  </button>
-                  <Link
-                    href={isAgreed ? 'https://t.me/MV_Rehab' : '#'}
-                    target={isAgreed ? '_blank' : '_self'}
-                    rel={isAgreed ? 'noopener noreferrer' : ''}
-                    className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-colors text-center ${
-                      isAgreed
-                        ? 'bg-white text-primary border-2 border-primary hover:bg-primary/5 cursor-pointer'
-                        : 'bg-gray-300 text-gray-500 border-2 border-gray-300 cursor-not-allowed'
-                    }`}
-                    {...(!isAgreed && { onClick: e => e.preventDefault() })}
-                  >
-                    Связаться в Telegram
-                  </Link>
+              {/* Запасной вариант для продуктов без структурированного контента */}
+              {!content ? (
+                <div className='ds-card p-6 dsk:p-10'>
+                  {product.id === 'rehabilitation-protocols' && (
+                    <div className='mb-6'>
+                      <h2 className='ds-h3 mb-4'>Этапы реабилитации</h2>
+                      <ImageCarousel
+                        images={[
+                          {
+                            src: '/images/products/IMAGE 2025-07-22 23:23:43.jpg',
+                            alt: 'Этап 1: Острый период (0-2 недели)',
+                            title: 'Острый период',
+                          },
+                          {
+                            src: '/images/products/IMAGE 2025-07-22 23:23:54.jpg',
+                            alt: 'Этап 2: Подострый период (2-6 недель)',
+                            title: 'Подострый период',
+                          },
+                          {
+                            src: '/images/products/IMAGE 2025-07-22 23:24:03.jpg',
+                            alt: 'Этап 3: Функциональное восстановление (6-12 недель)',
+                            title: 'Функциональное восстановление',
+                          },
+                          {
+                            src: '/images/products/IMAGE 2025-07-22 23:24:15.jpg',
+                            alt: 'Этап 4: Возвращение к спорту (12+ недель)',
+                            title: 'Возвращение к спорту',
+                          },
+                        ]}
+                      />
+                    </div>
+                  )}
+                  <h2 className='ds-h2 ds-h2-sm'>Описание</h2>
+                  {product.shortDescription ? (
+                    <p className='mt-4 mb-4'>{product.shortDescription}</p>
+                  ) : null}
+                  <CheckList className='mt-4' items={product.fullDescription} />
                 </div>
-              </div>
-            </motion.div>
-          )}
+              ) : null}
+            </div>
 
-          {/* Дополнительные уровни для Формулы движения */}
-          {product.id === 'formula-movement' && showAllLevels && (
-            <motion.div
-              initial={{ height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.5 }}
-              className='mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+            <div
+              id='buy'
+              className='flex flex-col gap-4 scroll-mt-28 dsk:sticky dsk:top-[104px]'
             >
-              {/* Второй уровень */}
-              <motion.div
-                initial={{ y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className='bg-secondary p-6 rounded-lg'
-                whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
-              >
-                <h1 className='text-xl font-semibold text-primary mb-4'>
-                  2-й уровень
-                </h1>
-                <div className='text-2xl font-bold text-accent mb-6'>
-                  6 000 ₽
-                </div>
-                {/* Чекбокс согласия с политикой конфиденциальности */}
-                <div
-                  className={`mb-3 p-3 rounded-md transition-all ${
-                    showConsentErrorLevel2
-                      ? 'bg-red-50 border border-red-200'
-                      : 'bg-gray-50'
-                  }`}
-                >
-                  <label
-                      htmlFor='consent-level-2-checkbox'
-                      className='flex items-center space-x-3 cursor-pointer group'>
-                    <div className='relative'>
-                      <input
-                        type='checkbox'
-                          id='consent-level-2-checkbox'
-                          name='consent-level-2'
-                        checked={isConsentCheckedLevel2}
-                        onChange={e => {
-                          setIsConsentCheckedLevel2(e.target.checked);
-                          if (e.target.checked)
-                            setShowConsentErrorLevel2(false);
-                        }}
-                        className='sr-only peer'
-                      />
-                      <div
-                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
-                          isConsentCheckedLevel2
-                            ? 'bg-primary border-primary shadow-md'
-                            : 'bg-white border-gray-300 group-hover:border-primary/50'
-                        }`}
-                      >
-                        {isConsentCheckedLevel2 && (
-                          <svg
-                            className='w-3 h-3 text-white'
-                            fill='currentColor'
-                            viewBox='0 0 20 20'
-                          >
-                            <path
-                              fillRule='evenodd'
-                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                              clipRule='evenodd'
-                            />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    <span className='text-xs text-gray-600 leading-relaxed'>
-                      Я даю{' '}
-                      <Link
-                        href='/consent'
-                        className='text-primary hover:underline'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        согласие на обработку персональных данных
-                      </Link>{' '}
-                      в соответствии с{' '}
-                      <Link
-                        href='/policy'
-                        className='text-primary hover:underline'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        политикой конфиденциальности
-                      </Link>
-                      .
-                    </span>
-                  </label>
-                  {showConsentErrorLevel2 && (
-                    <motion.div
-                      initial={{ y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className='mt-2 text-xs text-red-600 font-medium'
-                    >
-                      ⚠️ Пожалуйста, дайте согласие на обработку персональных
-                      данных для продолжения
-                    </motion.div>
-                  )}
-                </div>
+              {mainBuyCard}
+              {programContent ? <ContactBox /> : null}
+            </div>
+          </div>
+        </section>
 
-                {/* Чекбокс согласия с договором оферты */}
-                <div
-                  className={`mb-4 p-3 rounded-md transition-all ${
-                    showOfferErrorLevel2
-                      ? 'bg-red-50 border border-red-200'
-                      : 'bg-gray-50'
-                  }`}
-                >
-                  <label
-                      htmlFor='offer-level-2-checkbox'
-                      className='flex items-center space-x-3 cursor-pointer group'>
-                    <div className='relative'>
-                      <input
-                        type='checkbox'
-                          id='offer-level-2-checkbox'
-                          name='offer-level-2'
-                        checked={isOfferCheckedLevel2}
-                        onChange={e => {
-                          setIsOfferCheckedLevel2(e.target.checked);
-                          if (e.target.checked) setShowOfferErrorLevel2(false);
-                        }}
-                        className='sr-only peer'
-                      />
-                      <div
-                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
-                          isOfferCheckedLevel2
-                            ? 'bg-primary border-primary shadow-md'
-                            : 'bg-white border-gray-300 group-hover:border-primary/50'
-                        }`}
-                      >
-                        {isOfferCheckedLevel2 && (
-                          <svg
-                            className='w-3 h-3 text-white'
-                            fill='currentColor'
-                            viewBox='0 0 20 20'
-                          >
-                            <path
-                              fillRule='evenodd'
-                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                              clipRule='evenodd'
-                            />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    <span className='text-xs text-gray-600 leading-relaxed'>
-                      Я согласен с условиями{' '}
-                      <a
-                        href='/offer'
-                        className='text-primary hover:underline'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        договора оферты
-                      </a>
-                      .
-                    </span>
-                  </label>
-                  {showOfferErrorLevel2 && (
-                    <motion.div
-                      initial={{ y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className='mt-2 text-xs text-red-600 font-medium'
-                    >
-                      ⚠️ Пожалуйста, согласитесь с условиями договора оферты для
-                      продолжения
-                    </motion.div>
-                  )}
-                </div>
-                <button
-                  onClick={handlePaymentLevel2}
-                  disabled={
-                    !isConsentCheckedLevel2 ||
-                    !isOfferCheckedLevel2 ||
-                    isPaymentProcessingLevel2
-                  }
-                  aria-label='Купить онлайн уровень 2 программы «Формула Движения»'
-                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
-                    isConsentCheckedLevel2 &&
-                    isOfferCheckedLevel2 &&
-                    !isPaymentProcessingLevel2
-                      ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
-                      : 'bg-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {isPaymentProcessingLevel2 ? (
-                    <>
-                      <svg
-                        className='animate-spin h-5 w-5 text-white'
-                        xmlns='http://www.w3.org/2000/svg'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                      >
-                        <circle
-                          className='opacity-25'
-                          cx='12'
-                          cy='12'
-                          r='10'
-                          stroke='currentColor'
-                          strokeWidth='4'
-                        ></circle>
-                        <path
-                          className='opacity-75'
-                          fill='currentColor'
-                          d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                        ></path>
-                      </svg>
-                      <span>Обработка...</span>
-                    </>
-                  ) : (
-                    'Купить онлайн'
-                  )}
-                </button>
-                {isConsentCheckedLevel2 && isOfferCheckedLevel2 ? (
-                  <Link
-                    href='https://t.me/MV_Rehab'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-primary hover:bg-primary-dark hover:border-primary/20 cursor-pointer'
-                  >
-                    Связаться в Telegram
-                  </Link>
-                ) : (
-                  <button
-                    onClick={handleTelegramClickLevel2}
-                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-gray-400 cursor-not-allowed'
-                  >
-                    Связаться в Telegram
-                  </button>
-                )}
-              </motion.div>
+        {/* «Формула Движения»: уровни 2–4 */}
+        {product.id === 'formula-movement' && showAllLevels && (
+          <section
+            id='formula-levels'
+            className='ds-wrap ds-sec'
+            aria-labelledby='levels-title'
+          >
+            <SectionHead
+              id='levels-title'
+              title='Следующие уровни'
+              sub='Каждый уровень — 2 месяца, 9 тренировок по 30 минут'
+            />
+            <div className='grid gap-4 dsk:gap-6 dsk:grid-cols-3 items-start'>
+              <BuyCard
+                as='article'
+                headingLevel={3}
+                heading='2-й уровень'
+                priceLabel='6 000 ₽'
+                consentId='consent-level-2-checkbox'
+                offerId='offer-level-2-checkbox'
+                consentName='consent-level-2'
+                offerName='offer-level-2'
+                consent={isConsentCheckedLevel2}
+                offer={isOfferCheckedLevel2}
+                onConsent={checked => {
+                  setIsConsentCheckedLevel2(checked);
+                  if (checked) setShowConsentErrorLevel2(false);
+                }}
+                onOffer={checked => {
+                  setIsOfferCheckedLevel2(checked);
+                  if (checked) setShowOfferErrorLevel2(false);
+                }}
+                consentError={showConsentErrorLevel2}
+                offerError={showOfferErrorLevel2}
+                processing={isPaymentProcessingLevel2}
+                onPay={handlePaymentLevel2}
+                onTelegram={handleTelegramClickLevel2}
+                payAria='Купить онлайн уровень 2 программы «Формула Движения»'
+              />
+              <BuyCard
+                as='article'
+                headingLevel={3}
+                heading='3-й уровень'
+                priceLabel='6 000 ₽'
+                consentId='consent-level-3-checkbox'
+                offerId='offer-level-3-checkbox'
+                consentName='consent-level-3'
+                offerName='offer-level-3'
+                consent={isConsentCheckedLevel3}
+                offer={isOfferCheckedLevel3}
+                onConsent={checked => {
+                  setIsConsentCheckedLevel3(checked);
+                  if (checked) setShowConsentErrorLevel3(false);
+                }}
+                onOffer={checked => {
+                  setIsOfferCheckedLevel3(checked);
+                  if (checked) setShowOfferErrorLevel3(false);
+                }}
+                consentError={showConsentErrorLevel3}
+                offerError={showOfferErrorLevel3}
+                processing={isPaymentProcessingLevel3}
+                onPay={handlePaymentLevel3}
+                onTelegram={handleTelegramClickLevel3}
+                payAria='Купить онлайн уровень 3 программы «Формула Движения»'
+              />
+              <BuyCard
+                as='article'
+                headingLevel={3}
+                heading='4-й уровень'
+                priceLabel='6 000 ₽'
+                consentId='consent-level-4-checkbox'
+                offerId='offer-level-4-checkbox'
+                consentName='consent-level-4'
+                offerName='offer-level-4'
+                consent={isConsentCheckedLevel4}
+                offer={isOfferCheckedLevel4}
+                onConsent={checked => {
+                  setIsConsentCheckedLevel4(checked);
+                  if (checked) setShowConsentErrorLevel4(false);
+                }}
+                onOffer={checked => {
+                  setIsOfferCheckedLevel4(checked);
+                  if (checked) setShowOfferErrorLevel4(false);
+                }}
+                consentError={showConsentErrorLevel4}
+                offerError={showOfferErrorLevel4}
+                processing={isPaymentProcessingLevel4}
+                onPay={handlePaymentLevel4}
+                onTelegram={handleTelegramClickLevel4}
+                payAria='Купить онлайн уровень 4 программы «Формула Движения»'
+              />
+            </div>
+          </section>
+        )}
 
-              {/* Третий уровень */}
-              <motion.div
-                initial={{ y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className='bg-secondary p-6 rounded-lg'
-                whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
-              >
-                <h1 className='text-xl font-semibold text-primary mb-4'>
-                  3-й уровень
-                </h1>
-                <div className='text-2xl font-bold text-accent mb-6'>
-                  6 000 ₽
-                </div>
-                {/* Первый чекбокс - согласие на обработку персональных данных */}
-                <div
-                  className={`mb-3 p-3 rounded-md transition-all ${
-                    showConsentErrorLevel3
-                      ? 'bg-red-50 border border-red-200'
-                      : 'bg-gray-50'
-                  }`}
-                >
-                  <label
-                      htmlFor='consent-level-3-checkbox'
-                      className='flex items-center space-x-3 cursor-pointer group'>
-                    <div className='relative'>
-                      <input
-                        type='checkbox'
-                          id='consent-level-3-checkbox'
-                          name='consent-level-3'
-                        checked={isConsentCheckedLevel3}
-                        onChange={e => {
-                          setIsConsentCheckedLevel3(e.target.checked);
-                          if (e.target.checked)
-                            setShowConsentErrorLevel3(false);
-                        }}
-                        className='sr-only peer'
-                      />
-                      <div
-                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
-                          isConsentCheckedLevel3
-                            ? 'bg-primary border-primary shadow-md'
-                            : 'bg-white border-gray-300 group-hover:border-primary/50'
-                        }`}
-                      >
-                        {isConsentCheckedLevel3 && (
-                          <svg
-                            className='w-3 h-3 text-white'
-                            fill='currentColor'
-                            viewBox='0 0 20 20'
-                          >
-                            <path
-                              fillRule='evenodd'
-                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                              clipRule='evenodd'
-                            />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    <span className='text-xs text-gray-600 leading-relaxed'>
-                      Я даю{' '}
-                      <Link
-                        href='/consent'
-                        className='text-primary hover:underline'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        согласие на обработку персональных данных
-                      </Link>{' '}
-                      в соответствии с{' '}
-                      <Link
-                        href='/policy'
-                        className='text-primary hover:underline'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        политикой конфиденциальности
-                      </Link>
-                      .
-                    </span>
-                  </label>
-                  {showConsentErrorLevel3 && (
-                    <motion.div
-                      initial={{ y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className='mt-2 text-xs text-red-600 font-medium'
-                    >
-                      ⚠️ Пожалуйста, отметьте согласие на обработку персональных
-                      данных для продолжения
-                    </motion.div>
-                  )}
-                </div>
-
-                {/* Второй чекбокс - согласие с договором оферты */}
-                <div
-                  className={`mb-4 p-3 rounded-md transition-all ${
-                    showOfferErrorLevel3
-                      ? 'bg-red-50 border border-red-200'
-                      : 'bg-gray-50'
-                  }`}
-                >
-                  <label
-                      htmlFor='offer-level-3-checkbox'
-                      className='flex items-center space-x-3 cursor-pointer group'>
-                    <div className='relative'>
-                      <input
-                        type='checkbox'
-                          id='offer-level-3-checkbox'
-                          name='offer-level-3'
-                        checked={isOfferCheckedLevel3}
-                        onChange={e => {
-                          setIsOfferCheckedLevel3(e.target.checked);
-                          if (e.target.checked) setShowOfferErrorLevel3(false);
-                        }}
-                        className='sr-only peer'
-                      />
-                      <div
-                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
-                          isOfferCheckedLevel3
-                            ? 'bg-primary border-primary shadow-md'
-                            : 'bg-white border-gray-300 group-hover:border-primary/50'
-                        }`}
-                      >
-                        {isOfferCheckedLevel3 && (
-                          <svg
-                            className='w-3 h-3 text-white'
-                            fill='currentColor'
-                            viewBox='0 0 20 20'
-                          >
-                            <path
-                              fillRule='evenodd'
-                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                              clipRule='evenodd'
-                            />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    <span className='text-xs text-gray-600 leading-relaxed'>
-                      Я согласен с условиями{' '}
-                      <a
-                        href='/offer'
-                        className='text-primary hover:underline'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        договора оферты
-                      </a>
-                      .
-                    </span>
-                  </label>
-                  {showOfferErrorLevel3 && (
-                    <motion.div
-                      initial={{ y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className='mt-2 text-xs text-red-600 font-medium'
-                    >
-                      ⚠️ Пожалуйста, отметьте согласие с договором оферты для
-                      продолжения
-                    </motion.div>
-                  )}
-                </div>
-                <button
-                  onClick={handlePaymentLevel3}
-                  disabled={
-                    !isConsentCheckedLevel3 ||
-                    !isOfferCheckedLevel3 ||
-                    isPaymentProcessingLevel3
-                  }
-                  aria-label='Купить онлайн уровень 3 программы «Формула Движения»'
-                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
-                    isConsentCheckedLevel3 &&
-                    isOfferCheckedLevel3 &&
-                    !isPaymentProcessingLevel3
-                      ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
-                      : 'bg-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {isPaymentProcessingLevel3 ? (
-                    <>
-                      <svg
-                        className='animate-spin h-5 w-5 text-white'
-                        xmlns='http://www.w3.org/2000/svg'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                      >
-                        <circle
-                          className='opacity-25'
-                          cx='12'
-                          cy='12'
-                          r='10'
-                          stroke='currentColor'
-                          strokeWidth='4'
-                        ></circle>
-                        <path
-                          className='opacity-75'
-                          fill='currentColor'
-                          d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                        ></path>
-                      </svg>
-                      <span>Обработка...</span>
-                    </>
-                  ) : (
-                    'Купить онлайн'
-                  )}
-                </button>
-                {isConsentCheckedLevel3 && isOfferCheckedLevel3 ? (
-                  <Link
-                    href='https://t.me/MV_Rehab'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-primary hover:bg-primary-dark hover:border-primary/20 cursor-pointer'
-                  >
-                    Связаться в Telegram
-                  </Link>
-                ) : (
-                  <button
-                    onClick={handleTelegramClickLevel3}
-                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-gray-400 cursor-not-allowed'
-                  >
-                    Связаться в Telegram
-                  </button>
-                )}
-              </motion.div>
-
-              {/* Четвертый уровень */}
-              <motion.div
-                initial={{ y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className='bg-secondary p-6 rounded-lg'
-                whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
-              >
-                <h1 className='text-xl font-semibold text-primary mb-4'>
-                  4-й уровень
-                </h1>
-                <div className='text-2xl font-bold text-accent mb-6'>
-                  6 000 ₽
-                </div>
-                {/* Первый чекбокс - согласие на обработку персональных данных */}
-                <div
-                  className={`mb-3 p-3 rounded-md transition-all ${
-                    showConsentErrorLevel4
-                      ? 'bg-red-50 border border-red-200'
-                      : 'bg-gray-50'
-                  }`}
-                >
-                  <label
-                      htmlFor='consent-level-4-checkbox'
-                      className='flex items-center space-x-3 cursor-pointer group'>
-                    <div className='relative'>
-                      <input
-                        type='checkbox'
-                          id='consent-level-4-checkbox'
-                          name='consent-level-4'
-                        checked={isConsentCheckedLevel4}
-                        onChange={e => {
-                          setIsConsentCheckedLevel4(e.target.checked);
-                          if (e.target.checked)
-                            setShowConsentErrorLevel4(false);
-                        }}
-                        className='sr-only peer'
-                      />
-                      <div
-                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
-                          isConsentCheckedLevel4
-                            ? 'bg-primary border-primary shadow-md'
-                            : 'bg-white border-gray-300 group-hover:border-primary/50'
-                        }`}
-                      >
-                        {isConsentCheckedLevel4 && (
-                          <svg
-                            className='w-3 h-3 text-white'
-                            fill='currentColor'
-                            viewBox='0 0 20 20'
-                          >
-                            <path
-                              fillRule='evenodd'
-                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                              clipRule='evenodd'
-                            />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    <span className='text-xs text-gray-600 leading-relaxed'>
-                      Я даю{' '}
-                      <Link
-                        href='/consent'
-                        className='text-primary hover:underline'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        согласие на обработку персональных данных
-                      </Link>{' '}
-                      в соответствии с{' '}
-                      <Link
-                        href='/policy'
-                        className='text-primary hover:underline'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        политикой конфиденциальности
-                      </Link>
-                      .
-                    </span>
-                  </label>
-                  {showConsentErrorLevel4 && (
-                    <motion.div
-                      initial={{ y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className='mt-2 text-xs text-red-600 font-medium'
-                    >
-                      ⚠️ Пожалуйста, отметьте согласие на обработку персональных
-                      данных для продолжения
-                    </motion.div>
-                  )}
-                </div>
-
-                {/* Второй чекбокс - согласие с договором оферты */}
-                <div
-                  className={`mb-4 p-3 rounded-md transition-all ${
-                    showOfferErrorLevel4
-                      ? 'bg-red-50 border border-red-200'
-                      : 'bg-gray-50'
-                  }`}
-                >
-                  <label
-                      htmlFor='offer-level-4-checkbox'
-                      className='flex items-center space-x-3 cursor-pointer group'>
-                    <div className='relative'>
-                      <input
-                        type='checkbox'
-                          id='offer-level-4-checkbox'
-                          name='offer-level-4'
-                        checked={isOfferCheckedLevel4}
-                        onChange={e => {
-                          setIsOfferCheckedLevel4(e.target.checked);
-                          if (e.target.checked) setShowOfferErrorLevel4(false);
-                        }}
-                        className='sr-only peer'
-                      />
-                      <div
-                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
-                          isOfferCheckedLevel4
-                            ? 'bg-primary border-primary shadow-md'
-                            : 'bg-white border-gray-300 group-hover:border-primary/50'
-                        }`}
-                      >
-                        {isOfferCheckedLevel4 && (
-                          <svg
-                            className='w-3 h-3 text-white'
-                            fill='currentColor'
-                            viewBox='0 0 20 20'
-                          >
-                            <path
-                              fillRule='evenodd'
-                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                              clipRule='evenodd'
-                            />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    <span className='text-xs text-gray-600 leading-relaxed'>
-                      Я согласен с условиями{' '}
-                      <a
-                        href='/offer'
-                        className='text-primary hover:underline'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        договора оферты
-                      </a>
-                      .
-                    </span>
-                  </label>
-                  {showOfferErrorLevel4 && (
-                    <motion.div
-                      initial={{ y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className='mt-2 text-xs text-red-600 font-medium'
-                    >
-                      ⚠️ Пожалуйста, отметьте согласие с договором оферты для
-                      продолжения
-                    </motion.div>
-                  )}
-                </div>
-                <button
-                  onClick={handlePaymentLevel4}
-                  disabled={
-                    !isConsentCheckedLevel4 ||
-                    !isOfferCheckedLevel4 ||
-                    isPaymentProcessingLevel4
-                  }
-                  aria-label='Купить онлайн уровень 4 программы «Формула Движения»'
-                  className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
-                    isConsentCheckedLevel4 &&
-                    isOfferCheckedLevel4 &&
-                    !isPaymentProcessingLevel4
-                      ? 'bg-accent hover:bg-accent/90 hover:shadow-xl cursor-pointer'
-                      : 'bg-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {isPaymentProcessingLevel4 ? (
-                    <>
-                      <svg
-                        className='animate-spin h-5 w-5 text-white'
-                        xmlns='http://www.w3.org/2000/svg'
-                        fill='none'
-                        viewBox='0 0 24 24'
-                      >
-                        <circle
-                          className='opacity-25'
-                          cx='12'
-                          cy='12'
-                          r='10'
-                          stroke='currentColor'
-                          strokeWidth='4'
-                        ></circle>
-                        <path
-                          className='opacity-75'
-                          fill='currentColor'
-                          d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                        ></path>
-                      </svg>
-                      <span>Обработка...</span>
-                    </>
-                  ) : (
-                    'Купить онлайн'
-                  )}
-                </button>
-                {isConsentCheckedLevel4 && isOfferCheckedLevel4 ? (
-                  <Link
-                    href='https://t.me/MV_Rehab'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-primary hover:bg-primary-dark hover:border-primary/20 cursor-pointer'
-                  >
-                    Связаться в Telegram
-                  </Link>
-                ) : (
-                  <button
-                    onClick={handleTelegramClickLevel4}
-                    className='block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all border-2 border-transparent bg-gray-400 cursor-not-allowed'
-                  >
-                    Связаться в Telegram
-                  </button>
-                )}
-              </motion.div>
-            </motion.div>
-          )}
-        </motion.div>
+        {content ? (
+          <MoreSection
+            title={isProgram ? 'Ещё программы' : 'Ещё услуги'}
+            ids={content.more}
+          />
+        ) : null}
       </div>
-
-      {/* Секция "Еще услуги" */}
-      <MoreServicesSection currentProductId={product.id} />
-    </motion.div>
     </>
   );
+}
+
+function StagesWrap({ c }: { c: ProgramPageContent }) {
+  return <Stages title={c.stagesTitle} text={c.stagesText} stages={c.stages} />;
 }

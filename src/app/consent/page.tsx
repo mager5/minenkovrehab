@@ -11,14 +11,14 @@ export const metadata: Metadata = pageMetadata({
 
 export default function ConsentPage() {
   return (
-    <div className='py-12 bg-white min-h-screen'>
-      <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='max-w-3xl mx-auto'>
-          <h1 className='text-3xl font-bold text-primary mb-8'>
+    <div className='ds pt-6 dsk:pt-10'>
+      <div className='ds-wrap'>
+        <div className='max-w-[880px] mx-auto'>
+          <h1 className='ds-h2 mb-6 dsk:mb-8'>
             Согласие на обработку персональных данных
           </h1>
 
-          <div className='bg-white rounded-lg shadow-md p-8 prose prose-lg max-w-none text-dark'>
+          <div className='ds-card ds-legal p-6 dsk:p-12'>
             <p className='mb-4'>
               Настоящим в соответствии с требованиями Федерального закона РФ от
               27.07.2006. №152-ФЗ «О персональных данных» свободно, своей волей
@@ -144,7 +144,7 @@ export default function ConsentPage() {
               соответствующее письмо по адресу электронной почты:{' '}
               <a
                 href='mailto:minenkov.rehab@yandex.ru'
-                className='text-blue-600 hover:text-blue-800 underline'
+                className='text-brand hover:text-navy underline'
               >
                 minenkov.rehab@yandex.ru
               </a>
