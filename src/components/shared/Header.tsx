@@ -105,7 +105,7 @@ export function Header() {
 
     try {
       authFetchInFlightRef.current = true;
-      const response = await fetch(`${getRailwayApiBaseUrl()}/api/auth/me`, {
+      const response = await fetch(`${getRailwayApiBaseUrl()}/api/auth/session`, {
         method: 'GET',
         credentials: 'include',
       });

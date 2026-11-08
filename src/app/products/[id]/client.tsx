@@ -868,11 +868,15 @@ export default function ProductClient({ product }: { product: Product }) {
 
       // Без входа покупка тоже возможна: спрашиваем email, на который придёт доступ.
       let guestEmail: string | undefined;
-      const me = await fetch('/api/auth/me', {
+      // Гость определяется через /api/auth/session (200 и user: null вместо 401 — без ошибки в консоли).
+      const me = await fetch('/api/auth/session', {
         credentials: 'same-origin',
         cache: 'no-store',
       }).catch(() => null);
-      if (!me || me.status === 401) {
+      const sessionUser = me?.ok
+        ? (await me.json().catch(() => null))?.data?.user
+        : undefined;
+      if (!me || (me.ok && !sessionUser)) {
         const email = await guestEmailDialog.ask();
         if (!email) {
           setIsPaymentProcessingLevel1(false);

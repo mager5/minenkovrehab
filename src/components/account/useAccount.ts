@@ -24,7 +24,7 @@ export function useAccount({ withPurchases = true } = {}) {
     let cancelled = false;
     (async () => {
       try {
-        const me = await fetch(`${getRailwayApiBaseUrl()}/api/auth/me`, {
+        const me = await fetch(`${getRailwayApiBaseUrl()}/api/auth/session`, {
           method: 'GET',
           credentials: 'include',
         });

@@ -10,6 +10,9 @@ import { getRailwayApiBaseUrl, resolveApiMediaUrl } from '@/lib/api-base';
 
 type StageId = 1 | 2 | 3 | 4 | 5;
 
+/** Этапы, для которых в кабинете загружено видео упражнений (course_videos: stage-1…stage-3). */
+const STAGES_WITH_VIDEO: StageId[] = [1, 2, 3];
+
 // Старый локальный helper (заменён на @/lib/api-base):
 // function getRailwayApiBaseUrl() {
 //   if (typeof window !== 'undefined') {
@@ -580,7 +583,8 @@ export function MeniscusStagesDetails({
 
   useEffect(() => {
     const fetchVideoUrl = async () => {
-      if (!activeStage) {
+      // Видео есть только у этапов 1–3: для остальных не запрашиваем (иначе бэкенд отвечает 403).
+      if (!activeStage || !STAGES_WITH_VIDEO.includes(activeStage.id)) {
         setVideoUrl(null);
         return;
       }
@@ -911,7 +915,7 @@ export function MeniscusStagesDetails({
                         const [strongPart, restPart] = isPolice ? item.split(' - ') : [null, null];
                         return (
                           <li key={item} className={LI}>
-                            <span aria-hidden='true' className={DOT} />
+                            <Tick />
                             <span>
                               {isPolice ? (
                                 <>
@@ -934,7 +938,7 @@ export function MeniscusStagesDetails({
 
                 <ul className={UL}>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Частичная резекция: опора на ногу возможна сразу, но без
                       выраженных болевых симптомов. В некоторых случаях может
@@ -943,7 +947,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Полная резекция: костыли используются 3–5 дней для
                       минимизации нагрузки, затем постепенно переход к полной
@@ -969,7 +973,7 @@ export function MeniscusStagesDetails({
 
                 <ul className={UL}>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       В первые две недели важно чаще держать ногу в возвышенном
                       положении, колено выше уровня сердца (по 15 минут 3 раза в
@@ -979,7 +983,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       При позиции сидя колено находится большую часть времени на
                       уровне тазобедренного сустава, кладём валик под пятку,
@@ -994,7 +998,7 @@ export function MeniscusStagesDetails({
 
                 <ul className={UL}>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Регулярное использование компрессионного трикотажа (чулки)
                       по назначению врача. Общие рекомендации: 1 неделя —
@@ -1006,7 +1010,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Чулки, бандажи и прочее необходимо снимать на момент
                       выполнения упражнений (наличие утягивающего белья будет
@@ -1015,7 +1019,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Также чулки обычно снимают на ночь и во время
                       гигиенических процедур (если врачом не была обозначена
@@ -1023,7 +1027,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Для профилактики тромбообразования необходимо каждый 1–2
                       часа занимать вертикальную позицию и делать круг по
@@ -1033,7 +1037,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Основной риск тромбообразования в первые 7–10 дней, после
                       риск остаётся, но значительно снижается (риск повышается
@@ -1041,7 +1045,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Симптомы тромба: жжение, боль с задней части голени или
                       бедре, боль при тыльном сгибании стопы (носок на себя),
@@ -1060,14 +1064,14 @@ export function MeniscusStagesDetails({
 
                 <ul className={UL}>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Держите швы сухими до снятия. Обращайтесь к врачу при
                       покраснении, воспалении или появлении гноя
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       После удаления первичной повязки швы обрабатываются
                       антисептическим раствором (по назначению врача) дважды в
@@ -1076,7 +1080,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Разрешается принимать душ на 3–4 сутки, но при этом шов
                       необходимо защитить водонепроницаемой повязкой. Полное
@@ -1085,7 +1089,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       До снятия швов (7–14 дней) недопустимо сгибание коленного
                       сустава больше 90 градусов (во избежание повреждения швов)
@@ -1098,7 +1102,7 @@ export function MeniscusStagesDetails({
 
                 <ul className={UL}>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Как указано в протоколе POLICE, первые 3–5 дней после
                       операции лёд прикладываем каждые 2 часа на 10–15 минут и
@@ -1110,7 +1114,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                   <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                     <span>
                       Лёд прикладываем обязательно через полотенце, чтобы не
                       получить холодовой ожог. Необходимо убирать холод и дать
@@ -1137,7 +1141,7 @@ export function MeniscusStagesDetails({
                         <ul className={UL}>
                           {block.items.map(item => (
                             <li key={item} className={LI}>
-                              <span aria-hidden='true' className={DOT} />
+                              <Tick />
                               <span>{item}</span>
                             </li>
                           ))}
@@ -1173,28 +1177,28 @@ export function MeniscusStagesDetails({
                 <>
                     <ul className={UL}>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>Мобилизация надколенника</span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>Мобилизация шва</span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Пассивное + активное разгибание коленного сустава
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Пассивное + активное сгибание коленного сустава (до
                           снятия швов 7–14 дней — сгибание не более 90 градусов)
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Силовые упражнения (статические, динамические).
                           Основной акцент на квадрицепс, также можно добавлять
@@ -1203,7 +1207,7 @@ export function MeniscusStagesDetails({
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Восстановление равновесной походки (упражнения на
                           перенос веса, баланс, проприоцепцию, отработку
@@ -1212,7 +1216,7 @@ export function MeniscusStagesDetails({
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Дополнительно: BFR‑тренинг, электромиостимуляция
                         </span>
@@ -1221,62 +1225,62 @@ export function MeniscusStagesDetails({
                   <h4 className={H4}>Рекомендации к упражнениям</h4>
                     <ul className={UL}>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Основной приоритет — пассивное (по возможности
                           активное) разгибание коленного сустава 0 градусов
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Прогресс в упражнениях на разгибание не более 3–5
                           градусов за день (во избежание перегрузки сустава)
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Прогресс в упражнениях на сгибание не более 5–10
                           градусов за день
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Перед упражнениями держите ногу на возвышенности 10–15
                           минут (для снижения отёка)
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           После упражнений холод через ткань 10–15 минут
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Избегайте резких движений и растяжки через
                           сопротивление
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Упражнения выполняются без боли или с лёгким
                           дискомфортом до 3 баллов по ВАШ
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Если боль усиливается, уменьшаем амплитуду или
                           количество повторений
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           После упражнений оцениваем состояние сустава. При
                           появлении значительного отёка или боли — отдых и
@@ -1284,7 +1288,7 @@ export function MeniscusStagesDetails({
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Поддерживаем активность, но не допускаем перегрузки.
                           Применяем лёгкую опору на трость или костыли (если это
@@ -1292,7 +1296,7 @@ export function MeniscusStagesDetails({
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Выполняем упражнения на коленный сустав в безопасных
                           положениях. Избегаем нагрузок, которые могут
@@ -1300,7 +1304,7 @@ export function MeniscusStagesDetails({
                         </span>
                       </li>
                       <li className={LI}>
-<span aria-hidden='true' className={DOT} />
+<Tick />
                         <span>
                           Упражнения проводятся 2 раза в день; при необходимости
                           возможна коррекция частоты и вида активности в
@@ -1313,7 +1317,7 @@ export function MeniscusStagesDetails({
                 <ul className={UL}>
                   {activeStage.exercises.map(ex => (
                     <li key={ex} className={LI}>
-                      <span aria-hidden='true' className={DOT} />
+                      <Tick />
                       <span>{ex}</span>
                     </li>
                   ))}
@@ -1489,7 +1493,17 @@ export function MeniscusStagesDetails({
 // ---------- Вспомогательные элементы вёрстки ----------
 const UL = 'list-none m-0 p-0 flex flex-col gap-2.5 text-[17px]';
 const LI = 'flex gap-3 items-start';
-const DOT = 'flex-none w-2 h-2 rounded-full bg-brand mt-[11px]';
+/** Маркер списка — зелёная галочка, как в «Целях и задачах». */
+function Tick() {
+  return (
+    <span
+      aria-hidden='true'
+      className='flex-none w-[26px] h-[26px] rounded-full bg-mint flex items-center justify-center mt-[2px]'
+    >
+      <Icon name='check' size={14} strokeWidth={3.2} color='var(--c-mint-ink)' />
+    </span>
+  );
+}
 const H4 = 'mt-6 mb-3 text-[18px] font-extrabold text-navy';
 
 const EX_NOTE: Record<number, string> = {

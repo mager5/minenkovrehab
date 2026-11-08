@@ -13,6 +13,7 @@ import {
   purchaseKind,
 } from '@/data/content';
 import { CONTACTS } from '@/lib/seo';
+import { getCatalogItemById } from '@/app/products/catalog';
 import { readLastStage } from '@/lib/course-progress';
 import { useAccount, type Purchase } from '@/components/account/useAccount';
 import {
@@ -43,11 +44,22 @@ export function useLastStages(courses: Course[]) {
   return stages;
 }
 
+/** Название покупки по slug из каталога сайта, в одном формате; «Формула Движения» — с уровнем. */
+export function purchaseTitle(purchase: Purchase): string {
+  const level = purchase.slug.match(/^formula-movement-level-(\d+)$/);
+  if (level) return `Формула Движения. Уровень ${level[1]}`;
+  return (
+    getCatalogItemById(purchase.slug)?.title ||
+    purchase.products?.title ||
+    'Покупка'
+  );
+}
+
 function PurchaseRow({ purchase }: { purchase: Purchase }) {
   const kind = purchaseKind(purchase.slug);
   const status = accountContent.purchaseStatus[kind];
   const course = COURSE_BY_PRODUCT[purchase.slug];
-  const title = purchase.products?.title || 'Покупка';
+  const title = purchaseTitle(purchase);
   return (
     <li className='flex flex-col dsk:flex-row dsk:items-center gap-2 dsk:gap-4 py-4 border-t border-line first:border-t-0'>
       <div className='flex-1 min-w-0'>
