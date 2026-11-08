@@ -7,9 +7,6 @@ COPY public ./public
 COPY content ./content
 COPY next.config.js tsconfig.json tailwind.config.js postcss.config.js global.d.ts ./
 ENV NEXT_TELEMETRY_DISABLED=1
-# Только для тестовой копии: --build-arg NEXT_PUBLIC_PAYMENTS_DISABLED=1. Боевая сборка — пусто.
-ARG NEXT_PUBLIC_PAYMENTS_DISABLED=
-ENV NEXT_PUBLIC_PAYMENTS_DISABLED=$NEXT_PUBLIC_PAYMENTS_DISABLED
 ENV MIGRATION_ENV=local MIGRATION_SITE_ORIGIN=http://127.0.0.1:3100 MIGRATION_API_INTERNAL_URL=http://127.0.0.1:3101
 RUN npm run build
 RUN npm prune --omit=dev --ignore-scripts

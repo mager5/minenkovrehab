@@ -7,7 +7,6 @@ import { motion } from 'framer-motion';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { authPost } from '@/lib/auth-client';
-import { PAYMENTS_DISABLED, PAYMENTS_DISABLED_MESSAGE } from '@/lib/api-base';
 
 // Анимации для появления элементов
 const fadeIn = {
@@ -158,9 +157,7 @@ export default function ProductPageWrapper({
   };
 
   const handlePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if(PAYMENTS_DISABLED){setServerMessage(PAYMENTS_DISABLED_MESSAGE);return;}
-    setIsPaymentProcessing(true);setServerMessage('');
+    e.preventDefault();setIsPaymentProcessing(true);setServerMessage('');
     try {
       if(!window.confirm('Подтверждаю согласие с офертой и обработкой данных для оформления заказа.')) return;
       const response=await authPost('/api/checkout',{productId:product.id,agreement:true});
@@ -229,7 +226,6 @@ export default function ProductPageWrapper({
       // Старый хардкод Railway:
       // const response = await fetch(
       //   'https://minenkovrehab-production-15cc.up.railway.app/api/mock-payment/complete',
-      if(PAYMENTS_DISABLED){setServerMessage(PAYMENTS_DISABLED_MESSAGE);return;}
       if(!window.confirm('Подтверждаю согласие с офертой и обработкой данных для оформления заказа.')) return;
       const response = await authPost('/api/checkout',{productId:product.id,agreement:true});
 

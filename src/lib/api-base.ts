@@ -2,9 +2,6 @@
 export const DEFAULT_API_BASE_URL = '';
 export function getRailwayApiBaseUrl(): string { return ''; }
 export function getRobokassaPaymentUrl(): string { return '/api/checkout'; }
-// Тестовая копия (new.minenkovrehab.ru) собирается с NEXT_PUBLIC_PAYMENTS_DISABLED=1: оплата не создаётся.
-export const PAYMENTS_DISABLED = process.env.NEXT_PUBLIC_PAYMENTS_DISABLED === '1';
-export const PAYMENTS_DISABLED_MESSAGE = 'На тестовой версии оплата отключена';
 export function resolveApiMediaUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   const value=url.trim();
