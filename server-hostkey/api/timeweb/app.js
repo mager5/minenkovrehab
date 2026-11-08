@@ -3,6 +3,7 @@ const { PaymentError, processResult, createOrder } = require('./payments');
 const { sessionUser, accessibleVideo } = require('./access');
 const { createAuth } = require('./auth');
 const { buildPaymentUrl } = require('./robokassa-url');
+const { createLeadHandler } = require('./leads');
 
 function createApp({ pool, paymentConfig, videoProvider = null, authPool = pool, authConfig = null }) {
   const app = express();
@@ -45,6 +46,8 @@ function createApp({ pool, paymentConfig, videoProvider = null, authPool = pool,
     };
     app.post('/api/checkout',auth.guard,checkout);
     app.post('/api/robokassa/generate-payment-url',auth.guard,checkout);
+    // Заявки с форм сайта: сохраняются в rehab.leads, уведомления — через worker (rehab.lead_outbox).
+    app.post('/api/leads',auth.guard,createLeadHandler(pool,{salt:authConfig.resetKey}));
   }
   const result = async (req, res) => {
     try {

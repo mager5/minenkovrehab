@@ -7,6 +7,9 @@ services:
     image: ${STAGING_IMAGE:?STAGING_IMAGE required}
     restart: unless-stopped
     env_file: [../env/frontend.env]
+    # Заявки с тестовой копии помечаются «[ТЕСТ new]» в письме и в Telegram.
+    environment:
+      LEADS_SITE: test
     networks:
       web:
         aliases: [frontend-staging]

@@ -124,3 +124,15 @@ sudo docker run --rm --network rehab_db --env-file env/migrator.env --env-file $
 
 `env/*.env`, `secrets/`, `certs/`, `lego/`, `.env`, `import/` (дампы базы), `backups/`, `timeweb/runtime-roles.sql`.
 Email для Let's Encrypt заменён на заглушку (`<acme-email>` в Caddyfile, `ACME_EMAIL` в `cert-renew.sh`).
+
+## 10. Заявки с форм сайта
+
+- Формы на главной, `/contacts` и окно «Записаться» → `POST /api/leads` (сайт, `src/pages/api/leads.ts`) → backend `api/timeweb/leads.js`.
+- Заявка сохраняется в `rehab.leads` (миграция `007_leads.sql`), уведомления ставятся в `rehab.lead_outbox` и отправляет worker (`lead-worker.js`).
+  Сбой почты или Telegram заявку не теряет: повтор с паузой, в лог — `lead_<канал>_delivery_failed <код>`.
+- Почта: `MIGRATION_LEADS_NOTIFY_EMAIL`, если не задан — `MIGRATION_ADMIN_NOTIFY_EMAIL` (`env/worker.env`).
+- Telegram: `MIGRATION_LEADS_TELEGRAM_TOKEN` (токен бота от @BotFather) и `MIGRATION_LEADS_TELEGRAM_CHAT_ID` в `env/worker.env`,
+  затем `deploy.sh worker`. Пока не заданы — канал помечается `skipped`.
+- Спам: скрытое поле `website` (honeypot) — молча «успех» без записи; не больше 3 заявок с одного IP за 10 минут (429).
+- Тестовая копия: `LEADS_SITE=test` в `infra/staging/compose.yaml` → `site='test'` и пометка «[ТЕСТ new]».
+- Посмотреть заявки: `SELECT created_at, site, source, name, phone, service FROM rehab.leads ORDER BY created_at DESC LIMIT 20;`
