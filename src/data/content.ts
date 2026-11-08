@@ -124,13 +124,16 @@ export const homeContent: HomeContent = {
       },
     ],
   },
+  // TODO(владелец): подтвердить цифры и подписи статистики на главной и /about.
+  // Подтверждено пользователем 08.11.2026 только число программ — 50+ (вместо 500+).
+  // Остальные значения и подписи — как было до SEO-правок.
   stats: {
-    satisfiedClients: 500,
-    satisfiedClientsLabel: 'Довольных клиентов',
+    satisfiedClients: 50,
+    satisfiedClientsLabel: 'Индивидуальных программ',
     consultations: 2000,
     consultationsLabel: 'Проведенных консультаций',
-    onlinePrograms: 50,
-    onlineProgramsLabel: 'Разработанных программ',
+    onlinePrograms: 100,
+    onlineProgramsLabel: 'Отзывов',
     experience: 8,
     experienceLabel: 'Лет опыта',
   },
@@ -178,6 +181,7 @@ export const aboutContent: AboutContentType = {
     title: 'Мой опыт',
     description:
       'За годы моей работы я помог сотням людей обрести свободу и радость в движении',
+    // TODO(владелец): подтвердить цифры статистики (см. stats на главной). Значения — как были в коде до SEO-правок.
     stats: [
       {
         value: 500,
