@@ -78,14 +78,13 @@ Frontend (Next.js) сюда не входит: в образе `rehab-frontend:h
      Боевой `docker compose` в `/opt/rehab` этот контейнер не видит и не трогает.
    - **Обновить одной командой:** `/opt/rehab/scripts/deploy-staging.sh` (ветка redesign; можно передать другую).
      Собирает `rehab-frontend-staging:src-<sha>` с `--build-arg NEXT_PUBLIC_PAYMENTS_DISABLED=1`, перезапускает только тестовый
-     контейнер, проверяет здоровье, страницы и 401 без пароля, при сбое откатывает. IndexNow не отправляет. Журнал — `deploy.log`.
-   - Caddy (блок `https://new.minenkovrehab.ru`): basic auth (логин `vadim`, хеш пароля только на сервере), `X-Robots-Tag: noindex, nofollow`,
+     контейнер, проверяет здоровье, страницы и ответ через Caddy (200 + noindex), при сбое откатывает. IndexNow не отправляет. Журнал — `deploy.log`.
+   - Caddy (блок `https://new.minenkovrehab.ru`): без пароля (basic auth снят по решению владельца), `X-Robots-Tag: noindex, nofollow`,
      свой `robots.txt` с `Disallow: /`, `/js/metrika.js` — пустая заглушка, файл ключа IndexNow — 404,
      `/api/checkout` и `/api/robokassa/*` — 403 «На тестовой версии оплата отключена». Canonical на страницах ведёт на боевой адрес.
    - Вход: бэкенд принимает только `Origin: https://minenkovrehab.ru` (CSRF). Caddy подменяет Origin только у запросов
      с самой тестовой копии; настройки бэкенда не менялись. Куки `mr_session`/`mr_csrf` — host-only на new.minenkovrehab.ru.
-   - Тестовый аккаунт `test@minenkovrehab.ru` (пароль — у владельца), доступ к `formula-movement-level-1`
-     (`purchases.source='manual test grant'`). Удалить: строки в `purchases`, `profiles`, `credentials`, `users` этого аккаунта.
+   - Вход — обычными аккаунтами боевой базы. Тестовый аккаунт test@minenkovrehab.ru создавался и удалён 08.11.2026.
    - Копия Caddyfile до изменений: `/opt/rehab/Caddyfile.bak-20261108-225257` (и `-225336`).
      Убрать копию: вернуть блок new на `redir https://minenkovrehab.ru{uri} 302`, затем
      `sudo docker compose --project-directory /opt/rehab/staging -f /opt/rehab/staging/compose.yaml down`.

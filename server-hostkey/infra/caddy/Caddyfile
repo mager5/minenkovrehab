@@ -1,4 +1,4 @@
-# Боевой Caddyfile: minenkovrehab.ru (сайт), www → редирект, new — тестовая копия (basic auth), api → backend (Robokassa Result URL).
+# Боевой Caddyfile: minenkovrehab.ru (сайт), www → редирект, new — тестовая копия (noindex, без оплаты), api → backend (Robokassa Result URL).
 # Сертификаты выпускает lego с Мака (DNS-01 через Cloudflare), кладём в ./certs:
 #   main.crt/main.key — minenkovrehab.ru, www, api;  site.crt/site.key — new.minenkovrehab.ru.
 # Как на radar152: HTTP/3 выключен + Alt-Svc clear, grace_period. Журнал запросов — только для minenkovrehab.ru (JSON, с ротацией).
@@ -75,22 +75,16 @@ https://api.minenkovrehab.ru {
 https://new.minenkovrehab.ru {
 	tls /certs/site.crt /certs/site.key
 	import secure
-	# Тестовая копия (ветка redesign, контейнер rehab-staging/frontend-staging). Закрыта паролем, не индексируется.
+	# Тестовая копия (ветка redesign, контейнер rehab-staging/frontend-staging). Без пароля, не индексируется.
 	header X-Robots-Tag "noindex, nofollow"
 	route {
-		# robots.txt отдаётся без пароля, чтобы роботы видели запрет.
+		# Свой robots.txt: запрет на всё.
 		@robots path /robots.txt
 		header @robots Content-Type "text/plain; charset=utf-8"
 		respond @robots <<TXT
 			User-agent: *
 			Disallow: /
 			TXT 200
-		basic_auth {
-			# Хеш bcrypt пароля — только на сервере, в репозиторий не кладём.
-			vadim <bcrypt-hash>
-		}
-		# Заголовок basic auth дальше сайта и бэкенда не уходит.
-		request_header -Authorization
 		# Без Метрики и без файла IndexNow.
 		@metrika path /js/metrika.js
 		header @metrika Content-Type "text/javascript; charset=utf-8"

@@ -49,13 +49,14 @@ for _ in $(seq 1 40); do
 done
 [ "$st" = healthy ] || rollback "контейнер не стал healthy"
 
-# Страницы изнутри контейнера (минуя basic auth Caddy).
+# Страницы изнутри контейнера.
 for u in / /products /products/formula-movement /about /contacts /login; do
   code=$($DC exec -T frontend-staging node -e "fetch('http://127.0.0.1:3000$u',{redirect:'manual'}).then(r=>console.log(r.status)).catch(()=>console.log(0))" </dev/null)
   [ "$code" = 200 ] || rollback "$u ответил $code"
 done
-# Снаружи без пароля — только 401.
-code=$(curl -sk --resolve new.minenkovrehab.ru:443:127.0.0.1 -o /dev/null -w '%{http_code}' https://new.minenkovrehab.ru/)
-[ "$code" = 401 ] || echo "$(date -Is) staging: ВНИМАНИЕ — без пароля ответ $code, ожидался 401" | tee -a "$LOG"
+# Снаружи через Caddy: 200 и запрет индексации.
+hdr=$(curl -sk --resolve new.minenkovrehab.ru:443:127.0.0.1 -D - -o /dev/null https://new.minenkovrehab.ru/)
+echo "$hdr" | grep -q '^HTTP/[0-9.]* 200' || rollback "через Caddy ответ не 200"
+echo "$hdr" | grep -qi '^x-robots-tag: noindex' || echo "$(date -Is) staging: ВНИМАНИЕ — нет X-Robots-Tag noindex" | tee -a "$LOG"
 
 echo "$(date -Is) staging: $TAG выкачен (был ${OLD:-ничего})" | tee -a "$LOG"
