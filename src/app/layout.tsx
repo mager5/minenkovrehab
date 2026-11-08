@@ -1,25 +1,11 @@
-import { Inter } from 'next/font/google';
+// Шрифт Inter раздаётся с нашего сервера (без запроса к Google Fonts при сборке и в браузере).
+import '@fontsource-variable/inter/wght.css';
 import './globals.css';
 import { Header } from '@/components/shared/Header';
 import Footer from '@/components/shared/Footer';
 import CookieBanner from '@/components/CookieBanner';
 // import HeyGenWidget from '@/components/shared/HeyGenWidget';
 import type { Metadata } from 'next';
-
-const inter = Inter({
-  subsets: ['latin', 'cyrillic'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-// Альтернативная конфигурация с явными fallback-шрифтами, если понадобится вернуться:
-// const inter = Inter({
-//   subsets: ['latin', 'cyrillic'],
-//   variable: '--font-inter',
-//   display: 'swap',
-//   fallback: ['system-ui', 'sans-serif'],
-//   adjustFontFallback: false,
-// });
 
 export const metadata: Metadata = {
   title: 'Миненков Вадим | Физический реабилитолог',
@@ -122,7 +108,7 @@ export default function RootLayout({
   return (
     <html
       lang='ru'
-      className={`${inter.variable} font-sans h-full overflow-x-hidden overflow-y-auto`}
+      className='font-sans h-full overflow-x-hidden overflow-y-auto'
     >
       <head>
         <script
