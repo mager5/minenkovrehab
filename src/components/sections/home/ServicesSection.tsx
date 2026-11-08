@@ -11,14 +11,14 @@ export function ServicesSection() {
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         <motion.div
           className='text-center mb-16'
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
           <motion.span
             className='text-accent font-semibold text-base uppercase tracking-wider'
-            initial={{ opacity: 0 }}
+            initial={false}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
@@ -27,7 +27,7 @@ export function ServicesSection() {
           </motion.span>
           <motion.h2
             className='text-3xl md:text-4xl font-bold text-primary mt-2 mb-3'
-            initial={{ opacity: 0 }}
+            initial={false}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -36,7 +36,7 @@ export function ServicesSection() {
           </motion.h2>
           <motion.div
             className='h-1 w-20 bg-accent mx-auto'
-            initial={{ width: 0, opacity: 0 }}
+            initial={{ width: 0 }}
             whileInView={{ width: '5rem', opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -86,7 +86,7 @@ function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
     >
       <motion.div
         className='bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100 h-full'
-        initial={{ opacity: 0, y: 50 }}
+        initial={{ y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{
@@ -98,12 +98,14 @@ function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
         whileHover={{ y: -10, transition: { duration: 0.3 } }}
       >
         <div className='relative h-52'>
-          <Image src={image} alt={title} fill className='object-cover' />
+          <Image src={image} alt={title} fill className='object-cover' 
+  sizes='(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw'
+          />
           <div className='absolute inset-0 bg-gradient-to-t from-primary/70 to-transparent'></div>
           <div className='absolute bottom-0 left-0 p-4 text-white'>
             <motion.span
               className='font-semibold text-accent-light'
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.3, delay: delay + 0.1 }}
@@ -115,7 +117,7 @@ function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
         <div className='p-6'>
           <motion.h3
             className='text-xl font-semibold text-primary mb-3'
-            initial={{ opacity: 0 }}
+            initial={false}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.3, delay: delay + 0.2 }}
@@ -129,7 +131,7 @@ function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
               whiteSpace: 'nowrap',
               textOverflow: 'ellipsis',
             }}
-            initial={{ opacity: 0 }}
+            initial={false}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.3, delay: delay + 0.3 }}
@@ -138,7 +140,7 @@ function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
             {description}
           </motion.p>
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={false}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.3, delay: delay + 0.4 }}

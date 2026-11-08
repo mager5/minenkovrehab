@@ -23,6 +23,7 @@ const Hero: React.FC<HeroProps> = ({
         fill
         className='hidden md:block object-cover'
         priority
+        sizes='100vw'
       />
 
       {/* Mobile Image */}
@@ -32,6 +33,7 @@ const Hero: React.FC<HeroProps> = ({
         fill
         className='block md:hidden object-cover'
         priority
+        sizes='100vw'
       />
 
       <div className='container mx-auto px-4 relative z-10 py-20 md:py-32'>

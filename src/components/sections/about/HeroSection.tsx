@@ -44,6 +44,7 @@ export function HeroSection({
             fill
             className='object-cover object-center'
             priority
+            sizes='100vw'
           />
         </div>
         <div className='absolute inset-0 bg-gradient-to-t from-[#3A7CA5]/80 via-[#3A7CA5]/50 to-transparent'></div>
@@ -55,7 +56,7 @@ export function HeroSection({
       >
         <motion.h1
           className='text-4xl md:text-5xl font-bold mb-6 text-white'
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2, delay: 0.1 }}
         >
@@ -63,7 +64,7 @@ export function HeroSection({
         </motion.h1>
         <motion.h2
           className='text-2xl md:text-3xl font-semibold mb-6 text-accent-light'
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2, delay: 0.15 }}
         >
@@ -71,7 +72,7 @@ export function HeroSection({
         </motion.h2>
         <motion.p
           className='text-lg opacity-90 text-white max-w-2xl mx-auto'
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2, delay: 0.2 }}
         >

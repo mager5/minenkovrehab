@@ -410,14 +410,14 @@ export function Header() {
               <p className='text-sm font-medium' style={{ color: '#ffffff' }}>
                 Следите за мной:
               </p>
-              <div className='flex space-x-3'>
+              <div className='flex'>
                 {socialLinks.map(link => (
                   <a
                     key={link.name}
                     href={link.url}
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='text-white hover:text-accent transition-all duration-300 transform hover:scale-110'
+                    className='inline-flex items-center justify-center w-11 h-11 -my-2 text-white hover:text-accent transition-all duration-300 transform hover:scale-110'
                     aria-label={link.label}
                     onKeyDown={e =>
                       handleKeyDown(e, () => window.open(link.url, '_blank'))
@@ -505,10 +505,11 @@ export function Header() {
             >
               <Image
                 src='/images/logo-80.png'
-                alt='Логотип Миненков Вадим'
+                alt='Логотип Вадим Миненков'
                 width={40}
                 height={40}
                 className='w-8 h-8 md:w-10 md:h-10'
+                priority
               />
               <span className='text-xl md:text-2xl font-bold text-primary transition-transform duration-300'>
                 Миненков<span className='text-accent'> Вадим</span>

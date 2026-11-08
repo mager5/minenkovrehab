@@ -10,7 +10,7 @@ export function CTASection() {
       <div className='container mx-auto px-4 sm:px-6 lg:px-8 text-center'>
         <motion.h2
           className='text-3xl font-bold text-primary mb-6'
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6 }}
@@ -19,7 +19,7 @@ export function CTASection() {
         </motion.h2>
         <motion.p
           className='text-lg text-dark mb-8 max-w-3xl mx-auto'
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, delay: 0.1 }}
@@ -27,7 +27,7 @@ export function CTASection() {
           {homeContent.cta.description}
         </motion.p>
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, delay: 0.2 }}

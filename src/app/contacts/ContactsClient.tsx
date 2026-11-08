@@ -8,7 +8,7 @@ import { getContactsContent } from '@/lib/content';
 
 // Анимации для появления элементов (ускоренные)
 const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { y: 20 },
   visible: (custom: number) => ({
     opacity: 1,
     y: 0,
@@ -91,6 +91,7 @@ export default function ContactsClient() {
               fill
               className='object-cover object-center'
               priority
+              sizes='100vw'
             />
           </div>
           <div className='absolute inset-0 bg-gradient-to-t from-[#3A7CA5]/80 via-[#3A7CA5]/50 to-transparent'></div>
@@ -128,7 +129,7 @@ export default function ContactsClient() {
             <div className='grid grid-cols-1 lg:grid-cols-2 gap-12'>
               {/* Форма обратной связи */}
               <motion.div
-                initial={{ opacity: 0, x: -30 }}
+                initial={{ x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.2, delay: 0.05 }}
@@ -138,7 +139,7 @@ export default function ContactsClient() {
 
               {/* Контактная информация */}
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
+                initial={{ x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.2, delay: 0.15 }}

@@ -1,13 +1,17 @@
 {
-  "name": "Миненков Вадим | Физический реабилитолог",
-  "short_name": "Minenkov",
-  "description": "Физическая реабилитация и тренировки для здоровья. Индивидуальный подход и готовые восстановительные программы.",
+  "name": "Вадим Миненков — реабилитолог",
+  "short_name": "Миненков",
+  "description": "Онлайн-реабилитация и тренировки: консультации, программа «Формула Движения», восстановительные программы после травм и операций.",
   "id": "/?source=pwa",
   "start_url": "/?source=pwa",
   "scope": "/",
   "lang": "ru",
   "display": "standalone",
-  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "fullscreen",
+    "minimal-ui"
+  ],
   "orientation": "portrait-primary",
   "icons": [
     {

@@ -12,7 +12,7 @@ import {
 
 // Анимации для появления элементов при прокрутке (ускоренные)
 const fadeInOnScroll = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { y: 20 },
   visible: {
     opacity: 1,
     y: 0,

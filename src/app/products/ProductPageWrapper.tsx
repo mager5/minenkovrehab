@@ -10,7 +10,7 @@ import { authPost } from '@/lib/auth-client';
 
 // Анимации для появления элементов
 const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { y: 20 },
   visible: (custom: number) => ({
     opacity: 1,
     y: 0,
@@ -64,13 +64,13 @@ export default function ProductPageWrapper({
     return (
       <motion.div
         className='container mx-auto px-4 py-12 text-center'
-        initial={{ opacity: 0 }}
+        initial={false}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
         <motion.h1
           className='text-2xl font-semibold text-primary mb-4'
-          initial={{ y: -20, opacity: 0 }}
+          initial={{ y: -20 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
@@ -78,14 +78,14 @@ export default function ProductPageWrapper({
         </motion.h1>
         <motion.p
           className='mb-6'
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           Запрашиваемый продукт не существует или был удален.
         </motion.p>
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
           whileHover={{ scale: 1.05 }}
@@ -258,7 +258,7 @@ export default function ProductPageWrapper({
   return (
     <motion.div
       className='py-12'
-      initial={{ opacity: 0 }}
+      initial={false}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
@@ -266,7 +266,7 @@ export default function ProductPageWrapper({
         {/* Навигация */}
         <motion.div
           className='mb-8'
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
@@ -284,7 +284,7 @@ export default function ProductPageWrapper({
         {/* Содержимое страницы */}
         <motion.div
           className='bg-white p-6 rounded-lg shadow-md'
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.07)' }}
@@ -292,13 +292,13 @@ export default function ProductPageWrapper({
           {paymentSuccess ? (
             <motion.div
               className='text-center py-12'
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
             >
               <motion.div
                 className='text-accent text-6xl mb-6 flex justify-center'
-                initial={{ scale: 0.5, opacity: 0 }}
+                initial={{ scale: 0.5 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{
                   duration: 0.5,
@@ -324,7 +324,7 @@ export default function ProductPageWrapper({
               </motion.div>
               <motion.h2
                 className='text-2xl font-bold text-primary mb-4'
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
@@ -332,7 +332,7 @@ export default function ProductPageWrapper({
               </motion.h2>
               <motion.p
                 className='text-lg mb-4'
-                initial={{ opacity: 0 }}
+                initial={false}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
@@ -340,7 +340,7 @@ export default function ProductPageWrapper({
               </motion.p>
               <motion.p
                 className='text-base text-gray-600'
-                initial={{ opacity: 0 }}
+                initial={false}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
               >
@@ -352,13 +352,13 @@ export default function ProductPageWrapper({
             // Старый экран благодарности с Telegram-ссылкой:
             // <motion.div
             //   className='text-center py-12'
-            //   initial={{ opacity: 0, scale: 0.9 }}
+            //   initial={{ scale: 0.9 }}
             //   animate={{ opacity: 1, scale: 1 }}
             //   transition={{ duration: 0.5 }}
             // >
             //   <motion.div
             //     className='text-accent text-6xl mb-6 flex justify-center'
-            //     initial={{ scale: 0.5, opacity: 0 }}
+            //     initial={{ scale: 0.5 }}
             //     animate={{ scale: 1, opacity: 1 }}
             //     transition={{
             //       duration: 0.5,
@@ -384,7 +384,7 @@ export default function ProductPageWrapper({
             //   </motion.div>
             //   <motion.h2
             //     className='text-2xl font-bold text-primary mb-4'
-            //     initial={{ opacity: 0, y: 20 }}
+            //     initial={{ y: 20 }}
             //     animate={{ opacity: 1, y: 0 }}
             //     transition={{ duration: 0.5, delay: 0.3 }}
             //   >
@@ -392,14 +392,14 @@ export default function ProductPageWrapper({
             //   </motion.h2>
             //   <motion.p
             //     className='text-lg mb-8'
-            //     initial={{ opacity: 0 }}
+            //     initial={false}
             //     animate={{ opacity: 1 }}
             //     transition={{ duration: 0.5, delay: 0.4 }}
             //   >
             //     Напишите мне в Telegram для получения материалов и инструкций:
             //   </motion.p>
             //   <motion.div
-            //     initial={{ opacity: 0, y: 20 }}
+            //     initial={{ y: 20 }}
             //     animate={{ opacity: 1, y: 0 }}
             //     transition={{ duration: 0.5, delay: 0.5 }}
             //     whileHover={{ scale: 1.05 }}
@@ -488,7 +488,7 @@ export default function ProductPageWrapper({
               {/* Форма оплаты */}
               <motion.div
                 className='lg:w-1/3 mt-8 lg:mt-0'
-                initial={{ opacity: 0, x: 30 }}
+                initial={{ x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7, delay: 0.3 }}
               >
@@ -498,7 +498,7 @@ export default function ProductPageWrapper({
                 >
                   <motion.h2
                     className='text-xl font-semibold text-primary mb-4'
-                    initial={{ opacity: 0 }}
+                    initial={false}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
                   >
@@ -506,7 +506,7 @@ export default function ProductPageWrapper({
                   </motion.h2>
                   <motion.div
                     className='text-2xl font-bold text-accent mb-6'
-                    initial={{ opacity: 0, scale: 0.9 }}
+                    initial={{ scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5, delay: 0.5 }}
                   >
@@ -515,13 +515,13 @@ export default function ProductPageWrapper({
 
                   <motion.form
                     onSubmit={handlePayment}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.6 }}
                   >
                     <motion.div
                       className='mb-4'
-                      initial={{ opacity: 0 }}
+                      initial={false}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.2, delay: 0.7 }}
                     >
@@ -543,7 +543,7 @@ export default function ProductPageWrapper({
                     </motion.div>
                     <motion.div
                       className='mb-4'
-                      initial={{ opacity: 0 }}
+                      initial={false}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.2, delay: 0.8 }}
                     >
@@ -565,7 +565,7 @@ export default function ProductPageWrapper({
                     </motion.div>
                     <motion.div
                       className='mb-6'
-                      initial={{ opacity: 0 }}
+                      initial={false}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.2, delay: 0.9 }}
                     >
@@ -596,7 +596,7 @@ export default function ProductPageWrapper({
                       disabled={isPaymentProcessing}
                       whileHover={!isPaymentProcessing ? { scale: 1.03 } : {}}
                       whileTap={!isPaymentProcessing ? { scale: 0.97 } : {}}
-                      initial={{ opacity: 0 }}
+                      initial={false}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.5, delay: 1 }}
                     >
@@ -606,7 +606,7 @@ export default function ProductPageWrapper({
                     </motion.button>
                     <motion.p
                       className='text-sm text-gray-500 mt-4 text-center'
-                      initial={{ opacity: 0 }}
+                      initial={false}
                       animate={{ opacity: 0.8 }}
                       transition={{ duration: 0.5, delay: 1.1 }}
                     >

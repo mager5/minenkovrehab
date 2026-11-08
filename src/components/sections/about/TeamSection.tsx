@@ -15,7 +15,7 @@ export function TeamSection({ title, description }: TeamSectionProps) {
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         <motion.div
           className='max-w-3xl mx-auto text-center'
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
@@ -29,7 +29,7 @@ export function TeamSection({ title, description }: TeamSectionProps) {
         <div className='mt-8 text-center'>
           <motion.div
             className='inline-block'
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}

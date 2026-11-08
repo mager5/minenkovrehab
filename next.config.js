@@ -1,12 +1,16 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
   // Migration uses SSR; API routing is handled by an explicit server proxy.
-  images: { unoptimized: true, remotePatterns: [
+  images: {
+    // Оптимизация картинок Next: AVIF/WebP, нужные размеры под экран, кэш на 30 дней.
+    formats: ['image/avif','image/webp'],
+    minimumCacheTTL: 2592000,
+    remotePatterns: [
     { protocol:'https',hostname:'images.unsplash.com' },
     { protocol:'https',hostname:'*.googleusercontent.com' },
     { protocol:'https',hostname:'*.cloudinary.com' },
   ] },
-  experimental: { cpus: 2 },
+  experimental: { cpus: 2, agentUpgrade: 'security' },
   // Старые адреса программ — постоянный редирект 301.
   async redirects(){return [
     {source:'/products/personal-program',destination:'/products/meniscus-resection',statusCode:301},
