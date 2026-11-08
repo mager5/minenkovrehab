@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useId } from 'react';
+import { Icon } from '@/components/ds/Icon';
 import {
   VideoPlayer,
   VideoPlayerRef,
@@ -838,100 +839,83 @@ export function MeniscusStagesDetails({
   const goNext = () =>
     setActiveStageId((activeStageId < 5 ? activeStageId + 1 : 5) as StageId);
 
+  // ---------- Вёрстка (концепт 2 «Мягкая забота») ----------
+  // Порядок блоков этапа: цели → рекомендации → запрещено → упражнения → видео и тесты → критерии перехода.
+  const hasVideo = !!(videoUrl || (activeStage?.id === 1 && weeklyTestUrl));
+  const toc = [
+    { id: 'stage-goals', label: 'Цели и задачи', show: true },
+    {
+      id: 'stage-recs',
+      label: 'Рекомендации',
+      show: !!(activeStage?.recommendations || activeStage?.activities || activeStage?.id === 1),
+    },
+    { id: 'stage-forbidden', label: 'Запрещено', show: !!activeStage?.forbidden },
+    { id: 'stage-exercises', label: 'Упражнения', show: !!activeStage?.exercises },
+    { id: 'stage-video', label: 'Видео и тесты', show: hasVideo },
+    {
+      id: 'stage-criteria',
+      label: activeStage?.id === 5 ? 'Критерии возвращения в спорт' : 'Критерии перехода',
+      show: !!activeStage?.criteria,
+    },
+  ].filter(i => i.show);
+
+  const nextStage = STAGES.find(s => s.id === activeStageId + 1);
+  const stageName = (s: Stage) => s.title.split(' — ')[1] ?? s.title;
+
   return (
-    <section ref={topRef} className='space-y-6'>
-      <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-        <div>
-          <h2 className='text-2xl font-semibold text-gray-900'>
-            Этапы реабилитации
-          </h2>
-          <p className='mt-1 text-base text-gray-600 max-w-3xl'>
-            Выберите этап, чтобы увидеть его цели, ограничения, рекомендации по
-            активности, упражнения и критерии перехода к следующему этапу.
-          </p>
-        </div>
-      </div>
+    <section aria-labelledby='stages-title'>
+      <h2 id='stages-title' className='ds-h2 ds-h2-sm'>
+        Этапы реабилитации
+      </h2>
+      <p className='mt-2.5 mb-5 text-muted max-w-[760px]'>
+        Выберите этап, чтобы увидеть его цели, ограничения, рекомендации по
+        активности, упражнения и критерии перехода к следующему этапу.
+      </p>
+      <StageTabs
+        stages={STAGES}
+        active={activeStageId}
+        onSelect={id => setActiveStageId(id)}
+      />
 
-      <div className='flex flex-wrap gap-3'>
-        {STAGES.map(stage => (
-          <button
-            key={stage.id}
-            type='button'
-            onClick={() => setActiveStageId(stage.id)}
-            className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition-all shadow-sm ${
-              stage.id === activeStageId
-                ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-md'
-                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:shadow-md'
-            }`}
-          >
-            <span className='mr-2 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] uppercase tracking-wide text-gray-600'>
-              {stage.period}
-            </span>
-            <span className='whitespace-nowrap'>{stage.title}</span>
-          </button>
-        ))}
-      </div>
-      {activeStage && (
-        <div className='space-y-1'>
-          <h2 className='text-2xl font-semibold text-gray-900'>
-            {activeStage.title}
-          </h2>
-          <p className='text-base text-gray-600'>
-            Период: {activeStage.period}
-          </p>
-        </div>
-      )}
-      {/* Удалён верхний навигационный блок, оставлен только нижний */}
+      <div
+        id='stage-panel'
+        role='tabpanel'
+        aria-labelledby={`stage-tab-${activeStageId}`}
+        className='mt-8 grid gap-8 dsk:grid-cols-[minmax(0,9fr)_minmax(0,3fr)] items-start'
+      >
+        <div className='min-w-0 flex flex-col gap-5'>
+          {activeStage && (
+            <header
+              ref={topRef}
+              className='scroll-mt-28 flex flex-col dsk:flex-row dsk:justify-between dsk:items-center gap-3'
+            >
+              <h2 className='ds-h2 !text-[26px] dsk:!text-[30px]'>{activeStage.title}</h2>
+              <div>
+                <span className='ds-badge bg-sky text-navy'>Период: {activeStage.period}</span>
+              </div>
+            </header>
+          )}
 
-      <div className='grid grid-cols-1 gap-6'>
-        <div className='space-y-6'>
-          <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
-            <h3 className='text-base font-semibold text-gray-900 mb-3'>
-              Цели и задачи
-            </h3>
-            <ul className='space-y-2 text-base text-gray-700'>
-              {activeStage?.goals.map(goal => (
-                <li key={goal} className='flex gap-2'>
-                  {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-indigo-500' /> */}
-                  <span>{goal}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <StageCard id='stage-goals' title='Цели и задачи'>
+            <CheckItems items={activeStage?.goals ?? []} />
+          </StageCard>
 
-          {activeStage?.recommendations && (
-            <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6 space-y-4'>
-              <h3 className='text-base font-bold inline-block rounded bg-yellow-200 px-2 py-0.5 text-gray-900 mb-2'>
-                Рекомендации
-              </h3>
-              <div className='space-y-4'>
-                {activeStage.recommendations.map(block => (
-                  <div key={block.title}>
-                    <p
-                      className={`text-base ${
-                        block.title === 'Протокол POLICE'
-                          ? 'mb-3 inline-block rounded bg-yellow-200 px-2 py-0.5 text-gray-900 font-bold'
-                          : 'mb-1 font-bold text-gray-900'
-                      }`}
-                    >
-                      {block.title}
-                    </p>
-                    <ul className='list-none space-y-1.5 text-base text-gray-700'>
+          {toc.some(i => i.id === 'stage-recs') && (
+            <StageCard id='stage-recs' title='Рекомендации'>
+              <div className='flex flex-col gap-2.5'>
+                {activeStage?.recommendations?.map((block, i) => (
+                  <Disclosure key={block.title} title={block.title} defaultOpen={i === 0}>
+                    <ul className={UL}>
                       {block.items.map(item => {
                         const isPolice = block.title === 'Протокол POLICE';
-                        const [strongPart, restPart] = isPolice
-                          ? item.split(' - ')
-                          : [null, null];
-
+                        const [strongPart, restPart] = isPolice ? item.split(' - ') : [null, null];
                         return (
-                          <li key={item} className='flex gap-2'>
-                            {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                          <li key={item} className={LI}>
+                            <span aria-hidden='true' className={DOT} />
                             <span>
                               {isPolice ? (
                                 <>
-                                  <span className='font-semibold'>
-                                    {strongPart}
-                                  </span>
+                                  <strong className='text-navy'>{strongPart}</strong>
                                   {restPart ? ` - ${restPart}` : ''}
                                 </>
                               ) : (
@@ -942,72 +926,15 @@ export function MeniscusStagesDetails({
                         );
                       })}
                     </ul>
-                  </div>
+                  </Disclosure>
                 ))}
-              </div>
-            </div>
-          )}
+                {activeStage?.id === 1 && (
+                  <>
+            <Disclosure title={'Ходьба'} defaultOpen={false}>
 
-          {activeStage?.forbidden && (
-            <div className='bg-rose-50 border border-rose-100 rounded-lg px-5 py-5 sm:px-6 sm:py-6'>
-              <h3 className='text-base font-bold text-rose-900 mb-2'>
-                Запрещено
-              </h3>
-              <p className='text-base text-rose-800'>{activeStage.forbidden}</p>
-            </div>
-          )}
-
-          {activeStage?.activities && (
-            <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6 space-y-4'>
-              {activeStage.id === 2 ||
-              activeStage.id === 3 ||
-              activeStage.id === 4 ||
-              activeStage.id === 5 ? (
-                <h3 className='text-base font-bold inline-block rounded bg-yellow-200 px-2 py-0.5 text-gray-900 mb-2'>
-                  Расширение активности
-                </h3>
-              ) : (
-                <h3 className='text-base font-semibold text-gray-900'>
-                  Активность
-                </h3>
-              )}
-              {activeStage.activities.map(block => (
-                <div key={block.title}>
-                  <p
-                    className={`text-base ${
-                      activeStage.id === 2 ||
-                      activeStage.id === 3 ||
-                      activeStage.id === 4 ||
-                      activeStage.id === 5
-                        ? 'font-bold'
-                        : 'font-medium'
-                    } text-gray-900 mb-1`}
-                  >
-                    {block.title}
-                  </p>
-                  <ul className='list-none space-y-1.5 text-base text-gray-700'>
-                    {block.items.map(item => (
-                      <li key={item} className='flex gap-2'>
-                        {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeStage?.id === 1 && (
-            <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6 space-y-4'>
-              <h3 className='text-base font-bold inline-block rounded bg-yellow-200 px-2 py-0.5 text-gray-900 mb-2'>
-                Рекомендации
-              </h3>
-              <div>
-                <p className='text-base font-bold text-gray-900 mb-1'>Ходьба</p>
-                <ul className='list-none space-y-1.5 text-base text-gray-700'>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                <ul className={UL}>
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Частичная резекция: опора на ногу возможна сразу, но без
                       выраженных болевых симптомов. В некоторых случаях может
@@ -1015,8 +942,8 @@ export function MeniscusStagesDetails({
                       опоры на первые дни (костыли 1–2 дня)
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Полная резекция: костыли используются 3–5 дней для
                       минимизации нагрузки, затем постепенно переход к полной
@@ -1025,7 +952,7 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                 </ul>
-                <p className='mt-2 text-base text-gray-700'>
+                <p className='m-0 mt-3'>
                   На данном этапе ходьбу используем для профилактики
                   тромбообразования (круг по комнате каждые 1–2 часа) и для
                   реализации минимальных бытовых потребностей, связанных с
@@ -1036,15 +963,13 @@ export function MeniscusStagesDetails({
                   будет увеличиваться (при условии позитивной динамики на
                   нагрузку и процессов восстановления).
                 </p>
-              </div>
+              
+            </Disclosure>
+            <Disclosure title={'Положение ноги'} defaultOpen={false}>
 
-              <div>
-                <p className='text-base font-bold text-gray-900 mb-1'>
-                  Положение ноги
-                </p>
-                <ul className='list-none space-y-1.5 text-base text-gray-700'>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                <ul className={UL}>
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       В первые две недели важно чаще держать ногу в возвышенном
                       положении, колено выше уровня сердца (по 15 минут 3 раза в
@@ -1053,8 +978,8 @@ export function MeniscusStagesDetails({
                       контрактуры)
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       При позиции сидя колено находится большую часть времени на
                       уровне тазобедренного сустава, кладём валик под пятку,
@@ -1063,15 +988,13 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                 </ul>
-              </div>
+              
+            </Disclosure>
+            <Disclosure title={'Компрессионное бельё и профилактика тромбообразования'} defaultOpen={false}>
 
-              <div>
-                <p className='text-base font-bold text-gray-900 mb-1'>
-                  Компрессионное бельё и профилактика тромбообразования
-                </p>
-                <ul className='list-none space-y-1.5 text-base text-gray-700'>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                <ul className={UL}>
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Регулярное использование компрессионного трикотажа (чулки)
                       по назначению врача. Общие рекомендации: 1 неделя —
@@ -1082,8 +1005,8 @@ export function MeniscusStagesDetails({
                       компрессии (эластичный бинт, бандаж)
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Чулки, бандажи и прочее необходимо снимать на момент
                       выполнения упражнений (наличие утягивающего белья будет
@@ -1091,16 +1014,16 @@ export function MeniscusStagesDetails({
                       в суставе)
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Также чулки обычно снимают на ночь и во время
                       гигиенических процедур (если врачом не была обозначена
                       иная схема)
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Для профилактики тромбообразования необходимо каждый 1–2
                       часа занимать вертикальную позицию и делать круг по
@@ -1109,16 +1032,16 @@ export function MeniscusStagesDetails({
                       минут
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Основной риск тромбообразования в первые 7–10 дней, после
                       риск остаётся, но значительно снижается (риск повышается
                       при малоактивном режиме пациента)
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Симптомы тромба: жжение, боль с задней части голени или
                       бедре, боль при тыльном сгибании стопы (носок на себя),
@@ -1131,22 +1054,20 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                 </ul>
-              </div>
+              
+            </Disclosure>
+            <Disclosure title={'Уход за швами'} defaultOpen={false}>
 
-              <div>
-                <p className='text-base font-bold text-gray-900 mb-1'>
-                  Уход за швами
-                </p>
-                <ul className='list-none space-y-1.5 text-base text-gray-700'>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                <ul className={UL}>
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Держите швы сухими до снятия. Обращайтесь к врачу при
                       покраснении, воспалении или появлении гноя
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       После удаления первичной повязки швы обрабатываются
                       антисептическим раствором (по назначению врача) дважды в
@@ -1154,8 +1075,8 @@ export function MeniscusStagesDetails({
                       загрязнений
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Разрешается принимать душ на 3–4 сутки, но при этом шов
                       необходимо защитить водонепроницаемой повязкой. Полное
@@ -1163,23 +1084,21 @@ export function MeniscusStagesDetails({
                       заживления самого места шва
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       До снятия швов (7–14 дней) недопустимо сгибание коленного
                       сустава больше 90 градусов (во избежание повреждения швов)
                     </span>
                   </li>
                 </ul>
-              </div>
+              
+            </Disclosure>
+            <Disclosure title={'Охлаждение'} defaultOpen={false}>
 
-              <div>
-                <p className='text-base font-bold text-gray-900 mb-1'>
-                  Охлаждение
-                </p>
-                <ul className='space-y-1.5 text-base text-gray-700'>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                <ul className={UL}>
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Как указано в протоколе POLICE, первые 3–5 дней после
                       операции лёд прикладываем каждые 2 часа на 10–15 минут и
@@ -1190,8 +1109,8 @@ export function MeniscusStagesDetails({
                       нагрузки постепенно отказываемся от охлаждения
                     </span>
                   </li>
-                  <li className='flex gap-2'>
-                    {/* <span className='mt-1 h-1 w-1 rounded-full bg-gray-400' /> */}
+                  <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                     <span>
                       Лёд прикладываем обязательно через полотенце, чтобы не
                       получить холодовой ожог. Необходимо убирать холод и дать
@@ -1202,44 +1121,80 @@ export function MeniscusStagesDetails({
                     </span>
                   </li>
                 </ul>
+              
+            </Disclosure>
+                  </>
+                )}
               </div>
+              {activeStage?.activities && (
+                <>
+                  <h4 className={H4}>
+                    {activeStage.id === 1 ? 'Активность' : 'Расширение активности'}
+                  </h4>
+                  <div className='flex flex-col gap-2.5'>
+                    {activeStage.activities.map(block => (
+                      <Disclosure key={block.title} title={block.title}>
+                        <ul className={UL}>
+                          {block.items.map(item => (
+                            <li key={item} className={LI}>
+                              <span aria-hidden='true' className={DOT} />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </Disclosure>
+                    ))}
+                  </div>
+                </>
+              )}
+            </StageCard>
+          )}
+
+          {activeStage?.forbidden && (
+            <div
+              id='stage-forbidden'
+              className='scroll-mt-28 rounded-card p-[22px] dsk:p-8 bg-[#FBEDEC] shadow-[inset_0_0_0_1px_#F2C9C4]'
+            >
+              <h3 className='m-0 mb-3 text-[21px] dsk:text-[22px] font-extrabold text-danger-ink flex items-center gap-2.5'>
+                <Icon name='alert' size={22} color='var(--c-danger-ink)' />
+                Запрещено
+              </h3>
+              <p className='m-0 text-[17px] text-[#7A2A22]'>{activeStage.forbidden}</p>
             </div>
           )}
 
           {activeStage?.exercises && (
-            <>
+            <StageCard
+              id='stage-exercises'
+              title={`Упражнения ${activeStage.id} этапа`}
+              sub={EX_NOTE[activeStage.id]}
+            >
               {activeStage.id === 1 ? (
-                <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6 space-y-4'>
-                  <div>
-                    <h3 className='text-2xl font-semibold text-gray-900'>
-                      УПРАЖНЕНИЯ ЭТАП 1
-                    </h3>
-                    <p className='mt-1 text-base text-gray-500'>
-                      выполняются 2 раза в день, ежедневно (возможна коррекция в
-                      зависимости от ситуации)
-                    </p>
-                  </div>
-
-                  <div>
-                    <ul className='list-none space-y-1.5 text-base text-gray-700'>
-                      <li className='flex gap-2'>
+                <>
+                    <ul className={UL}>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>Мобилизация надколенника</span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>Мобилизация шва</span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Пассивное + активное разгибание коленного сустава
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Пассивное + активное сгибание коленного сустава (до
                           снятия швов 7–14 дней — сгибание не более 90 градусов)
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Силовые упражнения (статические, динамические).
                           Основной акцент на квадрицепс, также можно добавлять
@@ -1247,7 +1202,8 @@ export function MeniscusStagesDetails({
                           частей бедра, мышц голени, ягодиц, мышц кора
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Восстановление равновесной походки (упражнения на
                           перенос веса, баланс, проприоцепцию, отработку
@@ -1255,88 +1211,96 @@ export function MeniscusStagesDetails({
                           колена в движении)
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Дополнительно: BFR‑тренинг, электромиостимуляция
                         </span>
                       </li>
                     </ul>
-                  </div>
-
-                  <div>
-                    <p className='text-base font-bold inline-block rounded bg-yellow-200 px-2 py-0.5 text-gray-900 mb-2'>
-                      Рекомендации
-                    </p>
-                    <ul className='list-none space-y-1.5 text-base text-gray-700'>
-                      <li className='flex gap-2'>
+                  <h4 className={H4}>Рекомендации к упражнениям</h4>
+                    <ul className={UL}>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Основной приоритет — пассивное (по возможности
                           активное) разгибание коленного сустава 0 градусов
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Прогресс в упражнениях на разгибание не более 3–5
                           градусов за день (во избежание перегрузки сустава)
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Прогресс в упражнениях на сгибание не более 5–10
                           градусов за день
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Перед упражнениями держите ногу на возвышенности 10–15
                           минут (для снижения отёка)
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           После упражнений холод через ткань 10–15 минут
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Избегайте резких движений и растяжки через
                           сопротивление
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Упражнения выполняются без боли или с лёгким
                           дискомфортом до 3 баллов по ВАШ
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Если боль усиливается, уменьшаем амплитуду или
                           количество повторений
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           После упражнений оцениваем состояние сустава. При
                           появлении значительного отёка или боли — отдых и
                           снижение нагрузки
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Поддерживаем активность, но не допускаем перегрузки.
                           Применяем лёгкую опору на трость или костыли (если это
                           необходимо)
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Выполняем упражнения на коленный сустав в безопасных
                           положениях. Избегаем нагрузок, которые могут
                           спровоцировать вальгусное или варусное смещение
                         </span>
                       </li>
-                      <li className='flex gap-2'>
+                      <li className={LI}>
+<span aria-hidden='true' className={DOT} />
                         <span>
                           Упражнения проводятся 2 раза в день; при необходимости
                           возможна коррекция частоты и вида активности в
@@ -1344,280 +1308,456 @@ export function MeniscusStagesDetails({
                         </span>
                       </li>
                     </ul>
-                  </div>
-                </div>
-              ) : activeStage.id === 2 ? (
-                <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
-                  <h3 className='text-2xl font-semibold text-gray-900'>
-                    УПРАЖНЕНИЯ ЭТАП 2
-                  </h3>
-                  <p className='mt-1 text-base text-gray-500 mb-3'>
-                    (выполняются 2 раза в день, 5-6 раз в неделю /возможна
-                    коррекция в зависимости от ситуации)
-                  </p>
-                  <ul className='list-none space-y-2 text-base text-gray-700'>
-                    {activeStage.exercises.map(ex => (
-                      <li key={ex} className='flex gap-2'>
-                        {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500' /> */}
-                        <span>{ex}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : activeStage.id === 3 ? (
-                <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
-                  <h3 className='text-2xl font-semibold text-gray-900'>
-                    УПРАЖНЕНИЯ ЭТАП 3
-                  </h3>
-                  <p className='mt-1 text-base text-gray-500 mb-3'>
-                    (выполняются 1-2 раза в день, 3-5 раз в неделю /возможна
-                    коррекция в зависимости от ситуации)
-                  </p>
-                  <ul className='list-none space-y-2 text-base text-gray-700'>
-                    {activeStage.exercises.map(ex => (
-                      <li key={ex} className='flex gap-2'>
-                        {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500' /> */}
-                        <span>{ex}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : activeStage.id === 4 ? (
-                <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
-                  <h3 className='text-2xl font-semibold text-gray-900'>
-                    УПРАЖНЕНИЯ ЭТАП 4
-                  </h3>
-                  <p className='mt-1 text-base text-gray-500 mb-3'>
-                    (выполняются 1 раза в день, 3-4 раза в неделю /возможна
-                    коррекция в зависимости от ситуации)
-                  </p>
-                  <ul className='list-none space-y-2 text-base text-gray-700'>
-                    {activeStage.exercises.map(ex => (
-                      <li key={ex} className='flex gap-2'>
-                        {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500' /> */}
-                        <span>{ex}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : activeStage.id === 5 ? (
-                <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
-                  <h3 className='text-2xl font-semibold text-gray-900'>
-                    УПРАЖНЕНИЯ ЭТАП 5
-                  </h3>
-                  <p className='mt-1 text-base text-gray-500 mb-3'>
-                    (выполняются 1 раза в день, 3-5 раз в неделю /возможна
-                    коррекция в зависимости от ситуации)
-                  </p>
-                  <ul className='list-none space-y-2 text-base text-gray-700'>
-                    {activeStage.exercises.map(ex => (
-                      <li key={ex} className='flex gap-2'>
-                        {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500' /> */}
-                        <span>{ex}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                </>
               ) : (
-                <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-5 sm:px-6 sm:py-6'>
-                  <h3 className='text-base font-semibold text-gray-900 mb-3'>
-                    Упражнения
-                  </h3>
-                  <ul className='list-none space-y-2 text-base text-gray-700'>
-                    {activeStage.exercises.map(ex => (
-                      <li key={ex} className='flex gap-2'>
-                        {/* <span className='mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500' /> */}
-                        <span>{ex}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className='mt-3 text-base text-gray-500'>
-                    Частота и объём выполнения корректируются с учётом
-                    самочувствия, реакции сустава и рекомендаций лечащего врача.
-                  </p>
-                </div>
+                <ul className={UL}>
+                  {activeStage.exercises.map(ex => (
+                    <li key={ex} className={LI}>
+                      <span aria-hidden='true' className={DOT} />
+                      <span>{ex}</span>
+                    </li>
+                  ))}
+                </ul>
               )}
-            </>
+            </StageCard>
           )}
 
-          {activeStage?.criteria && (
-            <div className='bg-indigo-50 border border-indigo-100 rounded-lg px-5 py-5 sm:px-6 sm:py-6'>
-              <h3 className='text-base font-bold text-indigo-900 mb-2'>
-                {activeStage.id === 5
-                  ? 'Критерии возвращения в спорт'
-                  : 'Критерии перехода'}
-              </h3>
-              <ul className='list-none space-y-1.5 text-base text-indigo-900'>
-                {activeStage.criteria.map(criterion => (
-                  <li key={criterion} className='flex gap-2'>
-                    <span>{criterion}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {(videoUrl || (activeStage?.id === 1 && weeklyTestUrl)) && (
-            <div className='bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden'>
-              <div className='px-5 py-4 border-b border-gray-100 bg-gray-50'>
-                <h3 className='text-base font-semibold text-gray-900'>
-                  {activeStage?.id === 1
-                    ? 'Еженедельные тесты и упражнения 1 этапа'
-                    : 'Видеоматериалы'}
-                </h3>
-              </div>
-              <div className='p-0'>
+          {hasVideo && (
+            <StageCard
+              id='stage-video'
+              title={
+                activeStage?.id === 1
+                  ? 'Еженедельные тесты и упражнения 1 этапа'
+                  : 'Видеоматериалы'
+              }
+            >
+              <div
+                className={`grid gap-8 ${
+                  activeStage?.id === 1 && weeklyTestUrl && videoUrl
+                    ? 'dsk:grid-cols-2 dsk:gap-6'
+                    : ''
+                }`}
+              >
                 {activeStage?.id === 1 && weeklyTestUrl && (
-                  <div className='px-5 py-5 sm:px-6 sm:py-6'>
-                    <h4 className='font-medium text-gray-900 mb-3'>
+                  <div className='min-w-0'>
+                    <h4 className='m-0 mb-2.5 text-[18px] font-extrabold text-ink'>
                       Еженедельный тест
                     </h4>
-                    {weeklyTestUrl.startsWith('https://kinescope.io/embed/') ? <iframe title='Еженедельный тест' src={weeklyTestUrl} referrerPolicy='no-referrer' allow='autoplay; fullscreen; encrypted-media; picture-in-picture' allowFullScreen className='aspect-video w-full border-0 rounded-lg' /> : <VideoPlayer src={weeklyTestUrl} ref={weeklyTestRef} />}
-                    <div className='mt-4'>
-                      <p className='text-base text-gray-700 mb-3'>
-                        Еженедельный ТЕСТ — отслеживание динамики восстановления
-                        амплитуды движения сустава и паттерна шага
-                      </p>
-                      <div className='grid gap-1'>
-                        {[
-                          { time: '0:30', label: 'Тест разгибания' },
-                          { time: '2:06', label: 'Тест сгибания' },
-                          { time: '2:48', label: 'Тест ходьбы' },
-                        ].map((item, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => handleWeeklyTimecodeClick(item.time)}
-                            className='flex items-center text-left group hover:bg-gray-50 p-2 rounded-md transition-colors -mx-2'
-                          >
-                            <span className='text-base text-indigo-600 w-12 shrink-0 group-hover:underline'>
-                              {item.time}
-                            </span>
-                            <span className='text-base text-gray-700 ml-2'>
-                              {item.label}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
+                    <div className='rounded-[22px] overflow-hidden bg-navy'>
+                      {weeklyTestUrl.startsWith('https://kinescope.io/embed/') ? (
+                        <iframe
+                          title='Еженедельный тест'
+                          src={weeklyTestUrl}
+                          referrerPolicy='no-referrer'
+                          allow='autoplay; fullscreen; encrypted-media; picture-in-picture'
+                          allowFullScreen
+                          className='block aspect-video w-full border-0'
+                        />
+                      ) : (
+                        <VideoPlayer src={weeklyTestUrl} ref={weeklyTestRef} />
+                      )}
                     </div>
+                    <p className='mt-3 mb-2.5 text-[15px] text-muted'>
+                      Еженедельный ТЕСТ — отслеживание динамики восстановления
+                      амплитуды движения сустава и паттерна шага
+                    </p>
+                    <Timecodes
+                      items={[
+                        { time: '0:30', label: 'Тест разгибания' },
+                        { time: '2:06', label: 'Тест сгибания' },
+                        { time: '2:48', label: 'Тест ходьбы' },
+                      ]}
+                      onPick={handleWeeklyTimecodeClick}
+                      resetKey={activeStageId}
+                    />
                   </div>
                 )}
 
                 {videoUrl && (
-                  <div
-                    className={
-                      activeStage?.id === 1 && weeklyTestUrl
-                        ? 'border-t border-gray-100'
-                        : ''
-                    }
-                  >
+                  <div className='min-w-0'>
                     {(activeStage?.id === 1 ||
                       activeStage?.id === 2 ||
                       activeStage?.id === 3) && (
-                      <div className='px-5 pt-5 sm:px-6 text-base text-gray-700'>
-                        <h4 className='font-medium text-gray-900 mb-3'>
-                          {activeStage.id === 1
-                            ? 'Видео 1 этапа — Острый'
-                            : activeStage.id === 2
-                              ? 'Видео 2 этапа — Ранний восстановительный'
-                              : 'Видео 3 этапа — Поздний восстановительный'}
-                        </h4>
-                      </div>
+                      <h4 className='m-0 mb-2.5 text-[18px] font-extrabold text-ink'>
+                        {activeStage.id === 1
+                          ? 'Видео 1 этапа — Острый'
+                          : activeStage.id === 2
+                            ? 'Видео 2 этапа — Ранний восстановительный'
+                            : 'Видео 3 этапа — Поздний восстановительный'}
+                      </h4>
                     )}
-                    {videoUrl.startsWith('https://kinescope.io/embed/') ? <iframe title='Видеоурок' src={videoUrl} referrerPolicy='no-referrer' allow='autoplay; fullscreen; encrypted-media; picture-in-picture' allowFullScreen className='aspect-video w-full border-0' /> : <VideoPlayer src={videoUrl} ref={videoPlayerRef} />}
-
+                    <div className='rounded-[22px] overflow-hidden bg-navy'>
+                      {videoUrl.startsWith('https://kinescope.io/embed/') ? (
+                        <iframe
+                          title='Видеоурок'
+                          src={videoUrl}
+                          referrerPolicy='no-referrer'
+                          allow='autoplay; fullscreen; encrypted-media; picture-in-picture'
+                          allowFullScreen
+                          className='block aspect-video w-full border-0'
+                        />
+                      ) : (
+                        <VideoPlayer src={videoUrl} ref={videoPlayerRef} />
+                      )}
+                    </div>
                     {activeStage?.videoDescription && (
-                      <div className='px-5 py-5 sm:px-6 sm:py-6 border-t border-gray-100'>
-                        <div className='space-y-4 text-base text-gray-700'>
-                          {activeStage.videoDescription.text.map(
-                            (paragraph, idx) => (
-                              <p key={idx}>{paragraph}</p>
-                            )
-                          )}
+                      <>
+                        <p className='mt-3 mb-2.5 text-[15px] text-muted'>
+                          Таймкоды ({activeStage.videoDescription.timecodes.length}{' '}
+                          {plural(activeStage.videoDescription.timecodes.length)}):
+                        </p>
+                        <Timecodes
+                          items={activeStage.videoDescription.timecodes}
+                          onPick={handleTimecodeClick}
+                          resetKey={activeStageId}
+                        />
+                        <div className='mt-5 flex flex-col gap-3 text-[16px] text-muted'>
+                          {activeStage.videoDescription.text.map((paragraph, idx) => (
+                            <p key={idx} className='m-0'>
+                              {paragraph}
+                            </p>
+                          ))}
                         </div>
-
-                        <div className='mt-6'>
-                          <h4 className='font-medium text-gray-900 mb-3'>
-                            Таймкоды:
-                          </h4>
-                          <div className='grid gap-1'>
-                            {activeStage.videoDescription.timecodes.map(
-                              (item, idx) => (
-                                <button
-                                  key={idx}
-                                  onClick={() => handleTimecodeClick(item.time)}
-                                  className='flex items-center text-left group hover:bg-gray-50 p-2 rounded-md transition-colors -mx-2'
-                                >
-                                  <span className='text-base text-indigo-600 w-12 shrink-0 group-hover:underline'>
-                                    {item.time}
-                                  </span>
-                                  <span className='text-base text-gray-700 ml-2'>
-                                    {item.label}
-                                  </span>
-                                </button>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      </>
                     )}
                   </div>
                 )}
               </div>
-            </div>
+            </StageCard>
           )}
-        </div>
-      </div>
 
-      <div className='bg-white rounded-lg shadow-sm border border-gray-100 px-5 py-4 sm:px-6 sm:py-5'>
-        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
-          <div className='flex items-center gap-2'>
+          {activeStage?.criteria && (
+            <StageCard
+              id='stage-criteria'
+              title={
+                activeStage.id === 5
+                  ? 'Критерии возвращения в спорт'
+                  : 'Критерии перехода'
+              }
+            >
+              <CheckItems items={activeStage.criteria} />
+            </StageCard>
+          )}
+
+          <div className='flex flex-col-reverse dsk:flex-row dsk:justify-between gap-3'>
             <button
               type='button'
               onClick={goPrev}
               disabled={activeStageId === 1}
-              className={`inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                activeStageId === 1
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              }`}
+              className='ds-btn ds-btn-md ds-btn-secondary disabled:opacity-60'
             >
+              <Icon name='chev-left' size={20} strokeWidth={2.6} />
               Предыдущий этап
             </button>
-            <button
-              type='button'
-              onClick={goNext}
-              disabled={activeStageId === 5}
-              className={`inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                activeStageId === 5
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              }`}
-            >
-              Следующий этап
-            </button>
-          </div>
-          <div className='flex flex-wrap gap-2'>
-            {STAGES.map(stage => (
+            {nextStage ? (
               <button
-                key={stage.id}
                 type='button'
-                onClick={() => setActiveStageId(stage.id)}
-                className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                  stage.id === activeStageId
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-                title={stage.title}
+                onClick={goNext}
+                className='ds-btn ds-btn-md ds-btn-primary !whitespace-normal text-center'
               >
-                <span className='mr-2 text-[10px] uppercase tracking-wide text-gray-500'>
-                  {stage.period}
-                </span>
-                <span>{stage.id} этап</span>
+                Следующий этап: {nextStage.id} — {stageName(nextStage)}
+                <Icon name='chev-right' size={20} strokeWidth={2.6} />
               </button>
-            ))}
+            ) : (
+              <button
+                type='button'
+                disabled
+                className='ds-btn ds-btn-md ds-btn-secondary disabled:opacity-60'
+              >
+                Это последний этап
+              </button>
+            )}
           </div>
         </div>
+
+        <aside className='hidden dsk:flex sticky top-[112px] flex-col gap-4' aria-label='Навигация по этапу'>
+          <StageToc items={toc} resetKey={activeStageId} />
+          <div className='ds-card p-6 text-[15px] text-muted leading-normal [&_a]:text-brand'>
+            <strong className='block text-[16px] text-navy mb-1.5'>Вопросы по программе</strong>
+            <a href='mailto:minenkov.rehab@yandex.ru'>minenkov.rehab@yandex.ru</a>
+            <br />
+            <a href='https://t.me/MV_Rehab' target='_blank' rel='noopener noreferrer'>
+              t.me/MV_Rehab
+            </a>
+          </div>
+        </aside>
       </div>
     </section>
+  );
+}
+
+// ---------- Вспомогательные элементы вёрстки ----------
+const UL = 'list-none m-0 p-0 flex flex-col gap-2.5 text-[17px]';
+const LI = 'flex gap-3 items-start';
+const DOT = 'flex-none w-2 h-2 rounded-full bg-brand mt-[11px]';
+const H4 = 'mt-6 mb-3 text-[18px] font-extrabold text-navy';
+
+const EX_NOTE: Record<number, string> = {
+  1: 'Выполняются 2 раза в день, ежедневно (возможна коррекция в зависимости от ситуации)',
+  2: '(выполняются 2 раза в день, 5-6 раз в неделю /возможна коррекция в зависимости от ситуации)',
+  3: '(выполняются 1-2 раза в день, 3-5 раз в неделю /возможна коррекция в зависимости от ситуации)',
+  4: '(выполняются 1 раза в день, 3-4 раза в неделю /возможна коррекция в зависимости от ситуации)',
+  5: '(выполняются 1 раза в день, 3-5 раз в неделю /возможна коррекция в зависимости от ситуации)',
+};
+
+function plural(n: number) {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'упражнение';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'упражнения';
+  return 'упражнений';
+}
+
+function StageCard({
+  id,
+  title,
+  sub,
+  children,
+}: {
+  id: string;
+  title: string;
+  sub?: string | undefined;
+  children: React.ReactNode;
+}) {
+  return (
+    <div id={id} className='ds-card scroll-mt-28 p-[22px] dsk:p-8'>
+      <h3 className='m-0 text-[21px] dsk:text-[22px] font-extrabold text-navy'>{title}</h3>
+      {sub ? <p className='mt-1.5 mb-0 text-[16px] text-muted'>{sub}</p> : null}
+      <div className='mt-4'>{children}</div>
+    </div>
+  );
+}
+
+function CheckItems({ items }: { items: string[] }) {
+  return (
+    <ul className='list-none m-0 p-0 flex flex-col gap-2.5 text-[17px]'>
+      {items.map(t => (
+        <li key={t} className='flex gap-3 items-start'>
+          <span
+            aria-hidden='true'
+            className='flex-none w-[26px] h-[26px] rounded-full bg-mint flex items-center justify-center mt-[2px]'
+          >
+            <Icon name='check' size={14} strokeWidth={3.2} color='var(--c-mint-ink)' />
+          </span>
+          <span>{t}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Раскрывающийся блок; содержимое всегда в DOM (свёрнутое — hidden). */
+function Disclosure({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const uid = useId();
+  return (
+    <div className='rounded-[18px] bg-canvas'>
+      <button
+        type='button'
+        aria-expanded={open}
+        aria-controls={uid}
+        onClick={() => setOpen(v => !v)}
+        className='w-full flex justify-between items-center gap-3 min-h-[56px] px-[18px] py-3 border-0 bg-transparent font-[inherit] text-[17px] font-extrabold text-navy text-left cursor-pointer rounded-[18px] ds-focus'
+      >
+        {title}
+        <span
+          aria-hidden='true'
+          className={`flex-none w-8 h-8 rounded-full flex items-center justify-center ${
+            open ? 'bg-brand' : 'bg-white'
+          }`}
+        >
+          <Icon
+            name={open ? 'minus' : 'plus'}
+            size={16}
+            strokeWidth={2.6}
+            color={open ? '#fff' : 'var(--c-blue)'}
+          />
+        </span>
+      </button>
+      <div id={uid} hidden={!open} className='px-[18px] pb-[18px] text-[16px] dsk:text-[17px]'>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** Таймкоды: по 2 в ряд, сначала 6, кнопка «Показать все N». */
+function Timecodes({
+  items,
+  onPick,
+  resetKey,
+}: {
+  items: { time: string; label: string }[];
+  onPick: (time: string) => void;
+  resetKey: number;
+}) {
+  const [all, setAll] = useState(false);
+  useEffect(() => setAll(false), [resetKey]);
+  const shown = all ? items : items.slice(0, 6);
+  return (
+    <>
+      <div className='grid gap-2 dsk:grid-cols-2'>
+        {shown.map((item, idx) => (
+          <button
+            key={idx}
+            type='button'
+            onClick={() => onPick(item.time)}
+            className='flex gap-2.5 items-center min-h-[44px] px-3 py-2 border-0 rounded-xl bg-canvas hover:bg-sky font-[inherit] text-[15px] text-left cursor-pointer ds-focus'
+          >
+            <span className='flex-none px-2 py-0.5 rounded-lg bg-sky text-brand font-extrabold text-[14px]'>
+              {item.time}
+            </span>
+            <span className='text-ink'>{item.label}</span>
+          </button>
+        ))}
+      </div>
+      {items.length > 6 ? (
+        <button
+          type='button'
+          onClick={() => setAll(v => !v)}
+          aria-expanded={all}
+          className='mt-2.5 min-h-[44px] px-[18px] border-0 rounded-full bg-sky text-navy font-[inherit] text-[15px] font-bold cursor-pointer ds-focus'
+        >
+          {all ? 'Свернуть' : `Показать все ${items.length}`}
+        </button>
+      ) : null}
+    </>
+  );
+}
+
+/** Вкладки этапов: на десктопе сетка из 5, на телефоне — горизонтальная лента; активная всегда видна. */
+function StageTabs({
+  stages,
+  active,
+  onSelect,
+}: {
+  stages: Stage[];
+  active: StageId;
+  onSelect: (id: StageId) => void;
+}) {
+  const listRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const list = listRef.current;
+    const tab = list?.querySelector<HTMLElement>(`[data-stage='${active}']`);
+    if (!list || !tab || list.scrollWidth <= list.clientWidth) return;
+    const left = tab.offsetLeft - (list.clientWidth - tab.offsetWidth) / 2;
+    list.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+  }, [active]);
+  const onKey = (e: React.KeyboardEvent, id: StageId) => {
+    const idx = stages.findIndex(s => s.id === id);
+    let next = -1;
+    if (e.key === 'ArrowRight') next = Math.min(stages.length - 1, idx + 1);
+    if (e.key === 'ArrowLeft') next = Math.max(0, idx - 1);
+    if (e.key === 'Home') next = 0;
+    if (e.key === 'End') next = stages.length - 1;
+    if (next < 0) return;
+    const target = stages[next];
+    if (!target) return;
+    e.preventDefault();
+    onSelect(target.id);
+    listRef.current
+      ?.querySelector<HTMLElement>(`[data-stage='${target.id}']`)
+      ?.focus();
+  };
+  return (
+    <div
+      ref={listRef}
+      role='tablist'
+      aria-label='Этапы реабилитации'
+      className='ds-hscroll flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-1 dsk:mx-0 dsk:px-0 dsk:grid dsk:grid-cols-5 dsk:overflow-visible'
+    >
+      {stages.map(stage => {
+        const on = stage.id === active;
+        return (
+          <button
+            key={stage.id}
+            id={`stage-tab-${stage.id}`}
+            data-stage={stage.id}
+            type='button'
+            role='tab'
+            aria-selected={on}
+            aria-controls='stage-panel'
+            tabIndex={on ? 0 : -1}
+            onClick={() => onSelect(stage.id)}
+            onKeyDown={e => onKey(e, stage.id)}
+            className={`snap-start flex-none w-[230px] dsk:w-auto flex flex-col items-start gap-1 px-[18px] py-4 border-0 rounded-[20px] text-left font-[inherit] cursor-pointer ds-focus ${
+              on
+                ? 'bg-navy text-white'
+                : 'bg-white text-navy shadow-[inset_0_0_0_2px_var(--c-line)] hover:shadow-[inset_0_0_0_2px_var(--c-blue)]'
+            }`}
+          >
+            <span className='text-[15px] font-bold opacity-80'>{stage.period}</span>
+            <span className='text-[17px] font-extrabold leading-tight'>{stage.title}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Липкое оглавление этапа: подсвечивает блок, который сейчас в зоне чтения. */
+function StageToc({
+  items,
+  resetKey,
+}: {
+  items: { id: string; label: string }[];
+  resetKey: number;
+}) {
+  const [current, setCurrent] = useState(items[0]?.id);
+  const key = items.map(i => i.id).join(',');
+  useEffect(() => {
+    setCurrent(items[0]?.id);
+    if (typeof IntersectionObserver === 'undefined') return;
+    const visible = new Map<string, boolean>();
+    const obs = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => visible.set(e.target.id, e.isIntersecting));
+        const first = items.find(i => visible.get(i.id));
+        if (first) setCurrent(first.id);
+      },
+      { rootMargin: '-120px 0px -55% 0px' }
+    );
+    items.forEach(i => {
+      const el = document.getElementById(i.id);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, resetKey]);
+  return (
+    <nav className='ds-card p-6' aria-label='На этой странице'>
+      <p className='m-0 mb-3 text-[15px] font-bold text-muted'>На этой странице</p>
+      <ul className='list-none m-0 p-0 flex flex-col gap-1 text-[16px] font-semibold'>
+        {items.map(i => {
+          const on = i.id === current;
+          return (
+            <li key={i.id}>
+              <a
+                href={`#${i.id}`}
+                aria-current={on ? 'location' : undefined}
+                onClick={e => {
+                  e.preventDefault();
+                  document.getElementById(i.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  setCurrent(i.id);
+                }}
+                className={`flex items-center gap-2 min-h-[40px] px-3 -mx-3 rounded-xl no-underline ds-focus ${
+                  on ? 'text-brand bg-sky' : 'text-ink hover:text-brand'
+                }`}
+              >
+                {i.label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }

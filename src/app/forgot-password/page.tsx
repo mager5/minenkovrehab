@@ -1,5 +1,7 @@
 'use client';
 
+// Восстановление пароля: форма email → «Письмо отправлено» в той же карточке.
+// Логика прежняя: POST /api/auth/forgot-password через authPost.
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,150 +10,125 @@ import {
   type ForgotPasswordInput,
 } from '@/lib/validations/auth';
 import { authPost } from '@/lib/auth-client';
-import { Button } from '@/components/ui/auth/Button';
-import { Input } from '@/components/ui/auth/Input';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/auth/Alert';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/auth/Card';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { TextField } from '@/components/ds/Field';
+import { Button } from '@/components/ds/Button';
+import { AuthShell, BackLink, CardHead } from '@/components/account/AuthShell';
+import { BigIcon, ErrorAlert } from '@/components/account/Alert';
 
-function ForgotPasswordForm() {
-  const [success, setSuccess] = useState(false);
+export default function ForgotPasswordPage() {
+  const [sentTo, setSentTo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [resent, setResent] = useState(false);
 
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
-  } = useForm<ForgotPasswordInput>({
-    resolver: zodResolver(forgotPasswordSchema),
-  });
+  } = useForm<ForgotPasswordInput>({ resolver: zodResolver(forgotPasswordSchema) });
 
-  const emailValue = watch('email');
+  const send = async (email: string) => {
+    const response = await authPost('/api/auth/forgot-password', { email });
+    if (!response.ok) throw new Error('queue');
+  };
 
   const onSubmit = async (data: ForgotPasswordInput) => {
     setError(null);
-    setSuccess(false);
     setIsLoading(true);
-
     try {
-      const response = await authPost('/api/auth/forgot-password', {email:data.email});
-      if(!response.ok) throw new Error('Не удалось поставить инструкцию в очередь.');
+      await send(data.email);
+      setSentTo(data.email);
+    } catch {
+      setError('Не удалось отправить запрос. Попробуйте позже.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || 'Не удалось отправить запрос. Попробуйте позже.');
+  const resend = async () => {
+    if (!sentTo) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      await send(sentTo);
+      setResent(true);
+    } catch {
+      setError('Не удалось отправить запрос. Попробуйте позже.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Card className='border-0 shadow-lg sm:border sm:shadow-sm'>
-      <CardHeader className='space-y-1'>
-        <CardTitle className='text-2xl font-bold tracking-tight text-center'>
-          Восстановление пароля
-        </CardTitle>
-        <CardDescription className='text-center'>
-          Введите ваш email, и мы отправим вам инструкции
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <AnimatePresence mode='wait'>
-          {success ? (
-            <motion.div
-              initial={{ scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-            >
-              <Alert variant='success' className='mb-6'>
-                <AlertTitle>Запрос принят</AlertTitle>
-                <AlertDescription>
-                  Если аккаунт существует, инструкция поставлена в очередь.
-                </AlertDescription>
-              </Alert>
-              <Button
-                variant='outline'
-                className='w-full'
-                onClick={() => setSuccess(false)}
-              >
-                Отправить повторно
-              </Button>
-            </motion.div>
-          ) : (
-            <motion.form
-              initial={{ x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              onSubmit={handleSubmit(onSubmit)}
-              className='space-y-4'
-              noValidate
-            >
-              {error && (
-                <Alert variant='destructive'>
-                  <AlertTitle>Ошибка</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className='space-y-2'>
-                <Input
-                  id='email'
-                  type='email'
-                  label='Email'
-                  placeholder='name@example.com'
-                  error={errors.email?.message || ''}
-                  disabled={isLoading}
-                  {...register('email')}
-                  value={emailValue}
-                />
-              </div>
-              <Button
-                type='submit'
-                className='w-full'
-                isLoading={isLoading}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Отправка...' : 'Отправить инструкцию'}
-              </Button>
-            </motion.form>
-          )}
-        </AnimatePresence>
-      </CardContent>
-      <CardFooter className='flex justify-center'>
-        <Link
-          href='/login'
-          className='flex items-center text-sm font-medium text-gray-500 hover:text-gray-900'
-        >
-          <ArrowLeft className='mr-2 h-4 w-4' />
-          Вернуться на страницу входа
-        </Link>
-      </CardFooter>
-    </Card>
-  );
-}
-
-export default function ForgotPasswordPage() {
-  return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
-      <div className='w-full max-w-md space-y-8'>
-        <ForgotPasswordForm />
-      </div>
-    </div>
+    <AuthShell
+      title='Забыли пароль?'
+      lead='Пришлём на почту ссылку, по которой можно задать новый пароль.'
+    >
+      {sentTo ? (
+        <div className='text-center'>
+          <BigIcon name='mail' />
+          <h2 className='mt-[18px] mb-2 text-[24px] dsk:text-[26px] font-extrabold text-navy'>
+            Письмо отправлено
+          </h2>
+          <p className='m-0 mb-6 text-[17px] text-muted' role='status'>
+            Если аккаунт с адресом{' '}
+            <strong className='text-ink break-all'>{sentTo}</strong> существует,
+            на него придёт инструкция по восстановлению пароля. Проверьте папку
+            «Спам».
+            {resent ? ' Письмо отправлено повторно.' : ''}
+          </p>
+          {error ? (
+            <div className='mb-4 text-left'>
+              <ErrorAlert title='Ошибка'>{error}</ErrorAlert>
+            </div>
+          ) : null}
+          <Button
+            variant='secondary'
+            size='md'
+            block
+            onClick={resend}
+            disabled={isLoading || resent}
+          >
+            {isLoading ? 'Отправляем…' : resent ? 'Отправлено повторно' : 'Отправить повторно'}
+          </Button>
+          <div className='mt-3'>
+            <BackLink href='/login'>Вернуться на страницу входа</BackLink>
+          </div>
+        </div>
+      ) : (
+        <>
+          <CardHead
+            title='Восстановление пароля'
+            sub='Введите ваш email, и мы отправим вам инструкции'
+          />
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className='flex flex-col gap-[18px]'
+            noValidate
+          >
+            {error ? <ErrorAlert title='Ошибка'>{error}</ErrorAlert> : null}
+            <TextField
+              id='forgot-email'
+              label='Email'
+              type='email'
+              inputMode='email'
+              autoComplete='email'
+              autoCapitalize='none'
+              spellCheck={false}
+              placeholder='name@example.com'
+              disabled={isLoading}
+              error={errors.email?.message}
+              {...register('email')}
+            />
+            <Button type='submit' size='lg' block disabled={isLoading} aria-busy={isLoading}>
+              {isLoading ? 'Отправляем…' : 'Отправить инструкцию'}
+            </Button>
+          </form>
+          <div className='mt-4'>
+            <BackLink href='/login'>Вернуться на страницу входа</BackLink>
+          </div>
+        </>
+      )}
+    </AuthShell>
   );
 }

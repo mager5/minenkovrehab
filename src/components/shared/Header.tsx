@@ -9,8 +9,6 @@ import { socialLinks, headerContacts, navigationItems } from '@/data/content';
 import { SafeIcon } from '@/components/ui/SafeIcon';
 import {
   User as UserIcon,
-  LogOut,
-  Settings,
   ArrowLeft,
   X,
   ChevronDown,
@@ -90,6 +88,7 @@ export function Header() {
   const router = useRouter();
   // const supabase = createClient();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
   const lastAuthFetchAtRef = useRef<number>(0);
   const authFetchInFlightRef = useRef(false);
 
@@ -296,6 +295,25 @@ export function Header() {
     }
   };
 
+  // Меню «Личный кабинет» (десктоп): закрытие по клику вне и по Esc
+  useEffect(() => {
+    if (!isProfileDropdownOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsProfileDropdownOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [isProfileDropdownOpen]);
+
   // Закрытие меню с помощью клавиши Escape
   useEffect(() => {
     const handleEscKey = (e: KeyboardEvent) => {
@@ -437,59 +455,37 @@ export function Header() {
             {isAuthLoading ? (
               <span className='invisible'>Войти</span>
             ) : user ? (
-              <div
-                className='relative'
-                onMouseEnter={() => setIsProfileDropdownOpen(true)}
-                onMouseLeave={() => setIsProfileDropdownOpen(false)}
-              >
+              <div className='relative' ref={profileRef}>
                 <button
                   type='button'
-                  className='inline-flex items-center gap-2 min-h-[44px] font-semibold text-brand hover:text-navy bg-transparent border-0 cursor-pointer ds-focus rounded-full px-2'
-                  aria-label='Меню профиля'
+                  className='inline-flex items-center gap-2 min-h-[44px] font-bold text-brand hover:text-navy bg-transparent border-0 cursor-pointer ds-focus rounded-full px-2 font-[inherit] text-[16px]'
+                  aria-haspopup='menu'
                   aria-expanded={isProfileDropdownOpen}
+                  aria-controls='profile-menu'
                   onClick={() => setIsProfileDropdownOpen(v => !v)}
                 >
                   <span className='w-8 h-8 rounded-full bg-sky flex items-center justify-center'>
                     <UserIcon className='w-[18px] h-[18px] text-brand' />
                   </span>
-                  <span className='max-w-[160px] truncate'>
-                    {user.email?.split('@')[0]}
-                  </span>
+                  Личный кабинет
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
+                    aria-hidden='true'
+                  />
                 </button>
                 <div
-                  className={`absolute top-full right-0 mt-1 w-64 bg-white rounded-[20px] shadow-pop z-[60] overflow-hidden transition-all duration-200 ${
+                  id='profile-menu'
+                  className={`absolute top-full right-0 mt-1 w-72 bg-white rounded-[20px] shadow-pop z-[60] overflow-hidden transition-all duration-200 ${
                     isProfileDropdownOpen
                       ? 'opacity-100 visible translate-y-0'
                       : 'opacity-0 invisible -translate-y-2'
                   }`}
                 >
-                  <div className='p-2'>
-                    <div className='px-4 py-3'>
-                      <p className='text-[14px] text-muted m-0'>Вы вошли как</p>
-                      <p
-                        className='text-[15px] font-bold text-ink truncate m-0'
-                        title={user.email ?? undefined}
-                      >
-                        {user.email}
-                      </p>
-                    </div>
-                    <Link
-                      href='/dashboard'
-                      className='flex items-center gap-2.5 min-h-[44px] px-4 rounded-xl text-[16px] text-ink no-underline hover:bg-sky hover:text-navy'
-                      onClick={() => setIsProfileDropdownOpen(false)}
-                    >
-                      <Settings className='w-[18px] h-[18px]' />
-                      Личный кабинет
-                    </Link>
-                    <button
-                      type='button'
-                      onClick={handleLogout}
-                      className='flex w-full items-center gap-2.5 min-h-[44px] px-4 rounded-xl text-[16px] text-danger-ink bg-transparent border-0 cursor-pointer hover:bg-[#FBEDEC] text-left font-[inherit]'
-                    >
-                      <LogOut className='w-[18px] h-[18px]' />
-                      Выйти
-                    </button>
-                  </div>
+                  <ProfileMenuItems
+                    email={user.email}
+                    onNavigate={() => setIsProfileDropdownOpen(false)}
+                    onLogout={handleLogout}
+                  />
                 </div>
               </div>
             ) : !isAuthPage && !pathname?.startsWith('/dashboard') ? (
@@ -652,7 +648,7 @@ export function Header() {
                   <button
                     type='button'
                     className='w-12 h-12 rounded-full bg-sky flex items-center justify-center border-0 cursor-pointer ds-focus'
-                    aria-label='Открыть меню профиля'
+                    aria-label='Личный кабинет: открыть меню'
                     aria-expanded={isMobileProfileOpen}
                     aria-controls='mobile-profile-menu'
                     onClick={toggleMobileProfile}
@@ -670,35 +666,12 @@ export function Header() {
                     }`}
                     style={{ top: '80px', willChange: 'transform, opacity' }}
                   >
-                    <div className='p-2'>
-                      <div className='px-4 py-3'>
-                        <p className='text-[15px] text-muted m-0'>
-                          Вы вошли как
-                        </p>
-                        <p
-                          className='text-[16px] font-bold text-ink truncate m-0'
-                          title={user.email ?? undefined}
-                        >
-                          {user.email}
-                        </p>
-                      </div>
-                      <Link
-                        href='/dashboard'
-                        className='flex items-center gap-3 min-h-[48px] px-4 rounded-xl text-[17px] text-ink no-underline hover:bg-sky'
-                        onClick={() => setIsMobileProfileOpen(false)}
-                      >
-                        <Settings className='w-5 h-5 text-muted' />
-                        Личный кабинет
-                      </Link>
-                      <button
-                        type='button'
-                        onClick={handleLogout}
-                        className='flex w-full items-center gap-3 min-h-[48px] px-4 rounded-xl text-[17px] text-danger-ink bg-transparent border-0 cursor-pointer hover:bg-[#FBEDEC] text-left font-[inherit]'
-                      >
-                        <LogOut className='w-5 h-5' />
-                        Выйти
-                      </button>
-                    </div>
+                    <ProfileMenuItems
+                      email={user.email}
+                      large
+                      onNavigate={() => setIsMobileProfileOpen(false)}
+                      onLogout={handleLogout}
+                    />
                   </div>
                 </div>
               )}
@@ -816,38 +789,15 @@ export function Header() {
               <div className='flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-2 flex flex-col gap-4'>
                 {user && (
                   <div className='ds-card p-2'>
-                    <div className='flex items-center gap-3 px-3 py-2'>
-                      <span className='w-10 h-10 rounded-full bg-sky flex items-center justify-center shrink-0'>
-                        <UserIcon className='w-5 h-5 text-brand' />
-                      </span>
-                      <div className='overflow-hidden'>
-                        <p className='text-[15px] text-muted m-0'>
-                          Вы вошли как
-                        </p>
-                        <p
-                          className='text-[16px] font-bold text-ink truncate m-0'
-                          title={user.email ?? undefined}
-                        >
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
-                    <Link
-                      href='/dashboard'
-                      onClick={closeMenu}
-                      className='flex items-center gap-3 min-h-[48px] px-3 rounded-xl text-[17px] text-ink no-underline hover:bg-sky'
-                    >
-                      <Settings className='w-5 h-5' />
+                    <p className='m-0 px-3 pt-2 text-[15px] font-extrabold text-navy'>
                       Личный кабинет
-                    </Link>
-                    <button
-                      type='button'
-                      onClick={handleLogout}
-                      className='flex w-full items-center gap-3 min-h-[48px] px-3 rounded-xl text-[17px] text-danger-ink bg-transparent border-0 cursor-pointer text-left font-[inherit]'
-                    >
-                      <LogOut className='w-5 h-5' />
-                      Выйти
-                    </button>
+                    </p>
+                    <ProfileMenuItems
+                      email={user.email}
+                      large
+                      onNavigate={closeMenu}
+                      onLogout={handleLogout}
+                    />
                   </div>
                 )}
 
@@ -1004,5 +954,46 @@ export function Header() {
         onClose={() => setIsBookingModalOpen(false)}
       />
     </>
+  );
+}
+
+/** Пункты меню «Личный кабинет»: email, «Мои программы», «Сменить пароль», «Выйти». */
+function ProfileMenuItems({
+  email,
+  large = false,
+  onNavigate,
+  onLogout,
+}: {
+  email: string | null;
+  large?: boolean;
+  onNavigate: () => void;
+  onLogout: () => void;
+}) {
+  const item = `flex items-center gap-3 ${large ? 'min-h-[48px] text-[17px]' : 'min-h-[44px] text-[16px]'} px-4 rounded-xl no-underline font-[inherit] ds-focus`;
+  return (
+    <div className='p-2'>
+      <div className='px-4 py-3'>
+        <p className='text-[15px] text-muted m-0'>Вы вошли как</p>
+        <p className='text-[16px] font-bold text-ink truncate m-0' title={email ?? undefined}>
+          {email}
+        </p>
+      </div>
+      <Link href='/dashboard' onClick={onNavigate} className={`${item} text-ink hover:bg-sky hover:text-navy`}>
+        <Icon name='book' size={20} />
+        Мои программы
+      </Link>
+      <Link href='/forgot-password' onClick={onNavigate} className={`${item} text-ink hover:bg-sky hover:text-navy`}>
+        <Icon name='key' size={20} />
+        Сменить пароль
+      </Link>
+      <button
+        type='button'
+        onClick={onLogout}
+        className={`${item} w-full text-danger-ink bg-transparent border-0 cursor-pointer hover:bg-[#FBEDEC] text-left`}
+      >
+        <Icon name='logout' size={20} />
+        Выйти
+      </button>
+    </div>
   );
 }

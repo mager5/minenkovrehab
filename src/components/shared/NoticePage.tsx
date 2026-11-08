@@ -1,5 +1,7 @@
-import Link from 'next/link';
+// Страница-уведомление в стиле дизайн-системы: «Доступ к курсу закрыт», заглушки разделов и т. п.
 import type { ReactNode } from 'react';
+import { ButtonLink } from '@/components/ds/Button';
+import { BigIcon } from '@/components/account/Alert';
 
 type Action = { href: string; label: string };
 
@@ -8,38 +10,41 @@ export default function NoticePage({
   children,
   primary,
   secondary,
+  icon = 'lock',
+  tone = 'warn',
 }: {
   title: string;
   children: ReactNode;
   primary?: Action;
   secondary?: Action;
+  icon?: string;
+  tone?: 'warn' | 'sky' | 'mint';
 }) {
   return (
-    <main className='flex-1 bg-secondary/40 px-4 py-16 sm:py-24'>
-      <div className='mx-auto max-w-xl rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-black/5 sm:p-10'>
-        <div className='mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary-light text-primary'>
-          <svg aria-hidden='true' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' className='h-7 w-7'>
-            <rect x='4' y='10' width='16' height='10' rx='2' />
-            <path d='M8 10V7a4 4 0 1 1 8 0v3' strokeLinecap='round' />
-          </svg>
+    <div className='ds-wrap pt-4 dsk:pt-6 pb-[var(--sec)]'>
+      <div className='ds-panel ds-panel-bg'>
+        <div className='ds-card mx-auto max-w-[640px] px-[22px] py-10 dsk:px-10 dsk:py-12 text-center'>
+          <BigIcon name={icon} tone={tone} />
+          <h1 className='mt-[18px] mb-2 text-[26px] dsk:text-[30px] font-extrabold text-navy leading-tight'>
+            {title}
+          </h1>
+          <div className='mx-auto mb-6 max-w-[460px] text-muted'>{children}</div>
+          {primary || secondary ? (
+            <div className='flex flex-col dsk:flex-row gap-3 justify-center'>
+              {primary ? (
+                <ButtonLink href={primary.href} size='md'>
+                  {primary.label}
+                </ButtonLink>
+              ) : null}
+              {secondary ? (
+                <ButtonLink href={secondary.href} variant='secondary' size='md'>
+                  {secondary.label}
+                </ButtonLink>
+              ) : null}
+            </div>
+          ) : null}
         </div>
-        <h1 className='text-2xl font-semibold text-gray-900 sm:text-3xl'>{title}</h1>
-        <div className='mt-3 text-base leading-relaxed text-gray-600'>{children}</div>
-        {(primary || secondary) && (
-          <div className='mt-8 flex flex-col justify-center gap-3 sm:flex-row'>
-            {primary && (
-              <Link href={primary.href} className='rounded-lg bg-primary px-6 py-3 font-medium text-white transition-colors hover:bg-primary-dark'>
-                {primary.label}
-              </Link>
-            )}
-            {secondary && (
-              <Link href={secondary.href} className='rounded-lg px-6 py-3 font-medium text-primary ring-1 ring-primary/30 transition-colors hover:bg-primary-light'>
-                {secondary.label}
-              </Link>
-            )}
-          </div>
-        )}
       </div>
-    </main>
+    </div>
   );
 }

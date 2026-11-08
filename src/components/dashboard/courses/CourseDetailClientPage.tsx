@@ -1,33 +1,26 @@
 'use client';
 
-// import { createClient } from '@/lib/supabase/client';
+// Страница программы в кабинете (концепт 2 «Мягкая забота»).
+// Доступ проверяется на сервере (app/dashboard/courses/[slug]/page.tsx), здесь — только вёрстка.
+// Последний открытый этап запоминается в localStorage (без него всё работает, открывается 1 этап).
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useEffect, useId, useState, type ReactNode } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { COURSES } from '@/data/courses';
 import { MeniscusStagesDetails } from '@/components/dashboard/courses/MeniscusStagesDetails';
 import { PlantarFasciopathyDetails } from '@/components/dashboard/courses/PlantarFasciopathyDetails';
-import { ChevronDown } from 'lucide-react';
 import { getRailwayApiBaseUrl } from '@/lib/api-base';
+import { readLastStage, saveLastStage } from '@/lib/course-progress';
+import { PageHead } from '@/components/ds/Layout';
+import { Icon } from '@/components/ds/Icon';
+import { ButtonLink } from '@/components/ds/Button';
+import NoticePage from '@/components/shared/NoticePage';
 
 type Props = {
   slug: string;
 };
 
-// Старый локальный helper (заменён на @/lib/api-base):
-// function getRailwayApiBaseUrl() {
-//   if (typeof window !== 'undefined') {
-//     const hostname = window.location.hostname;
-//     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-//       return '';
-//     }
-//   }
-//   return (
-//     process.env.NEXT_PUBLIC_RAILWAY_API_URL ||
-//     'https://minenkovrehab-production-15cc.up.railway.app'
-//   );
-// }
+type StageId = 1 | 2 | 3 | 4 | 5;
 
 export default function CourseDetailClientPage({ slug }: Props) {
   const [loading, setLoading] = useState(true);
@@ -39,41 +32,36 @@ export default function CourseDetailClientPage({ slug }: Props) {
     individuality: false,
     trialLoad: false,
   });
-  const [meniscusStageId, setMeniscusStageId] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [meniscusStageId, setMeniscusStageIdState] = useState<StageId>(1);
   const router = useRouter();
-  // const supabase = createClient();
+
+  const setMeniscusStageId = (id: StageId) => {
+    setMeniscusStageIdState(id);
+    saveLastStage(slug, id);
+  };
+
+  useEffect(() => {
+    const saved = readLastStage(slug, 5);
+    if (saved) setMeniscusStageIdState(saved as StageId);
+  }, [slug]);
 
   useEffect(() => {
     const checkUser = async () => {
-      // const {
-      //   data: { user },
-      // } = await supabase.auth.getUser();
-      //
-      // if (!user) {
-      //   router.push('/login');
-      //   return;
-      // }
-      // setUser(user);
-      // setLoading(false);
-
       try {
         const response = await fetch(`${getRailwayApiBaseUrl()}/api/auth/me`, {
           method: 'GET',
           credentials: 'include',
         });
         const payload = await response.json().catch(() => null);
-
         if (!response.ok || !payload?.success || !payload?.data?.user?.id) {
-          router.push('/login');
+          router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`);
           return;
         }
-
         setUser(payload.data.user);
       } finally {
         setLoading(false);
       }
     };
-
     checkUser();
   }, [router]);
 
@@ -81,8 +69,10 @@ export default function CourseDetailClientPage({ slug }: Props) {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='text-gray-500'>Загрузка...</div>
+      <div className='ds-wrap pt-6 pb-[var(--sec)]'>
+        <div className='ds-card p-8 text-muted' role='status'>
+          Загрузка…
+        </div>
       </div>
     );
   }
@@ -93,9 +83,15 @@ export default function CourseDetailClientPage({ slug }: Props) {
 
   if (!course) {
     return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='text-gray-500'>Курс не найден</div>
-      </div>
+      <NoticePage
+        title='Курс не найден'
+        icon='book'
+        tone='sky'
+        primary={{ href: '/dashboard', label: 'В личный кабинет' }}
+      >
+        Такой программы нет в личном кабинете. Список ваших программ — на
+        главной странице кабинета.
+      </NoticePage>
     );
   }
 
@@ -103,16 +99,8 @@ export default function CourseDetailClientPage({ slug }: Props) {
   const isPlantarCourse = course.slug === 'plantar-fasciopathy';
   const meniscusStages = [
     { id: 1 as const, title: '1 ЭТАП – Острый', period: '0–2 недели' },
-    {
-      id: 2 as const,
-      title: '2 ЭТАП – Ранний восстановительный',
-      period: '2–4 недели',
-    },
-    {
-      id: 3 as const,
-      title: '3 ЭТАП – Поздний восстановительный',
-      period: '4–8 недель',
-    },
+    { id: 2 as const, title: '2 ЭТАП – Ранний восстановительный', period: '2–4 недели' },
+    { id: 3 as const, title: '3 ЭТАП – Поздний восстановительный', period: '4–8 недель' },
     { id: 4 as const, title: '4 ЭТАП – Функциональный', period: '8–12 недель' },
     { id: 5 as const, title: '5 ЭТАП – Тренировочный', period: '3–4 месяца' },
   ];
@@ -129,32 +117,67 @@ export default function CourseDetailClientPage({ slug }: Props) {
     },
   };
 
-  return (
-    <div className='min-h-screen bg-gray-50'>
-      <header className='bg-white shadow'>
-        <div className='mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
-          <div>
-            <h1 className='text-3xl font-bold tracking-tight text-gray-900'>
-              {course.slug === 'meniscus-resection-rehab'
-                ? 'Резекция мениска. Восстановительная программа (Занимает 1,5-3 месяца)'
-                : course.title}
-            </h1>
-          </div>
-          <Link
-            href='/dashboard/courses'
-            className='inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-          >
-            Ко всем курсам
-          </Link>
-        </div>
-      </header>
+  const crumbs = [
+    { label: 'Личный кабинет', href: '/dashboard' },
+    { label: 'Мои программы', href: '/dashboard/courses' },
+    { label: course.shortTitle || course.title },
+  ];
 
-      <main className='max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-10'>
-        {isMeniscusCourse ? (
-          <div className='space-y-10'>
-            <section className='max-w-5xl space-y-8'>
-              <div className='rounded-2xl border border-gray-100 bg-white shadow-sm px-5 py-6 sm:px-7 sm:py-7 space-y-4'>
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+  return (
+    <div className='pb-[var(--sec)]'>
+      <PageHead
+        crumbs={crumbs}
+        title={course.cabinetTitle || course.title}
+        lead={
+          isMeniscusCourse
+            ? `${course.shortDescription} Занимает 1,5–3 месяца.`
+            : course.shortDescription
+        }
+        extra={
+          <div className='flex flex-wrap gap-2.5 mt-6'>
+            <span className='ds-badge bg-mint text-mint-ink'>Доступ открыт</span>
+            {isMeniscusCourse ? (
+              <>
+                <span className='ds-badge bg-white text-navy'>5 этапов</span>
+                <span className='ds-badge bg-white text-navy'>Видео упражнений 1–3 этапов</span>
+              </>
+            ) : null}
+          </div>
+        }
+      />
+
+      {isMeniscusCourse ? (
+        <>
+          <section className='ds-wrap ds-sec'>
+            <div className='ds-card p-[22px] dsk:px-9 dsk:py-8'>
+              <h2 className='m-0 mb-3 text-[24px] dsk:text-[26px] font-extrabold text-navy'>
+                Прежде чем начать
+              </h2>
+              <p className='m-0'>
+                Данный раздел сайта — собрание аудиовизуальных и текстовых
+                материалов моего личного авторства. Восстановительная программа
+                — это своего рода «дорожная карта»: какие задачи стоят на каждом
+                этапе, как двигаться вперёд и какие ориентиры учитывать.
+              </p>
+              <div className='flex gap-3.5 mt-[18px] px-5 py-[18px] rounded-[20px] bg-[#FFF6E5] shadow-[inset_0_0_0_1px_#F3DDB0]'>
+                <span
+                  aria-hidden='true'
+                  className='flex-none w-10 h-10 rounded-xl bg-[#FFE8BD] flex items-center justify-center'
+                >
+                  <Icon name='alert' size={20} color='var(--c-warn-ink)' />
+                </span>
+                <p className='m-0 text-[17px] text-[#4A3A1A]'>
+                  <strong>
+                    Доступ к материалам не является назначением лечения
+                  </strong>{' '}
+                  и не заменяет очную консультацию. Перед выполнением любых
+                  упражнений обязательно проконсультируйтесь с лечащим врачом
+                  или специалистом по реабилитации.
+                </p>
+              </div>
+              <div className='flex flex-col gap-2.5 mt-[18px]'>
+                <Accordion title='О программе подробнее'>
+                <p className='m-0 mt-3'>
                   Данный раздел сайта представляет собой собрание
                   аудиовизуальных и текстовых материалов моего личного
                   авторства. Меня зовут Миненков Вадим Леонидович, я —
@@ -162,11 +185,11 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   и спортивной тренировке)
                 </p>
 
-                <p className='text-sm sm:text-base font-semibold text-gray-900 leading-relaxed'>
+                <p className='m-0 mt-3 font-bold text-ink'>
                   Что такое &quot;восстановительная программа&quot; в нашем
                   случае?
                 </p>
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                <p className='m-0 mt-3'>
                   Восстановительная программа — это структурированная
                   последовательность этапов восстановления после резекции
                   мениска. Это своего рода &quot;дорожная карта&quot;, которая
@@ -176,29 +199,29 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   проверенный практикой.
                 </p>
 
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                <p className='m-0 mt-3'>
                   Материалы, представленные в программе, не противоречат
                   официальным клиническим рекомендациям. Напротив — они
                   дополняют их, раскрывая нюансы и детали, которые часто
                   остаются &quot;за кадром&quot;.
                 </p>
 
-                <p className='text-sm sm:text-base font-semibold text-gray-900 leading-relaxed'>
+                <p className='m-0 mt-3 font-bold text-ink'>
                   При этом они не могут использоваться без предварительной
                   консультации с лечащим врачом.
                 </p>
 
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                <p className='m-0 mt-3'>
                   Весь контент является компиляцией — собранной информацией из
                   различных источников: методических пособий, бумажных изданий,
                   планов лечения, а также рекомендаций врачей и моего
                   собственного опыта практической работы.
                 </p>
 
-                <p className='text-sm sm:text-base font-semibold text-gray-900 leading-relaxed'>
+                <p className='m-0 mt-3 font-bold text-ink'>
                   Важно понимать:
                 </p>
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                <p className='m-0 mt-3'>
                   <strong>
                     Доступ к материалам не является назначением лечения и не
                     заменяет очную консультацию со специалистом.
@@ -210,13 +233,13 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   </strong>
                 </p>
 
-                <p className='text-sm sm:text-base font-semibold text-gray-900 leading-relaxed'>
+                <p className='m-0 mt-3 font-bold text-ink'>
                   Перед выполнением любых упражнений обязательно
                   проконсультируйтесь с лечащим врачом или специалистом по
                   реабилитации.
                 </p>
 
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                <p className='m-0 mt-3'>
                   Восстановительная программа ниже представлена в текстовом
                   формате. И так же представлены видео упражнений для первых 3-х
                   этапов. С первого дня после операции до возвращения к ранней
@@ -229,30 +252,26 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   зависимости от профессиональных целей, вида спорта и
                   индивидуальных потребностей.
                 </p>
-              </div>
-
-              <div className='rounded-2xl border border-gray-100 bg-white shadow-sm px-5 py-6 sm:px-7 sm:py-7 space-y-5'>
-                <h2 className='text-xl sm:text-2xl font-semibold tracking-tight text-gray-900'>
-                  Что такое резекция мениска
-                </h2>
-                <p className='text-base text-gray-700 leading-relaxed mb-3'>
+                </Accordion>
+                <Accordion title='Что такое резекция мениска и сколько длится восстановление'>
+                <p className='m-0 mt-3'>
                   Резекция мениска – это хирургическая операция, направленная на
                   удаление поврежденной части мениска в коленном суставе
                 </p>
-                <p className='text-base text-gray-700 leading-relaxed'>
+                <p className='m-0 mt-3'>
                   Резекция мениска может быть частичной/парциальной (удаляется
                   только часть мениска) и полной (удаляется весь мениск)
                 </p>
 
-                <p className='text-base font-semibold text-gray-900'>
+                <p className='m-0 mt-4 font-bold text-ink'>
                   Реабилитация состоит из 5 этапов
                 </p>
-                <ul className='space-y-2 text-sm sm:text-base text-gray-700 list-disc pl-5'>
+                <ul className='mt-3 mb-0 pl-6 list-disc flex flex-col gap-1.5'>
                   {meniscusStages.map(stage => (
                     <li key={stage.id}>
                       <a
                         href='#stages'
-                        className='text-indigo-700 hover:text-indigo-800 hover:underline font-medium'
+                        className='text-brand font-bold underline hover:text-navy'
                         onClick={event => {
                           event.preventDefault();
                           setMeniscusStageId(stage.id);
@@ -266,18 +285,18 @@ export default function CourseDetailClientPage({ slug }: Props) {
                       >
                         {stage.title}
                       </a>
-                      <span className='text-gray-600'>. {stage.period}</span>
+                      <span className='text-muted'>. {stage.period}</span>
                     </li>
                   ))}
                 </ul>
-                <p className='text-xs sm:text-sm text-gray-600 leading-relaxed'>
+                <p className='m-0 mt-3 text-[15px] text-muted'>
                   *Данные сроки являются ориентировочными и не могут корректно
                   соответствовать каждому случаю. В зависимости от исходной
                   точки, поставленных целей и задач, сроки реабилитации могут в
                   значительной степени отличаться
                 </p>
 
-                <ul className='space-y-3 text-sm sm:text-base text-gray-700 leading-relaxed'>
+                <ul className='mt-3 mb-0 pl-6 list-disc flex flex-col gap-2.5'>
                   <li>
                     <strong>Позднего восстановительного этапа</strong> будет
                     достаточно большинству людей, чья повседневная активность не
@@ -315,7 +334,7 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   </li>
                 </ul>
 
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed'>
+                <p className='m-0 mt-3'>
                   <strong>
                     Так же на сроки восстановления могут повлиять следующие
                     факторы:
@@ -327,13 +346,9 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   сопутствующие патологии, осложнения, уровень комплаентности,
                   психологическое состояние и прочее.
                 </p>
-              </div>
-
-              <div className='rounded-2xl border border-gray-100 bg-white shadow-sm px-5 py-6 sm:px-7 sm:py-7'>
-                <h2 className='text-xl sm:text-2xl font-semibold tracking-tight text-gray-900 mb-2'>
-                  Принципы физической реабилитации
-                </h2>
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line mb-5'>
+                </Accordion>
+                <Accordion title='Принципы физической реабилитации'>
+                <p className='m-0 mt-2 mb-2 px-1 whitespace-pre-line'>
                   При выполнении физических упражнений организм подвергается
                   воздействию (
                   <em>механических, биохимических и нейрофизиологических</em>){' '}
@@ -343,14 +358,14 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   увеличению их функциональной прочности и устойчивости к
                   повреждениям.
                 </p>
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed mb-4'>
+                <p className='m-0 mt-3 mb-1'>
                   Для реализации данной формулы необходимо соблюдать основные
                   принципы физической реабилитации:
                 </p>
 
                 <button
                   type='button'
-                  className='w-full bg-transparent py-2 flex items-center justify-between text-left group'
+                  className='mt-2 w-full flex items-center justify-between gap-3 min-h-[52px] px-4 py-2.5 rounded-2xl border-0 bg-white font-[inherit] text-[17px] font-extrabold text-navy text-left cursor-pointer ds-focus'
                   onClick={() =>
                     setOpenPrinciples(prev => ({
                       ...prev,
@@ -359,15 +374,15 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   }
                   aria-expanded={openPrinciples.progression}
                 >
-                  <span className='text-base font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors'>
+                  <span>
                     1. Принцип прогрессии нагрузки
                   </span>
                   <ChevronDown
-                    className={`h-5 w-5 text-gray-500 transition-transform ${openPrinciples.progression ? 'rotate-180' : ''}`}
+                    className={`flex-none h-6 w-6 text-brand transition-transform ${openPrinciples.progression ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {openPrinciples.progression && (
-                  <p className='text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line mb-5'>
+                  <p className='m-0 mt-2 mb-2 px-1 whitespace-pre-line'>
                     — это постепенное увеличение нагрузки (
                     <em>от простого к сложному</em>). <u>Посредством</u>:
                     увеличения числа упражнений в комплексе, количества
@@ -387,7 +402,7 @@ export default function CourseDetailClientPage({ slug }: Props) {
 
                 <button
                   type='button'
-                  className='w-full bg-transparent py-2 flex items-center justify-between text-left group'
+                  className='mt-2 w-full flex items-center justify-between gap-3 min-h-[52px] px-4 py-2.5 rounded-2xl border-0 bg-white font-[inherit] text-[17px] font-extrabold text-navy text-left cursor-pointer ds-focus'
                   onClick={() =>
                     setOpenPrinciples(prev => ({
                       ...prev,
@@ -396,15 +411,15 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   }
                   aria-expanded={openPrinciples.specificity}
                 >
-                  <span className='text-base font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors'>
+                  <span>
                     2. Принцип специфичности
                   </span>
                   <ChevronDown
-                    className={`h-5 w-5 text-gray-500 transition-transform ${openPrinciples.specificity ? 'rotate-180' : ''}`}
+                    className={`flex-none h-6 w-6 text-brand transition-transform ${openPrinciples.specificity ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {openPrinciples.specificity && (
-                  <p className='text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line mb-5'>
+                  <p className='m-0 mt-2 mb-2 px-1 whitespace-pre-line'>
                     — для развития конкретных навыков и улучшения
                     функциональности в определённом виде активности, необходимо
                     выполнять упражнения и действия, которые максимально
@@ -428,7 +443,7 @@ export default function CourseDetailClientPage({ slug }: Props) {
 
                 <button
                   type='button'
-                  className='w-full bg-transparent py-2 flex items-center justify-between text-left group'
+                  className='mt-2 w-full flex items-center justify-between gap-3 min-h-[52px] px-4 py-2.5 rounded-2xl border-0 bg-white font-[inherit] text-[17px] font-extrabold text-navy text-left cursor-pointer ds-focus'
                   onClick={() =>
                     setOpenPrinciples(prev => ({
                       ...prev,
@@ -437,15 +452,15 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   }
                   aria-expanded={openPrinciples.recovery}
                 >
-                  <span className='text-base font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors'>
+                  <span>
                     3. Принцип восстановления
                   </span>
                   <ChevronDown
-                    className={`h-5 w-5 text-gray-500 transition-transform ${openPrinciples.recovery ? 'rotate-180' : ''}`}
+                    className={`flex-none h-6 w-6 text-brand transition-transform ${openPrinciples.recovery ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {openPrinciples.recovery && (
-                  <p className='text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line mb-5'>
+                  <p className='m-0 mt-2 mb-2 px-1 whitespace-pre-line'>
                     — для того, чтобы на полученные стимулы от упражнений,
                     произошли нужные нам адаптации, организм должен получить
                     достаточное время и условия для восстановления.{' '}
@@ -461,7 +476,7 @@ export default function CourseDetailClientPage({ slug }: Props) {
 
                 <button
                   type='button'
-                  className='w-full bg-transparent py-2 flex items-center justify-between text-left group'
+                  className='mt-2 w-full flex items-center justify-between gap-3 min-h-[52px] px-4 py-2.5 rounded-2xl border-0 bg-white font-[inherit] text-[17px] font-extrabold text-navy text-left cursor-pointer ds-focus'
                   onClick={() =>
                     setOpenPrinciples(prev => ({
                       ...prev,
@@ -470,20 +485,20 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   }
                   aria-expanded={openPrinciples.individuality}
                 >
-                  <span className='text-base font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors'>
+                  <span>
                     4. Принцип индивидуальности
                   </span>
                   <ChevronDown
-                    className={`h-5 w-5 text-gray-500 transition-transform ${openPrinciples.individuality ? 'rotate-180' : ''}`}
+                    className={`flex-none h-6 w-6 text-brand transition-transform ${openPrinciples.individuality ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {openPrinciples.individuality && (
-                  <p className='text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line mb-5'>{`Каждый человек обладает уникальными структурно-функциональными особенностями и специфической реакцией на физическую нагрузку, что определяет необходимость персонализированного подхода при построении тренировочной или восстановительной программы. Однотипные упражнения, объёмы и интенсивность нагрузки не могут одинаково эффективно воздействовать на всех, поэтому каждый элемент программы подбирается с учётом текущего функционального состояния, способности к адаптации, уровня подготовки, скорости восстановления и переносимости нагрузок. Применение этого принципа предполагает гибкость: параметры выполнения упражнений, их объём, темп, амплитуда движения и сложность корректируются в соответствии с индивидуальными особенностями и реакцией организма. Если выполнение упражнения сопровождается дискомфортом, болевыми ощущениями или другими функциональными ограничениями, нагрузка изменяется до тех пор, пока выполнение не станет безопасным и функционально допустимым; при невозможности устранить негативные проявления рассматривается замена упражнения или отказ от него. Такой подход обеспечивает адаптацию тренировочного процесса к конкретному человеку, позволяет постепенно увеличивать нагрузку и способствует развитию силы, выносливости, координации и других функциональных характеристик без излишнего риска перегрузки.`}</p>
+                  <p className='m-0 mt-2 mb-2 px-1 whitespace-pre-line'>{`Каждый человек обладает уникальными структурно-функциональными особенностями и специфической реакцией на физическую нагрузку, что определяет необходимость персонализированного подхода при построении тренировочной или восстановительной программы. Однотипные упражнения, объёмы и интенсивность нагрузки не могут одинаково эффективно воздействовать на всех, поэтому каждый элемент программы подбирается с учётом текущего функционального состояния, способности к адаптации, уровня подготовки, скорости восстановления и переносимости нагрузок. Применение этого принципа предполагает гибкость: параметры выполнения упражнений, их объём, темп, амплитуда движения и сложность корректируются в соответствии с индивидуальными особенностями и реакцией организма. Если выполнение упражнения сопровождается дискомфортом, болевыми ощущениями или другими функциональными ограничениями, нагрузка изменяется до тех пор, пока выполнение не станет безопасным и функционально допустимым; при невозможности устранить негативные проявления рассматривается замена упражнения или отказ от него. Такой подход обеспечивает адаптацию тренировочного процесса к конкретному человеку, позволяет постепенно увеличивать нагрузку и способствует развитию силы, выносливости, координации и других функциональных характеристик без излишнего риска перегрузки.`}</p>
                 )}
 
                 <button
                   type='button'
-                  className='w-full bg-transparent py-2 flex items-center justify-between text-left group mb-2'
+                  className='mt-2 w-full flex items-center justify-between gap-3 min-h-[52px] px-4 py-2.5 rounded-2xl border-0 bg-white font-[inherit] text-[17px] font-extrabold text-navy text-left cursor-pointer ds-focus'
                   onClick={() =>
                     setOpenPrinciples(prev => ({
                       ...prev,
@@ -492,20 +507,20 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   }
                   aria-expanded={openPrinciples.trialLoad}
                 >
-                  <span className='text-base font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors'>
+                  <span>
                     5. Принцип пробного освоения нагрузки
                   </span>
                   <ChevronDown
-                    className={`h-5 w-5 text-gray-500 transition-transform ${openPrinciples.trialLoad ? 'rotate-180' : ''}`}
+                    className={`flex-none h-6 w-6 text-brand transition-transform ${openPrinciples.trialLoad ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {openPrinciples.trialLoad && (
-                  <p className='text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line mb-5'>{`Принцип пробного освоения нагрузки применяется как к новым упражнениям, так и к упражнениям, которые человек выполняет после длительного перерыва, травмы, операции или значительных изменений физической подготовки. Суть этого принципа в том, что любую такую нагрузку сначала выполняют в облегчённом варианте, уменьшая объём и интенсивность на 30–50% относительно общей рекомендуемой нагрузки. Это позволяет безопасно проверить, как организм и ткани реагируют на новую или изменённую активность, выявить возможные ограничения и избежать перегрузки.
+                  <p className='m-0 mt-2 mb-2 px-1 whitespace-pre-line'>{`Принцип пробного освоения нагрузки применяется как к новым упражнениям, так и к упражнениям, которые человек выполняет после длительного перерыва, травмы, операции или значительных изменений физической подготовки. Суть этого принципа в том, что любую такую нагрузку сначала выполняют в облегчённом варианте, уменьшая объём и интенсивность на 30–50% относительно общей рекомендуемой нагрузки. Это позволяет безопасно проверить, как организм и ткани реагируют на новую или изменённую активность, выявить возможные ограничения и избежать перегрузки.
 Реакцию наблюдают во время выполнения упражнения, сразу после тренировки и в течение последующих суток, включая ночной период. На основе этих наблюдений решают, как продолжать нагрузку: при нормальной реакции её постепенно увеличивают до целевых параметров, при появлении дискомфорта, боли или ограничений — корректируют объём, интенсивность или технику выполнения, либо заменяют упражнение.
 Принцип пробной дозировки включает возможность постепенного освоения нагрузки в разных формах. В его рамках можно начинать с меньшего числа тренировочных сессий в течение дня или недели, следить за реакцией организма на получаемый объём и постепенно увеличивать количество подходов или сессий до рабочих значений. Такой подход помогает организму постепенно привыкать к нагрузке, снижает риск перегрузки и создаёт безопасную основу для последовательного и контролируемого прогрессирования тренировочного процесса.`}</p>
                 )}
 
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed mb-3'>
+                <p className='m-0 mt-3'>
                   На начальном этапе реабилитации (
                   <em>острый и ранний восстановительный этапы</em>) упражнения
                   на травмированный сегмент выполняются ежедневно (
@@ -521,7 +536,7 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   коленного сустава и укрепления мышц за счёт преимущественно
                   изометрических упражнений
                 </p>
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed mb-3'>
+                <p className='m-0 mt-3'>
                   По мере прогресса и перехода к более поздним этапам
                   реабилитации, нагрузка увеличивается. Упражнения становятся
                   более интенсивными и направленными на развитие силы,
@@ -537,7 +552,7 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   спортсмену <u>быстрей</u> набрать функциональные кондиции и
                   предотвратить детренированность
                 </p>
-                <p className='text-sm sm:text-base text-gray-700 leading-relaxed mb-5'>
+                <p className='m-0 mt-3'>
                   В профессиональном спорте можно встретить ситуации, где на
                   сроке 3-4 недели после операции спортсмен завершает свою
                   реабилитацию и возвращается к спортивной деятельности. Важно
@@ -552,7 +567,7 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   деятельности и данный шаг сопряжен с осознанным риском
                 </p>
 
-                <blockquote className='text-sm sm:text-base italic text-gray-900 leading-relaxed'>
+                <blockquote className='m-0 mt-5 p-5 rounded-2xl bg-sky italic text-navy'>
                   «Реабилитация после резекции мениска — это не вопрос времени,
                   а вопрос достижений. Просто ожидание окончания этапов не
                   гарантирует восстановления. Только через последовательное
@@ -560,83 +575,33 @@ export default function CourseDetailClientPage({ slug }: Props) {
                   достичь полноценного восстановления функции сустава. Время без
                   усилий не восстановит функциональность колена!»
                 </blockquote>
+                </Accordion>
               </div>
-            </section>
-
-            <div id='stages'>
-              <MeniscusStagesDetails
-                activeStageId={meniscusStageId}
-                onActiveStageIdChange={setMeniscusStageId}
-              />
             </div>
-          </div>
-        ) : isPlantarCourse ? (
+          </section>
+          <section id='stages' className='ds-wrap pt-12 dsk:pt-16 scroll-mt-28'>
+            <MeniscusStagesDetails
+              activeStageId={meniscusStageId}
+              onActiveStageIdChange={setMeniscusStageId}
+            />
+          </section>
+        </>
+      ) : isPlantarCourse ? (
+        <section className='ds-wrap ds-sec'>
           <PlantarFasciopathyDetails />
-        ) : (
-          <div className='space-y-8'>
-            <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
-              <div className='lg:col-span-2'>
-                <div className='bg-white rounded-lg shadow overflow-hidden'>
-                  <div className='relative h-64 w-full sm:h-80'>
-                    <Image
-                      src={course.image}
-                      alt={course.title}
-                      fill
-                      sizes='(min-width: 1280px) 66vw, 100vw'
-                      className='object-cover'
-                      priority
-                    />
-                  </div>
-                  <div className='px-5 py-6 sm:px-6 sm:py-7 space-y-4'>
-                    <p className='text-base text-gray-700 leading-relaxed'>
-                      {course.fullDescription}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <aside className='lg:col-span-1 space-y-6'>
-                <div className='bg-white rounded-lg shadow p-5 sm:p-6'>
-                  <h2 className='text-lg font-semibold text-gray-900 mb-3'>
-                    Связанные услуги
-                  </h2>
-                  <p className='text-sm text-gray-500 mb-4'>
-                    Курс опирается на услуги, которые уже представлены на сайте.
-                  </p>
-                  <ul className='space-y-3'>
-                    {course.services.map(service => (
-                      <li
-                        key={service.id}
-                        className='flex items-start gap-3 rounded-md border border-gray-100 bg-gray-50 px-3 py-2.5'
-                      >
-                        <div className='mt-1 h-2 w-2 rounded-full bg-indigo-500' />
-                        <div className='text-sm text-gray-800'>
-                          <div className='font-medium'>{service.title}</div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className='bg-indigo-50 border border-indigo-100 rounded-lg p-5 sm:p-6'>
-                  <h2 className='text-lg font-semibold text-indigo-900 mb-2'>
-                    Как начать обучение
-                  </h2>
-                  <p className='text-sm text-indigo-800 mb-3'>
-                    Получите доступ к материалам курса после оплаты
-                    соответствующей услуги на сайте.
-                  </p>
-                  <Link
-                    href='/products'
-                    className='inline-flex items-center justify-center w-full rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-                  >
-                    Перейти к услугам
-                  </Link>
-                </div>
-              </aside>
+        </section>
+      ) : (
+        <section className='ds-wrap ds-sec'>
+          <div className='ds-card p-[22px] dsk:p-9'>
+            <p className='m-0 whitespace-pre-line'>{course.fullDescription}</p>
+            <div className='mt-6'>
+              <ButtonLink href='/products' size='md'>
+                Перейти к услугам
+              </ButtonLink>
             </div>
           </div>
-        )}
-      </main>
-
+        </section>
+      )}
       <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -644,3 +609,41 @@ export default function CourseDetailClientPage({ slug }: Props) {
     </div>
   );
 }
+
+/** Раскрывающийся блок «Прежде чем начать». Содержимое в DOM всегда, свёрнутое — hidden. */
+function Accordion({ title, children }: { title: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  return (
+    <div className='rounded-[18px] bg-canvas'>
+      <button
+        type='button'
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen(v => !v)}
+        className='w-full flex justify-between items-center gap-3 min-h-[56px] px-[18px] py-3 border-0 bg-transparent font-[inherit] text-[17px] font-extrabold text-navy text-left cursor-pointer rounded-[18px] ds-focus'
+      >
+        {title}
+        <span
+          aria-hidden='true'
+          className={`flex-none w-8 h-8 rounded-full flex items-center justify-center ${
+            open ? 'bg-brand' : 'bg-white'
+          }`}
+        >
+          <Icon
+            name={open ? 'minus' : 'plus'}
+            size={16}
+            strokeWidth={2.6}
+            color={open ? '#fff' : 'var(--c-blue)'}
+          />
+        </span>
+      </button>
+      <div id={id} hidden={!open} className='px-[18px] pb-5 text-[16px] dsk:text-[17px]'>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ChevronDown используется в принципах физической реабилитации.
+void ChevronDown;

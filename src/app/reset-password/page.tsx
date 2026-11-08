@@ -1,192 +1,136 @@
 'use client';
 
-import { useState } from 'react';
+// Новый пароль по ссылке из письма. Логика прежняя: токен из #token=…, POST /api/auth/reset-password,
+// после успеха — переход на /login через 3 секунды.
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import {
   resetPasswordSchema,
   type ResetPasswordInput,
 } from '@/lib/validations/auth';
 import { authPost } from '@/lib/auth-client';
-import { Button } from '@/components/ui/auth/Button';
-import { Input } from '@/components/ui/auth/Input';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/auth/Alert';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/auth/Card';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2 } from 'lucide-react';
+import { Button, ButtonLink } from '@/components/ds/Button';
+import { AuthShell, CardHead } from '@/components/account/AuthShell';
+import { BigIcon, ErrorAlert } from '@/components/account/Alert';
+import { PasswordChecklist, PasswordField } from '@/components/account/PasswordField';
 
-function ResetPasswordForm() {
+export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [noToken, setNoToken] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { password: '', confirmPassword: '' },
   });
+  const password = watch('password') || '';
+
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.hash.slice(1)).get('token');
+    if (!token) setNoToken(true);
+  }, []);
 
   const onSubmit = async (data: ResetPasswordInput) => {
     setError(null);
     setIsLoading(true);
-
     try {
-      const token = new URLSearchParams(window.location.hash.slice(1)).get('token') || '';
-      const response = await authPost('/api/auth/reset-password',{token,password:data.password});
-      if(!response.ok) throw new Error('Ссылка недействительна или срок её действия истёк.');
-      window.history.replaceState(null,'','/reset-password');
-
+      const token =
+        new URLSearchParams(window.location.hash.slice(1)).get('token') || '';
+      const response = await authPost('/api/auth/reset-password', {
+        token,
+        password: data.password,
+      });
+      if (!response.ok)
+        throw new Error('Ссылка недействительна или срок её действия истёк.');
+      window.history.replaceState(null, '', '/reset-password');
       setSuccess(true);
-
-      // Redirect after a delay
       setTimeout(() => {
         router.push('/login');
       }, 3000);
     } catch (err: any) {
-      setError(err.message || 'Не удалось изменить пароль. Попробуйте позже.');
+      setError(err?.message || 'Не удалось изменить пароль. Попробуйте позже.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (success) {
-    return (
-      <Card className='border-0 shadow-lg sm:border sm:shadow-sm'>
-        <CardContent className='pt-6'>
-          <div className='flex flex-col items-center justify-center space-y-4 text-center'>
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+  const linkProblem = noToken || error;
+
+  return (
+    <AuthShell
+      title='Задайте новый пароль'
+      lead='Ссылка из письма действует ограниченное время.'
+    >
+      {success ? (
+        <div className='text-center' role='status'>
+          <BigIcon name='check' />
+          <h2 className='mt-[18px] mb-2 text-[24px] dsk:text-[26px] font-extrabold text-navy'>
+            Пароль успешно изменён
+          </h2>
+          <p className='m-0 mb-6 text-[17px] text-muted'>
+            Теперь вы можете войти с новым паролем. Через несколько секунд
+            откроется страница входа.
+          </p>
+          <ButtonLink href='/login' size='lg' block>
+            Перейти ко входу
+          </ButtonLink>
+        </div>
+      ) : (
+        <>
+          <CardHead
+            title='Новый пароль'
+            sub='Придумайте надёжный пароль для вашего аккаунта'
+          />
+          {linkProblem ? (
+            <div className='mb-5 flex flex-col gap-3'>
+              <ErrorAlert title='Ошибка'>
+                {error || 'Ссылка недействительна или срок её действия истёк.'}
+              </ErrorAlert>
+              <ButtonLink href='/forgot-password' variant='secondary' size='md' block>
+                Запросить новую ссылку
+              </ButtonLink>
+            </div>
+          ) : null}
+          {noToken ? null : (
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className='flex flex-col gap-[18px]'
+              noValidate
             >
-              <CheckCircle2 className='h-16 w-16 text-green-500' />
-            </motion.div>
-            <div className='space-y-2'>
-              <h3 className='text-xl font-bold'>Пароль успешно изменен</h3>
-              <p className='text-gray-500'>
-                Теперь вы можете войти в систему с новым паролем.
-                <br />
-                Вы будете перенаправлены на страницу входа...
-              </p>
-            </div>
-            <Button className='w-full' onClick={() => router.push('/login')}>
-              Перейти ко входу
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className='border-0 shadow-lg sm:border sm:shadow-sm'>
-      <CardHeader className='space-y-1'>
-        <CardTitle className='text-2xl font-bold tracking-tight text-center'>
-          Новый пароль
-        </CardTitle>
-        <CardDescription className='text-center'>
-          Придумайте надежный пароль для вашего аккаунта
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-              >
-                <Alert variant='destructive'>
-                  <AlertTitle>Ошибка</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div className='space-y-2'>
-            <Input
-              id='password'
-              type='password'
-              label='Новый пароль'
-              error={errors.password?.message || ''}
-              {...register('password')}
-            />
-            <div className='text-xs text-gray-500 space-y-1 mt-2'>
-              <p>Требования к паролю:</p>
-              <ul className='list-disc list-inside pl-2 space-y-0.5'>
-                <li
-                  className={
-                    !errors.password?.message && !errors.password
-                      ? 'text-green-600'
-                      : ''
-                  }
-                >
-                  Минимум 8 символов
-                </li>
-                <li
-                  className={
-                    !errors.password?.message && !errors.password
-                      ? 'text-green-600'
-                      : ''
-                  }
-                >
-                  Заглавная буква и цифра
-                </li>
-                <li
-                  className={
-                    !errors.password?.message && !errors.password
-                      ? 'text-green-600'
-                      : ''
-                  }
-                >
-                  Специальный символ
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className='space-y-2'>
-            <Input
-              id='confirmPassword'
-              type='password'
-              label='Подтвердите пароль'
-              error={errors.confirmPassword?.message || ''}
-              {...register('confirmPassword')}
-            />
-          </div>
-
-          <Button type='submit' className='w-full' isLoading={isLoading}>
-            Сохранить пароль
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
-  );
-}
-
-export default function ResetPasswordPage() {
-  return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
-      <div className='w-full max-w-md space-y-8'>
-        <ResetPasswordForm />
-      </div>
-    </div>
+              <PasswordField
+                id='reset-password'
+                label='Новый пароль'
+                autoComplete='new-password'
+                describedBy='reset-rules'
+                disabled={isLoading}
+                error={errors.password?.message}
+                {...register('password')}
+              />
+              <PasswordChecklist id='reset-rules' value={password} />
+              <PasswordField
+                id='reset-password2'
+                label='Подтвердите пароль'
+                autoComplete='new-password'
+                disabled={isLoading}
+                error={errors.confirmPassword?.message}
+                {...register('confirmPassword')}
+              />
+              <Button type='submit' size='lg' block disabled={isLoading} aria-busy={isLoading}>
+                {isLoading ? 'Сохраняем…' : 'Сохранить пароль'}
+              </Button>
+            </form>
+          )}
+        </>
+      )}
+    </AuthShell>
   );
 }

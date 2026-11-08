@@ -1047,3 +1047,51 @@ export const moreCards: Record<
     href: '/products/neck-thoracic-pain',
   },
 };
+
+/* ============================================================
+   Личный кабинет и вход: тексты статусов покупок и подсказки.
+   ============================================================ */
+
+/** Тип покупки определяет, что человек видит в «Мои покупки». */
+export type PurchaseKind = 'program' | 'pending' | 'service';
+
+export const accountContent = {
+  loginNote:
+    'Аккаунт создаётся автоматически при первой оплате — используйте email, указанный при покупке.',
+  dashboardLead: 'Здравствуйте! Здесь программы, к которым у вас открыт доступ.',
+  coursesLead: 'Выберите программу, чтобы открыть описание и материалы.',
+  emptyTitle: 'У вас пока нет программ',
+  emptyText:
+    'После оплаты программа появится здесь автоматически. Если вы уже оплатили, а программы нет — проверьте, что вошли под тем же email, который указали при покупке.',
+  purchaseStatus: {
+    /** Программа с материалами в кабинете. */
+    program: { badge: 'Доступна', note: '', action: 'Открыть' },
+    /** Программа, материалов которой в кабинете пока нет. */
+    pending: {
+      badge: 'Оплачено',
+      note: 'Материалы скоро появятся в кабинете, Вадим свяжется с вами',
+      action: 'Написать в Telegram',
+    },
+    /** Консультации и онлайн-тренировки. */
+    service: {
+      badge: 'Оплачено',
+      note: 'Вадим свяжется с вами, чтобы согласовать время',
+      action: 'Написать в Telegram',
+    },
+  } satisfies Record<PurchaseKind, { badge: string; note: string; action: string }>,
+};
+
+/** Покупки-услуги (по slug продукта в базе). */
+const SERVICE_SLUGS = ['consultation', 'express-consultation', 'online-training'];
+
+/** slug продукта в базе → slug программы в кабинете (если у программы есть страница с материалами). */
+export const COURSE_BY_PRODUCT: Record<string, string> = {
+  'personal-program': 'meniscus-resection-rehab',
+};
+
+/** Тип покупки по slug продукта. Всё, что не услуга и не программа с материалами, — «Оплачено, материалы скоро». */
+export function purchaseKind(productSlug: string): PurchaseKind {
+  if (COURSE_BY_PRODUCT[productSlug]) return 'program';
+  if (SERVICE_SLUGS.includes(productSlug)) return 'service';
+  return 'pending';
+}

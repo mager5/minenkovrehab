@@ -4,6 +4,14 @@ export type Course = {
   shortDescription: string;
   fullDescription: string;
   image: string;
+  /** Заголовок в кабинете (карточка и страница программы). */
+  cabinetTitle?: string;
+  /** Короткое название для хлебных крошек. */
+  shortTitle?: string;
+  /** Строка под заголовком карточки: срок, этапы, видео. */
+  meta?: string;
+  /** Есть ли у программы страница с материалами в кабинете. */
+  hasCabinetPage?: boolean;
   services: {
     id: string;
     title: string;
@@ -71,6 +79,10 @@ export const COURSES: Course[] = [
   {
     slug: 'meniscus-resection-rehab',
     title: 'Программа восстановления после резекции мениска',
+    cabinetTitle: 'Резекция мениска. Восстановительная программа',
+    shortTitle: 'Резекция мениска',
+    meta: 'Занимает 1,5–3 месяца · 5 этапов · видео упражнений первых 3 этапов',
+    hasCabinetPage: true,
     shortDescription:
       'Структурированная восстановительная программа после частичной или полной резекции мениска.',
     fullDescription:
