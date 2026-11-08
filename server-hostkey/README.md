@@ -51,7 +51,15 @@ Frontend (Next.js) сюда не входит: в образе `rehab-frontend:h
      validator.schema.org — без ошибок. Предупреждения Google только о необязательных полях (address, review, shipping, return policy).
      Отзывы и рейтинг в разметку не добавлены намеренно. **При смене цен на сайте — поправить `svc` в генераторе.**
 
-### Что поправить в исходниках сайта на Mac, чтобы убрать замены из Caddy
+7. **SEO перенесено в код сайта (08.11.2026).** Фронтенд собран на сервере из ветки `seo-audit` (коммит 0bc1d7f):
+   образ `rehab-frontend:src-0bc1d7f`, `FRONTEND_IMAGE` в `/opt/rehab/.env`. Блок `https://minenkovrehab.ru` в Caddy — только `reverse_proxy`,
+   подмены `replace`, `/_rx/*`, `/sitemap.xml` и картинки из `extras/` для основного сайта больше не используются
+   (пункты 4–6 выше и `infra/seo/` оставлены как история). Откат: прежний образ `rehab-frontend:hk-dd8354d`
+   и `/opt/rehab/.env.bak-20261108-171636`, `/opt/rehab/Caddyfile.bak-20261108-171636`.
+   Сборка фронтенда на сервере: `git -C /opt/rehab-src fetch origin <ветка>`, `git archive` во временную папку,
+   `docker build -f deploy/timeweb/frontend.Dockerfile -t rehab-frontend:src-<sha> .` (около 8 минут), затем смена `FRONTEND_IMAGE` и `docker compose up -d frontend`.
+
+### (выполнено 08.11.2026 в ветке seo-audit) Что поправить в исходниках сайта на Mac, чтобы убрать замены из Caddy
 
 - `src/app/layout.tsx`: `metadataBase`, `canonical`, `openGraph.url`, `authors`, `twitter.creator` — `minekovrehab` → `minenkovrehab`;
   коды `verification` вместо `xxxxxxxx`; опечатка «дегенератика» в keywords.
