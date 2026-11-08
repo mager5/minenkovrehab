@@ -44,8 +44,8 @@ export function useAccount({ withPurchases = true } = {}) {
           if (!cancelled)
             setPurchases(res.ok && payload?.success ? payload?.data?.purchases || [] : []);
         }
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
+      } catch {
+        // Запрос прерван или сеть недоступна — показываем то, что успели загрузить, без ошибки в консоли.
       } finally {
         if (!cancelled) setLoading(false);
       }

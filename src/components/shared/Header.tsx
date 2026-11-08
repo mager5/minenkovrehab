@@ -123,8 +123,8 @@ export function Header() {
       } else {
         setUser(null);
       }
-    } catch (error) {
-      console.error('Error checking auth status:', error);
+    } catch {
+      // Запрос прерван (переход на другую страницу) или сеть недоступна — считаем, что гость, без ошибки в консоли.
       setUser(null);
     } finally {
       authFetchInFlightRef.current = false;
