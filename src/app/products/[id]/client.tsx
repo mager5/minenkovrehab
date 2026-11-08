@@ -35,7 +35,12 @@ import {
   productPath,
   REHAB_PROGRAMS_PATH,
 } from '../catalog';
-import { getRobokassaPaymentUrl, resolveApiMediaUrl } from '@/lib/api-base';
+import {
+  PAYMENTS_DISABLED,
+  PAYMENTS_DISABLED_MESSAGE,
+  getRobokassaPaymentUrl,
+  resolveApiMediaUrl,
+} from '@/lib/api-base';
 
 // Старый локальный helper (заменён на @/lib/api-base):
 // function getRailwayApiBaseUrl() { ... }
@@ -748,6 +753,10 @@ export default function ProductClient({ product }: { product: Product }) {
 
   // Функция создания платежа через Railway API
   const handlePayment = async (level: number) => {
+    if (PAYMENTS_DISABLED) {
+      alert(PAYMENTS_DISABLED_MESSAGE);
+      return;
+    }
     try {
       console.log('🔄 Создание платежа для продукта:', product.title);
       console.log('🔄 Уровень:', level);
