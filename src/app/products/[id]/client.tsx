@@ -131,7 +131,8 @@ function BuyCard({
   offerError: boolean;
   processing: boolean;
   onPay: () => void;
-  onTelegram: (e: React.MouseEvent) => void;
+  /** Не используется: Telegram доступен без согласий. */
+  onTelegram?: (e: React.MouseEvent) => void;
   payAria: string;
   children?: React.ReactNode;
   as?: 'aside' | 'article';
@@ -140,6 +141,11 @@ function BuyCard({
 }) {
   const { price, unit } = splitPrice(priceLabel);
   const H = `h${headingLevel}` as 'h2';
+  // «Купить онлайн» активна всегда: без согласий — ошибки у чекбоксов (их ставит onPay) и прокрутка к первому неотмеченному.
+  const pay = () => {
+    if (!consent || !offer) focusCheckbox(!consent ? consentId : offerId);
+    onPay();
+  };
   return (
     <Tag className={`ds-card p-6 dsk:p-8 flex flex-col gap-4 ${className}`}>
       <div>
@@ -162,7 +168,7 @@ function BuyCard({
         checked={consent}
         onChange={e => onConsent(e.target.checked)}
         error={
-          consentError
+          consentError && !consent
             ? 'Пожалуйста, отметьте согласие на обработку персональных данных для продолжения'
             : undefined
         }
@@ -182,7 +188,7 @@ function BuyCard({
         checked={offer}
         onChange={e => onOffer(e.target.checked)}
         error={
-          offerError
+          offerError && !offer
             ? 'Пожалуйста, согласитесь с условиями договора оферты для продолжения'
             : undefined
         }
@@ -194,8 +200,8 @@ function BuyCard({
       </Checkbox>
       <button
         type='button'
-        onClick={onPay}
-        disabled={!consent || !offer || processing}
+        onClick={pay}
+        disabled={processing}
         aria-label={payAria}
         className='ds-btn ds-btn-lg ds-btn-primary ds-btn-block'
       >
@@ -208,38 +214,29 @@ function BuyCard({
           'Купить онлайн'
         )}
       </button>
-      {consent && offer ? (
-        <Link
-          href='https://t.me/MV_Rehab'
-          target='_blank'
-          rel='noopener noreferrer'
-          className='ds-btn ds-btn-md ds-btn-outline ds-btn-block'
-        >
-          <Icon name='send' size={20} strokeWidth={2} />
-          Связаться в Telegram
-        </Link>
-      ) : (
-        <button
-          type='button'
-          onClick={onTelegram}
-          aria-disabled='true'
-          className='ds-btn ds-btn-md ds-btn-outline ds-btn-block'
-        >
-          <Icon name='send' size={20} strokeWidth={2} />
-          Связаться в Telegram
-        </button>
-      )}
-      {!consent || !offer ? (
-        <p className='ds-hint m-0 -mt-1'>
-          Чтобы купить или написать в Telegram, отметьте оба согласия.
-        </p>
-      ) : null}
+      <Link
+        href='https://t.me/MV_Rehab'
+        target='_blank'
+        rel='noopener noreferrer'
+        className='ds-btn ds-btn-md ds-btn-outline ds-btn-block'
+      >
+        <Icon name='send' size={20} strokeWidth={2} />
+        Связаться в Telegram
+      </Link>
       {children}
     </Tag>
   );
 }
 
-function MobilePriceBar({ priceLabel }: { priceLabel: string }) {
+/** Прокрутка к чекбоксу согласия и фокус на нём. */
+function focusCheckbox(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.closest('label')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  el.focus({ preventScroll: true });
+}
+
+function MobilePriceBar({ priceLabel, onBuy }: { priceLabel: string; onBuy: () => void }) {
   const { price, unit } = splitPrice(priceLabel);
   return (
     <section className='ds-wrap dsk:hidden pt-4' aria-label='Стоимость'>
@@ -250,12 +247,13 @@ function MobilePriceBar({ priceLabel }: { priceLabel: string }) {
           </strong>
           {unit ? <span className='text-[15px] text-muted'>{unit}</span> : null}
         </span>
-        <a
-          href='#buy'
+        <button
+          type='button'
+          onClick={onBuy}
           className='ds-btn ds-btn-primary min-h-[52px] px-6 text-[17px] font-extrabold'
         >
           Купить
-        </a>
+        </button>
       </div>
     </section>
   );
@@ -478,8 +476,6 @@ export default function ProductClient({ product }: { product: Product }) {
   const [showOfferError, setShowOfferError] = useState(false);
   // Состояние для показа всех уровней программы «Формула Движения»
   const [showAllLevels, setShowAllLevels] = useState(false);
-  // Состояние для показа дополнительной информации для консультации
-  const [showMoreConsultation, setShowMoreConsultation] = useState(false);
   // Состояние для чекбоксов согласия для каждого уровня
   const [isConsentCheckedLevel2, setIsConsentCheckedLevel2] = useState(false);
   const [isOfferCheckedLevel2, setIsOfferCheckedLevel2] = useState(false);
@@ -512,7 +508,6 @@ export default function ProductClient({ product }: { product: Product }) {
     useState(false);
 
   // Состояния для экспресс-консультации
-  const [isAgreed, setIsAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   // const [customerEmail, setCustomerEmail] = useState('');
   // const [customerPhone, setCustomerPhone] = useState('');
@@ -612,7 +607,6 @@ export default function ProductClient({ product }: { product: Product }) {
 
     if (!isConsentChecked) {
       setShowConsentError(true);
-      setTimeout(() => setShowConsentError(false), 3000);
       hasError = true;
     } else {
       setShowConsentError(false);
@@ -620,67 +614,12 @@ export default function ProductClient({ product }: { product: Product }) {
 
     if (!isOfferChecked) {
       setShowOfferError(true);
-      setTimeout(() => setShowOfferError(false), 3000);
       hasError = true;
     } else {
       setShowOfferError(false);
     }
 
     return !hasError;
-  };
-
-  // Обработчик для Telegram
-  const handleTelegramClick = (e: React.MouseEvent) => {
-    if (!checkConsent()) {
-      e.preventDefault();
-      return;
-    }
-  };
-
-  // Обработчики для кнопок Telegram для каждого уровня
-  const handleTelegramClickLevel2 = (e: React.MouseEvent) => {
-    if (!isConsentCheckedLevel2 || !isOfferCheckedLevel2) {
-      if (!isConsentCheckedLevel2) {
-        setShowConsentErrorLevel2(true);
-        setTimeout(() => setShowConsentErrorLevel2(false), 3000);
-      }
-      if (!isOfferCheckedLevel2) {
-        setShowOfferErrorLevel2(true);
-        setTimeout(() => setShowOfferErrorLevel2(false), 3000);
-      }
-      e.preventDefault();
-      return;
-    }
-  };
-
-  const handleTelegramClickLevel3 = (e: React.MouseEvent) => {
-    if (!isConsentCheckedLevel3 || !isOfferCheckedLevel3) {
-      if (!isConsentCheckedLevel3) {
-        setShowConsentErrorLevel3(true);
-        setTimeout(() => setShowConsentErrorLevel3(false), 3000);
-      }
-      if (!isOfferCheckedLevel3) {
-        setShowOfferErrorLevel3(true);
-        setTimeout(() => setShowOfferErrorLevel3(false), 3000);
-      }
-      e.preventDefault();
-      return;
-    }
-  };
-
-  const handleTelegramClickLevel4 = (e: React.MouseEvent) => {
-    if (!isConsentCheckedLevel4 || !isOfferCheckedLevel4) {
-      if (!isConsentCheckedLevel4) {
-        setShowConsentErrorLevel4(true);
-        setTimeout(() => setShowConsentErrorLevel4(false), 3000);
-      }
-      if (!isOfferCheckedLevel4) {
-        setShowOfferErrorLevel4(true);
-        setTimeout(() => setShowOfferErrorLevel4(false), 3000);
-      }
-      e.preventDefault();
-      return;
-    }
   };
 
   // Обработчики для кнопок оплаты для каждого уровня
@@ -695,11 +634,9 @@ export default function ProductClient({ product }: { product: Product }) {
     if (!isConsentCheckedLevel2 || !isOfferCheckedLevel2) {
       if (!isConsentCheckedLevel2) {
         setShowConsentErrorLevel2(true);
-        setTimeout(() => setShowConsentErrorLevel2(false), 3000);
       }
       if (!isOfferCheckedLevel2) {
         setShowOfferErrorLevel2(true);
-        setTimeout(() => setShowOfferErrorLevel2(false), 3000);
       }
       return;
     }
@@ -710,11 +647,9 @@ export default function ProductClient({ product }: { product: Product }) {
     if (!isConsentCheckedLevel3 || !isOfferCheckedLevel3) {
       if (!isConsentCheckedLevel3) {
         setShowConsentErrorLevel3(true);
-        setTimeout(() => setShowConsentErrorLevel3(false), 3000);
       }
       if (!isOfferCheckedLevel3) {
         setShowOfferErrorLevel3(true);
-        setTimeout(() => setShowOfferErrorLevel3(false), 3000);
       }
       return;
     }
@@ -725,11 +660,9 @@ export default function ProductClient({ product }: { product: Product }) {
     if (!isConsentCheckedLevel4 || !isOfferCheckedLevel4) {
       if (!isConsentCheckedLevel4) {
         setShowConsentErrorLevel4(true);
-        setTimeout(() => setShowConsentErrorLevel4(false), 3000);
       }
       if (!isOfferCheckedLevel4) {
         setShowOfferErrorLevel4(true);
-        setTimeout(() => setShowOfferErrorLevel4(false), 3000);
       }
       return;
     }
@@ -937,36 +870,6 @@ export default function ProductClient({ product }: { product: Product }) {
     }
   };
 
-  /*
-  // Старый мок-метод для тестов (оставлен для истории)
-  const handlePaymentMock = async (level: number) => {
-    console.log('🧪 Демонстрационный режим оплаты, уровень:', level);
-
-    // Устанавливаем состояние загрузки для соответствующего уровня
-    switch (level) {
-      case 1:
-        setIsPaymentProcessingLevel1(true);
-        break;
-      case 2:
-        setIsPaymentProcessingLevel2(true);
-        break;
-      case 3:
-        setIsPaymentProcessingLevel3(true);
-        break;
-      case 4:
-        setIsPaymentProcessingLevel4(true);
-        break;
-    }
-
-    // Небольшая задержка, чтобы пользователь увидел спиннер
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // Переход на страницу успешной оплаты (имитация)
-    if (typeof window !== 'undefined') {
-      window.location.href = '/payment/success?mock=1';
-    }
-  };
-  */
 
   /* ---------- Данные для оформления ---------- */
   const catalogItem = getCatalogItemById(product.id);
@@ -1017,7 +920,6 @@ export default function ProductClient({ product }: { product: Product }) {
       offerError={showOfferError}
       processing={isPaymentProcessingLevel1}
       onPay={handlePaymentLevel1}
-      onTelegram={handleTelegramClick}
       payAria={`Купить онлайн: ${product.title}`}
     >
       {product.id === 'formula-movement' ? (
@@ -1164,7 +1066,18 @@ export default function ProductClient({ product }: { product: Product }) {
           right={headRight}
           extra={headExtra}
         />
-        <MobilePriceBar priceLabel={mainPriceLabel} />
+        <MobilePriceBar
+          priceLabel={mainPriceLabel}
+          onBuy={() => {
+            // Без согласий — ошибки и прокрутка к карточке покупки; с согласиями — оплата (1-й уровень у «Формулы»).
+            if (!isConsentChecked || !isOfferChecked) {
+              checkConsent();
+              focusCheckbox(!isConsentChecked ? 'consent-checkbox' : 'offer-checkbox');
+              return;
+            }
+            void handlePaymentLevel1();
+          }}
+        />
 
         <section className='ds-wrap ds-sec'>
           <div className='grid gap-6 dsk:gap-8 dsk:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] items-start'>
@@ -1271,7 +1184,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   ))
                 : null}
 
-              {/* Онлайн-консультация: дополнительно — экспресс-консультация («Показать еще») */}
+              {/* Онлайн-консультация: ссылка на экспресс-консультацию (покупается только на своей странице) */}
               {product.id === 'consultation' ? (
                 <div
                   className='ds-card p-6 dsk:px-8 dsk:py-7 flex flex-col gap-5'
@@ -1293,111 +1206,13 @@ export default function ProductClient({ product }: { product: Product }) {
                         — 20 минут, 4 000 ₽
                       </p>
                     </div>
-                    <button
-                      type='button'
-                      onClick={() =>
-                        setShowMoreConsultation(!showMoreConsultation)
-                      }
+                    <Link
+                      href='/products/express-consultation'
                       className='ds-btn ds-btn-md ds-btn-tertiary'
-                      aria-expanded={showMoreConsultation}
-                      aria-controls='express-more'
                     >
-                      {showMoreConsultation ? 'Свернуть' : 'Показать еще'}
-                    </button>
+                      Подробнее
+                    </Link>
                   </div>
-
-                  {showMoreConsultation && (
-                    <div
-                      id='express-more'
-                      className='rounded-[20px] bg-white p-5 dsk:p-7 flex flex-col gap-4'
-                    >
-                      <h3 className='ds-h3'>Экспресс онлайн-консультация</h3>
-                      <p className='m-0 text-[17px] text-muted'>
-                        Быстрая консультация для разбора конкретного вопроса и
-                        получения рекомендаций.
-                      </p>
-                      <div>
-                        <h4 className='m-0 mb-3 text-[17px] font-extrabold text-navy'>
-                          Что включает:
-                        </h4>
-                        <CheckList
-                          className='text-[17px]'
-                          items={[
-                            'Разбор истории вашего состояния',
-                            'Ответы на все ваши вопросы',
-                            'Определение целей и задач',
-                            'Выбор вектора действий по решению вашего вопроса',
-                          ]}
-                        />
-                      </div>
-                      <NotMedical />
-                      <p className='m-0 text-[28px] font-extrabold text-navy'>
-                        {formatPrice('express-consultation', 3000)}
-                      </p>
-                      <Checkbox
-                        id='agreement-checkbox'
-                        name='agreement'
-                        checked={isAgreed}
-                        onChange={e => setIsAgreed(e.target.checked)}
-                        required
-                      >
-                        Я даю{' '}
-                        <Link href='/consent'>
-                          согласие на обработку персональных данных
-                        </Link>{' '}
-                        в соответствии с{' '}
-                        <Link href='/policy'>политикой конфиденциальности</Link>{' '}
-                        и согласен с условиями{' '}
-                        <Link href='/terms'>договора оферты</Link>.
-                      </Checkbox>
-                      <div className='flex flex-col sm:flex-row gap-3'>
-                        <button
-                          type='button'
-                          onClick={async () => {
-                            if (!isAgreed) {
-                              alert(
-                                'Пожалуйста, дайте согласие на обработку персональных данных'
-                              );
-                              return;
-                            }
-                            setIsLoading(true);
-                            try {
-                              console.log(
-                                '🧪 Демонстрационный режим: оплата для экспресс-консультации'
-                              );
-                              await new Promise(resolve =>
-                                setTimeout(resolve, 800)
-                              );
-                              if (typeof window !== 'undefined') {
-                                window.location.href =
-                                  '/payment/success?mock=1&product=express-consultation';
-                              }
-                            } finally {
-                              setIsLoading(false);
-                            }
-                          }}
-                          disabled={!isAgreed || isLoading}
-                          aria-label='Купить онлайн экспресс-консультацию'
-                          className='ds-btn ds-btn-md ds-btn-primary flex-1'
-                        >
-                          {isLoading ? 'Обработка...' : 'Купить онлайн'}
-                        </button>
-                        <Link
-                          href={isAgreed ? 'https://t.me/MV_Rehab' : '#'}
-                          target={isAgreed ? '_blank' : '_self'}
-                          rel={isAgreed ? 'noopener noreferrer' : ''}
-                          className='ds-btn ds-btn-md ds-btn-outline flex-1'
-                          aria-disabled={!isAgreed}
-                          {...(!isAgreed && {
-                            onClick: (e: React.MouseEvent) =>
-                              e.preventDefault(),
-                          })}
-                        >
-                          Связаться в Telegram
-                        </Link>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ) : null}
 
@@ -1488,7 +1303,6 @@ export default function ProductClient({ product }: { product: Product }) {
                 offerError={showOfferErrorLevel2}
                 processing={isPaymentProcessingLevel2}
                 onPay={handlePaymentLevel2}
-                onTelegram={handleTelegramClickLevel2}
                 payAria='Купить онлайн уровень 2 программы «Формула Движения»'
               />
               <BuyCard
@@ -1514,7 +1328,6 @@ export default function ProductClient({ product }: { product: Product }) {
                 offerError={showOfferErrorLevel3}
                 processing={isPaymentProcessingLevel3}
                 onPay={handlePaymentLevel3}
-                onTelegram={handleTelegramClickLevel3}
                 payAria='Купить онлайн уровень 3 программы «Формула Движения»'
               />
               <BuyCard
@@ -1540,7 +1353,6 @@ export default function ProductClient({ product }: { product: Product }) {
                 offerError={showOfferErrorLevel4}
                 processing={isPaymentProcessingLevel4}
                 onPay={handlePaymentLevel4}
-                onTelegram={handleTelegramClickLevel4}
                 payAria='Купить онлайн уровень 4 программы «Формула Движения»'
               />
             </div>

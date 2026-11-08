@@ -1,10 +1,13 @@
 'use client';
 
 // Форма заявки (страница «Контакты» и блок записи на главной).
-// Логика отправки — прежняя (без изменений); редизайн затронул только разметку и стили.
+// Отправка: POST /api/leads → база (rehab.leads) + уведомления на почту и в Telegram (через очередь бэкенда).
+// Кнопка активна всегда; при ошибке подсвечиваются поля и фокус уходит к первому неверному.
 import { useState } from 'react';
 import { TextField, TextArea, Select, Checkbox, Icon } from '@/components/ds';
+import { Honeypot } from '@/components/shared/Honeypot';
 import { leadServiceOptions } from '@/data/content';
+import { useLeadForm } from '@/lib/leads';
 
 export function ContactForm({
   variant = 'contacts',
@@ -14,113 +17,26 @@ export function ContactForm({
   className?: string;
 }) {
   const isHome = variant === 'home';
-  // Выбор услуги — только для отображения в форме (в отправку не входит, как и раньше).
   const [service, setService] = useState(leadServiceOptions[0]?.value ?? '');
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    message: '',
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [consentChecked, setConsentChecked] = useState(false);
-
-  const formatPhoneNumber = (value: string): string => {
-    if (!value) return value;
-
-    // Удаляем все нецифровые символы
-    const phoneNumber = value.replace(/\D/g, '');
-
-    // Если первая цифра 8 или 7, удаляем ее и добавляем +7
-    let normalisedPhone = phoneNumber;
-    if (phoneNumber.startsWith('8') || phoneNumber.startsWith('7')) {
-      normalisedPhone = phoneNumber.substring(1);
-    }
-
-    const phoneNumberLength = normalisedPhone.length;
-
-    // Начинаем всегда с +7
-    let formattedNumber = '+7';
-
-    // Добавляем скобку и первые цифры кода
-    if (phoneNumberLength > 0) {
-      formattedNumber += ` (${normalisedPhone.substring(0, Math.min(3, phoneNumberLength))}`;
-    }
-
-    // Закрываем скобку и добавляем следующие цифры
-    if (phoneNumberLength > 3) {
-      formattedNumber += `) ${normalisedPhone.substring(3, Math.min(6, phoneNumberLength))}`;
-    }
-
-    // Добавляем первое тире
-    if (phoneNumberLength > 6) {
-      formattedNumber += `-${normalisedPhone.substring(6, Math.min(8, phoneNumberLength))}`;
-    }
-
-    // Добавляем второе тире
-    if (phoneNumberLength > 8) {
-      formattedNumber += `-${normalisedPhone.substring(8, Math.min(10, phoneNumberLength))}`;
-    }
-
-    return formattedNumber;
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    if (name === 'phone') {
-      const formattedValue = formatPhoneNumber(value);
-      // Ограничиваем максимальную длину отформатированного номера, чтобы соответствовать +7 (XXX) XXX-XX-XX
-      if (formattedValue.length > 18) return;
-      setFormData(prev => ({
-        ...prev,
-        [name]: formattedValue,
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  };
-
-  const handleConsentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setConsentChecked(e.target.checked);
-  };
-
-  const handleFocus = (field: string) => {
-    setFocusedField(field);
-  };
-
-  const handleBlur = () => {
-    setFocusedField(null);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!consentChecked) {
-      return; // Prevent submission if consent is not checked
-    }
-
-    setIsSubmitting(true);
-    setSubmitError(false);
-
-    // Имитация отправки данных формы
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      setFormData({ name: '', phone: '', message: '' });
-      setConsentChecked(false);
-    }, 1500);
-  };
+  const form = useLeadForm({ source: isHome ? 'home' : 'contacts', requireMessage: !isHome });
+  const { values, errors } = form;
 
   const headingId = isHome ? 'lead-form-heading' : 'contact-form-heading';
   const fid = (k: string) => (isHome ? `lead-${k}` : k);
+  const ids = {
+    name: fid('name'),
+    phone: fid('phone'),
+    message: fid('message'),
+    consent: fid('consent'),
+    offer: fid('consent'),
+  };
+  const sending = form.status === 'sending';
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const label = leadServiceOptions.find(o => o.value === service)?.label ?? '';
+    void form.submit(label, ids);
+  };
 
   return (
     <div className={`ds-card p-6 dsk:p-10 text-ink ${className}`}>
@@ -132,61 +48,47 @@ export function ContactForm({
         {isHome ? 'Запись на консультацию' : 'Напишите мне'}
       </h2>
 
-      {submitSuccess ? (
-        <div
-          className='flex gap-4 items-start p-6 rounded-[20px] bg-mint'
-          role='status'
-          aria-live='polite'
-        >
+      {form.status === 'sent' ? (
+        <div className='flex gap-4 items-start p-6 rounded-[20px] bg-mint' role='status' aria-live='polite'>
           <span className='ds-ibox w-11 h-11 rounded-[14px] bg-white'>
-            <Icon
-              name='check'
-              size={22}
-              strokeWidth={3}
-              color='var(--c-mint-ink)'
-            />
+            <Icon name='check' size={22} strokeWidth={3} color='var(--c-mint-ink)' />
           </span>
           <div>
-            <p className='m-0 font-extrabold text-[20px] text-navy'>
-              Сообщение отправлено!
-            </p>
+            <p className='m-0 font-extrabold text-[20px] text-navy'>Заявка отправлена!</p>
             <p className='m-0 mt-1 text-[17px] text-ink'>
               Благодарю за обращение. Я свяжусь с вами в ближайшее время.
             </p>
           </div>
         </div>
       ) : (
-        <form
-          onSubmit={handleSubmit}
-          className='flex flex-col gap-5'
-          aria-labelledby={headingId}
-        >
+        <form onSubmit={handleSubmit} className='relative flex flex-col gap-5' aria-labelledby={headingId} noValidate>
+          <Honeypot id={fid('website')} ref={form.honeypot} />
           <div className='grid gap-4 dsk:grid-cols-2'>
             <TextField
               label='Ваше имя'
-              id={fid('name')}
+              id={ids.name}
               name='name'
               type='text'
               autoComplete='name'
-              value={formData.name}
-              onChange={handleChange}
-              onFocus={() => handleFocus('name')}
-              onBlur={handleBlur}
+              value={values.name}
+              onChange={e => form.set('name', e.target.value)}
               required
               aria-required='true'
+              error={errors.name}
             />
             <TextField
-              label={isHome ? 'Телефон' : 'Телефон (необязательно)'}
-              id={fid('phone')}
+              label='Телефон'
+              id={ids.phone}
               name='phone'
               type='tel'
               inputMode='tel'
               autoComplete='tel'
               placeholder='+7 (___) ___-__-__'
-              value={formData.phone}
-              onChange={handleChange}
-              onFocus={() => handleFocus('phone')}
-              onBlur={handleBlur}
+              value={values.phone}
+              onChange={e => form.set('phone', e.target.value)}
+              required
+              aria-required='true'
+              error={errors.phone}
             />
           </div>
 
@@ -201,23 +103,23 @@ export function ContactForm({
           {!isHome ? (
             <TextArea
               label='Ваше сообщение'
-              id={fid('message')}
+              id={ids.message}
               name='message'
               placeholder='Коротко опишите ситуацию'
-              value={formData.message}
-              onChange={handleChange}
-              onFocus={() => handleFocus('message')}
-              onBlur={handleBlur}
+              value={values.message}
+              onChange={e => form.set('message', e.target.value)}
               required
               aria-required='true'
+              error={errors.message}
             />
           ) : null}
 
           <Checkbox
-            id={fid('consent')}
-            checked={consentChecked}
-            onChange={handleConsentChange}
+            id={ids.consent}
+            checked={form.consent}
+            onChange={e => form.setConsent(e.target.checked)}
             required
+            error={errors.consent}
           >
             Я даю{' '}
             <a href='/consent' target='_blank' rel='noopener noreferrer'>
@@ -233,34 +135,23 @@ export function ContactForm({
             </a>
           </Checkbox>
 
+          {form.serverError ? (
+            <div className='ds-error p-4 rounded-2xl bg-[#FBEDEC]' role='alert' aria-live='assertive'>
+              <Icon name='alert' size={18} color='var(--c-danger-ink)' />
+              {form.serverError}
+            </div>
+          ) : null}
+
           <button
             type='submit'
             className={`ds-btn ds-btn-lg ds-btn-primary ${isHome ? 'ds-btn-block' : 'self-stretch dsk:self-start'}`}
-            disabled={isSubmitting || !consentChecked}
-            aria-disabled={isSubmitting || !consentChecked}
-            aria-busy={isSubmitting}
+            aria-busy={sending}
           >
-            {isSubmitting ? (
+            {sending ? (
               <>
-                <svg
-                  className='animate-spin h-5 w-5'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  aria-hidden='true'
-                >
-                  <circle
-                    className='opacity-25'
-                    cx='12'
-                    cy='12'
-                    r='10'
-                    stroke='currentColor'
-                    strokeWidth='4'
-                  />
-                  <path
-                    className='opacity-75'
-                    fill='currentColor'
-                    d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z'
-                  />
+                <svg className='animate-spin h-5 w-5' fill='none' viewBox='0 0 24 24' aria-hidden='true'>
+                  <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+                  <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z' />
                 </svg>
                 Отправка...
               </>
@@ -270,23 +161,6 @@ export function ContactForm({
               'Отправить сообщение'
             )}
           </button>
-          {!consentChecked && !isSubmitting ? (
-            <p className='ds-hint m-0 -mt-2'>
-              Чтобы отправить, отметьте согласие выше.
-            </p>
-          ) : null}
-
-          {submitError && (
-            <div
-              className='ds-error p-4 rounded-2xl bg-[#FBEDEC]'
-              role='alert'
-              aria-live='assertive'
-            >
-              <Icon name='alert' size={18} color='var(--c-danger-ink)' />
-              Что-то пошло не так. Пожалуйста, попробуйте позже или свяжитесь со
-              мной другим способом.
-            </div>
-          )}
         </form>
       )}
     </div>

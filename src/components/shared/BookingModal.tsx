@@ -5,6 +5,8 @@ import { Dialog, Transition } from '@headlessui/react';
 import { IoMdClose } from 'react-icons/io';
 import { bookingServices } from '@/data/content';
 import { TextField, TextArea, Select, Checkbox, Icon } from '@/components/ds';
+import { Honeypot } from '@/components/shared/Honeypot';
+import { useLeadForm } from '@/lib/leads';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -12,51 +14,32 @@ interface BookingModalProps {
 }
 
 const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    service: '',
-    message: '',
-  });
+  const form = useLeadForm({ source: 'modal', requireOffer: true });
+  const { values, errors } = form;
+  const [service, setService] = useState('');
+  const sending = form.status === 'sending';
+  const ids = {
+    name: 'modal-name',
+    phone: 'modal-phone',
+    message: 'modal-message',
+    consent: 'modal-consent',
+    offer: 'modal-offer',
+  };
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [consentChecked, setConsentChecked] = useState(false);
-  const [offerChecked, setOfferChecked] = useState(false);
-  const [consentError, setConsentError] = useState(false);
-  const [offerError, setOfferError] = useState(false);
-
-  // Сброс формы при открытии/закрытии модального окна
+  // Сброс формы при открытии модального окна
   useEffect(() => {
     if (isOpen) {
-      setFormData({
-        name: '',
-        phone: '',
-        service: '',
-        message: '',
-      });
-      setSubmitSuccess(false);
-      setSubmitError(false);
-      setConsentChecked(false);
-      setOfferChecked(false);
-      setOfferChecked(false);
-      setConsentError(false);
-      setOfferError(false);
+      form.reset();
+      setService('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   // Обновление URL только на клиенте
   useEffect(() => {
     if (isOpen && typeof window !== 'undefined') {
-      // Добавляем случайный параметр к URL при открытии модального окна
       const timestamp = new Date().getTime();
-      window.history.replaceState(
-        {},
-        '',
-        `${window.location.pathname}?modal=${timestamp}`
-      );
+      window.history.replaceState({}, '', `${window.location.pathname}?modal=${timestamp}`);
     }
   }, [isOpen]);
 
@@ -65,128 +48,10 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
 
   const services = bookingServices;
 
-  const formatPhoneNumber = (value: string): string => {
-    if (!value) return value;
-
-    // Удаляем все нецифровые символы
-    const phoneNumber = value.replace(/\D/g, '');
-
-    // Если первая цифра 8 или 7, удаляем ее и добавляем +7
-    let normalisedPhone = phoneNumber;
-    if (phoneNumber.startsWith('8') || phoneNumber.startsWith('7')) {
-      normalisedPhone = phoneNumber.substring(1);
-    }
-
-    const phoneNumberLength = normalisedPhone.length;
-
-    // Начинаем всегда с +7
-    let formattedNumber = '+7';
-
-    // Добавляем скобку и первые цифры кода
-    if (phoneNumberLength > 0) {
-      formattedNumber += ` (${normalisedPhone.substring(0, Math.min(3, phoneNumberLength))}`;
-    }
-
-    // Закрываем скобку и добавляем следующие цифры
-    if (phoneNumberLength > 3) {
-      formattedNumber += `) ${normalisedPhone.substring(3, Math.min(6, phoneNumberLength))}`;
-    }
-
-    // Добавляем первое тире
-    if (phoneNumberLength > 6) {
-      formattedNumber += `-${normalisedPhone.substring(6, Math.min(8, phoneNumberLength))}`;
-    }
-
-    // Добавляем второе тире
-    if (phoneNumberLength > 8) {
-      formattedNumber += `-${normalisedPhone.substring(8, Math.min(10, phoneNumberLength))}`;
-    }
-
-    return formattedNumber;
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    if (name === 'phone') {
-      const formattedValue = formatPhoneNumber(value);
-      // Ограничиваем максимальную длину отформатированного номера, чтобы соответствовать +7 (XXX) XXX-XX-XX
-      if (formattedValue.length > 18) return;
-      setFormData(prev => ({
-        ...prev,
-        [name]: formattedValue,
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  };
-
-  const handleFocus = (field: string) => {
-    setFocusedField(field);
-  };
-
-  const handleBlur = () => {
-    setFocusedField(null);
-  };
-
-  const handleConsentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setConsentChecked(e.target.checked);
-    if (e.target.checked) {
-      setConsentError(false);
-    }
-  };
-
-  const handleOfferChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOfferChecked(e.target.checked);
-    if (e.target.checked) {
-      setOfferError(false);
-    }
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Сброс ошибок
-    setConsentError(false);
-    setOfferError(false);
-
-    // Проверка обоих чекбоксов
-    let hasErrors = false;
-    if (!consentChecked) {
-      setConsentError(true);
-      hasErrors = true;
-    }
-    if (!offerChecked) {
-      setOfferError(true);
-      hasErrors = true;
-    }
-
-    if (hasErrors) {
-      return; // Предотвращаем отправку если не отмечены оба чекбокса
-    }
-
-    setIsSubmitting(true);
-    setSubmitError(false);
-
-    // Имитация отправки данных формы
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      // Сброс формы после успешной отправки
-      setFormData({
-        name: '',
-        phone: '',
-        service: '',
-        message: '',
-      });
-      setConsentChecked(false);
-    }, 1500);
+    const label = services.find(sv => sv.id === service)?.name ?? '';
+    void form.submit(label, ids);
   };
 
   // Обработчик нажатия клавиши Escape для закрытия модального окна
@@ -250,7 +115,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                   Записаться
                 </Dialog.Title>
 
-                {submitSuccess ? (
+                {form.status === 'sent' ? (
                   <div
                     className='flex flex-col gap-4 p-6 rounded-[20px] bg-mint'
                     role='status'
@@ -263,7 +128,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                         strokeWidth={3}
                         color='var(--c-mint-ink)'
                       />
-                      Запись оформлена!
+                      Заявка отправлена!
                     </p>
                     <p className='m-0 text-[17px] text-ink'>
                       Благодарю за обращение. Я свяжусь с вами в ближайшее время
@@ -283,144 +148,98 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                 ) : (
                   <form
                     onSubmit={handleSubmit}
-                    className='flex flex-col gap-4'
+                    className='relative flex flex-col gap-4'
                     aria-labelledby='booking-modal-title'
+                    noValidate
                   >
+                    <Honeypot id='modal-website' ref={form.honeypot} />
                     <TextField
                       label='Ваше имя'
-                      id='name'
+                      id={ids.name}
                       name='name'
                       type='text'
                       autoComplete='name'
-                      value={formData.name}
-                      onChange={handleChange}
-                      onFocus={() => handleFocus('name')}
-                      onBlur={handleBlur}
+                      value={values.name}
+                      onChange={e => form.set('name', e.target.value)}
                       required
                       aria-required='true'
+                      error={errors.name}
                       ref={initialFocusRef}
                     />
                     <TextField
                       label='Телефон'
-                      id='phone'
+                      id={ids.phone}
                       name='phone'
                       type='tel'
                       inputMode='tel'
                       autoComplete='tel'
-                      value={formData.phone}
-                      onChange={handleChange}
-                      onFocus={() => handleFocus('phone')}
-                      onBlur={handleBlur}
+                      value={values.phone}
+                      onChange={e => form.set('phone', e.target.value)}
                       required
                       placeholder='+7 (___) ___-__-__'
-                      pattern='\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}'
                       aria-required='true'
+                      error={errors.phone}
                       hint='Формат: +7 (999) 999-99-99'
                     />
                     <Select
                       label='Услуга'
-                      id='service'
-                      name='service'
+                      id='modal-service'
                       placeholder='Выберите услугу'
-                      options={services.map(sv => ({
-                        value: sv.id,
-                        label: sv.name,
-                      }))}
-                      value={formData.service}
-                      onChange={v =>
-                        handleChange({
-                          target: { name: 'service', value: v },
-                        } as unknown as React.ChangeEvent<HTMLInputElement>)
-                      }
+                      options={services.map(sv => ({ value: sv.id, label: sv.name }))}
+                      value={service}
+                      onChange={setService}
                     />
                     <TextArea
                       label='Ваше сообщение'
-                      id='message'
+                      id={ids.message}
                       name='message'
                       rows={3}
-                      value={formData.message}
-                      onChange={handleChange}
-                      onFocus={() => handleFocus('message')}
-                      onBlur={handleBlur}
+                      value={values.message}
+                      onChange={e => form.set('message', e.target.value)}
                       placeholder='Коротко опишите ситуацию (необязательно)'
                     />
                     <Checkbox
-                      id='modal-consent'
-                      checked={consentChecked}
-                      onChange={handleConsentChange}
+                      id={ids.consent}
+                      checked={form.consent}
+                      onChange={e => form.setConsent(e.target.checked)}
                       required
-                      error={
-                        consentError
-                          ? 'Необходимо дать согласие на обработку персональных данных'
-                          : undefined
-                      }
+                      error={errors.consent}
                     >
                       Я даю{' '}
-                      <a
-                        href='/consent'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
+                      <a href='/consent' target='_blank' rel='noopener noreferrer'>
                         согласие на обработку персональных данных
                       </a>{' '}
                       в соответствии с{' '}
-                      <a
-                        href='/policy'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
+                      <a href='/policy' target='_blank' rel='noopener noreferrer'>
                         политикой конфиденциальности
                       </a>
                     </Checkbox>
                     <Checkbox
-                      id='modal-offer'
-                      checked={offerChecked}
-                      onChange={handleOfferChange}
+                      id={ids.offer}
+                      checked={form.offer}
+                      onChange={e => form.setOffer(e.target.checked)}
                       required
-                      error={
-                        offerError
-                          ? 'Необходимо согласиться с условиями договора оферты'
-                          : undefined
-                      }
+                      error={errors.offer}
                     >
                       Я согласен с условиями{' '}
-                      <a
-                        href='/offer'
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
+                      <a href='/offer' target='_blank' rel='noopener noreferrer'>
                         договора оферты
                       </a>
                     </Checkbox>
 
-                    {submitError && (
-                      <div
-                        className='ds-error p-4 rounded-2xl bg-[#FBEDEC]'
-                        role='alert'
-                        aria-live='assertive'
-                      >
-                        <Icon
-                          name='alert'
-                          size={18}
-                          color='var(--c-danger-ink)'
-                        />
-                        Не удалось отправить заявку. Пожалуйста, попробуйте
-                        снова позже.
+                    {form.serverError ? (
+                      <div className='ds-error p-4 rounded-2xl bg-[#FBEDEC]' role='alert' aria-live='assertive'>
+                        <Icon name='alert' size={18} color='var(--c-danger-ink)' />
+                        {form.serverError}
                       </div>
-                    )}
+                    ) : null}
 
                     <button
                       type='submit'
                       className='ds-btn ds-btn-lg ds-btn-primary ds-btn-block mt-2'
-                      disabled={
-                        isSubmitting || !consentChecked || !offerChecked
-                      }
-                      aria-disabled={
-                        isSubmitting || !consentChecked || !offerChecked
-                      }
-                      aria-busy={isSubmitting}
+                      aria-busy={sending}
                     >
-                      {isSubmitting ? 'Отправка...' : 'Записаться'}
+                      {sending ? 'Отправка...' : 'Записаться'}
                     </button>
                   </form>
                 )}
