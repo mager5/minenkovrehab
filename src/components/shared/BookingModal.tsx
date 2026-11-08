@@ -4,6 +4,7 @@ import { Fragment, useState, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { IoMdClose } from 'react-icons/io';
 import { bookingServices } from '@/data/content';
+import { TextField, TextArea, Select, Checkbox, Icon } from '@/components/ds';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -60,7 +61,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
   }, [isOpen]);
 
   // Ref для фокуса на первом элементе при открытии
-  const initialFocusRef = useRef(null);
+  const initialFocusRef = useRef<HTMLInputElement & HTMLButtonElement>(null);
 
   const services = bookingServices;
 
@@ -214,7 +215,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
           leaveTo='opacity-0'
         >
           <div
-            className='fixed inset-0 bg-black/50 backdrop-blur-sm'
+            className='fixed inset-0 bg-[rgba(13,60,99,0.45)] backdrop-blur-sm'
             aria-hidden='true'
           />
         </Transition.Child>
@@ -230,61 +231,48 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
               leaveFrom='opacity-100 scale-100'
               leaveTo='opacity-0 scale-95'
             >
-              <Dialog.Panel className='w-full max-w-md transform overflow-hidden rounded-xl bg-white p-8 shadow-lg transition-all duration-500 border border-gray-100 relative'>
+              <Dialog.Panel className='ds w-full max-w-[520px] transform rounded-[28px] bg-white p-6 dsk:p-9 text-left shadow-pop transition-all relative'>
                 <button
                   type='button'
-                  className='absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300 z-10'
+                  className='absolute top-4 right-4 w-12 h-12 rounded-full bg-sky hover:bg-[#d5e6f3] flex items-center justify-center border-0 cursor-pointer ds-focus z-10'
                   onClick={onClose}
                   aria-label='Закрыть'
                 >
-                  <IoMdClose className='h-5 w-5 text-gray-700' />
+                  <IoMdClose className='h-5 w-5 text-navy' />
                 </button>
 
                 <Dialog.Title
                   as='h2'
-                  className='text-2xl font-bold text-primary mb-8 relative inline-block'
+                  className='ds-h2 mb-6 pr-14'
+                  style={{ fontSize: 'min(var(--fs-h2), 30px)' }}
                   id='booking-modal-title'
                 >
                   Записаться
-                  <span
-                    className='block h-1.5 w-24 bg-accent mt-2 rounded-full'
-                    aria-hidden='true'
-                  ></span>
                 </Dialog.Title>
 
                 {submitSuccess ? (
                   <div
-                    className='bg-green-50 border-l-4 border-accent p-6 rounded-lg shadow-md animate-fadeIn'
+                    className='flex flex-col gap-4 p-6 rounded-[20px] bg-mint'
                     role='status'
                     aria-live='polite'
                   >
-                    <div className='flex items-center mb-3'>
-                      <svg
-                        className='w-6 h-6 mr-3 text-accent'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                        aria-hidden='true'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth='2'
-                          d='M5 13l4 4L19 7'
-                        ></path>
-                      </svg>
-                      <p className='font-bold text-lg text-primary'>
-                        Запись оформлена!
-                      </p>
-                    </div>
-                    <p className='text-gray-700'>
+                    <p className='m-0 flex items-center gap-3 font-extrabold text-[20px] text-navy'>
+                      <Icon
+                        name='check'
+                        size={24}
+                        strokeWidth={3}
+                        color='var(--c-mint-ink)'
+                      />
+                      Запись оформлена!
+                    </p>
+                    <p className='m-0 text-[17px] text-ink'>
                       Благодарю за обращение. Я свяжусь с вами в ближайшее время
                       для подтверждения записи.
                     </p>
-                    <div className='mt-5'>
+                    <div>
                       <button
                         type='button'
-                        className='inline-flex justify-center px-4 py-2 text-sm font-medium text-accent bg-white border border-accent rounded-md hover:bg-accent hover:text-white focus:outline-none focus:ring-2 focus:ring-accent transition-all duration-300'
+                        className='ds-btn ds-btn-md ds-btn-secondary'
                         onClick={onClose}
                         ref={initialFocusRef}
                       >
@@ -295,329 +283,145 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                 ) : (
                   <form
                     onSubmit={handleSubmit}
-                    className='space-y-6'
+                    className='flex flex-col gap-4'
                     aria-labelledby='booking-modal-title'
                   >
-                    <div className='form-group relative overflow-hidden'>
-                      <label htmlFor='name' className='sr-only'>
-                        Ваше имя
-                      </label>
-                      <input
-                        type='text'
-                        id='name'
-                        name='name'
-                        value={formData.name}
-                        onChange={handleChange}
-                        onFocus={() => handleFocus('name')}
-                        onBlur={handleBlur}
-                        className={`w-full bg-gray-50 border-0 border-b-2 rounded-t-lg px-4 py-3.5 text-gray-800 transition-all duration-300 focus:outline-none 
-                        ${focusedField === 'name' ? 'border-accent shadow-sm' : 'border-gray-200'}`}
-                        required
-                        placeholder='Ваше имя'
-                        aria-required='true'
-                        ref={initialFocusRef}
-                      />
-                      <div
-                        className={`absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-500 
-                        ${focusedField === 'name' ? 'w-full' : ''}`}
-                        aria-hidden='true'
-                      ></div>
-                    </div>
-
-                    <div className='form-group relative overflow-hidden'>
-                      <label htmlFor='phone' className='sr-only'>
-                        Телефон
-                      </label>
-                      <input
-                        type='tel'
-                        id='phone'
-                        name='phone'
-                        value={formData.phone}
-                        onChange={handleChange}
-                        onFocus={() => handleFocus('phone')}
-                        onBlur={handleBlur}
-                        className={`w-full bg-gray-50 border-0 border-b-2 rounded-t-lg px-4 py-3.5 text-gray-800 transition-all duration-300 focus:outline-none 
-                        ${focusedField === 'phone' ? 'border-accent shadow-sm' : 'border-gray-200'}`}
-                        required
-                        placeholder='Телефон'
-                        pattern='\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}'
-                        aria-required='true'
-                        aria-describedby='phone-format'
-                      />
-                      <div
-                        className={`absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-500 
-                        ${focusedField === 'phone' ? 'w-full' : ''}`}
-                        aria-hidden='true'
-                      ></div>
-                      <div id='phone-format' className='sr-only'>
-                        Формат телефона: +7 (999) 999-99-99
-                      </div>
-                    </div>
-
-                    <div className='form-group relative overflow-hidden'>
-                      <label htmlFor='service' className='sr-only'>
-                        Выберите услугу
-                      </label>
-                      <select
-                        id='service'
-                        name='service'
-                        value={formData.service}
-                        onChange={handleChange}
-                        onFocus={() => handleFocus('service')}
-                        onBlur={handleBlur}
-                        className={`w-full bg-gray-50 border-0 border-b-2 rounded-t-lg px-4 py-3.5 text-gray-800 transition-all duration-300 focus:outline-none appearance-none
-                        ${focusedField === 'service' ? 'border-accent shadow-sm' : 'border-gray-200'} 
-                        [&>option]:bg-white [&>option]:py-2 [&>option]:px-4 [&>option]:text-gray-800 
-                        [&>option:hover]:bg-accent [&>option:hover]:text-white [&>option:checked]:bg-accent/20`}
-                        required
-                        aria-required='true'
-                        style={{
-                          backgroundImage:
-                            "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m6 9 6 6 6-6'/%3e%3c/svg%3e\")",
-                          backgroundRepeat: 'no-repeat',
-                          backgroundPosition: 'right 0.75rem center',
-                          backgroundSize: '1.25rem',
-                          paddingRight: '2.5rem',
-                        }}
+                    <TextField
+                      label='Ваше имя'
+                      id='name'
+                      name='name'
+                      type='text'
+                      autoComplete='name'
+                      value={formData.name}
+                      onChange={handleChange}
+                      onFocus={() => handleFocus('name')}
+                      onBlur={handleBlur}
+                      required
+                      aria-required='true'
+                      ref={initialFocusRef}
+                    />
+                    <TextField
+                      label='Телефон'
+                      id='phone'
+                      name='phone'
+                      type='tel'
+                      inputMode='tel'
+                      autoComplete='tel'
+                      value={formData.phone}
+                      onChange={handleChange}
+                      onFocus={() => handleFocus('phone')}
+                      onBlur={handleBlur}
+                      required
+                      placeholder='+7 (___) ___-__-__'
+                      pattern='\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}'
+                      aria-required='true'
+                      hint='Формат: +7 (999) 999-99-99'
+                    />
+                    <Select
+                      label='Услуга'
+                      id='service'
+                      name='service'
+                      placeholder='Выберите услугу'
+                      options={services.map(sv => ({
+                        value: sv.id,
+                        label: sv.name,
+                      }))}
+                      value={formData.service}
+                      onChange={v =>
+                        handleChange({
+                          target: { name: 'service', value: v },
+                        } as unknown as React.ChangeEvent<HTMLInputElement>)
+                      }
+                    />
+                    <TextArea
+                      label='Ваше сообщение'
+                      id='message'
+                      name='message'
+                      rows={3}
+                      value={formData.message}
+                      onChange={handleChange}
+                      onFocus={() => handleFocus('message')}
+                      onBlur={handleBlur}
+                      placeholder='Коротко опишите ситуацию (необязательно)'
+                    />
+                    <Checkbox
+                      id='modal-consent'
+                      checked={consentChecked}
+                      onChange={handleConsentChange}
+                      required
+                      error={
+                        consentError
+                          ? 'Необходимо дать согласие на обработку персональных данных'
+                          : undefined
+                      }
+                    >
+                      Я даю{' '}
+                      <a
+                        href='/consent'
+                        target='_blank'
+                        rel='noopener noreferrer'
                       >
-                        <option value='' disabled>
-                          Выберите услугу
-                        </option>
-                        {services.map(service => (
-                          <option key={service.id} value={service.id}>
-                            {service.name}
-                          </option>
-                        ))}
-                      </select>
-                      <div
-                        className={`absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-500 
-                        ${focusedField === 'service' ? 'w-full' : ''}`}
-                        aria-hidden='true'
-                      ></div>
-                    </div>
-
-                    <div className='form-group relative overflow-hidden'>
-                      <label htmlFor='message' className='sr-only'>
-                        Ваше сообщение
-                      </label>
-                      <textarea
-                        id='message'
-                        name='message'
-                        value={formData.message}
-                        onChange={handleChange}
-                        onFocus={() => handleFocus('message')}
-                        onBlur={handleBlur}
-                        rows={4}
-                        className={`w-full bg-gray-50 border-0 border-b-2 rounded-t-lg px-4 py-3.5 text-gray-800 transition-all duration-300 focus:outline-none resize-none 
-                        ${focusedField === 'message' ? 'border-accent shadow-sm' : 'border-gray-200'}
-                        font-medium placeholder:text-gray-500 placeholder:font-normal tracking-wide`}
-                        placeholder='Ваше сообщение'
-                        aria-required='false'
-                      ></textarea>
-                      <div
-                        className={`absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-500 
-                        ${focusedField === 'message' ? 'w-full' : ''}`}
-                        aria-hidden='true'
-                      ></div>
-                    </div>
-
-                    <div className='form-group mb-2 space-y-3'>
-                      {/* Первый чекбокс - согласие на обработку персональных данных */}
-                      <label
-                        className='flex items-center cursor-pointer group'
-                        htmlFor='modal-consent'
+                        согласие на обработку персональных данных
+                      </a>{' '}
+                      в соответствии с{' '}
+                      <a
+                        href='/policy'
+                        target='_blank'
+                        rel='noopener noreferrer'
                       >
-                        <div className='relative flex items-center mr-3'>
-                          <input
-                            id='modal-consent'
-                            className='absolute opacity-0 w-5 h-5 cursor-pointer'
-                            required
-                            aria-required='true'
-                            type='checkbox'
-                            checked={consentChecked}
-                            onChange={handleConsentChange}
-                          />
-                          <div
-                            className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-all duration-300 flex-shrink-0 
-                            ${consentChecked ? 'bg-accent border-accent' : consentError ? 'bg-white border-red-500' : 'bg-white border-gray-300 group-hover:border-accent'}`}
-                            aria-hidden='true'
-                          >
-                            {consentChecked && (
-                              <svg
-                                className='w-3 h-3 text-white'
-                                fill='none'
-                                stroke='currentColor'
-                                viewBox='0 0 24 24'
-                                aria-hidden='true'
-                              >
-                                <path
-                                  strokeLinecap='round'
-                                  strokeLinejoin='round'
-                                  strokeWidth='3'
-                                  d='M5 13l4 4L19 7'
-                                ></path>
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                        <span className='text-sm text-gray-700 pt-0.5 text-left'>
-                          Я даю{' '}
-                          <a
-                            href='/consent'
-                            className='text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
-                            target='_blank'
-                            rel='noopener noreferrer'
-                          >
-                            согласие на обработку персональных данных
-                          </a>{' '}
-                          в соответствии с{' '}
-                          <a
-                            href='/policy'
-                            className='text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
-                            target='_blank'
-                            rel='noopener noreferrer'
-                          >
-                            политикой конфиденциальности
-                          </a>
-                        </span>
-                      </label>
-                      {consentError && (
-                        <p className='text-red-500 text-sm ml-8'>
-                          Необходимо дать согласие на обработку персональных
-                          данных
-                        </p>
-                      )}
-
-                      {/* Второй чекбокс - согласие с договором оферты */}
-                      <label
-                        className='flex items-center cursor-pointer group'
-                        htmlFor='modal-offer'
+                        политикой конфиденциальности
+                      </a>
+                    </Checkbox>
+                    <Checkbox
+                      id='modal-offer'
+                      checked={offerChecked}
+                      onChange={handleOfferChange}
+                      required
+                      error={
+                        offerError
+                          ? 'Необходимо согласиться с условиями договора оферты'
+                          : undefined
+                      }
+                    >
+                      Я согласен с условиями{' '}
+                      <a
+                        href='/offer'
+                        target='_blank'
+                        rel='noopener noreferrer'
                       >
-                        <div className='relative flex items-center mr-3'>
-                          <input
-                            id='modal-offer'
-                            className='absolute opacity-0 w-5 h-5 cursor-pointer'
-                            required
-                            aria-required='true'
-                            type='checkbox'
-                            checked={offerChecked}
-                            onChange={handleOfferChange}
-                          />
-                          <div
-                            className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-all duration-300 flex-shrink-0 
-                            ${offerChecked ? 'bg-accent border-accent' : offerError ? 'bg-white border-red-500' : 'bg-white border-gray-300 group-hover:border-accent'}`}
-                            aria-hidden='true'
-                          >
-                            {offerChecked && (
-                              <svg
-                                className='w-3 h-3 text-white'
-                                fill='none'
-                                stroke='currentColor'
-                                viewBox='0 0 24 24'
-                                aria-hidden='true'
-                              >
-                                <path
-                                  strokeLinecap='round'
-                                  strokeLinejoin='round'
-                                  strokeWidth='3'
-                                  d='M5 13l4 4L19 7'
-                                ></path>
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                        <span className='text-sm text-gray-700 pt-0.5 text-left'>
-                          Я согласен с условиями{' '}
-                          <a
-                            href='/offer'
-                            className='text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2'
-                            target='_blank'
-                            rel='noopener noreferrer'
-                          >
-                            договора оферта
-                          </a>
-                        </span>
-                      </label>
-                      {offerError && (
-                        <p className='text-red-500 text-sm ml-8'>
-                          Необходимо согласиться с условиями договора оферты
-                        </p>
-                      )}
-                    </div>
+                        договора оферты
+                      </a>
+                    </Checkbox>
 
                     {submitError && (
                       <div
-                        className='bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm'
+                        className='ds-error p-4 rounded-2xl bg-[#FBEDEC]'
                         role='alert'
                         aria-live='assertive'
                       >
-                        <div className='flex items-center mb-2'>
-                          <svg
-                            className='w-5 h-5 mr-2 text-red-600'
-                            fill='none'
-                            stroke='currentColor'
-                            viewBox='0 0 24 24'
-                            aria-hidden='true'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth='2'
-                              d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
-                            ></path>
-                          </svg>
-                          <p className='font-bold text-red-800'>
-                            Произошла ошибка!
-                          </p>
-                        </div>
-                        <p className='text-red-700'>
-                          Не удалось отправить заявку. Пожалуйста, попробуйте
-                          снова позже.
-                        </p>
+                        <Icon
+                          name='alert'
+                          size={18}
+                          color='var(--c-danger-ink)'
+                        />
+                        Не удалось отправить заявку. Пожалуйста, попробуйте
+                        снова позже.
                       </div>
                     )}
 
-                    <div className='mt-8'>
-                      <button
-                        type='submit'
-                        className={`w-full py-4 rounded-lg transition-all duration-500 font-semibold text-lg relative overflow-hidden ${
-                          isSubmitting
-                            ? 'bg-gray-200 cursor-not-allowed text-gray-500'
-                            : !consentChecked
-                              ? 'bg-white text-accent border-2 border-accent cursor-not-allowed'
-                              : !offerChecked
-                                ? 'bg-white text-accent border-2 border-accent cursor-not-allowed'
-                                : 'bg-accent text-white hover:bg-accent-dark'
-                        }`}
-                        disabled={
-                          isSubmitting || !consentChecked || !offerChecked
-                        }
-                        aria-disabled={
-                          isSubmitting || !consentChecked || !offerChecked
-                        }
-                        aria-busy={isSubmitting}
-                      >
-                        <span className='relative z-10 flex items-center justify-center'>
-                          {isSubmitting ? 'Отправка...' : 'Записаться'}
-                          {!isSubmitting && (
-                            <svg
-                              className='ml-2 w-5 h-5 transition-transform duration-300 transform group-hover:translate-x-1'
-                              fill='none'
-                              stroke='currentColor'
-                              viewBox='0 0 24 24'
-                              aria-hidden='true'
-                            >
-                              <path
-                                strokeLinecap='round'
-                                strokeLinejoin='round'
-                                strokeWidth='2'
-                                d='M14 5l7 7m0 0l-7 7m7-7H3'
-                              ></path>
-                            </svg>
-                          )}
-                        </span>
-                      </button>
-                    </div>
+                    <button
+                      type='submit'
+                      className='ds-btn ds-btn-lg ds-btn-primary ds-btn-block mt-2'
+                      disabled={
+                        isSubmitting || !consentChecked || !offerChecked
+                      }
+                      aria-disabled={
+                        isSubmitting || !consentChecked || !offerChecked
+                      }
+                      aria-busy={isSubmitting}
+                    >
+                      {isSubmitting ? 'Отправка...' : 'Записаться'}
+                    </button>
                   </form>
                 )}
               </Dialog.Panel>

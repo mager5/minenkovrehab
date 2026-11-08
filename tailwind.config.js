@@ -12,6 +12,8 @@ module.exports = {
         'lg': '1024px',
         'xl': '1280px',
         '2xl': '1536px',
+        // Брейкпоинт дизайн-системы: ≤900px — мобильная раскладка, ≥901px — десктопная
+        dsk: '901px',
       },
       colors: {
         'primary': '#0063A5', // синий (основной)
@@ -27,12 +29,36 @@ module.exports = {
         'gray-100': '#F3F4F6',
         'gray-200': '#E5E7EB',
         'gray-300': '#D1D5DB',
+        // Дизайн-система «Мягкая забота» (значения — в CSS-переменных globals.css)
+        navy: 'var(--c-navy)',
+        brand: 'var(--c-blue)',
+        sky: 'var(--c-sky)',
+        mint: 'var(--c-mint)',
+        'mint-ink': 'var(--c-mint-ink)',
+        leaf: 'var(--c-leaf)',
+        ink: 'var(--c-ink)',
+        muted: 'var(--c-muted)',
+        canvas: 'var(--c-canvas)',
+        surface: 'var(--c-surface)',
+        line: 'var(--c-line)',
+        danger: 'var(--c-danger)',
+        'danger-ink': 'var(--c-danger-ink)',
+        'warn-bg': 'var(--c-warn-bg)',
+        'warn-soft': 'var(--c-warn-soft)',
+        'warn-ink': 'var(--c-warn-ink)',
+      },
+      borderRadius: {
+        card: 'var(--r-card)',
+        panel: 'var(--r-panel)',
+        field: 'var(--r-field)',
       },
       boxShadow: {
         card: '0 4px 15px rgba(0, 0, 0, 0.05)',
         'card-hover': '0 10px 30px rgba(0, 0, 0, 0.1)',
         glow: '0 0 15px rgba(43, 170, 126, 0.5)',
         'glow-primary': '0 0 15px rgba(0, 99, 165, 0.5)',
+        ds: 'var(--shadow-card)',
+        pop: 'var(--shadow-pop)',
       },
       dropShadow: {
         'glow': '0 0 8px rgba(43, 170, 126, 0.6)',

@@ -1,5 +1,6 @@
-// Шрифт Inter раздаётся с нашего сервера (без запроса к Google Fonts при сборке и в браузере).
-import '@fontsource-variable/inter/wght.css';
+// Шрифт Manrope (400–800) раздаётся с нашего сервера через next/font (без запроса к Google Fonts
+// при сборке и в браузере): вариативный woff2 с латиницей и кириллицей лежит в src/fonts.
+import localFont from 'next/font/local';
 import './globals.css';
 import { Header } from '@/components/shared/Header';
 import Footer from '@/components/shared/Footer';
@@ -9,10 +10,19 @@ import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { BRAND, SITE_URL } from '@/lib/seo';
 
+const manrope = localFont({
+  src: '../fonts/Manrope-Variable.woff2',
+  weight: '200 800',
+  style: 'normal',
+  display: 'swap',
+  variable: '--font-manrope',
+  fallback: ['system-ui', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+});
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0063A5',
+  themeColor: '#0D3C63',
 };
 
 // Корневые метаданные: только общее для всего сайта.
@@ -42,10 +52,18 @@ export const metadata: Metadata = {
       { url: '/favicons/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
     ],
     apple: [
-      { url: '/favicons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      {
+        url: '/favicons/apple-touch-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
     ],
     other: [
-      { rel: 'mask-icon', url: '/favicons/safari-pinned-tab.svg', color: '#0063A5' },
+      {
+        rel: 'mask-icon',
+        url: '/favicons/safari-pinned-tab.svg',
+        color: '#0063A5',
+      },
     ],
   },
   verification: {
@@ -66,7 +84,7 @@ export default function RootLayout({
   return (
     <html
       lang='ru'
-      className='font-sans h-full overflow-x-hidden overflow-y-auto'
+      className={`${manrope.variable} font-sans h-full overflow-x-hidden overflow-y-auto`}
     >
       <head>
         <script
@@ -82,10 +100,11 @@ export default function RootLayout({
         <meta httpEquiv='Expires' content='0' />
       </head>
       <body className='antialiased min-h-screen flex flex-col h-full overflow-x-hidden overflow-y-auto'>
-        <div className='flex flex-col min-h-screen overflow-x-hidden'>
+        {/* overflow-x-clip (а не hidden): не создаёт контейнер прокрутки, поэтому sticky-элементы работают */}
+        <div className='flex flex-col min-h-screen overflow-x-clip'>
           <a
             href='#main-content'
-            className='sr-only focus:not-sr-only focus:absolute focus:p-4 focus:bg-primary focus:text-white focus:z-50'
+            className='sr-only focus:not-sr-only focus:absolute focus:p-4 focus:bg-brand focus:text-white focus:z-[60] focus:rounded-full focus:m-2'
           >
             Перейти к основному содержанию
           </a>

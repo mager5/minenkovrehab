@@ -3,11 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --font-inter: 'Inter Variable', 'Inter';
+  /* Шрифт задаётся через next/font (Manrope) в layout.tsx → --font-manrope */
+  --font-inter: var(--font-manrope), 'Manrope', system-ui, sans-serif;
   --fs-xs: 12px;
   --lh-xs: 16px;
-  --fs-sm: 14px;
-  --lh-sm: 20px;
+  --fs-sm: 15px;
+  --lh-sm: 22px;
   --fs-base: 16px;
   --lh-base: 24px;
   --fs-lg: 18px;
@@ -186,4 +187,520 @@ body {
   background: rgba(255, 255, 255, 1) !important;
   opacity: 1 !important;
   border: 1px solid rgba(255, 255, 255, 0.8) !important;
+}
+
+/* =====================================================================
+   Дизайн-система «Мягкая забота» (концепт 2)
+   Токены — CSS-переменные; Tailwind-цвета ссылаются на них (tailwind.config.js).
+   ===================================================================== */
+:root {
+  --c-navy: #0d3c63; /* заголовки, подвал */
+  --c-blue: #16639e; /* кнопки, ссылки, фокус */
+  --c-sky: #e8f1f8; /* голубой светлый */
+  --c-mint: #dcf1e8; /* мятный светлый */
+  --c-mint-ink: #1b6247; /* мятный тёмный */
+  --c-leaf: #2e8a64; /* зелёный (чекбокс) */
+  --c-ink: #1c2833; /* текст */
+  --c-muted: #4b5a68; /* вторичный текст */
+  --c-canvas: #f3f7fa; /* фон страницы */
+  --c-surface: #ffffff; /* карточки */
+  --c-line: #d3dee8; /* рамка поля */
+  --c-danger: #c2453a;
+  --c-danger-ink: #a3322a;
+  --c-warn-bg: #fff6e5;
+  --c-warn-soft: #fff4db;
+  --c-warn-ink: #7a4b00;
+
+  --g-panel:
+    radial-gradient(120% 90% at 0% 0%, #dcebf7 0%, rgba(220, 235, 247, 0) 60%),
+    radial-gradient(
+      90% 90% at 100% 100%,
+      #d9f1e6 0%,
+      rgba(217, 241, 230, 0) 60%
+    ),
+    #eef5fa;
+  --g-panel-m:
+    radial-gradient(120% 70% at 0% 0%, #dcebf7 0%, rgba(220, 235, 247, 0) 60%),
+    radial-gradient(
+      100% 70% at 100% 100%,
+      #d9f1e6 0%,
+      rgba(217, 241, 230, 0) 60%
+    ),
+    #eef5fa;
+  --g-cta:
+    radial-gradient(
+      100% 120% at 100% 0%,
+      #3b9f79 0%,
+      rgba(59, 159, 121, 0) 55%
+    ),
+    linear-gradient(135deg, #16639e 0%, #0d3c63 100%);
+  --g-photo-card: linear-gradient(160deg, #bfd9ee 0%, #cbe9db 100%);
+  --g-featured: linear-gradient(160deg, #ffffff 40%, #e2f3eb 100%);
+
+  --r-card: 28px;
+  --r-panel: 40px;
+  --r-field: 16px;
+  --shadow-card: 0 12px 32px rgba(13, 60, 99, 0.07);
+  --shadow-pop: 0 16px 40px rgba(13, 60, 99, 0.16);
+  --ring: 0 0 0 4px rgba(22, 99, 158, 0.16);
+
+  --sec: 96px;
+  --gutter: 40px;
+  --container: 1240px;
+
+  --fs-h1: 56px;
+  --fs-h2: 42px;
+  --fs-h3: 22px;
+  --fs-lead: 21px;
+  --fs-text: 19px;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --r-card: 24px;
+    --r-panel: 28px;
+    --sec: 48px;
+    --gutter: 16px;
+    --fs-h1: 34px;
+    --fs-h2: 28px;
+    --fs-lead: 18px;
+    --fs-text: 18px;
+  }
+}
+
+body {
+  background: var(--c-canvas);
+  color: var(--c-ink);
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+}
+
+@layer components {
+  .ds {
+    font-size: var(--fs-text);
+    line-height: 1.6;
+    color: var(--c-ink);
+  }
+  .ds-wrap {
+    width: 100%;
+    max-width: var(--container);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+    box-sizing: border-box;
+  }
+  .ds-sec {
+    padding-top: var(--sec);
+  }
+  .ds-card {
+    background: var(--c-surface);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-card);
+  }
+  .ds-panel {
+    border-radius: var(--r-panel);
+    padding: 64px;
+  }
+  .ds-panel-bg {
+    background: var(--g-panel);
+  }
+  .ds-cta-bg {
+    background: var(--g-cta);
+    color: #fff;
+  }
+  .ds-h1 {
+    margin: 0;
+    font-weight: 800;
+    font-size: var(--fs-h1);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--c-navy);
+    text-wrap: balance;
+  }
+  .ds-h2 {
+    margin: 0;
+    font-weight: 800;
+    font-size: var(--fs-h2);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--c-navy);
+    text-wrap: balance;
+  }
+  .ds-h2-sm {
+    font-size: min(var(--fs-h2), 34px);
+  }
+  .ds-h3 {
+    margin: 0;
+    font-weight: 800;
+    font-size: var(--fs-h3);
+    line-height: 1.3;
+    color: var(--c-navy);
+  }
+  .ds-lead {
+    font-size: var(--fs-lead);
+    line-height: 1.6;
+    color: var(--c-muted);
+  }
+  .ds-small {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .ds-link {
+    color: var(--c-blue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  .ds-link:hover {
+    color: var(--c-navy);
+  }
+  .ds a:focus-visible,
+  .ds button:focus-visible,
+  .ds-focus:focus-visible {
+    outline: 3px solid var(--c-blue);
+    outline-offset: 3px;
+  }
+
+  /* ---------- Кнопки-«таблетки» ---------- */
+  .ds-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 0;
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.18s ease,
+      transform 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ds-btn:focus-visible {
+    outline: 3px solid var(--c-blue);
+    outline-offset: 3px;
+  }
+  .ds-btn-lg {
+    min-height: 64px;
+    padding: 0 36px;
+    font-size: 20px;
+  }
+  .ds-btn-md {
+    min-height: 54px;
+    padding: 0 26px;
+    font-size: 17px;
+  }
+  .ds-btn-sm {
+    min-height: 48px;
+    padding: 0 20px;
+    font-size: 16px;
+  }
+  .ds-btn-primary {
+    background: var(--c-blue);
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(22, 99, 158, 0.28);
+  }
+  .ds-btn-primary:hover {
+    background: var(--c-navy);
+    color: #fff;
+  }
+  .ds-btn-secondary {
+    background: #fff;
+    color: var(--c-navy);
+  }
+  .ds-btn-secondary:hover {
+    background: var(--c-sky);
+    color: var(--c-navy);
+  }
+  .ds-btn-tertiary {
+    background: var(--c-sky);
+    color: var(--c-navy);
+  }
+  .ds-btn-tertiary:hover {
+    background: #d5e6f3;
+    color: var(--c-navy);
+  }
+  .ds-btn-outline {
+    background: transparent;
+    color: var(--c-navy);
+    box-shadow: inset 0 0 0 2px #bfd3e4;
+  }
+  .ds-btn-outline:hover {
+    background: var(--c-sky);
+    box-shadow: inset 0 0 0 2px var(--c-blue);
+    color: var(--c-navy);
+  }
+  .ds-btn-light {
+    background: #fff;
+    color: var(--c-navy);
+  }
+  .ds-btn-light:hover {
+    background: var(--c-sky);
+    color: var(--c-navy);
+  }
+  .ds-btn:disabled,
+  .ds-btn[aria-disabled='true'] {
+    background: #e3eaf0;
+    color: #7a8896;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  .ds-btn-block {
+    width: 100%;
+  }
+
+  /* ---------- Поля ---------- */
+  .ds-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--c-ink);
+  }
+  .ds-field {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 60px;
+    border: 2px solid var(--c-line);
+    border-radius: var(--r-field);
+    padding: 0 20px;
+    font: inherit;
+    font-size: 19px;
+    line-height: 1.4;
+    color: var(--c-ink);
+    background: #f7fafc;
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      background-color 0.15s ease;
+  }
+  .ds-field::placeholder {
+    color: #7a8896;
+    opacity: 1;
+  }
+  .ds-field:hover {
+    border-color: #b5c6d6;
+  }
+  .ds-field:focus,
+  .ds-field:focus-visible,
+  .ds-field[aria-expanded='true'] {
+    border-color: var(--c-blue);
+    background: #fff;
+    box-shadow: var(--ring);
+    outline: none;
+  }
+  .ds-field[aria-invalid='true'] {
+    border-color: var(--c-danger);
+    background: #fff;
+  }
+  .ds-field[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 4px rgba(194, 69, 58, 0.16);
+  }
+  .ds-field:disabled {
+    background: #eef2f6;
+    color: #7a8896;
+    cursor: not-allowed;
+  }
+  textarea.ds-field {
+    min-height: 132px;
+    padding: 16px 20px;
+    resize: vertical;
+  }
+  .ds-field:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset;
+  }
+  .ds-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--c-danger-ink);
+  }
+  .ds-hint {
+    font-size: 15px;
+    color: var(--c-muted);
+  }
+
+  /* ---------- Чекбокс ---------- */
+  .ds-check {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    cursor: pointer;
+    min-height: 44px;
+    padding-top: 8px;
+  }
+  .ds-check input {
+    position: absolute;
+    opacity: 0;
+    width: 44px;
+    height: 44px;
+    left: -8px;
+    top: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .ds-check-box {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 2px solid #9aaab8;
+    color: transparent;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .ds-check:hover .ds-check-box {
+    border-color: var(--c-blue);
+  }
+  .ds-check input:checked + .ds-check-box {
+    background: var(--c-leaf);
+    border-color: var(--c-leaf);
+    color: #fff;
+  }
+  .ds-check input:focus-visible + .ds-check-box {
+    box-shadow: 0 0 0 4px rgba(22, 99, 158, 0.28);
+  }
+  .ds-check input[aria-invalid='true'] + .ds-check-box {
+    border-color: var(--c-danger);
+  }
+  .ds-check-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--c-muted);
+  }
+  .ds-check-text a {
+    color: var(--c-blue);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* ---------- Чипы ---------- */
+  .ds-chip {
+    min-height: 48px;
+    padding: 0 22px;
+    border-radius: 999px;
+    border: 0;
+    background: #fff;
+    color: var(--c-navy);
+    box-shadow: inset 0 0 0 2px var(--c-line);
+    font: inherit;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      box-shadow 0.15s ease,
+      color 0.15s ease;
+  }
+  .ds-chip:hover {
+    box-shadow: inset 0 0 0 2px var(--c-blue);
+  }
+  .ds-chip[aria-pressed='true'] {
+    background: var(--c-navy);
+    color: #fff;
+    box-shadow: none;
+  }
+
+  /* ---------- Прочее ---------- */
+  .ds-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  .ds-ibox {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ds-photo {
+    display: block;
+    width: 100%;
+    object-fit: cover;
+    border-radius: var(--r-card);
+  }
+  .ds-hscroll {
+    scrollbar-width: none;
+  }
+  .ds-hscroll::-webkit-scrollbar {
+    display: none;
+  }
+  .ds-prose p {
+    margin: 12px 0 0;
+  }
+  .ds-prose p:first-child {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .ds-panel {
+    padding: 28px 20px;
+  }
+  .ds-btn-lg {
+    padding: 0 28px;
+    font-size: 18px;
+  }
+  .ds-stack-m {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ds-full-m {
+    width: 100%;
+    white-space: normal;
+  }
+}
+
+/* Юридические страницы (политика, оферта, согласие): только типографика */
+.ds-legal {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--c-ink);
+  overflow-wrap: anywhere;
+}
+.ds-legal h2 {
+  color: var(--c-navy);
+  font-weight: 800;
+  line-height: 1.3;
+}
+.ds-legal h3 {
+  color: var(--c-navy);
+  font-weight: 800;
+}
+.ds-legal a {
+  color: var(--c-blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ds-legal ul {
+  list-style: disc;
+}
+.ds-legal ol {
+  list-style: decimal;
+}
+@media (max-width: 900px) {
+  .ds-legal {
+    font-size: 16px;
+  }
 }

@@ -86,19 +86,18 @@ export default function AuthPopover({
       <Link
         href='/login'
         onClick={handleClick}
-        className={`
-          flex flex-col items-center justify-center text-primary text-xs font-medium py-1 px-2
-          rounded-md hover:bg-gray-50
-          transition-all duration-300 transform active:scale-95 
-          focus:outline-none 
-          ${isOpen ? 'bg-gray-50' : ''}
-        `}
+        className={
+          isMobile
+            ? `w-12 h-12 rounded-full bg-sky flex items-center justify-center text-navy ds-focus ${isOpen ? 'ring-2 ring-brand' : ''}`
+            : `inline-flex items-center gap-1.5 min-h-[44px] px-2 rounded-full font-semibold text-[16px] text-brand hover:text-navy no-underline ds-focus`
+        }
         aria-expanded={isOpen}
         aria-haspopup='true'
+        aria-label={isMobile ? 'Войти' : undefined}
         role='button'
       >
-        <User className='w-5 h-5 md:w-5 md:h-5 w-6 h-6' />
-        <span className='hidden md:inline mt-0.5'>Войти</span>
+        <User className='w-5 h-5' aria-hidden='true' />
+        {!isMobile && <span>Войти</span>}
       </Link>
 
       <Transition
@@ -114,24 +113,24 @@ export default function AuthPopover({
         <div
           className={`${
             isMobile
-              ? 'fixed left-4 right-4 top-[4.5rem] w-auto'
+              ? 'fixed left-4 right-4 top-[5rem] w-auto'
               : 'absolute right-0 mt-2 w-80'
           } origin-top-right pt-2 z-50`}
         >
-          <div className='bg-white rounded-xl shadow-xl ring-1 ring-black/5 p-6 border border-gray-100 relative'>
+          <div className='bg-white rounded-[24px] shadow-pop p-6 relative'>
             {/* Triangle pointer - hide on mobile as positioning changes */}
             {!isMobile && (
-              <div className='absolute -top-2 right-8 w-4 h-4 bg-white border-t border-l border-gray-100 transform rotate-45'></div>
+              <div className='absolute -top-2 right-8 w-4 h-4 bg-white transform rotate-45'></div>
             )}
 
-            <p className='text-sm text-gray-600 mb-6 leading-relaxed relative z-10'>
+            <p className='text-[16px] text-muted mb-5 leading-relaxed relative z-10'>
               Войдите, чтобы получить доступ к вашим программам и материалам.
             </p>
 
             <div className='flex flex-col gap-3 relative z-10'>
               <Link
                 href='/login'
-                className='flex items-center justify-center w-full bg-primary text-white px-4 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-sm text-sm'
+                className='ds-btn ds-btn-primary ds-btn-md ds-btn-block'
                 onClick={() => isMobile && onClose && onClose()}
               >
                 Войти или зарегистрироваться

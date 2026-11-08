@@ -46,23 +46,23 @@ export default function CookieBanner() {
       aria-labelledby='cookie-banner-title'
       aria-describedby='cookie-banner-text'
     >
-      <div className='pointer-events-auto isolate w-full max-w-[400px] bg-white text-dark rounded-2xl shadow-[0_16px_40px_rgba(15,23,42,0.18)] ring-1 ring-black/[0.06] px-4 py-3 sm:px-5 sm:py-3.5 animate-fade-in'>
+      <div className='pointer-events-auto isolate w-full max-w-[400px] bg-white text-ink rounded-[24px] shadow-pop px-5 py-4 animate-fade-in'>
         <p
           id='cookie-banner-title'
-          className='text-sm sm:text-[15px] font-semibold text-dark tracking-tight'
+          className='m-0 text-[16px] font-extrabold text-navy'
         >
           Мы используем cookie
         </p>
         <p
           id='cookie-banner-text'
-          className='mt-1 text-[12.5px] sm:text-[13px] leading-[1.45] text-[#4b5563]'
+          className='mt-1 mb-0 text-[15px] leading-[1.5] text-muted'
         >
           Необходимые cookie помогают сайту работать: сохраняют вход в аккаунт и
           ваши настройки. Аналитика может включаться только с вашего согласия.
         </p>
         <Link
           href='/policy'
-          className='mt-1.5 inline-block text-[12.5px] sm:text-[13px] font-medium text-accent hover:text-accent-dark underline-offset-2 hover:underline transition-colors'
+          className='mt-1.5 inline-block text-[15px] font-semibold text-brand hover:text-navy underline underline-offset-2'
           target='_blank'
         >
           Подробнее в политике конфиденциальности
@@ -71,19 +71,19 @@ export default function CookieBanner() {
           <button
             type='button'
             onClick={() => saveConsent('necessary')}
-            className='flex-1 min-h-[44px] px-3 py-2 rounded-xl border border-gray-300 bg-white text-dark hover:bg-gray-50 hover:border-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-accent/40'
+            className='flex-1 min-h-[48px] px-4 py-2 rounded-full bg-sky text-navy hover:bg-[#d5e6f3] transition-colors border-0 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-brand/30'
           >
-            <span className='block text-[13px] font-semibold leading-tight'>
+            <span className='block text-[15px] font-bold leading-tight'>
               Только необходимые
             </span>
-            <span className='block text-[11px] font-normal text-[#6b7280] leading-tight mt-0.5'>
+            <span className='block text-[15px] font-medium text-muted leading-tight mt-0.5'>
               Без аналитики
             </span>
           </button>
           <button
             type='button'
             onClick={() => saveConsent('all')}
-            className='flex-1 min-h-[44px] px-3 py-2 rounded-xl bg-accent hover:bg-accent-dark text-white font-semibold text-[13px] shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50'
+            className='flex-1 min-h-[48px] px-4 py-2 rounded-full bg-brand hover:bg-navy text-white font-bold text-[15px] border-0 cursor-pointer transition-colors focus:outline-none focus-visible:ring-4 focus-visible:ring-brand/30'
           >
             Принять все
           </button>

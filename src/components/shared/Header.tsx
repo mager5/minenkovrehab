@@ -14,10 +14,11 @@ import {
   ArrowLeft,
   X,
   ChevronDown,
-  MapPin,
   Mail,
   Phone,
 } from 'lucide-react';
+import { Icon } from '@/components/ds/Icon';
+import { formatPhone } from '@/components/ds/Layout';
 import { Transition } from '@headlessui/react';
 import AuthPopover from './AuthPopover';
 import { getRailwayApiBaseUrl } from '@/lib/api-base';
@@ -365,6 +366,25 @@ export function Header() {
     }
   };
 
+  const phoneHref = `tel:${headerContacts.phone.replace(/[^+\d]/g, '')}`;
+  const phoneLabel = formatPhone(headerContacts.phone);
+  const hoursLabel = headerContacts.workingHours.replace(/-/g, '–');
+  const isActive = (href: string) =>
+    href === '/'
+      ? pathname === '/'
+      : pathname === href || !!pathname?.startsWith(`${href}/`);
+  const navLinkClass = (active: boolean) =>
+    `inline-flex items-center gap-1 min-h-[44px] px-4 rounded-full no-underline whitespace-nowrap transition-colors ${
+      active
+        ? 'bg-sky text-navy'
+        : 'text-ink hover:bg-[#F3F7FA] hover:text-navy'
+    }`;
+  const showGuestAuth =
+    !isAuthLoading &&
+    !user &&
+    !isAuthPage &&
+    !pathname?.startsWith('/dashboard');
+
   return (
     <>
       {/* Предотвращение скролла при открытом мобильном меню */}
@@ -388,7 +408,7 @@ export function Header() {
         leaveTo='opacity-0'
       >
         <div
-          className='fixed inset-0 bg-black/50 z-40 backdrop-blur-sm will-change-[opacity]'
+          className='fixed inset-0 bg-[rgba(13,60,99,0.45)] z-40 backdrop-blur-sm will-change-[opacity]'
           onClick={() => {
             setIsMenuOpen(false);
             setIsMobileAuthOpen(false);
@@ -398,131 +418,123 @@ export function Header() {
         />
       </Transition>
 
-      {/* Верхняя инфо-панель */}
+      {/* Верхняя строка: часы, телефон, вход (только десктоп) */}
       <div
-        className={`hidden lg:block bg-primary text-white py-2 transition-all duration-500 ease-in-out ${isScrolled ? 'transform -translate-y-full opacity-0 h-0 overflow-hidden' : 'transform translate-y-0 opacity-100'}`}
+        className='hidden min-[1100px]:block ds-wrap pt-3'
         role='complementary'
         aria-label='Контактная информация'
       >
-        <div className='max-w-screen-2xl mx-auto px-4 lg:px-8'>
-          <div className='flex justify-between items-center'>
-            <div className='flex items-center space-x-4'>
-              <p className='text-sm font-medium' style={{ color: '#ffffff' }}>
-                Следите за мной:
-              </p>
-              <div className='flex'>
-                {socialLinks.map(link => (
-                  <a
-                    key={link.name}
-                    href={link.url}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='inline-flex items-center justify-center w-11 h-11 -my-2 text-white hover:text-accent transition-all duration-300 transform hover:scale-110'
-                    aria-label={link.label}
-                    onKeyDown={e =>
-                      handleKeyDown(e, () => window.open(link.url, '_blank'))
-                    }
-                  >
-                    <SafeIcon name={link.name} className='w-5 h-5' />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className='flex items-center space-x-6'>
-              <div className='flex items-center'>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='h-5 w-5 mr-2'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                  aria-hidden='true'
-                  focusable='false'
+        <div className='flex justify-end items-center gap-6 flex-wrap px-3 text-[16px]'>
+          <span className='text-muted'>{hoursLabel}</span>
+          <a
+            href={phoneHref}
+            className='font-bold text-navy no-underline text-[17px] hover:text-brand min-h-[44px] inline-flex items-center'
+            aria-label={`Позвонить по телефону ${phoneLabel}`}
+          >
+            {phoneLabel}
+          </a>
+          <div className='min-w-[72px] flex justify-end'>
+            {isAuthLoading ? (
+              <span className='invisible'>Войти</span>
+            ) : user ? (
+              <div
+                className='relative'
+                onMouseEnter={() => setIsProfileDropdownOpen(true)}
+                onMouseLeave={() => setIsProfileDropdownOpen(false)}
+              >
+                <button
+                  type='button'
+                  className='inline-flex items-center gap-2 min-h-[44px] font-semibold text-brand hover:text-navy bg-transparent border-0 cursor-pointer ds-focus rounded-full px-2'
+                  aria-label='Меню профиля'
+                  aria-expanded={isProfileDropdownOpen}
+                  onClick={() => setIsProfileDropdownOpen(v => !v)}
                 >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'
-                  />
-                </svg>
-                <a
-                  href={`tel:${headerContacts.phone.replace(/[^+\d]/g, '')}`}
-                  className='text-white hover:text-accent-light transition-colors'
-                  aria-label={`Позвонить по телефону ${headerContacts.phone}`}
-                  onKeyDown={e =>
-                    handleKeyDown(
-                      e,
-                      () =>
-                        (window.location.href = `tel:${headerContacts.phone.replace(/[^+\d]/g, '')}`)
-                    )
-                  }
-                >
-                  <span className='hidden md:inline'>
-                    {headerContacts.phone}
+                  <span className='w-8 h-8 rounded-full bg-sky flex items-center justify-center'>
+                    <UserIcon className='w-[18px] h-[18px] text-brand' />
                   </span>
-                </a>
-              </div>
-              <div className='flex items-center'>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='h-5 w-5 mr-2'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                  aria-hidden='true'
-                  focusable='false'
+                  <span className='max-w-[160px] truncate'>
+                    {user.email?.split('@')[0]}
+                  </span>
+                </button>
+                <div
+                  className={`absolute top-full right-0 mt-1 w-64 bg-white rounded-[20px] shadow-pop z-[60] overflow-hidden transition-all duration-200 ${
+                    isProfileDropdownOpen
+                      ? 'opacity-100 visible translate-y-0'
+                      : 'opacity-0 invisible -translate-y-2'
+                  }`}
                 >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                  />
-                </svg>
-                <span className='text-sm font-medium'>
-                  {headerContacts.workingHours}
-                </span>
+                  <div className='p-2'>
+                    <div className='px-4 py-3'>
+                      <p className='text-[14px] text-muted m-0'>Вы вошли как</p>
+                      <p
+                        className='text-[15px] font-bold text-ink truncate m-0'
+                        title={user.email ?? undefined}
+                      >
+                        {user.email}
+                      </p>
+                    </div>
+                    <Link
+                      href='/dashboard'
+                      className='flex items-center gap-2.5 min-h-[44px] px-4 rounded-xl text-[16px] text-ink no-underline hover:bg-sky hover:text-navy'
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      <Settings className='w-[18px] h-[18px]' />
+                      Личный кабинет
+                    </Link>
+                    <button
+                      type='button'
+                      onClick={handleLogout}
+                      className='flex w-full items-center gap-2.5 min-h-[44px] px-4 rounded-xl text-[16px] text-danger-ink bg-transparent border-0 cursor-pointer hover:bg-[#FBEDEC] text-left font-[inherit]'
+                    >
+                      <LogOut className='w-[18px] h-[18px]' />
+                      Выйти
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : !isAuthPage && !pathname?.startsWith('/dashboard') ? (
+              <AuthPopover />
+            ) : null}
           </div>
         </div>
       </div>
 
-      {/* Основная навигация - липкая часть */}
+      {/* Основная навигация — «таблетка», липкая */}
       <header
-        className={`sticky top-0 left-0 right-0 z-50 bg-white transition-all duration-500 ease-in-out ${isScrolled ? 'shadow-lg py-3' : 'shadow-sm py-4'}`}
+        className='sticky top-0 z-50 pt-3 min-[1100px]:pt-3'
         role='banner'
       >
-        <div className='max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex justify-between items-center'>
-            {/* Логотип и название */}
+        <div className='ds-wrap'>
+          <div
+            className={`flex items-center justify-between gap-4 bg-white rounded-full py-2 pr-2 pl-[18px] min-[1100px]:py-3 min-[1100px]:pr-3 min-[1100px]:pl-7 transition-shadow duration-300 ${
+              isScrolled
+                ? 'shadow-[0_12px_32px_rgba(13,60,99,0.14)]'
+                : 'shadow-[0_8px_24px_rgba(13,60,99,0.06)]'
+            }`}
+          >
+            {/* Логотип */}
             <Link
               href='/'
-              className='flex items-center space-x-2'
+              className='flex items-center gap-2.5 no-underline font-extrabold text-[16px] min-[1100px]:text-[19px] text-navy hover:text-navy min-h-[44px] shrink-0'
               aria-label='Миненков Вадим - На главную'
             >
               <Image
                 src='/images/logo-80.png'
-                alt='Логотип Вадим Миненков'
+                alt=''
                 width={40}
                 height={40}
-                className='w-8 h-8 md:w-10 md:h-10'
+                className='w-7 h-7 min-[1100px]:w-9 min-[1100px]:h-9'
                 priority
               />
-              <span className='text-xl md:text-2xl font-bold text-primary transition-transform duration-300'>
-                Миненков<span className='text-accent'> Вадим</span>
-              </span>
+              <span>Миненков Вадим</span>
             </Link>
 
             {/* Десктопное меню */}
             <nav
-              className='hidden [&>*]:text-nowrap [@media(min-width:840px)]:flex space-x-1 lg:space-x-2'
+              className='hidden min-[1100px]:flex flex-1 justify-center gap-1.5 text-[17px] font-semibold'
               aria-label='Основная навигация'
             >
               {navigationItems.map(item => {
-                // Специальная обработка для пункта "Услуги"
                 if (item.href === '/products') {
                   return (
                     <div
@@ -530,91 +542,81 @@ export function Header() {
                       className='relative'
                       onMouseEnter={() => setIsServicesDropdownOpen(true)}
                       onMouseLeave={() => setIsServicesDropdownOpen(false)}
+                      onFocus={() => setIsServicesDropdownOpen(true)}
+                      onBlur={e => {
+                        if (!e.currentTarget.contains(e.relatedTarget as Node))
+                          setIsServicesDropdownOpen(false);
+                      }}
                     >
                       <Link
                         href={item.href}
-                        className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap flex items-center ${pathname === item.href || (pathname && pathname.startsWith('/products/')) ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                        className={navLinkClass(isActive(item.href))}
                         aria-current={
                           pathname === item.href ? 'page' : undefined
                         }
+                        aria-haspopup='true'
+                        aria-expanded={isServicesDropdownOpen}
                       >
                         {item.label}
-                        <svg
-                          className={`ml-1 h-4 w-4 transition-transform duration-200 ${isServicesDropdownOpen ? 'rotate-180' : ''}`}
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          stroke='currentColor'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M19 9l-7 7-7-7'
-                          />
-                        </svg>
+                        <Icon
+                          name='chev-down'
+                          size={18}
+                          strokeWidth={2.4}
+                          className={`transition-transform duration-200 ${isServicesDropdownOpen ? 'rotate-180' : ''}`}
+                        />
                       </Link>
 
                       {/* Выпадающее меню услуг */}
                       <div
-                        className={`absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-100 transition-all duration-300 z-50 ${isServicesDropdownOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}
+                        className={`absolute top-full left-1/2 -translate-x-1/2 pt-3 w-[340px] z-50 transition-all duration-200 ${
+                          isServicesDropdownOpen
+                            ? 'opacity-100 visible'
+                            : 'opacity-0 invisible'
+                        }`}
                       >
-                        <div className='py-2'>
-                          {servicesDropdownItems.map((service, _) => (
+                        <div className='bg-white rounded-[24px] shadow-pop p-2'>
+                          {servicesDropdownItems.map(service => (
                             <Link
                               key={service.href}
                               href={service.href}
-                              className='block px-4 py-3 hover:bg-gray-50 transition-colors duration-200 group'
+                              className='block px-4 py-3 rounded-2xl no-underline hover:bg-sky group'
                               aria-label={`${service.label}: ${service.description}`}
                             >
-                              <div className='font-medium text-gray-900 group-hover:text-primary transition-colors duration-200'>
+                              <span className='block font-bold text-[16px] text-navy'>
                                 {service.label}
-                              </div>
-                              <div
-                                className='text-sm text-gray-500 mt-1'
-                                style={{
-                                  overflow: 'hidden',
-                                  whiteSpace: 'nowrap',
-                                  textOverflow: 'ellipsis',
-                                }}
+                              </span>
+                              <span
+                                className='block text-[15px] font-medium text-muted mt-0.5 truncate'
                                 title={service.description}
                               >
                                 {service.description}
-                              </div>
+                              </span>
                             </Link>
                           ))}
-                          <div className='border-t border-gray-100 mt-2 pt-2'>
-                            <Link
-                              href='/products'
-                              className='block px-4 py-2 text-sm font-medium text-primary hover:bg-gray-50 transition-colors duration-200'
-                              aria-label='Посмотреть все услуги и программы'
-                            >
-                              Все услуги →
-                            </Link>
-                          </div>
+                          <Link
+                            href='/products'
+                            className='flex items-center gap-1.5 min-h-[44px] px-4 mt-1 rounded-2xl text-[16px] font-bold text-brand no-underline hover:bg-sky'
+                            aria-label='Посмотреть все услуги и программы'
+                          >
+                            Все услуги
+                            <Icon
+                              name='chev-right'
+                              size={16}
+                              strokeWidth={2.4}
+                            />
+                          </Link>
                         </div>
                       </div>
                     </div>
                   );
                 }
 
-                // Обычные пункты меню
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`px-2 lg:px-4 py-2 text-sm lg:text-base font-medium hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-2/3 whitespace-nowrap ${pathname === item.href ? 'text-primary font-semibold after:w-2/3' : 'text-gray-800'}`}
+                    className={navLinkClass(isActive(item.href))}
                     aria-current={pathname === item.href ? 'page' : undefined}
-                    aria-label={
-                      item.label === 'Главная'
-                        ? 'Перейти на главную страницу'
-                        : item.label === 'Обо мне'
-                          ? 'Узнать больше о специалисте'
-                          : item.label === 'Услуги'
-                            ? 'Посмотреть услуги и программы'
-                            : item.label === 'Контакты'
-                              ? 'Связаться со специалистом'
-                              : `Перейти в раздел ${item.label}`
-                    }
                   >
                     {item.label}
                   </Link>
@@ -622,133 +624,59 @@ export function Header() {
               })}
             </nav>
 
-            {/* Кнопки действий (Desktop) */}
-            <div className='flex items-center space-x-3 lg:space-x-4 xl:space-x-7 xl:pr-10'>
-              <div className='hidden [@media(min-width:840px)]:block w-[112px] shrink-0'>
-                {isAuthLoading ? (
-                  <div className='invisible'>
-                    <AuthPopover />
-                  </div>
-                ) : user ? (
-                  <div
-                    className='relative'
-                    onMouseEnter={() => setIsProfileDropdownOpen(true)}
-                    onMouseLeave={() => setIsProfileDropdownOpen(false)}
-                  >
-                    <button
-                      className='flex items-center space-x-2 text-primary hover:text-primary-dark font-medium transition-colors focus:outline-none py-2'
-                      aria-label='Меню профиля'
-                      aria-expanded={isProfileDropdownOpen}
-                    >
-                      <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors'>
-                        <UserIcon className='w-5 h-5 text-primary' />
-                      </div>
-                      <span className='hidden xl:inline text-sm font-medium'>
-                        {user.email?.split('@')[0]}
-                      </span>
-                    </button>
-                    <div
-                      className={`absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 transition-all duration-300 z-50 overflow-hidden ${
-                        isProfileDropdownOpen
-                          ? 'opacity-100 visible translate-y-0'
-                          : 'opacity-0 invisible -translate-y-2'
-                      }`}
-                    >
-                      <div className='py-1'>
-                        <div className='px-4 py-3 border-b border-gray-100 bg-gray-50/50'>
-                          <p className='text-xs text-gray-500 mb-0.5'>
-                            Вы вошли как
-                          </p>
-                          <p
-                            className='text-sm font-medium text-gray-900 truncate'
-                            title={user.email ?? undefined}
-                          >
-                            {user.email}
-                          </p>
-                        </div>
-                        <Link
-                          href='/dashboard'
-                          className='flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors'
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                        >
-                          <Settings className='w-4 h-4 mr-2.5' />
-                          Личный кабинет
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className='flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors text-left'
-                        >
-                          <LogOut className='w-4 h-4 mr-2.5' />
-                          Выйти
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : !isAuthPage && !pathname?.startsWith('/dashboard') ? (
-                  <AuthPopover />
-                ) : null}
-              </div>
+            {/* Кнопка записи (десктоп) */}
+            <button
+              type='button'
+              onClick={openBookingModal}
+              className='hidden min-[1100px]:inline-flex ds-btn ds-btn-primary min-h-[52px] px-[26px] text-[17px] shrink-0'
+              style={{ boxShadow: 'none' }}
+              aria-label='Записаться на консультацию'
+              aria-haspopup='dialog'
+            >
+              Записаться
+            </button>
 
-              {/* Кнопка записи */}
-              <button
-                onClick={openBookingModal}
-                className='hidden [@media(min-width:840px)]:block bg-accent hover:bg-accent-dark text-white font-semibold text-sm lg:text-base px-3 lg:px-5 py-3 rounded-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 xl:mr-8 '
-                aria-label='Записаться на консультацию'
-                aria-haspopup='dialog'
-              >
-                Записаться
-              </button>
-            </div>
-
-            {/* Мобильное меню (бургер) */}
-            <div className='flex items-center gap-1 [@media(min-width:840px)]:hidden'>
-              {!isAuthLoading &&
-                !user &&
-                !isAuthPage &&
-                !pathname?.startsWith('/dashboard') && (
-                  <div className='mr-1'>
-                    <AuthPopover
-                      isMobile={true}
-                      isOpen={isMobileAuthOpen}
-                      onToggle={toggleMobileAuth}
-                      onClose={() => setIsMobileAuthOpen(false)}
-                    />
-                  </div>
-                )}
+            {/* Мобильные действия */}
+            <div className='flex items-center gap-2 min-[1100px]:hidden'>
+              {showGuestAuth && (
+                <AuthPopover
+                  isMobile={true}
+                  isOpen={isMobileAuthOpen}
+                  onToggle={toggleMobileAuth}
+                  onClose={() => setIsMobileAuthOpen(false)}
+                />
+              )}
 
               {user && !isAuthPage && (
                 <div className='relative'>
                   <button
                     type='button'
-                    className='mr-2 p-2 text-primary hover:text-primary-dark transition-colors focus:outline-none'
+                    className='w-12 h-12 rounded-full bg-sky flex items-center justify-center border-0 cursor-pointer ds-focus'
                     aria-label='Открыть меню профиля'
                     aria-expanded={isMobileProfileOpen}
                     aria-controls='mobile-profile-menu'
                     onClick={toggleMobileProfile}
                   >
-                    <UserIcon className='w-6 h-6' />
+                    <UserIcon className='w-5 h-5 text-navy' />
                   </button>
 
                   {/* Мобильное выпадающее меню профиля */}
                   <div
                     id='mobile-profile-menu'
-                    className={`fixed left-4 right-4 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 transition-all duration-300 origin-top-right ${
+                    className={`fixed left-4 right-4 mt-2 bg-white rounded-[24px] shadow-pop overflow-hidden z-50 transition-all duration-300 origin-top-right ${
                       isMobileProfileOpen
                         ? 'opacity-100 visible translate-y-0 scale-100'
                         : 'opacity-0 invisible -translate-y-4 scale-95'
                     }`}
-                    style={{
-                      top: isScrolled ? '56px' : '64px',
-                      willChange: 'transform, opacity',
-                    }}
+                    style={{ top: '80px', willChange: 'transform, opacity' }}
                   >
-                    <div className='py-1'>
-                      <div className='px-4 py-4 border-b border-gray-100 bg-gray-50/50'>
-                        <p className='text-xs text-gray-500 mb-1'>
+                    <div className='p-2'>
+                      <div className='px-4 py-3'>
+                        <p className='text-[15px] text-muted m-0'>
                           Вы вошли как
                         </p>
                         <p
-                          className='text-sm font-semibold text-gray-900 truncate'
+                          className='text-[16px] font-bold text-ink truncate m-0'
                           title={user.email ?? undefined}
                         >
                           {user.email}
@@ -756,17 +684,18 @@ export function Header() {
                       </div>
                       <Link
                         href='/dashboard'
-                        className='flex items-center px-4 py-3 text-base text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors active:bg-gray-100'
+                        className='flex items-center gap-3 min-h-[48px] px-4 rounded-xl text-[17px] text-ink no-underline hover:bg-sky'
                         onClick={() => setIsMobileProfileOpen(false)}
                       >
-                        <Settings className='w-5 h-5 mr-3 text-gray-400' />
+                        <Settings className='w-5 h-5 text-muted' />
                         Личный кабинет
                       </Link>
                       <button
+                        type='button'
                         onClick={handleLogout}
-                        className='flex w-full items-center px-4 py-3 text-base text-red-600 hover:bg-red-50 transition-colors text-left active:bg-red-50'
+                        className='flex w-full items-center gap-3 min-h-[48px] px-4 rounded-xl text-[17px] text-danger-ink bg-transparent border-0 cursor-pointer hover:bg-[#FBEDEC] text-left font-[inherit]'
                       >
-                        <LogOut className='w-5 h-5 mr-3' />
+                        <LogOut className='w-5 h-5' />
                         Выйти
                       </button>
                     </div>
@@ -777,50 +706,42 @@ export function Header() {
               {isAuthPage ? (
                 <button
                   type='button'
-                  className='text-gray-800 hover:text-primary focus:outline-none transition-all duration-300 p-2 rounded-md'
+                  className='w-12 h-12 rounded-full bg-sky flex items-center justify-center border-0 cursor-pointer ds-focus'
                   onClick={handleBack}
                   aria-label='Вернуться назад'
                 >
-                  <ArrowLeft className='h-6 w-6' />
+                  <ArrowLeft className='h-5 w-5 text-navy' />
                 </button>
               ) : (
-                <button
-                  type='button'
-                  className='text-gray-800 hover:text-primary focus:outline-none transition-all duration-300 p-2 rounded-md'
-                  onClick={toggleMobileMenu}
-                  aria-label={isMenuOpen ? 'Закрыть меню' : 'Открыть меню'}
-                  aria-expanded={isMenuOpen}
-                  aria-controls='mobile-menu'
-                >
-                  <svg
-                    className='h-6 w-6 transition-transform duration-300 ease-in-out'
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                    style={{
-                      transform: isMenuOpen ? 'rotate(90deg)' : 'rotate(0)',
-                    }}
-                    aria-hidden='true'
-                    focusable='false'
+                <>
+                  <a
+                    href={phoneHref}
+                    aria-label={`Позвонить по телефону ${phoneLabel}`}
+                    className='w-12 h-12 rounded-full bg-sky flex items-center justify-center ds-focus'
                   >
-                    {isMenuOpen ? (
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M6 18L18 6M6 6l12 12'
-                      />
-                    ) : (
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M4 6h16M4 12h16M4 18h16'
-                      />
-                    )}
-                  </svg>
-                </button>
+                    <Icon
+                      name='phone'
+                      size={20}
+                      strokeWidth={2}
+                      color='var(--c-navy)'
+                    />
+                  </a>
+                  <button
+                    type='button'
+                    className='w-12 h-12 rounded-full bg-brand flex items-center justify-center border-0 cursor-pointer ds-focus'
+                    onClick={toggleMobileMenu}
+                    aria-label={isMenuOpen ? 'Закрыть меню' : 'Открыть меню'}
+                    aria-expanded={isMenuOpen}
+                    aria-controls='mobile-menu'
+                  >
+                    <Icon
+                      name={isMenuOpen ? 'close' : 'menu'}
+                      size={22}
+                      strokeWidth={2.2}
+                      color='#fff'
+                    />
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -830,11 +751,12 @@ export function Header() {
       {/* Мобильное меню (Drawer) */}
       <Transition show={isMenuOpen} as={Fragment}>
         <div
-          className='fixed inset-0 z-50 lg:hidden'
+          id='mobile-menu'
+          className='fixed inset-0 z-50 min-[1100px]:hidden'
           aria-modal='true'
           role='dialog'
+          aria-label='Меню'
         >
-          {/* Overlay with dimming */}
           <Transition.Child
             as={Fragment}
             enter='transition-opacity duration-300'
@@ -845,119 +767,130 @@ export function Header() {
             leaveTo='opacity-0'
           >
             <div
-              className='fixed inset-0 bg-black/60 backdrop-blur-sm'
+              className='fixed inset-0 bg-[rgba(13,60,99,0.45)] backdrop-blur-sm'
               onClick={closeMenu}
               aria-hidden='true'
             />
           </Transition.Child>
 
-          {/* Slide-in Menu Panel */}
           <Transition.Child
             as={Fragment}
             enter='transition transform duration-300 ease-in-out'
-            enterFrom='-translate-x-full'
+            enterFrom='translate-x-full'
             enterTo='translate-x-0'
             leave='transition transform duration-300 ease-in-out'
             leaveFrom='translate-x-0'
-            leaveTo='-translate-x-full'
+            leaveTo='translate-x-full'
           >
-            <div className='relative flex flex-col w-full h-full bg-white shadow-xl overflow-hidden'>
-              {/* Header */}
-              <div className='flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white z-10'>
-                <Link
-                  href='/'
-                  className='flex items-center space-x-2'
-                  onClick={closeMenu}
-                >
-                  <Image
-                    src='/images/logo-80.png'
-                    alt='Logo'
-                    width={32}
-                    height={32}
-                    className='w-8 h-8'
-                  />
-                  <span className='text-xl font-bold text-primary'>
-                    Миненков<span className='text-accent'> Вадим</span>
-                  </span>
-                </Link>
-                <button
-                  ref={closeButtonRef}
-                  onClick={closeMenu}
-                  className='p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary'
-                  aria-label='Закрыть меню'
-                >
-                  <X className='w-6 h-6' />
-                </button>
+            <div className='ds relative ml-auto flex flex-col w-full max-w-[440px] h-full bg-canvas overflow-hidden'>
+              {/* Шапка меню */}
+              <div className='flex items-center justify-between px-4 pt-3.5 pb-3'>
+                <div className='flex flex-1 items-center justify-between bg-white rounded-full py-2 pr-2 pl-[18px] shadow-[0_8px_24px_rgba(13,60,99,0.06)]'>
+                  <Link
+                    href='/'
+                    className='flex items-center gap-2 no-underline font-extrabold text-[16px] text-navy min-h-[44px]'
+                    onClick={closeMenu}
+                  >
+                    <Image
+                      src='/images/logo-80.png'
+                      alt=''
+                      width={28}
+                      height={28}
+                      className='w-7 h-7'
+                    />
+                    Миненков Вадим
+                  </Link>
+                  <button
+                    ref={closeButtonRef}
+                    type='button'
+                    onClick={closeMenu}
+                    className='w-12 h-12 rounded-full bg-sky flex items-center justify-center border-0 cursor-pointer ds-focus'
+                    aria-label='Закрыть меню'
+                  >
+                    <X className='w-6 h-6 text-navy' />
+                  </button>
+                </div>
               </div>
 
-              {/* Scrollable Content */}
-              <div className='flex-1 overflow-y-auto overscroll-contain px-4 py-6 space-y-6'>
-                <nav className='space-y-1'>
-                  {/* Профиль пользователя */}
-                  {user && (
-                    <div className='border-b border-gray-100 pb-4 mb-4'>
-                      <div className='flex items-center px-2 py-2 space-x-3 mb-2'>
-                        <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0'>
-                          <UserIcon className='w-6 h-6 text-primary' />
-                        </div>
-                        <div className='overflow-hidden'>
-                          <p className='text-xs text-gray-500'>Вы вошли как</p>
-                          <p
-                            className='text-sm font-medium text-gray-900 truncate'
-                            title={user.email ?? undefined}
-                          >
-                            {user.email}
-                          </p>
-                        </div>
+              {/* Содержимое */}
+              <div className='flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-2 flex flex-col gap-4'>
+                {user && (
+                  <div className='ds-card p-2'>
+                    <div className='flex items-center gap-3 px-3 py-2'>
+                      <span className='w-10 h-10 rounded-full bg-sky flex items-center justify-center shrink-0'>
+                        <UserIcon className='w-5 h-5 text-brand' />
+                      </span>
+                      <div className='overflow-hidden'>
+                        <p className='text-[15px] text-muted m-0'>
+                          Вы вошли как
+                        </p>
+                        <p
+                          className='text-[16px] font-bold text-ink truncate m-0'
+                          title={user.email ?? undefined}
+                        >
+                          {user.email}
+                        </p>
                       </div>
-                      <Link
-                        href='/dashboard'
-                        onClick={closeMenu}
-                        className='flex items-center px-2 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary rounded-lg transition-colors'
-                      >
-                        <Settings className='w-5 h-5 mr-3' />
-                        Личный кабинет
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className='flex w-full items-center px-2 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left'
-                      >
-                        <LogOut className='w-5 h-5 mr-3' />
-                        Выйти
-                      </button>
                     </div>
-                  )}
+                    <Link
+                      href='/dashboard'
+                      onClick={closeMenu}
+                      className='flex items-center gap-3 min-h-[48px] px-3 rounded-xl text-[17px] text-ink no-underline hover:bg-sky'
+                    >
+                      <Settings className='w-5 h-5' />
+                      Личный кабинет
+                    </Link>
+                    <button
+                      type='button'
+                      onClick={handleLogout}
+                      className='flex w-full items-center gap-3 min-h-[48px] px-3 rounded-xl text-[17px] text-danger-ink bg-transparent border-0 cursor-pointer text-left font-[inherit]'
+                    >
+                      <LogOut className='w-5 h-5' />
+                      Выйти
+                    </button>
+                  </div>
+                )}
 
+                <nav
+                  className='ds-card p-2 flex flex-col'
+                  aria-label='Мобильная навигация'
+                >
                   {navigationItems.map(item => {
                     if (item.label === 'Услуги') {
                       return (
-                        <div
-                          key={item.label}
-                          className='border-b border-gray-100 pb-2 mb-2'
-                        >
+                        <div key={item.label}>
                           <button
+                            type='button'
                             onClick={() =>
                               setIsMobileServicesOpen(!isMobileServicesOpen)
                             }
-                            className='flex items-center justify-between w-full py-3 text-lg font-medium text-gray-900 hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-lg px-2 group'
+                            className={`flex items-center justify-between w-full min-h-[52px] px-4 rounded-2xl text-[19px] font-bold border-0 cursor-pointer font-[inherit] text-left ${
+                              isActive('/products')
+                                ? 'bg-sky text-navy'
+                                : 'bg-transparent text-ink'
+                            }`}
                             aria-expanded={isMobileServicesOpen}
                           >
                             <span>{item.label}</span>
                             <ChevronDown
-                              className={`w-5 h-5 transition-transform duration-300 text-gray-400 group-hover:text-primary ${isMobileServicesOpen ? 'rotate-180' : ''}`}
+                              className={`w-5 h-5 transition-transform duration-300 text-brand ${isMobileServicesOpen ? 'rotate-180' : ''}`}
                             />
                           </button>
-
                           <div
-                            className={`overflow-hidden transition-all duration-300 ease-in-out ${isMobileServicesOpen ? 'max-h-[800px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}
+                            className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                              isMobileServicesOpen
+                                ? 'max-h-[800px] opacity-100'
+                                : 'max-h-0 opacity-0'
+                            }`}
                           >
-                            <div className='pl-4 space-y-1 pb-2 border-l-2 border-gray-100 ml-2'>
+                            <div className='flex flex-col py-1 pl-3'>
                               {servicesDropdownItems.map(service => (
                                 <Link
                                   key={service.href}
                                   href={service.href}
                                   onClick={closeMenu}
-                                  className='block text-gray-600 hover:text-primary py-2 px-2 text-sm font-medium transition-colors rounded-md hover:bg-gray-50'
+                                  tabIndex={isMobileServicesOpen ? 0 : -1}
+                                  className='flex items-center min-h-[48px] px-4 rounded-xl text-[17px] font-semibold text-muted no-underline hover:bg-sky hover:text-navy'
                                 >
                                   {service.label}
                                 </Link>
@@ -965,22 +898,31 @@ export function Header() {
                               <Link
                                 href='/products'
                                 onClick={closeMenu}
-                                className='block text-primary font-semibold py-2 px-2 text-sm mt-2 hover:bg-primary/5 rounded-md transition-colors'
+                                tabIndex={isMobileServicesOpen ? 0 : -1}
+                                className='flex items-center gap-1.5 min-h-[48px] px-4 rounded-xl text-[17px] font-bold text-brand no-underline hover:bg-sky'
                               >
-                                Все услуги →
+                                Все услуги
+                                <Icon
+                                  name='chev-right'
+                                  size={16}
+                                  strokeWidth={2.4}
+                                />
                               </Link>
                             </div>
                           </div>
                         </div>
                       );
                     }
-
                     return (
                       <Link
                         key={item.href}
                         href={item.href}
                         onClick={closeMenu}
-                        className={`block py-3 text-lg font-medium px-2 rounded-lg transition-colors ${pathname === item.href ? 'bg-primary/5 text-primary' : 'text-gray-900 hover:bg-gray-50 hover:text-primary'}`}
+                        className={`flex items-center min-h-[52px] px-4 rounded-2xl text-[19px] font-bold no-underline ${
+                          isActive(item.href)
+                            ? 'bg-sky text-navy'
+                            : 'text-ink hover:bg-[#F3F7FA]'
+                        }`}
                         aria-current={
                           pathname === item.href ? 'page' : undefined
                         }
@@ -991,69 +933,65 @@ export function Header() {
                   })}
                 </nav>
 
-                {/* Contacts */}
-                <div className='border-t border-gray-100 pt-6 space-y-5'>
-                  <h3 className='text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2'>
-                    Контакты
-                  </h3>
-
+                <div className='ds-card p-5 flex flex-col gap-4'>
                   <a
-                    href={`tel:${headerContacts.phone.replace(/[^+\d]/g, '')}`}
-                    className='flex items-center space-x-4 text-gray-700 hover:text-primary transition-colors group'
+                    href={phoneHref}
+                    className='flex items-center gap-3.5 no-underline text-navy'
                   >
-                    <div className='w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary/10 transition-colors'>
-                      <Phone className='w-5 h-5' />
-                    </div>
-                    <div>
-                      <span className='block text-sm text-gray-500'>
-                        Телефон
+                    <span className='ds-ibox w-11 h-11 rounded-[14px] bg-sky'>
+                      <Phone className='w-5 h-5 text-brand' />
+                    </span>
+                    <span className='leading-tight'>
+                      <span className='block text-[15px] text-muted'>
+                        Телефон · {hoursLabel}
                       </span>
-                      <span className='font-medium text-lg'>
-                        {headerContacts.phone}
+                      <span className='font-extrabold text-[19px]'>
+                        {phoneLabel}
                       </span>
-                    </div>
+                    </span>
                   </a>
-
                   <a
                     href={`mailto:${headerContacts.email}`}
-                    className='flex items-center space-x-4 text-gray-700 hover:text-primary transition-colors group'
+                    className='flex items-center gap-3.5 no-underline text-navy'
                   >
-                    <div className='w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary/10 transition-colors'>
-                      <Mail className='w-5 h-5' />
-                    </div>
-                    <div>
-                      <span className='block text-sm text-gray-500'>Email</span>
-                      <span className='font-medium break-all'>
+                    <span className='ds-ibox w-11 h-11 rounded-[14px] bg-sky'>
+                      <Mail className='w-5 h-5 text-brand' />
+                    </span>
+                    <span className='leading-tight'>
+                      <span className='block text-[15px] text-muted'>
+                        Email
+                      </span>
+                      <span className='font-bold text-[17px] break-all'>
                         {headerContacts.email}
                       </span>
-                    </div>
+                    </span>
                   </a>
+                  <div className='flex flex-wrap gap-1'>
+                    {socialLinks.map(link => (
+                      <a
+                        key={link.name}
+                        href={link.url}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='w-11 h-11 rounded-full flex items-center justify-center text-navy hover:bg-sky'
+                        aria-label={link.label}
+                      >
+                        <SafeIcon name={link.name} className='w-6 h-6' />
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Footer Actions */}
-              <div className='p-4 border-t border-gray-100 bg-gray-50 z-10'>
+              {/* Кнопка записи */}
+              <div className='px-4 pb-5 pt-3 bg-canvas'>
                 <button
+                  type='button'
                   onClick={openBookingModal}
-                  className='w-full bg-accent hover:bg-accent-dark text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center'
+                  className='ds-btn ds-btn-primary ds-btn-lg ds-btn-block'
                 >
-                  Записаться на прием
+                  Записаться на приём
                 </button>
-
-                <div className='flex justify-center space-x-8 mt-6 pb-2'>
-                  {socialLinks.map(link => (
-                    <a
-                      key={link.name}
-                      href={link.url}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='text-gray-400 hover:text-primary transition-all duration-300 transform hover:scale-110'
-                      aria-label={link.label}
-                    >
-                      <SafeIcon name={link.name} className='w-6 h-6' />
-                    </a>
-                  ))}
-                </div>
               </div>
             </div>
           </Transition.Child>

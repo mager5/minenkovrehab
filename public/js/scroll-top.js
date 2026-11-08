@@ -7,16 +7,16 @@
 
   var css =
     '.rx-top{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));' +
-    'z-index:45;width:48px;height:48px;padding:0;margin:0;border:0;border-radius:9999px;background:#0063A5;color:#fff;' +
+    'z-index:45;width:48px;height:48px;padding:0;margin:0;border:0;border-radius:9999px;background:#16639E;color:#fff;' +
     'display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px rgba(0,63,105,.28);' +
     'opacity:0;visibility:hidden;transform:translateY(12px);-webkit-tap-highlight-color:transparent;' +
     'transition:opacity .25s ease,transform .25s ease,visibility .25s,background-color .2s ease,box-shadow .2s ease}' +
     '.rx-top svg{width:22px;height:22px;display:block}' +
     '.rx-top.rx-top--on{opacity:1;visibility:visible;transform:none}' +
-    '.rx-top:hover{background:#004F84;box-shadow:0 8px 22px rgba(0,63,105,.34)}' +
+    '.rx-top:hover{background:#0D3C63;box-shadow:0 8px 22px rgba(0,63,105,.34)}' +
     '.rx-top:active{transform:scale(.94)}' +
     '.rx-top:focus{outline:none}' +
-    '.rx-top:focus-visible{outline:3px solid #2BAA7E;outline-offset:3px}' +
+    '.rx-top:focus-visible{outline:3px solid #16639E;outline-offset:3px}' +
     '@media (min-width:768px){.rx-top{right:32px;bottom:32px;width:52px;height:52px}.rx-top svg{width:24px;height:24px}}' +
     '@media (prefers-reduced-motion:reduce){.rx-top{transition:opacity .01s,visibility .01s}}' +
     '@media print{.rx-top{display:none!important}}';
@@ -28,14 +28,23 @@
   }
 
   function isBig(el) {
-    return el && el.nodeType === 1 && el.clientHeight >= window.innerHeight * 0.6;
+    return (
+      el && el.nodeType === 1 && el.clientHeight >= window.innerHeight * 0.6
+    );
   }
 
   function findScroller() {
-    if (current && document.contains(current) && current.scrollHeight > current.clientHeight + 10) return current;
+    if (
+      current &&
+      document.contains(current) &&
+      current.scrollHeight > current.clientHeight + 10
+    )
+      return current;
     var root = rootScroller();
     if (root.scrollHeight > root.clientHeight + 10) return root;
-    var wrap = document.querySelector('body > div.min-h-screen, body > div > div.min-h-screen');
+    var wrap = document.querySelector(
+      'body > div.min-h-screen, body > div > div.min-h-screen'
+    );
     if (wrap && wrap.scrollHeight > wrap.clientHeight + 10) return wrap;
     return root;
   }
@@ -75,14 +84,21 @@
       }
     }
     function schedule() {
-      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
     }
 
-    document.addEventListener('scroll', function (e) {
-      var t = e.target === document ? rootScroller() : e.target;
-      if (isBig(t)) current = t;
-      schedule();
-    }, { capture: true, passive: true });
+    document.addEventListener(
+      'scroll',
+      function (e) {
+        var t = e.target === document ? rootScroller() : e.target;
+        if (isBig(t)) current = t;
+        schedule();
+      },
+      { capture: true, passive: true }
+    );
     window.addEventListener('resize', schedule, { passive: true });
 
     // Next.js меняет страницы без перезагрузки — пересчитываем после перехода.
@@ -94,15 +110,28 @@
         return r;
       };
     });
-    window.addEventListener('popstate', function () { setTimeout(schedule, 150); });
+    window.addEventListener('popstate', function () {
+      setTimeout(schedule, 150);
+    });
 
     btn.addEventListener('click', function () {
-      var smooth = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      var smooth = !(
+        window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      );
       var el = findScroller();
       var root = rootScroller();
-      try { el.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' }); } catch (_) { el.scrollTop = 0; }
+      try {
+        el.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
+      } catch (_) {
+        el.scrollTop = 0;
+      }
       if (el !== root && root.scrollTop) {
-        try { root.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' }); } catch (_) { root.scrollTop = 0; }
+        try {
+          root.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
+        } catch (_) {
+          root.scrollTop = 0;
+        }
       }
       btn.blur();
     });
@@ -110,6 +139,7 @@
     update();
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
