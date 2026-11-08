@@ -71,6 +71,24 @@ Frontend (Next.js) сюда не входит: в образе `rehab-frontend:h
      из `sitemap.xml` и отправляет POST JSON (`host`, `key`, `keyLocation`, `urlList`) на `https://yandex.com/indexnow`; ответ пишет в `deploy.log`.
      `deploy-frontend.sh` вызывает его после успешного деплоя; сбой отправки деплой не ломает. Можно запускать и вручную.
      Если ключ меняется — поменять и файл в `public/`, и `KEY` в скрипте.
+9. **Тестовая копия new.minenkovrehab.ru (08.11.2026).** Ветка `redesign`, рядом с боевым сайтом.
+   - DNS: A-запись `new → 185.149.147.209` в зоне Reg.ru. Сертификат — прежний `certs/site.crt` (до 19.01.2027, продлевать вместе с main).
+   - Контейнер: отдельный проект compose `rehab-staging` (`/opt/rehab/staging/compose.yaml`, копия в `infra/staging/`),
+     в сети `rehab_web` под именем `frontend-staging`; env — тот же `env/frontend.env`, бэкенд и база — боевые.
+     Боевой `docker compose` в `/opt/rehab` этот контейнер не видит и не трогает.
+   - **Обновить одной командой:** `/opt/rehab/scripts/deploy-staging.sh` (ветка redesign; можно передать другую).
+     Собирает `rehab-frontend-staging:src-<sha>` с `--build-arg NEXT_PUBLIC_PAYMENTS_DISABLED=1`, перезапускает только тестовый
+     контейнер, проверяет здоровье, страницы и 401 без пароля, при сбое откатывает. IndexNow не отправляет. Журнал — `deploy.log`.
+   - Caddy (блок `https://new.minenkovrehab.ru`): basic auth (логин `vadim`, хеш пароля только на сервере), `X-Robots-Tag: noindex, nofollow`,
+     свой `robots.txt` с `Disallow: /`, `/js/metrika.js` — пустая заглушка, файл ключа IndexNow — 404,
+     `/api/checkout` и `/api/robokassa/*` — 403 «На тестовой версии оплата отключена». Canonical на страницах ведёт на боевой адрес.
+   - Вход: бэкенд принимает только `Origin: https://minenkovrehab.ru` (CSRF). Caddy подменяет Origin только у запросов
+     с самой тестовой копии; настройки бэкенда не менялись. Куки `mr_session`/`mr_csrf` — host-only на new.minenkovrehab.ru.
+   - Тестовый аккаунт `test@minenkovrehab.ru` (пароль — у владельца), доступ к `formula-movement-level-1`
+     (`purchases.source='manual test grant'`). Удалить: строки в `purchases`, `profiles`, `credentials`, `users` этого аккаунта.
+   - Копия Caddyfile до изменений: `/opt/rehab/Caddyfile.bak-20261108-225257` (и `-225336`).
+     Убрать копию: вернуть блок new на `redir https://minenkovrehab.ru{uri} 302`, затем
+     `sudo docker compose --project-directory /opt/rehab/staging -f /opt/rehab/staging/compose.yaml down`.
 
 ### (выполнено 08.11.2026 в ветке seo-audit) Что поправить в исходниках сайта на Mac, чтобы убрать замены из Caddy
 

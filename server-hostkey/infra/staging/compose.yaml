@@ -1,0 +1,19 @@
+# Тестовая копия сайта (new.minenkovrehab.ru): отдельный проект compose «rehab-staging», боевой стек не трогает.
+# Подключается к сети боевого стека rehab_web: Caddy проксирует на frontend-staging:3000, сайт ходит в тот же backend:3101.
+# Образ задаёт /opt/rehab/staging/.env (STAGING_IMAGE), его пишет scripts/deploy-staging.sh.
+name: rehab-staging
+services:
+  frontend-staging:
+    image: ${STAGING_IMAGE:?STAGING_IMAGE required}
+    restart: unless-stopped
+    env_file: [../env/frontend.env]
+    networks:
+      web:
+        aliases: [frontend-staging]
+    expose: ["3000"]
+    mem_limit: 448m
+    init: true
+networks:
+  web:
+    external: true
+    name: rehab_web
