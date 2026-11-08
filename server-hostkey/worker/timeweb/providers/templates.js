@@ -28,6 +28,18 @@ function renderMessage(message,siteOrigin){
     `Товар: ${one(o.product)}\nСумма: ${sum}\nПокупатель: ${one(o.buyer)}\nЗаказ Робокассы №: ${one(o.invoiceId)}\n${when?`Время: ${when}\n`:''}\n`+
     `Покупателю автоматически ушло письмо с доступом в личный кабинет (${siteOrigin}/dashboard).\n\nMinenkov Rehab`};
  }
+ if(message.kind==='lead'){
+  const l=message.lead||{};const one=v=>String(v==null?'':v).replace(/[\r\n]+/g,' ').trim();
+  if(!l.name||!l.phone)throw new DeliveryError('invalid_lead_notice',{retryable:false});
+  const test=l.site==='test'?'[ТЕСТ new] ':'';
+  const from={home:'форма на главной',contacts:'форма на странице «Контакты»',modal:'окно «Записаться»'}[l.source]||one(l.source);
+  const when=l.createdAt?new Date(l.createdAt).toLocaleString('ru-RU',{timeZone:'Europe/Moscow'})+' МСК':'';
+  const msg=String(l.message==null?'':l.message).replace(/\r/g,'').trim();
+  return {subject:one(`${test}Заявка с сайта: ${l.name}${l.service?' — '+l.service:''}`).slice(0,200),
+   text:`${test?'ТЕСТОВАЯ заявка с new.minenkovrehab.ru (не настоящий клиент).\n\n':''}Новая заявка с сайта.\n\n`+
+    `Имя: ${one(l.name)}\nТелефон: ${one(l.phone)}\n${l.service?`Услуга: ${one(l.service)}\n`:''}`+
+    `${msg?`Сообщение:\n${msg}\n`:''}\nОткуда: ${from}${l.page?` (${one(l.page)})`:''}\n${when?`Время: ${when}\n`:''}\nMinenkov Rehab`};
+ }
  throw new DeliveryError('invalid_template',{retryable:false});
 }
 module.exports={DeliveryError,renderMessage};
