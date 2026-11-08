@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { authPost } from '@/lib/auth-client';
+import { useGuestEmailDialog } from '@/components/shared/GuestEmailDialog';
 import { formatPrice, Product } from '../data';
 import { motion } from 'framer-motion';
 import ImageCarousel from '@/components/ui/ImageCarousel';
@@ -10,14 +12,13 @@ import { useState, useEffect } from 'react';
 import { MoreServicesSection } from '@/components/sections/MoreServicesSection';
 import { Loader2, Mail, MessageCircleMore, Send } from 'lucide-react';
 import {
-  getRailwayApiBaseUrl,
   getRobokassaPaymentUrl,
   resolveApiMediaUrl,
 } from '@/lib/api-base';
 
 // Анимации для появления элементов
 const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { y: 20 },
   visible: (custom: number) => ({
     opacity: 1,
     y: 0,
@@ -33,24 +34,18 @@ const fadeIn = {
 // function getRailwayApiBaseUrl() { ... }
 
 function getPresentationVideoEndpoint() {
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return '/api/products/presentation-video';
-    }
-  }
-
-  return `${getRailwayApiBaseUrl()}/api/courses/products/presentation-video`;
+  return '/api/courses/products/presentation-video';
 }
 
 // Клиентский компонент для страницы продукта
 export default function ProductClient({ product }: { product: Product }) {
+  const guestEmailDialog = useGuestEmailDialog();
   // Состояние для чекбоксов согласия
   const [isConsentChecked, setIsConsentChecked] = useState(false);
   const [isOfferChecked, setIsOfferChecked] = useState(false);
   const [showConsentError, setShowConsentError] = useState(false);
   const [showOfferError, setShowOfferError] = useState(false);
-  // Состояние для показа всех уровней программы "Формула движения"
+  // Состояние для показа всех уровней программы «Формула Движения»
   const [showAllLevels, setShowAllLevels] = useState(false);
   // Состояние для показа дополнительной информации для консультации
   const [showMoreConsultation, setShowMoreConsultation] = useState(false);
@@ -137,6 +132,7 @@ export default function ProductClient({ product }: { product: Product }) {
         const response = await fetch(getPresentationVideoEndpoint());
         const payload = await response.json().catch(() => null);
         const nextUrl =
+          payload?.data?.embedUrl ||
           payload?.data?.hlsMasterUrl ||
           payload?.data?.url ||
           payload?.data?.signedUrl ||
@@ -432,40 +428,21 @@ export default function ProductClient({ product }: { product: Product }) {
       //   process.env.NODE_ENV === 'production'
       //     ? 'https://minenkovrehab-production-15cc.up.railway.app/api/robokassa/generate-payment-url'
       //     : '/api/robokassa/generate-payment-url';
+      // Согласие с офертой и обработкой данных подтверждается галочками перед кнопкой оплаты.
       const apiUrl = getRobokassaPaymentUrl();
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: product.price,
-          productId: product.id,
-          level,
-          email: 'noreply@minenkovrehab.ru',
-          phone: '+79000000000',
-          // email: 'customer@example.com',
-          // phone: '+79001234567',
-          // Явно передаем номенклатуру для чека (фискализация)
-          receipt: {
-            sno: 'usn_income', // УСН Доходы
-            items: [
-              {
-                name:
-                  product.id === 'formula-movement' && level
-                    ? `${product.title} (Уровень ${level})`
-                    : product.title,
-                quantity: 1,
-                sum: product.price,
-                payment_method: getPaymentMethod(product.id),
-                payment_object: 'service',
-                tax: 'none',
-              },
-            ],
-          },
-        }),
-      });
+      // Без входа покупка тоже возможна: спрашиваем email, на который придёт доступ.
+      let guestEmail: string | undefined;
+      const me = await fetch('/api/auth/me', { credentials: 'same-origin', cache: 'no-store' }).catch(() => null);
+      if (!me || me.status === 401) {
+        const email = await guestEmailDialog.ask();
+        if (!email) {
+          setIsPaymentProcessingLevel1(false);setIsPaymentProcessingLevel2(false);setIsPaymentProcessingLevel3(false);setIsPaymentProcessingLevel4(false);
+          return;
+        }
+        guestEmail = email;
+      }
+      const response = await authPost(apiUrl, {productId:product.id,level,agreement:true,...(guestEmail?{email:guestEmail}:{})});
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -542,9 +519,11 @@ export default function ProductClient({ product }: { product: Product }) {
   */
 
   return (
+    <>
+    {guestEmailDialog.dialog}
     <motion.div
       className='py-12'
-      initial={{ opacity: 0 }}
+      initial={false}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
@@ -552,7 +531,7 @@ export default function ProductClient({ product }: { product: Product }) {
         {/* Навигация */}
         <motion.div
           className='mb-8'
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
@@ -570,7 +549,7 @@ export default function ProductClient({ product }: { product: Product }) {
         {/* Содержимое страницы */}
         <motion.div
           className='bg-white p-6 rounded-lg shadow-md'
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           whileHover={{ boxShadow: '0 10px 25px rgba(0,0,0,0.07)' }}
@@ -605,6 +584,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     fill
                     className='object-cover'
                     priority
+                    sizes='(min-width: 1024px) 66vw, 100vw'
                   />
                 </motion.div>
               )}
@@ -658,6 +638,8 @@ export default function ProductClient({ product }: { product: Product }) {
                         </p>
                       </div>
                     </div>
+                  ) : presentationVideoUrl && presentationVideoUrl.startsWith('https://kinescope.io/embed/') ? (
+                    <iframe title='Презентация программы' src={presentationVideoUrl} referrerPolicy='no-referrer' allow='autoplay; fullscreen; encrypted-media; picture-in-picture' allowFullScreen className='aspect-video w-full border-0 rounded-lg' />
                   ) : presentationVideoUrl ? (
                     <VideoPlayer
                       src={presentationVideoUrl}
@@ -784,7 +766,7 @@ export default function ProductClient({ product }: { product: Product }) {
               className={`lg:w-1/3 mt-8 lg:mt-0 lg:self-start ${
                 product.id === 'personal-program' ? 'lg:pt-16' : ''
               }`}
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
             >
@@ -794,7 +776,7 @@ export default function ProductClient({ product }: { product: Product }) {
               >
                 <motion.h2
                   className='text-xl font-semibold text-primary mb-4'
-                  initial={{ opacity: 0 }}
+                  initial={false}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.4 }}
                 >
@@ -802,7 +784,7 @@ export default function ProductClient({ product }: { product: Product }) {
                 </motion.h2>
                 <motion.div
                   className='text-2xl font-bold text-accent mb-6'
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.5 }}
                 >
@@ -813,7 +795,7 @@ export default function ProductClient({ product }: { product: Product }) {
 
                 {/* Плашка "Не является медицинской услугой" */}
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.55 }}
                   className='mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md'
@@ -838,7 +820,7 @@ export default function ProductClient({ product }: { product: Product }) {
 
                 {/* Чекбоксы согласия */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.6 }}
                   className='mb-4 space-y-3'
@@ -851,19 +833,23 @@ export default function ProductClient({ product }: { product: Product }) {
                         : 'bg-gray-50'
                     }`}
                   >
-                    <label className='flex items-center space-x-3 cursor-pointer group'>
+                    <label
+                      htmlFor='consent-checkbox'
+                      className='flex items-center space-x-3 cursor-pointer group'>
                       <div className='relative'>
                         <input
                           type='checkbox'
+                          id='consent-checkbox'
+                          name='consent'
                           checked={isConsentChecked}
                           onChange={e => {
                             setIsConsentChecked(e.target.checked);
                             if (e.target.checked) setShowConsentError(false);
                           }}
-                          className='sr-only'
+                          className='sr-only peer'
                         />
                         <div
-                          className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                          className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
                             isConsentChecked
                               ? 'bg-primary border-primary shadow-md'
                               : 'bg-white border-gray-300 group-hover:border-primary/50'
@@ -907,7 +893,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     </label>
                     {showConsentError && (
                       <motion.div
-                        initial={{ opacity: 0, y: -10 }}
+                        initial={{ y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className='mt-2 text-xs text-red-600 font-medium'
                       >
@@ -925,19 +911,23 @@ export default function ProductClient({ product }: { product: Product }) {
                         : 'bg-gray-50'
                     }`}
                   >
-                    <label className='flex items-center space-x-3 cursor-pointer group'>
+                    <label
+                      htmlFor='offer-checkbox'
+                      className='flex items-center space-x-3 cursor-pointer group'>
                       <div className='relative'>
                         <input
                           type='checkbox'
+                          id='offer-checkbox'
+                          name='offer'
                           checked={isOfferChecked}
                           onChange={e => {
                             setIsOfferChecked(e.target.checked);
                             if (e.target.checked) setShowOfferError(false);
                           }}
-                          className='sr-only'
+                          className='sr-only peer'
                         />
                         <div
-                          className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                          className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
                             isOfferChecked
                               ? 'bg-primary border-primary shadow-md'
                               : 'bg-white border-gray-300 group-hover:border-primary/50'
@@ -972,7 +962,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     </label>
                     {showOfferError && (
                       <motion.div
-                        initial={{ opacity: 0, y: -10 }}
+                        initial={{ y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className='mt-2 text-xs text-red-600 font-medium'
                       >
@@ -985,7 +975,7 @@ export default function ProductClient({ product }: { product: Product }) {
 
                 {/* Кнопка покупки */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.7 }}
                   whileHover={{
@@ -1044,7 +1034,7 @@ export default function ProductClient({ product }: { product: Product }) {
 
                 {/* Кнопка связи в Telegram */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.8 }}
                   whileHover={{
@@ -1077,7 +1067,7 @@ export default function ProductClient({ product }: { product: Product }) {
                 {/* Кнопка показать все уровни для Формулы движения */}
                 {product.id === 'formula-movement' && (
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.9 }}
                     className='mb-4'
@@ -1094,7 +1084,7 @@ export default function ProductClient({ product }: { product: Product }) {
                 {/* Кнопка показать еще для консультации */}
                 {product.id === 'consultation' && (
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.9 }}
                     className='mb-4'
@@ -1116,7 +1106,7 @@ export default function ProductClient({ product }: { product: Product }) {
           {/* Карточка оплаты экспресс-онлайн-консультации */}
           {product.id === 'consultation' && showMoreConsultation && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
+              initial={{ height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.5 }}
@@ -1161,10 +1151,14 @@ export default function ProductClient({ product }: { product: Product }) {
 
                 {/* Чекбокс согласия */}
                 <div className='mb-6'>
-                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                  <label
+                      htmlFor='agreement-checkbox'
+                      className='flex items-center space-x-3 cursor-pointer group'>
                     <div className='relative'>
                       <input
                         type='checkbox'
+                          id='agreement-checkbox'
+                          name='agreement'
                         checked={isAgreed}
                         onChange={e => setIsAgreed(e.target.checked)}
                         className='absolute opacity-0 w-5 h-5 cursor-pointer'
@@ -1272,7 +1266,7 @@ export default function ProductClient({ product }: { product: Product }) {
           {/* Дополнительные уровни для Формулы движения */}
           {product.id === 'formula-movement' && showAllLevels && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
+              initial={{ height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.5 }}
@@ -1280,7 +1274,7 @@ export default function ProductClient({ product }: { product: Product }) {
             >
               {/* Второй уровень */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className='bg-secondary p-6 rounded-lg'
@@ -1300,20 +1294,24 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                  <label
+                      htmlFor='consent-level-2-checkbox'
+                      className='flex items-center space-x-3 cursor-pointer group'>
                     <div className='relative'>
                       <input
                         type='checkbox'
+                          id='consent-level-2-checkbox'
+                          name='consent-level-2'
                         checked={isConsentCheckedLevel2}
                         onChange={e => {
                           setIsConsentCheckedLevel2(e.target.checked);
                           if (e.target.checked)
                             setShowConsentErrorLevel2(false);
                         }}
-                        className='sr-only'
+                        className='sr-only peer'
                       />
                       <div
-                        className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
                           isConsentCheckedLevel2
                             ? 'bg-primary border-primary shadow-md'
                             : 'bg-white border-gray-300 group-hover:border-primary/50'
@@ -1358,7 +1356,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   </label>
                   {showConsentErrorLevel2 && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className='mt-2 text-xs text-red-600 font-medium'
                     >
@@ -1376,19 +1374,23 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                  <label
+                      htmlFor='offer-level-2-checkbox'
+                      className='flex items-center space-x-3 cursor-pointer group'>
                     <div className='relative'>
                       <input
                         type='checkbox'
+                          id='offer-level-2-checkbox'
+                          name='offer-level-2'
                         checked={isOfferCheckedLevel2}
                         onChange={e => {
                           setIsOfferCheckedLevel2(e.target.checked);
                           if (e.target.checked) setShowOfferErrorLevel2(false);
                         }}
-                        className='sr-only'
+                        className='sr-only peer'
                       />
                       <div
-                        className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
                           isOfferCheckedLevel2
                             ? 'bg-primary border-primary shadow-md'
                             : 'bg-white border-gray-300 group-hover:border-primary/50'
@@ -1424,7 +1426,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   </label>
                   {showOfferErrorLevel2 && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className='mt-2 text-xs text-red-600 font-medium'
                     >
@@ -1440,7 +1442,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     !isOfferCheckedLevel2 ||
                     isPaymentProcessingLevel2
                   }
-                  aria-label='Купить онлайн уровень 2 программы Формула движения'
+                  aria-label='Купить онлайн уровень 2 программы «Формула Движения»'
                   className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
                     isConsentCheckedLevel2 &&
                     isOfferCheckedLevel2 &&
@@ -1498,7 +1500,7 @@ export default function ProductClient({ product }: { product: Product }) {
 
               {/* Третий уровень */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className='bg-secondary p-6 rounded-lg'
@@ -1518,20 +1520,24 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                  <label
+                      htmlFor='consent-level-3-checkbox'
+                      className='flex items-center space-x-3 cursor-pointer group'>
                     <div className='relative'>
                       <input
                         type='checkbox'
+                          id='consent-level-3-checkbox'
+                          name='consent-level-3'
                         checked={isConsentCheckedLevel3}
                         onChange={e => {
                           setIsConsentCheckedLevel3(e.target.checked);
                           if (e.target.checked)
                             setShowConsentErrorLevel3(false);
                         }}
-                        className='sr-only'
+                        className='sr-only peer'
                       />
                       <div
-                        className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
                           isConsentCheckedLevel3
                             ? 'bg-primary border-primary shadow-md'
                             : 'bg-white border-gray-300 group-hover:border-primary/50'
@@ -1576,7 +1582,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   </label>
                   {showConsentErrorLevel3 && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className='mt-2 text-xs text-red-600 font-medium'
                     >
@@ -1594,19 +1600,23 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                  <label
+                      htmlFor='offer-level-3-checkbox'
+                      className='flex items-center space-x-3 cursor-pointer group'>
                     <div className='relative'>
                       <input
                         type='checkbox'
+                          id='offer-level-3-checkbox'
+                          name='offer-level-3'
                         checked={isOfferCheckedLevel3}
                         onChange={e => {
                           setIsOfferCheckedLevel3(e.target.checked);
                           if (e.target.checked) setShowOfferErrorLevel3(false);
                         }}
-                        className='sr-only'
+                        className='sr-only peer'
                       />
                       <div
-                        className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
                           isOfferCheckedLevel3
                             ? 'bg-primary border-primary shadow-md'
                             : 'bg-white border-gray-300 group-hover:border-primary/50'
@@ -1642,7 +1652,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   </label>
                   {showOfferErrorLevel3 && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className='mt-2 text-xs text-red-600 font-medium'
                     >
@@ -1658,7 +1668,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     !isOfferCheckedLevel3 ||
                     isPaymentProcessingLevel3
                   }
-                  aria-label='Купить онлайн уровень 3 программы Формула движения'
+                  aria-label='Купить онлайн уровень 3 программы «Формула Движения»'
                   className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
                     isConsentCheckedLevel3 &&
                     isOfferCheckedLevel3 &&
@@ -1716,7 +1726,7 @@ export default function ProductClient({ product }: { product: Product }) {
 
               {/* Четвертый уровень */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className='bg-secondary p-6 rounded-lg'
@@ -1736,20 +1746,24 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                  <label
+                      htmlFor='consent-level-4-checkbox'
+                      className='flex items-center space-x-3 cursor-pointer group'>
                     <div className='relative'>
                       <input
                         type='checkbox'
+                          id='consent-level-4-checkbox'
+                          name='consent-level-4'
                         checked={isConsentCheckedLevel4}
                         onChange={e => {
                           setIsConsentCheckedLevel4(e.target.checked);
                           if (e.target.checked)
                             setShowConsentErrorLevel4(false);
                         }}
-                        className='sr-only'
+                        className='sr-only peer'
                       />
                       <div
-                        className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
                           isConsentCheckedLevel4
                             ? 'bg-primary border-primary shadow-md'
                             : 'bg-white border-gray-300 group-hover:border-primary/50'
@@ -1794,7 +1808,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   </label>
                   {showConsentErrorLevel4 && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className='mt-2 text-xs text-red-600 font-medium'
                     >
@@ -1812,19 +1826,23 @@ export default function ProductClient({ product }: { product: Product }) {
                       : 'bg-gray-50'
                   }`}
                 >
-                  <label className='flex items-center space-x-3 cursor-pointer group'>
+                  <label
+                      htmlFor='offer-level-4-checkbox'
+                      className='flex items-center space-x-3 cursor-pointer group'>
                     <div className='relative'>
                       <input
                         type='checkbox'
+                          id='offer-level-4-checkbox'
+                          name='offer-level-4'
                         checked={isOfferCheckedLevel4}
                         onChange={e => {
                           setIsOfferCheckedLevel4(e.target.checked);
                           if (e.target.checked) setShowOfferErrorLevel4(false);
                         }}
-                        className='sr-only'
+                        className='sr-only peer'
                       />
                       <div
-                        className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${
+                        className={`w-5 h-5 rounded border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 transition-all duration-200 flex items-center justify-center ${
                           isOfferCheckedLevel4
                             ? 'bg-primary border-primary shadow-md'
                             : 'bg-white border-gray-300 group-hover:border-primary/50'
@@ -1860,7 +1878,7 @@ export default function ProductClient({ product }: { product: Product }) {
                   </label>
                   {showOfferErrorLevel4 && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className='mt-2 text-xs text-red-600 font-medium'
                     >
@@ -1876,7 +1894,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     !isOfferCheckedLevel4 ||
                     isPaymentProcessingLevel4
                   }
-                  aria-label='Купить онлайн уровень 4 программы Формула движения'
+                  aria-label='Купить онлайн уровень 4 программы «Формула Движения»'
                   className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
                     isConsentCheckedLevel4 &&
                     isOfferCheckedLevel4 &&
@@ -1939,5 +1957,6 @@ export default function ProductClient({ product }: { product: Product }) {
       {/* Секция "Еще услуги" */}
       <MoreServicesSection currentProductId={product.id} />
     </motion.div>
+    </>
   );
 }

@@ -8,7 +8,7 @@ const requestCounts = new Map<string, { count: number; resetTime: number }>();
 function getRateLimitKey(request: NextRequest): string {
   // Используем IP адрес для идентификации клиента
   const forwarded = request.headers.get('x-forwarded-for');
-  const ip = forwarded ? (forwarded.split(',')[0]?.trim() ?? 'unknown') : (request.ip ?? 'unknown');
+  const ip = forwarded ? (forwarded.split(',')[0]?.trim() ?? 'unknown') : (request.headers.get('x-real-ip') ?? 'unknown');
   return ip || 'unknown';
 }
 

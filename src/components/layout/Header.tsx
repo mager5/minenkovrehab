@@ -289,7 +289,7 @@ export function Header() {
               aria-label='Миненков Вадим - На главную'
             >
               <Image
-                src='/images/logo.png'
+                src='/images/logo-80.png'
                 alt='Логотип Миненков Вадим'
                 width={40}
                 height={40}

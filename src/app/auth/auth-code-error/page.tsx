@@ -16,7 +16,7 @@ export default function AuthCodeError() {
   return (
     <div className='container flex h-screen w-screen flex-col items-center justify-center'>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className='mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]'

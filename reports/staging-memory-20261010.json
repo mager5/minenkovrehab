@@ -1,0 +1,31 @@
+{
+  "runtime": {
+    "platform": "macOS",
+    "node": "20.20.2",
+    "duration_ms": 9367,
+    "samples": 88,
+    "interval_ms": 100,
+    "unit": "KiB RSS",
+    "peak": {
+      "frontend": 178544,
+      "api": 60992,
+      "worker": 60240,
+      "postgres": 116960
+    },
+    "combined_app_peak": 286416
+  },
+  "macos_build": {
+    "node": "20.20.2",
+    "peak_tree_rss_kib": 979856,
+    "duration_ms": 15336,
+    "exit_code": 0
+  },
+  "linux_build": {
+    "node": "22.23.3",
+    "limit_bytes": 2147483648,
+    "peak_cgroup_bytes": 2070282240,
+    "duration_ms": 48697,
+    "exit_code": 0,
+    "includes": "offline npm ci and build; page cache included; network disabled"
+  }
+}

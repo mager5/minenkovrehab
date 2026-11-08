@@ -7,8 +7,7 @@ export const loginSchema = z.object({
     .email('Некорректный формат email'),
   password: z
     .string()
-    .min(1, 'Пароль обязателен')
-    .min(8, 'Пароль должен содержать минимум 8 символов'),
+    .min(1, 'Пароль обязателен'),
 });
 
 export const forgotPasswordSchema = z.object({

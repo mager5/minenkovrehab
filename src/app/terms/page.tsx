@@ -1,11 +1,8 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { pageMetadata, privateMetadata } from '@/lib/seo';
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: 'Договор-оферта | Миненков Вадим',
-  description:
-    'Договор-оферта на оказание услуг стретчинга тренером Миненковым Вадимом',
-};
+export const metadata: Metadata = privateMetadata('Договор-оферта (архив) | Вадим Миненков');
 
 export default function TermsPage() {
   return (

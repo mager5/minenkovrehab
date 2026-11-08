@@ -7,7 +7,7 @@ import {
   forgotPasswordSchema,
   type ForgotPasswordInput,
 } from '@/lib/validations/auth';
-import { createClient } from '@/lib/supabase/client';
+import { authPost } from '@/lib/auth-client';
 import { Button } from '@/components/ui/auth/Button';
 import { Input } from '@/components/ui/auth/Input';
 import {
@@ -31,7 +31,7 @@ function ForgotPasswordForm() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const supabase = createClient();
+
 
   const {
     register,
@@ -50,13 +50,8 @@ function ForgotPasswordForm() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
-      });
-
-      if (error) {
-        throw error;
-      }
+      const response = await authPost('/api/auth/forgot-password', {email:data.email});
+      if(!response.ok) throw new Error('Не удалось поставить инструкцию в очередь.');
 
       setSuccess(true);
     } catch (err: any) {
@@ -80,15 +75,14 @@ function ForgotPasswordForm() {
         <AnimatePresence mode='wait'>
           {success ? (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
             >
               <Alert variant='success' className='mb-6'>
-                <AlertTitle>Письмо отправлено</AlertTitle>
+                <AlertTitle>Запрос принят</AlertTitle>
                 <AlertDescription>
-                  Проверьте вашу почту для продолжения процесса восстановления
-                  пароля.
+                  Если аккаунт существует, инструкция поставлена в очередь.
                 </AlertDescription>
               </Alert>
               <Button
@@ -101,7 +95,7 @@ function ForgotPasswordForm() {
             </motion.div>
           ) : (
             <motion.form
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               onSubmit={handleSubmit(onSubmit)}

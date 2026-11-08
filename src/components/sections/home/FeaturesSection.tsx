@@ -30,7 +30,7 @@ export function FeaturesSection() {
     <section className='py-20 bg-gray-50'>
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className='text-center mb-12'
@@ -50,7 +50,7 @@ export function FeaturesSection() {
             <motion.div
               key={index}
               className='rounded-lg bg-white p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100'
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{

@@ -1,10 +1,9 @@
-import VideosClientPage from '@/components/dashboard/videos/VideosClientPage';
-
-export const metadata = {
-  title: 'Мои видео | Личный кабинет',
-  description: 'Управление видеоматериалами',
-};
+import NoticePage from '@/components/shared/NoticePage';
 
 export default function VideosPage() {
-  return <VideosClientPage />;
+  return (
+    <NoticePage title='Личные видео' secondary={{ href: '/dashboard', label: 'В личный кабинет' }}>
+      Загрузка личных видео будет доступна после переноса хранилища.
+    </NoticePage>
+  );
 }

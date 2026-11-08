@@ -21,6 +21,7 @@ import {
 import { Transition } from '@headlessui/react';
 import AuthPopover from './AuthPopover';
 import { getRailwayApiBaseUrl } from '@/lib/api-base';
+import { authPost } from '@/lib/auth-client';
 // import { createClient } from '@/lib/supabase/client';
 // import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 
@@ -38,13 +39,13 @@ const servicesDropdownItems = [
   },
   {
     href: '/products/formula-movement',
-    label: 'Программа "Формула Движения"',
+    label: 'Программа «Формула Движения»',
     description: 'Авторская программа тренировок для всего тела',
   },
   {
-    href: '/products/personal-program',
-    label: 'Восстановительная программа',
-    description: 'Пошаговый алгоритм после операций',
+    href: '/products/rehab-programs',
+    label: 'Восстановительные программы',
+    description: 'Пошаговые программы после травм и операций',
   },
   {
     href: '/products/online-training',
@@ -242,11 +243,8 @@ export function Header() {
 
   const handleLogout = async () => {
     // await supabase.auth.signOut();
-    await fetch(`${getRailwayApiBaseUrl()}/api/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-    }).catch(() => null);
+    const response = await authPost('/api/auth/logout');
+    if (!response.ok) return;
     setUser(null);
     setIsProfileDropdownOpen(false);
     setIsMobileProfileOpen(false);
@@ -412,14 +410,14 @@ export function Header() {
               <p className='text-sm font-medium' style={{ color: '#ffffff' }}>
                 Следите за мной:
               </p>
-              <div className='flex space-x-3'>
+              <div className='flex'>
                 {socialLinks.map(link => (
                   <a
                     key={link.name}
                     href={link.url}
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='text-white hover:text-accent transition-all duration-300 transform hover:scale-110'
+                    className='inline-flex items-center justify-center w-11 h-11 -my-2 text-white hover:text-accent transition-all duration-300 transform hover:scale-110'
                     aria-label={link.label}
                     onKeyDown={e =>
                       handleKeyDown(e, () => window.open(link.url, '_blank'))
@@ -506,11 +504,12 @@ export function Header() {
               aria-label='Миненков Вадим - На главную'
             >
               <Image
-                src='/images/logo.png'
-                alt='Логотип Миненков Вадим'
+                src='/images/logo-80.png'
+                alt='Логотип Вадим Миненков'
                 width={40}
                 height={40}
                 className='w-8 h-8 md:w-10 md:h-10'
+                priority
               />
               <span className='text-xl md:text-2xl font-bold text-primary transition-transform duration-300'>
                 Миненков<span className='text-accent'> Вадим</span>
@@ -871,7 +870,7 @@ export function Header() {
                   onClick={closeMenu}
                 >
                   <Image
-                    src='/images/logo.png'
+                    src='/images/logo-80.png'
                     alt='Logo'
                     width={32}
                     height={32}

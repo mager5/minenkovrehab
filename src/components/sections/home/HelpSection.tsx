@@ -10,7 +10,7 @@ export function HelpSection() {
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-12 items-center'>
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.1 }}
@@ -18,7 +18,7 @@ export function HelpSection() {
             <motion.h2
               className='text-3xl font-bold mb-8 leading-tight'
               style={{ color: '#d1f3ea' }}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
@@ -26,7 +26,7 @@ export function HelpSection() {
               {homeContent.help.title}
               <motion.span
                 className='text-accent-light'
-                initial={{ opacity: 0 }}
+                initial={false}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
@@ -41,7 +41,7 @@ export function HelpSection() {
                   key={index}
                   className='flex items-start bg-primary-dark/50 p-4 rounded-lg'
                   style={{ backgroundColor: 'rgba(209, 243, 234, 0.2)' }}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
@@ -90,7 +90,7 @@ export function HelpSection() {
 
           <motion.div
             className='relative'
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.3 }}

@@ -1,11 +1,13 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { pageMetadata, privateMetadata } from '@/lib/seo';
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: 'Договор-оферта | Миненков Вадим',
+export const metadata: Metadata = pageMetadata({
+  title: 'Договор-оферта | Вадим Миненков',
   description:
-    'Публичная оферта на оказание услуг ИП Миненков Вадим Леонидович',
-};
+    'Публичная оферта ИП Миненков Вадим Леонидович на онлайн-консультации, тренировки и восстановительные программы: порядок оплаты, возврата и оказания услуг.',
+  path: '/offer',
+});
 
 export default function OfferPage() {
   return (

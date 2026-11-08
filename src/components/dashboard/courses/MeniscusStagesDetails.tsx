@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import {
   VideoPlayer,
   VideoPlayerRef,
@@ -561,7 +560,6 @@ export function MeniscusStagesDetails({
   const videoPlayerRef = useRef<VideoPlayerRef>(null);
   const weeklyTestRef = useRef<VideoPlayerRef>(null);
   const topRef = useRef<HTMLElement>(null);
-  const supabase = useMemo(() => createClient(), []);
   const isStaticSite =
     typeof window !== 'undefined' &&
     (window.location.hostname === 'minenkovrehab.ru' ||
@@ -617,6 +615,7 @@ export function MeniscusStagesDetails({
       //   payload?.data?.publicUrl;
 
       const nextUrl =
+        payload?.data?.embedUrl ||
         payload?.data?.hlsMasterUrl ||
         payload?.data?.url ||
         payload?.data?.signedUrl ||
@@ -700,7 +699,6 @@ export function MeniscusStagesDetails({
   }, [
     activeStageId,
     isStaticSite,
-    supabase,
     activeStage?.videoPath,
     activeStage?.id,
   ]);
@@ -758,6 +756,7 @@ export function MeniscusStagesDetails({
       //   payload?.data?.publicUrl;
 
       const nextUrl =
+        payload?.data?.embedUrl ||
         payload?.data?.hlsMasterUrl ||
         payload?.data?.url ||
         payload?.data?.signedUrl ||
@@ -832,7 +831,7 @@ export function MeniscusStagesDetails({
       // setWeeklyTestUrl(publicData?.publicUrl || null);
     };
     loadWeeklyTest();
-  }, [activeStage, isStaticSite, supabase]);
+  }, [activeStage, isStaticSite]);
 
   const goPrev = () =>
     setActiveStageId((activeStageId > 1 ? activeStageId - 1 : 1) as StageId);
@@ -1473,7 +1472,7 @@ export function MeniscusStagesDetails({
                     <h4 className='font-medium text-gray-900 mb-3'>
                       Еженедельный тест
                     </h4>
-                    <VideoPlayer src={weeklyTestUrl} ref={weeklyTestRef} />
+                    {weeklyTestUrl.startsWith('https://kinescope.io/embed/') ? <iframe title='Еженедельный тест' src={weeklyTestUrl} referrerPolicy='no-referrer' allow='autoplay; fullscreen; encrypted-media; picture-in-picture' allowFullScreen className='aspect-video w-full border-0 rounded-lg' /> : <VideoPlayer src={weeklyTestUrl} ref={weeklyTestRef} />}
                     <div className='mt-4'>
                       <p className='text-base text-gray-700 mb-3'>
                         Еженедельный ТЕСТ — отслеживание динамики восстановления
@@ -1524,7 +1523,7 @@ export function MeniscusStagesDetails({
                         </h4>
                       </div>
                     )}
-                    <VideoPlayer src={videoUrl} ref={videoPlayerRef} />
+                    {videoUrl.startsWith('https://kinescope.io/embed/') ? <iframe title='Видеоурок' src={videoUrl} referrerPolicy='no-referrer' allow='autoplay; fullscreen; encrypted-media; picture-in-picture' allowFullScreen className='aspect-video w-full border-0' /> : <VideoPlayer src={videoUrl} ref={videoPlayerRef} />}
 
                     {activeStage?.videoDescription && (
                       <div className='px-5 py-5 sm:px-6 sm:py-6 border-t border-gray-100'>

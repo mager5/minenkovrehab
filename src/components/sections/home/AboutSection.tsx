@@ -11,14 +11,14 @@ export function AboutSection() {
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         <motion.div
           className='text-center mb-16'
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6 }}
         >
           {/* <motion.span 
             className="text-accent font-semibold text-base uppercase tracking-wider"
-            initial={{ opacity: 0 }}
+            initial={false}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -27,7 +27,7 @@ export function AboutSection() {
           </motion.span> */}
           <motion.h2
             className='text-3xl md:text-4xl font-bold text-primary mt-2 mb-3'
-            initial={{ opacity: 0 }}
+            initial={false}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -36,7 +36,7 @@ export function AboutSection() {
           </motion.h2>
           <motion.div
             className='h-1 w-20 bg-accent mx-auto'
-            initial={{ width: 0, opacity: 0 }}
+            initial={{ width: 0 }}
             whileInView={{ width: '5rem', opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.3 }}
@@ -62,7 +62,7 @@ export function AboutSection() {
               </div>
               <motion.div
                 className='absolute top-0 right-0 bg-accent text-white font-bold py-2 px-4 rounded-bl-lg'
-                initial={{ x: 50, opacity: 0 }}
+                initial={{ x: 50 }}
                 whileInView={{ x: 0, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
@@ -75,7 +75,7 @@ export function AboutSection() {
           <motion.div>
             <motion.p
               className='text-dark text-lg mb-6'
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
@@ -85,7 +85,7 @@ export function AboutSection() {
 
             <motion.div
               className='mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-100'
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.1 }}
@@ -125,7 +125,7 @@ export function AboutSection() {
 
             <motion.div
               className='bg-white p-6 rounded-lg shadow-sm border border-gray-100'
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}

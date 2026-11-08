@@ -1,434 +1,111 @@
 'use client';
-
-import { Fragment, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
-import { Dialog, Transition } from '@headlessui/react';
-import { getRailwayApiBaseUrl } from '@/lib/api-base';
 
-interface PaymentData {
-  outSum?: string;
-  invId?: string;
-  signatureValue?: string;
-}
+type State = 'checking' | 'pending' | 'paid' | 'login' | 'missing' | 'error';
 
-// Старый локальный helper (заменён на @/lib/api-base):
-// function getRailwayApiBaseUrl() {
-//   const value =
-//     typeof process !== 'undefined'
-//       ? (process.env.NEXT_PUBLIC_RAILWAY_API_URL || '').trim()
-//       : '';
-//   return value || 'https://minenkovrehab-production-15cc.up.railway.app';
-// }
+const TEXT: Record<State, { title: string; body: string }> = {
+  checking: { title: 'Проверяем оплату', body: 'Проверяем статус заказа…' },
+  pending: { title: 'Ждём подтверждения', body: 'Заказ ожидает подтверждения оплаты.' },
+  paid: { title: 'Оплата прошла', body: 'Оплата подтверждена. Доступ открыт в личном кабинете.' },
+  login: { title: 'Спасибо за заказ', body: 'Доступ придёт на email, указанный при покупке, сразу после подтверждения оплаты. Чтобы посмотреть статус заказа, войдите в аккаунт.' },
+  missing: { title: 'Заказ не найден', body: 'Номер заказа не указан.' },
+  error: { title: 'Не удалось проверить', body: 'Не удалось проверить статус. Попробуйте позже.' },
+};
 
-export default function PaymentSuccessPage() {
-  const searchParams = useSearchParams();
-  const [paymentData, setPaymentData] = useState<PaymentData>({});
-  const [isVerifying, setIsVerifying] = useState(true);
-  const [isValid, setIsValid] = useState(false);
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [isSubmittingEmail, setIsSubmittingEmail] = useState(false);
-  const [emailResultMessage, setEmailResultMessage] = useState('');
-
-  useEffect(() => {
-    // Получаем параметры от Robokassa
-    if (searchParams) {
-      /*
-      // Старый вариант (оставлен для истории): читали только Robokassa-ключи
-      const outSum = searchParams.get('OutSum');
-      const invId = searchParams.get('InvId');
-      const signatureValue = searchParams.get('SignatureValue');
-      */
-      const outSum =
-        searchParams.get('OutSum') || searchParams.get('outSum') || undefined;
-      const invId =
-        searchParams.get('InvId') || searchParams.get('invId') || undefined;
-      const signatureValue =
-        searchParams.get('SignatureValue') ||
-        searchParams.get('signatureValue') ||
-        undefined;
-
-      setPaymentData({
-        ...(outSum && { outSum }),
-        ...(invId && { invId }),
-        ...(signatureValue && { signatureValue }),
-      });
-
-      // Проверяем подпись (опционально)
-      if (outSum && invId && signatureValue) {
-        verifyPayment(outSum, invId, signatureValue);
-      } else {
-        setIsVerifying(false);
-        setIsValid(true); // Считаем валидным, если пользователь попал на эту страницу
-      }
-    } else {
-      setIsVerifying(false);
-      setIsValid(true);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (!isVerifying && isValid) {
-      const productId =
-        searchParams?.get('shp_product_id') ||
-        searchParams?.get('product') ||
-        '';
-      const outSum = paymentData.outSum || '';
-      const invId = paymentData.invId || '';
-      const signatureValue = paymentData.signatureValue || '';
-      const hasSuccessSignature = Boolean(outSum && invId && signatureValue);
-
-      if (
-        String(productId).trim() === 'personal-program' &&
-        hasSuccessSignature
-      ) {
-        setIsEmailModalOpen(true);
-      }
-    }
-  }, [
-    isVerifying,
-    isValid,
-    searchParams,
-    paymentData.outSum,
-    paymentData.invId,
-    paymentData.signatureValue,
-  ]);
-
-  const validateEmail = (value: string) => {
-    if (!value.trim()) {
-      return 'Email обязателен';
-    }
-    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-    if (!emailRegex.test(value.trim())) {
-      return 'Некорректный формат email';
-    }
-    return '';
-  };
-
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setEmailResultMessage('');
-
-    const error = validateEmail(email);
-    if (error) {
-      setEmailError(error);
-      return;
-    }
-
-    setEmailError('');
-    setIsSubmittingEmail(true);
-
-    try {
-      const outSum = paymentData.outSum || '';
-      const invId = paymentData.invId || '';
-      const signatureValue = paymentData.signatureValue || '';
-      const shpProductId = searchParams?.get('shp_product_id') || undefined;
-
-      const isLocalhost =
-        typeof window !== 'undefined' &&
-        (window.location.hostname === 'localhost' ||
-          window.location.hostname === '127.0.0.1');
-      const apiUrl = isLocalhost
-        ? '/api/robokassa/complete-personal-program'
-        : `${getRailwayApiBaseUrl()}/api/robokassa/complete-personal-program`;
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: email.trim(),
-          OutSum: outSum,
-          InvId: invId,
-          SignatureValue: signatureValue,
-          ...(shpProductId ? { shp_product_id: shpProductId } : {}),
-        }),
-      });
-
-      const contentType = String(response.headers.get('content-type') || '');
-      const data = contentType.includes('application/json')
-        ? await response.json()
-        : { success: false, message: await response.text() };
-
-      if (!response.ok || !data?.success) {
-        const message =
-          data?.error ||
-          data?.message ||
-          'Не удалось отправить доступ. Пожалуйста, попробуйте ещё раз.';
-        setEmailResultMessage(message);
-        return;
-      }
-
-      const serverMessage =
-        data?.message ||
-        (data?.status === 'exists'
-          ? 'Пользователь с таким email уже зарегистрирован. Используйте форму входа.'
-          : 'Личный кабинет создан. На указанный email отправлены логин, пароль и безопасная ссылка для входа.');
-
-      let finalMessage = serverMessage;
-      if (data?.emailSent === false && data?.emailError) {
-        finalMessage += `\n\nДополнительно: ${data.emailError}`;
-      } else if (data?.emailSent === false) {
-        finalMessage +=
-          '\n\nДополнительно: письмо не было отправлено почтовым сервисом. Проверьте настройки Resend.';
-      }
-
-      setEmailResultMessage(finalMessage);
-
-      if (response.ok && data?.success) {
-        if (data?.emailSent === false) {
-          return;
-        }
-        if (data?.autoLogin === false) {
-          return;
-        }
-        window.location.href = '/dashboard';
-      }
-    } catch (error) {
-      console.error('Ошибка при отправке email:', error);
-      setEmailResultMessage(
-        'Произошла ошибка. Пожалуйста, попробуйте еще раз.'
-      );
-    } finally {
-      setIsSubmittingEmail(false);
-    }
-  };
-
-  const verifyPayment = async (
-    outSum: string,
-    invId: string,
-    signature: string
-  ) => {
-    try {
-      // Здесь можно добавить проверку подписи через API
-      // const response = await fetch(`/api/robokassa/verify-signature?outSum=${outSum}&invId=${invId}&signature=${signature}&type=success`);
-      // const result = await response.json();
-      // setIsValid(result.data?.isValid || false);
-
-      // Пока просто считаем валидным
-      setIsValid(true);
-    } catch (error) {
-      console.error('Ошибка проверки платежа:', error);
-      setIsValid(true); // В случае ошибки считаем валидным
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
-  if (isVerifying) {
+function StatusIcon({ state }: { state: State }) {
+  if (state === 'paid')
     return (
-      <div className='min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center px-4'>
-        <div className='max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center'>
-          <div className='animate-spin rounded-full h-16 w-16 border-b-2 border-green-600 mx-auto mb-4'></div>
-          <h1 className='text-2xl font-bold text-gray-900 mb-2'>
-            Проверяем платеж...
-          </h1>
-          <p className='text-gray-600'>Пожалуйста, подождите</p>
-        </div>
+      <div className='mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-accent'>
+        <svg aria-hidden='true' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.2' className='h-8 w-8'>
+          <path d='M5 12.5l4.5 4.5L19 7.5' strokeLinecap='round' strokeLinejoin='round' />
+        </svg>
       </div>
     );
-  }
-
+  if (state === 'checking' || state === 'pending')
+    return (
+      <div className='mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-light text-primary'>
+        <svg aria-hidden='true' viewBox='0 0 24 24' fill='none' className='h-8 w-8 animate-spin'>
+          <circle cx='12' cy='12' r='9' stroke='currentColor' strokeOpacity='0.2' strokeWidth='2.5' />
+          <path d='M21 12a9 9 0 0 0-9-9' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' />
+        </svg>
+      </div>
+    );
   return (
-    <>
-      <div className='min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center px-4'>
-        <div className='max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center'>
-          {isValid ? (
-            <>
-              <CheckCircleIcon className='h-20 w-20 text-green-500 mx-auto mb-6' />
-              <h1 className='text-3xl font-bold text-gray-900 mb-4'>
-                Платеж успешен!
-              </h1>
-              <p className='text-gray-600 mb-6'>
-                Спасибо за оплату! Ваш платеж был успешно обработан.
-              </p>
+    <div className='mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-600'>
+      <svg aria-hidden='true' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='h-8 w-8'>
+        <path d='M12 8v5M12 16.5v.01' strokeLinecap='round' />
+        <circle cx='12' cy='12' r='9' />
+      </svg>
+    </div>
+  );
+}
 
-              {paymentData.outSum && (
-                <div className='bg-gray-50 rounded-lg p-4 mb-6 text-left'>
-                  <h3 className='font-semibold text-gray-900 mb-2'>
-                    Детали платежа:
-                  </h3>
-                  <div className='space-y-1 text-sm text-gray-600'>
-                    <div>
-                      Сумма:{' '}
-                      <span className='font-medium'>
-                        {paymentData.outSum} ₽
-                      </span>
-                    </div>
-                    {paymentData.invId && (
-                      <div>
-                        Номер заказа:{' '}
-                        <span className='font-medium'>{paymentData.invId}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+function PaymentStatus() {
+  const params = useSearchParams();
+  const invoice = params?.get('InvId') || params?.get('invId');
+  const [state, setState] = useState<State>('checking');
 
-              <div className='space-y-3'>
-                <p className='text-sm text-gray-500'>
-                  В ближайшее время с вами свяжется наш специалист для уточнения
-                  деталей.
-                </p>
+  useEffect(() => {
+    let stopped = false;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const check = async () => {
+      if (!invoice) { setState('missing'); return; }
+      try {
+        const response = await fetch(`/api/robokassa/orders/${encodeURIComponent(invoice)}/status`, { credentials: 'same-origin', cache: 'no-store' });
+        const payload = await response.json().catch(() => null);
+        if (stopped) return;
+        const next: State = response.ok && payload?.data?.status === 'paid' ? 'paid' : response.ok ? 'pending' : 'login';
+        setState(next);
+        if (next === 'paid' && timer) clearInterval(timer);
+      } catch {
+        if (!stopped) setState('error');
+      }
+    };
+    check();
+    timer = setInterval(check, 5000);
+    return () => { stopped = true; if (timer) clearInterval(timer); };
+  }, [invoice]);
 
-                <div className='flex flex-col sm:flex-row gap-3'>
-                  <Link
-                    href='/'
-                    className='flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors'
-                  >
-                    На главную
-                  </Link>
-                </div>
-              </div>
-            </>
+  const text = TEXT[state];
+  return (
+    <main className='flex-1 bg-secondary/40 px-4 py-16 sm:py-24'>
+      <div className='mx-auto max-w-xl rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-black/5 sm:p-10'>
+        <StatusIcon state={state} />
+        <h1 className='text-2xl font-semibold text-gray-900 sm:text-3xl'>{text.title}</h1>
+        <p role='status' className='mt-3 text-base leading-relaxed text-gray-600'>{text.body}</p>
+        {state === 'pending' && (
+          <p className='mt-2 text-sm text-gray-500'>Обычно это занимает до минуты. Страница обновится сама.</p>
+        )}
+        {invoice && state !== 'missing' && (
+          <p className='mt-6 inline-block rounded-lg bg-gray-50 px-4 py-2 text-sm text-gray-500'>
+            Номер заказа: <span className='font-medium text-gray-800'>{invoice}</span>
+          </p>
+        )}
+        <div className='mt-8 flex flex-col justify-center gap-3 sm:flex-row'>
+          {state === 'login' ? (
+            <Link href={`/login?next=${encodeURIComponent('/payment/success?InvId=' + (invoice || ''))}`} className='rounded-lg bg-primary px-6 py-3 font-medium text-white transition-colors hover:bg-primary-dark'>
+              Войти
+            </Link>
           ) : (
-            <>
-              <div className='h-20 w-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6'>
-                <span className='text-red-500 text-4xl'>⚠️</span>
-              </div>
-              <h1 className='text-3xl font-bold text-gray-900 mb-4'>
-                Ошибка проверки
-              </h1>
-              <p className='text-gray-600 mb-6'>
-                Не удалось проверить подлинность платежа. Пожалуйста, свяжитесь
-                с поддержкой.
-              </p>
-
-              <div className='flex flex-col sm:flex-row gap-3'>
-                <Link
-                  href='/contacts'
-                  className='flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors'
-                >
-                  Связаться с нами
-                </Link>
-                <Link
-                  href='/'
-                  className='flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors'
-                >
-                  На главную
-                </Link>
-              </div>
-            </>
+            <Link href='/dashboard' className='rounded-lg bg-primary px-6 py-3 font-medium text-white transition-colors hover:bg-primary-dark'>
+              Личный кабинет
+            </Link>
           )}
+          <Link href='/contacts' className='rounded-lg px-6 py-3 font-medium text-primary ring-1 ring-primary/30 transition-colors hover:bg-primary-light'>
+            Связаться с нами
+          </Link>
         </div>
       </div>
+    </main>
+  );
+}
 
-      <Transition appear show={isEmailModalOpen} as={Fragment}>
-        <Dialog
-          as='div'
-          className='relative z-50'
-          onClose={() => setIsEmailModalOpen(false)}
-        >
-          <Transition.Child
-            as={Fragment}
-            enter='ease-out duration-200'
-            enterFrom='opacity-0'
-            enterTo='opacity-100'
-            leave='ease-in duration-150'
-            leaveFrom='opacity-100'
-            leaveTo='opacity-0'
-          >
-            <div className='fixed inset-0 bg-black/40' />
-          </Transition.Child>
-
-          <div className='fixed inset-0 overflow-y-auto'>
-            <div className='flex min-h-full items-center justify-center p-4'>
-              <Transition.Child
-                as={Fragment}
-                enter='ease-out duration-200'
-                enterFrom='opacity-0 scale-95 translate-y-4'
-                enterTo='opacity-100 scale-100 translate-y-0'
-                leave='ease-in duration-150'
-                leaveFrom='opacity-100 scale-100 translate-y-0'
-                leaveTo='opacity-0 scale-95 translate-y-4'
-              >
-                <Dialog.Panel className='w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all'>
-                  <Dialog.Title className='text-lg font-semibold leading-6 text-gray-900'>
-                    Для доступа к личному кабинету укажите адрес электронной
-                    почты
-                  </Dialog.Title>
-                  <div className='mt-2'>
-                    <p className='text-sm text-gray-500'>
-                      На указанный email мы отправим логин, временный пароль и
-                      безопасную ссылку для входа в личный кабинет.
-                    </p>
-                  </div>
-
-                  <form className='mt-4 space-y-4' onSubmit={handleEmailSubmit}>
-                    <div>
-                      <label
-                        htmlFor='email'
-                        className='block text-sm font-medium text-gray-700'
-                      >
-                        Электронная почта
-                      </label>
-                      <input
-                        id='email'
-                        type='email'
-                        value={email}
-                        onChange={e => {
-                          setEmail(e.target.value);
-                          if (emailError) {
-                            setEmailError('');
-                          }
-                        }}
-                        placeholder='you@example.com'
-                        className='mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm'
-                      />
-                      {emailError && (
-                        <p className='mt-1 text-xs text-red-600'>
-                          {emailError}
-                        </p>
-                      )}
-                    </div>
-
-                    {emailResultMessage && (
-                      <div className='text-xs text-gray-600 bg-gray-50 rounded-md p-2'>
-                        {emailResultMessage}
-                      </div>
-                    )}
-
-                    {emailResultMessage &&
-                      emailResultMessage.includes('письмо') &&
-                      emailResultMessage.includes('не') && (
-                        <div className='text-xs text-gray-600'>
-                          <Link
-                            href='/dashboard'
-                            className='text-blue-600 hover:underline'
-                          >
-                            Перейти в личный кабинет
-                          </Link>
-                        </div>
-                      )}
-
-                    <div className='mt-4 flex flex-col sm:flex-row gap-3'>
-                      <button
-                        type='submit'
-                        disabled={isSubmittingEmail}
-                        className='flex-1 inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50'
-                      >
-                        {isSubmittingEmail ? 'Отправка...' : 'Получить доступ'}
-                      </button>
-                      <button
-                        type='button'
-                        onClick={() => setIsEmailModalOpen(false)}
-                        className='flex-1 inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
-                      >
-                        Позже
-                      </button>
-                    </div>
-                  </form>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-      </Transition>
-    </>
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<main className='flex-1 px-4 py-24 text-center text-gray-500'>Проверяем статус заказа…</main>}>
+      <PaymentStatus />
+    </Suspense>
   );
 }

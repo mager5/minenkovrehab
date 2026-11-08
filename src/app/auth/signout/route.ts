@@ -1,8 +1,3 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-
-export async function POST(request: Request) {
-  const supabase = createClient();
-  await supabase.auth.signOut();
-  return redirect('/login');
-}
+import { NextResponse } from 'next/server';
+// Logout is a CSRF-protected POST /api/auth/logout; GET never mutates a session.
+export function GET() { return new NextResponse('Используйте выход в меню аккаунта.',{status:405}); }

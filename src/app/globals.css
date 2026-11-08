@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  --font-inter: 'Inter Variable', 'Inter';
   --fs-xs: 12px;
   --lh-xs: 16px;
   --fs-sm: 14px;
