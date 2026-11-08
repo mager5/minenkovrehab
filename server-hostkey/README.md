@@ -59,6 +59,18 @@ Frontend (Next.js) сюда не входит: в образе `rehab-frontend:h
    **Деплой фронтенда — из master:** `/opt/rehab/scripts/deploy-frontend.sh` (копия в `infra/scripts/deploy-frontend.sh`).
    Берёт свежий master из GitHub, собирает образ `rehab-frontend:src-<sha>` (около 8 минут), выкатывает, проверяет
    здоровье и страницы, при ошибке откатывает. Текущий коммит — в `/opt/rehab/FRONTEND_COMMIT`, история — в `/opt/rehab/deploy.log`.
+8. **Журнал запросов и IndexNow (08.11.2026).**
+   - **Access-лог Caddy** для `https://minenkovrehab.ru` — JSON, ротация по 50 МиБ, хранится 10 файлов (`log` в `infra/caddy/Caddyfile`).
+     В контейнере `/data/logs/minenkovrehab-access.log`, на хосте `/var/lib/docker/volumes/rehab_caddy_data/_data/logs/` (читать через sudo).
+     Заголовки Cookie/Authorization Caddy в лог не пишет. Пример: запросы ботов за сутки —
+     `sudo jq -r 'select(.request.headers["User-Agent"][0]|test("YandexBot|Googlebot")) | [(.ts|floor|todate), .status, .request.uri] | @tsv' <лог>`.
+     Копия до правки — `/opt/rehab/Caddyfile.bak-20261108-190853`. Caddyfile примонтирован в контейнер файлом: правим «на месте»
+     (`cat новый > Caddyfile`, а не `sed -i`/`mv`, иначе контейнер не увидит изменения), затем `caddy validate` и `caddy reload`.
+   - **IndexNow (Яндекс).** Ключ `bcc8f8593ece76dda52e5a727c39f4b8` (публичный по протоколу): файл `public/<ключ>.txt` в коде сайта,
+     отдаётся по `https://minenkovrehab.ru/<ключ>.txt`. `/opt/rehab/scripts/indexnow-submit.sh` (копия в `infra/scripts/`) берёт все URL
+     из `sitemap.xml` и отправляет POST JSON (`host`, `key`, `keyLocation`, `urlList`) на `https://yandex.com/indexnow`; ответ пишет в `deploy.log`.
+     `deploy-frontend.sh` вызывает его после успешного деплоя; сбой отправки деплой не ломает. Можно запускать и вручную.
+     Если ключ меняется — поменять и файл в `public/`, и `KEY` в скрипте.
 
 ### (выполнено 08.11.2026 в ветке seo-audit) Что поправить в исходниках сайта на Mac, чтобы убрать замены из Caddy
 

@@ -57,3 +57,6 @@ done
 
 echo "$SHA $BRANCH $(date -Is)" > "$APP/FRONTEND_COMMIT"
 echo "$(date -Is) frontend: $TAG выкачен (был $OLD)" | tee -a "$LOG"
+
+# IndexNow: сообщить Яндексу обо всех URL из sitemap. Сбой отправки деплой не ломает.
+"$APP/scripts/indexnow-submit.sh" || echo "$(date -Is) indexnow: не отправлено (деплой при этом успешен)" | tee -a "$LOG"
