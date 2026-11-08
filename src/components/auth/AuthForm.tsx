@@ -93,7 +93,7 @@ function LoginForm() {
         return;
       }
       window.dispatchEvent(new Event('mr-auth-changed'));
-      router.replace(safeNext(search.get('next')));
+      router.replace(safeNext(search?.get('next') ?? null));
       router.refresh();
       // isLoading не сбрасываем: кнопка показывает «Вход…» до перехода.
     } catch {
