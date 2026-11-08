@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { homeContent } from '@/data/content';
+import { homeContent, homeServiceTarget } from '@/data/content';
 
 export function ServicesSection() {
   return (
@@ -79,28 +79,11 @@ interface ServiceCardProps {
 }
 
 function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
-  // Определяем ссылку на основе названия услуги
-  const getServiceLink = (serviceTitle: string) => {
-    if (serviceTitle.includes('Формула Движения')) {
-      return '/products/formula-movement';
-    }
-    if (serviceTitle.includes('Программа')) {
-      return '/products/personal-program';
-    }
-    if (serviceTitle.includes('Экспресс онлайн-консультация')) {
-      return '/products/express-consultation';
-    }
-    if (serviceTitle.includes('консультаци')) {
-      return '/products/consultation';
-    }
-    if (serviceTitle.includes('тренировк')) {
-      return '/products/online-training';
-    }
-    return '/products';
-  };
-
   return (
-    <Link href={getServiceLink(title)} className='block cursor-pointer'>
+    <Link
+      href={homeServiceTarget(title).href}
+      className='block cursor-pointer'
+    >
       <motion.div
         className='bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100 h-full'
         initial={{ opacity: 0, y: 50 }}

@@ -1,9 +1,5 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { aboutContent } from '@/data/content';
-import { getAboutContent } from '@/lib/content';
-import { AboutContentType } from '@/types/content';
+import type { Metadata } from 'next';
+import { aboutContent as content } from '@/data/content';
 import {
   HeroSection,
   MissionSection,
@@ -11,63 +7,55 @@ import {
   ApproachSection,
   TeamSection,
 } from '@/components';
+import { pageMetadata } from '@/lib/seo';
+import { breadcrumbs, person } from '@/lib/schema';
+import { JsonLd } from '@/components/seo/JsonLd';
 
+export const metadata: Metadata = pageMetadata({
+  title: 'Обо мне — инструктор-методист ЛФК | Вадим Миненков',
+  description:
+    'Вадим Миненков — специалист по физической реабилитации и спортивной тренировке, инструктор-методист ЛФК. Опыт 8+ лет, онлайн-консультации и программы.',
+  path: '/about',
+  socialTitle: 'Обо мне — Вадим Миненков',
+  type: 'profile',
+});
+
+// Контент страницы — один источник (src/data/content.ts), рендерится на сервере.
 export default function About() {
-  // Состояние для данных страницы
-  const [content, setContent] = useState<AboutContentType>(aboutContent);
-
-  // Загрузка контента при монтировании компонента
-  useEffect(() => {
-    async function loadAboutData() {
-      try {
-        const data = await getAboutContent<AboutContentType>();
-        setContent(data);
-      } catch (error) {
-        // Log error for debugging in development
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.error('Ошибка загрузки данных о нас:', error);
-        }
-      }
-    }
-
-    loadAboutData();
-  }, []);
-
   return (
     <div className='min-h-screen overflow-x-hidden'>
-      {/* Hero секция */}
+      <JsonLd
+        nodes={[
+          {
+            '@type': 'ProfilePage',
+            url: 'https://minenkovrehab.ru/about',
+            name: 'Обо мне',
+            mainEntity: person,
+          },
+          breadcrumbs([{ name: 'Обо мне', path: '/about' }]),
+        ]}
+      />
       <HeroSection
         title={content.hero.title}
         subtitle={content.hero.subtitle}
         description={content.hero.description}
       />
-
-      {/* Миссия */}
       <MissionSection
         title={content.mission.title}
         description={content.mission.description}
         values={content.mission.values}
       />
-
-      {/* Опыт и статистика */}
       <ExperienceSection
         title={content.experience.title}
         description={content.experience.description}
         stats={content.experience.stats}
       />
-
-      {/* Наш подход */}
       <ApproachSection
         title={content.approach.title}
         steps={content.approach.steps}
       />
-
-      {/* Команда */}
-      <TeamSection
-        title={content.team.title}
-        description={content.team.description}
-      />
+      {/* Без заголовка: H1 «Обо мне» уже есть в первом экране */}
+      <TeamSection description={content.team.description} />
     </div>
   );
 }

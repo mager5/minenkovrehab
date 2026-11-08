@@ -1,11 +1,13 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { pageMetadata, privateMetadata } from '@/lib/seo';
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: 'Политика конфиденциальности | Миненков Вадим',
+export const metadata: Metadata = pageMetadata({
+  title: 'Политика конфиденциальности | Вадим Миненков',
   description:
-    'Политика конфиденциальности для клиентов физического реабилитолога Миненкова Вадима',
-};
+    'Политика конфиденциальности сайта minenkovrehab.ru: какие персональные данные клиентов собирает ИП Миненков Вадим Леонидович, зачем и как их защищает.',
+  path: '/policy',
+});
 
 export default function PolicyPage() {
   return (

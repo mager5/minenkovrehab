@@ -14,23 +14,23 @@ export function formatPrice(productId: string, price: number): string {
     // case 'online-support': // Удален продукт
     //   return `${price.toLocaleString('ru-RU')} ₽ / МЕС.`;
     case 'consultation':
-      return `${price.toLocaleString('ru-RU')} ₽ / 60 МИН.`;
+      return `${price.toLocaleString('ru-RU')} ₽ / 60 минут`;
     // case 'movement-analysis': // Удален продукт
     //   return `${price.toLocaleString('ru-RU')} ₽`;
     case 'online-training':
-      return `${price.toLocaleString('ru-RU')} ₽ / 60 МИН.`;
+      return `${price.toLocaleString('ru-RU')} ₽ / 60 минут`;
     case 'personal-program':
-      return `${price.toLocaleString('ru-RU')} ₽ / 6 МЕС.`;
+      return `${price.toLocaleString('ru-RU')} ₽ / 6 мес.`;
     case 'plantar-fasciopathy':
-      return `${price.toLocaleString('ru-RU')} ₽ / 6 МЕС.`;
+      return `${price.toLocaleString('ru-RU')} ₽ / 6 мес.`;
     case 'low-back-pain':
-      return `${price.toLocaleString('ru-RU')} ₽ / 6 МЕС.`;
+      return `${price.toLocaleString('ru-RU')} ₽ / 6 мес.`;
     case 'neck-thoracic-pain':
-      return `${price.toLocaleString('ru-RU')} ₽ / 6 МЕС.`;
+      return `${price.toLocaleString('ru-RU')} ₽ / 6 мес.`;
     case 'formula-movement':
-      return `${price.toLocaleString('ru-RU')} ₽ / УРОВЕНЬ (2 МЕС.)`;
+      return `${price.toLocaleString('ru-RU')} ₽ / уровень (2 мес.)`;
     case 'express-consultation':
-      return `${price.toLocaleString('ru-RU')} ₽ / 20 МИН.`;
+      return `${price.toLocaleString('ru-RU')} ₽ / 20 минут`;
     default:
       return `${price.toLocaleString('ru-RU')} ₽`;
   }
@@ -96,7 +96,7 @@ export const products: Product[] = [
   },
   {
     id: 'plantar-fasciopathy',
-    title: 'Плантарный фасциит "Пяточная шпора". Восстановительная программа',
+    title: 'Плантарный фасциит «Пяточная шпора». Восстановительная программа',
     shortDescription:
       'Подробный информационный материал в формате пошагового алгоритма для восстановления при плантарной фасциопатии.',
     fullDescription: [
@@ -121,9 +121,9 @@ export const products: Product[] = [
   {
     id: 'low-back-pain',
     title:
-      'Восстановительная программа "Поясница" (неспецифическая боль в нижней части спины)',
+      'Восстановительная программа «Поясница» (неспецифическая боль в нижней части спины)',
     shortDescription:
-      'Пошаговый информационный материал по работе с поясничным отделом — от мягкого снятия напряжения до формирования "мышечного корсета".',
+      'Пошаговый информационный материал по работе с поясничным отделом — от мягкого снятия напряжения до формирования «мышечного корсета».',
     fullDescription: [
       'Описание',
       'Подробный информационный материал в формате пошагового алгоритма для восстановления при боли в пояснице и тазовом регионе.',
@@ -149,7 +149,7 @@ export const products: Product[] = [
   {
     id: 'neck-thoracic-pain',
     title:
-      'Восстановительная программа "Шея + грудной отдел" (неспецифическая боль в верхней части спины)',
+      'Восстановительная программа «Шея + грудной отдел» (неспецифическая боль в верхней части спины)',
     shortDescription:
       'Пошаговый информационный материал по работе с шеей и грудным отделом — от мягкого снятия напряжения до постепенного укрепления и улучшения контроля движений.',
     fullDescription: [
@@ -194,7 +194,7 @@ export const products: Product[] = [
     id: 'online-training',
     title: 'Онлайн-тренировка',
     shortDescription:
-      'Индивидуальная онлайн-тренировка в формате видеозвонка проводится по предварительному согласованию времени и даты. Продолжительность занятия — около 60 МИН.',
+      'Индивидуальная онлайн-тренировка в формате видеозвонка проводится по предварительному согласованию времени и даты. Продолжительность занятия — около 60 минут.',
     fullDescription: [
       'Формат доступен только после прохождения первичной консультации и определения вашей исходной точки. Это необходимо для учета текущего состояния, целей и особенностей опорно-двигательного аппарата, а также подбора эффективной стратегии работы.',
       'Тренировка строится комплексно и включает проработку основных компонентов физического состояния: развитие силы, подвижности суставов, гибкости, баланса, дыхания, общей выносливости и контроля движений.',
@@ -224,7 +224,7 @@ export const products: Product[] = [
   },
   {
     id: 'formula-movement',
-    title: "Программа тренировок 'Формула Движения'",
+    title: "Программа тренировок «Формула Движения»",
     shortDescription:
       'Это ваш путь к свободным, лёгким и уверенным движениям — без боли, зажимов и усталости.',
     fullDescription: [

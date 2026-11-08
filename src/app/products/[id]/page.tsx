@@ -1,57 +1,71 @@
-// Серверная часть для статической генерации
-import { Metadata } from 'next';
+// Страница услуги или программы: /products/<slug>.
+// Адрес берётся из каталога (catalog.ts), содержимое — из data.ts по id продукта.
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import ProductPageProxy from './page-proxy';
-import { getAllProductIds, getProductById } from '../productAdapter';
+import { getProductById } from '../productAdapter';
+import {
+  catalog,
+  getCatalogItemBySlug,
+  productPath,
+  REHAB_PROGRAMS_PATH,
+} from '../catalog';
+import { pageMetadata, privateMetadata, SERVICES_OG_IMAGE } from '@/lib/seo';
+import { breadcrumbs, catalogItemNode } from '@/lib/schema';
+import { JsonLd } from '@/components/seo/JsonLd';
 
-// Маркер для статической генерации
 export const dynamic = 'force-static';
+// Только адреса из каталога; остальное — 404 (старые адреса перенаправляет next.config.js).
+export const dynamicParams = false;
 
-// Метаданные для страницы продукта
+export function generateStaticParams() {
+  return catalog.map(item => ({ id: item.slug }));
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-
-  // Получаем продукт из централизованного хранилища
-  const product = await getProductById(id);
-
-  if (!product) {
-    return {
-      title: 'Продукт не найден | Миненков Вадим',
-      description: 'Запрашиваемый продукт не существует или был удален.',
-    };
-  }
-
-  return {
-    title: `${product.title} | Миненков Вадим`,
-    description: product.shortDescription,
-  };
+  const item = getCatalogItemBySlug(id);
+  if (!item) return privateMetadata('Страница не найдена | Вадим Миненков');
+  return pageMetadata({
+    title: item.seoTitle,
+    description: item.seoDescription,
+    path: productPath(item),
+    image: SERVICES_OG_IMAGE,
+    socialTitle: item.title,
+  });
 }
 
-// Функция для статической генерации страниц
-export async function generateStaticParams() {
-  // Получаем все id продуктов из централизованного хранилища
-  const productIds = await getAllProductIds();
-
-  return productIds.map(id => ({
-    id,
-  }));
-}
-
-// Серверная функция рендеринга страницы
 export default async function Page({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Получаем id из промиса params
   const { id } = await params;
+  const item = getCatalogItemBySlug(id);
+  if (!item) notFound();
+  const product = await getProductById(item.id);
+  if (!product) notFound();
 
-  // Получаем продукт из централизованного хранилища
-  const product = await getProductById(id);
-  const productExists = !!product;
+  const trail =
+    item.kind === 'program'
+      ? [
+          { name: 'Услуги', path: '/products' },
+          { name: 'Восстановительные программы', path: REHAB_PROGRAMS_PATH },
+          { name: item.title, path: productPath(item) },
+        ]
+      : [
+          { name: 'Услуги', path: '/products' },
+          { name: item.title, path: productPath(item) },
+        ];
 
-  return <ProductPageProxy product={product} productExists={productExists} />;
+  return (
+    <>
+      <JsonLd nodes={[catalogItemNode(item), breadcrumbs(trail)]} />
+      <ProductPageProxy product={product} productExists />
+    </>
+  );
 }

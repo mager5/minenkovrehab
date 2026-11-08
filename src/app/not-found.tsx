@@ -1,4 +1,11 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { privateMetadata } from '@/lib/seo';
+
+// 404: noindex, без canonical.
+export const metadata: Metadata = privateMetadata(
+  'Страница не найдена | Вадим Миненков'
+);
 
 export default function NotFound() {
   return (

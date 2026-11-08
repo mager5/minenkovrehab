@@ -45,7 +45,7 @@ export default function ProductClient({ product }: { product: Product }) {
   const [isOfferChecked, setIsOfferChecked] = useState(false);
   const [showConsentError, setShowConsentError] = useState(false);
   const [showOfferError, setShowOfferError] = useState(false);
-  // Состояние для показа всех уровней программы "Формула движения"
+  // Состояние для показа всех уровней программы «Формула Движения»
   const [showAllLevels, setShowAllLevels] = useState(false);
   // Состояние для показа дополнительной информации для консультации
   const [showMoreConsultation, setShowMoreConsultation] = useState(false);
@@ -1421,7 +1421,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     !isOfferCheckedLevel2 ||
                     isPaymentProcessingLevel2
                   }
-                  aria-label='Купить онлайн уровень 2 программы Формула движения'
+                  aria-label='Купить онлайн уровень 2 программы «Формула Движения»'
                   className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
                     isConsentCheckedLevel2 &&
                     isOfferCheckedLevel2 &&
@@ -1639,7 +1639,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     !isOfferCheckedLevel3 ||
                     isPaymentProcessingLevel3
                   }
-                  aria-label='Купить онлайн уровень 3 программы Формула движения'
+                  aria-label='Купить онлайн уровень 3 программы «Формула Движения»'
                   className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
                     isConsentCheckedLevel3 &&
                     isOfferCheckedLevel3 &&
@@ -1857,7 +1857,7 @@ export default function ProductClient({ product }: { product: Product }) {
                     !isOfferCheckedLevel4 ||
                     isPaymentProcessingLevel4
                   }
-                  aria-label='Купить онлайн уровень 4 программы Формула движения'
+                  aria-label='Купить онлайн уровень 4 программы «Формула Движения»'
                   className={`block w-full text-white text-center px-6 py-3 rounded-md font-medium transition-all shadow-lg mb-4 flex items-center justify-center space-x-2 ${
                     isConsentCheckedLevel4 &&
                     isOfferCheckedLevel4 &&

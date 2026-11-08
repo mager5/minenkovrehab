@@ -39,13 +39,13 @@ const servicesDropdownItems = [
   },
   {
     href: '/products/formula-movement',
-    label: 'Программа "Формула Движения"',
+    label: 'Программа «Формула Движения»',
     description: 'Авторская программа тренировок для всего тела',
   },
   {
-    href: '/products/personal-program',
-    label: 'Восстановительная программа',
-    description: 'Пошаговый алгоритм после операций',
+    href: '/products/rehab-programs',
+    label: 'Восстановительные программы',
+    description: 'Пошаговые программы после травм и операций',
   },
   {
     href: '/products/online-training',
@@ -504,7 +504,7 @@ export function Header() {
               aria-label='Миненков Вадим - На главную'
             >
               <Image
-                src='/images/logo.png'
+                src='/images/logo-80.png'
                 alt='Логотип Миненков Вадим'
                 width={40}
                 height={40}
@@ -869,7 +869,7 @@ export function Header() {
                   onClick={closeMenu}
                 >
                   <Image
-                    src='/images/logo.png'
+                    src='/images/logo-80.png'
                     alt='Logo'
                     width={32}
                     height={32}

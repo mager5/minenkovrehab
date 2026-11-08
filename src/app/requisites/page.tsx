@@ -1,11 +1,9 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { pageMetadata, privateMetadata } from '@/lib/seo';
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: 'Реквизиты для оплаты | Миненков Вадим',
-  description:
-    'Реквизиты для оплаты услуг физического реабилитолога ИП Миненкова Вадима',
-};
+// В реквизитах указан другой ИНН (не ИП Миненкова) — страница скрыта от поиска до проверки владельцем.
+export const metadata: Metadata = privateMetadata('Реквизиты для оплаты | Вадим Миненков');
 
 export default function RequisitesPage() {
   return (

@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 interface TeamSectionProps {
-  title: string;
+  /** Заголовок секции; на странице «Обо мне» не нужен — там уже есть H1 «Обо мне». */
+  title?: string;
   description: string;
 }
 
@@ -19,7 +20,9 @@ export function TeamSection({ title, description }: TeamSectionProps) {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className='text-3xl font-bold text-primary mb-6'>{title}</h2>
+          {title && (
+            <h2 className='text-3xl font-bold text-primary mb-6'>{title}</h2>
+          )}
           <p className='text-lg text-gray-600 mb-12'>{description}</p>
         </motion.div>
 

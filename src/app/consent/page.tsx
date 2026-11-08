@@ -1,11 +1,13 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { pageMetadata, privateMetadata } from '@/lib/seo';
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: 'Согласие на обработку персональных данных | Миненков Вадим',
+export const metadata: Metadata = pageMetadata({
+  title: 'Согласие на обработку персональных данных | Вадим Миненков',
   description:
-    'Согласие на обработку персональных данных в соответствии с ФЗ-152',
-};
+    'Согласие на обработку персональных данных по 152-ФЗ для клиентов ИП Миненков Вадим Леонидович: какие данные обрабатываются, цели, сроки и порядок отзыва.',
+  path: '/consent',
+});
 
 export default function ConsentPage() {
   return (

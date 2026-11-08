@@ -184,14 +184,14 @@ const ServicesColumn = () => {
             href='/products/formula-movement'
             className='text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline'
             style={{ color: '#d1f3ea' }}
-            aria-label='Программа тренировок Формула Движения'
+            aria-label='Программа тренировок «Формула Движения»'
           >
-            Программа тренировок &quot;Формула Движения&quot;
+            Программа тренировок «Формула Движения»
           </Link>
         </li>
         <li role='listitem'>
           <Link
-            href='/products/personal-program'
+            href='/products/rehab-programs'
             className='text-white hover:text-accent transition-all duration-300 font-semibold focus:outline-none focus:underline'
             style={{ color: '#d1f3ea' }}
             aria-label='Восстановительные программы'
@@ -468,7 +468,7 @@ const FooterBottom = ({ currentYear }: { currentYear: number }) => (
             className='text-white text-xs mt-1 opacity-80'
             style={{ color: '#d1f3ea' }}
           >
-            ИНН 262703733425 • ОГРН 325265100067202
+            ИНН 262703733425 • ОГРНИП 325265100067202
           </p>
         </div>
         <div className='mt-4 md:mt-0 flex flex-wrap justify-center md:justify-end'>

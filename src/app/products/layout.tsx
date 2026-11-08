@@ -1,8 +1,6 @@
 import React from 'react';
-import { metadata } from './metadata';
 
-export { metadata };
-
+// Метаданные задаёт каждая страница раздела сама — здесь их нет, чтобы ничего не наследовалось.
 export default function ProductsLayout({
   children,
 }: {

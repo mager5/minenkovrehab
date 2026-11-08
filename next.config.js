@@ -7,6 +7,11 @@ module.exports = {
     { protocol:'https',hostname:'*.cloudinary.com' },
   ] },
   experimental: { cpus: 2 },
+  // Старые адреса программ — постоянный редирект 301.
+  async redirects(){return [
+    {source:'/products/personal-program',destination:'/products/meniscus-resection',statusCode:301},
+    {source:'/products/rehabilitation-protocols',destination:'/products/rehab-programs',statusCode:301},
+  ];},
   async headers(){return [{source:'/(.*)',headers:[
     {key:'X-Content-Type-Options',value:'nosniff'},
     {key:'Referrer-Policy',value:'no-referrer'},

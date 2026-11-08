@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { homeContent } from '@/data/content';
+import { homeContent, homeServiceTarget } from '@/data/content';
 import { useState, useRef, useEffect } from 'react';
 
 interface MoreServicesSectionProps {
@@ -17,8 +17,8 @@ export function MoreServicesSection({
   const filteredServices = homeContent.services.items.filter(service => {
     // Исключаем текущую услугу на основе ID
     if (currentProductId) {
-      const serviceId = getServiceId(service.title);
-      return serviceId !== currentProductId;
+      const { ids } = homeServiceTarget(service.title);
+      return !(ids.length === 1 && ids[0] === currentProductId);
     }
 
     return true;
@@ -143,26 +143,6 @@ export function MoreServicesSection({
   const onMouseLeave = () => {
     setIsDragging(false);
   };
-
-  // Функция для получения ID услуги на основе названия
-  function getServiceId(serviceTitle: string): string {
-    if (serviceTitle.includes('Формула Движения')) {
-      return 'formula-movement';
-    }
-    if (serviceTitle.includes('Программа')) {
-      return 'personal-program';
-    }
-    if (serviceTitle.includes('консультаци')) {
-      return 'consultation';
-    }
-    if (serviceTitle.includes('тренировк')) {
-      return 'online-training';
-    }
-    if (serviceTitle.includes('протокол')) {
-      return 'rehabilitation-protocols';
-    }
-    return '';
-  }
 
   // Если нет услуг для отображения, не рендерим секцию
   if (filteredServices.length === 0) {
@@ -322,31 +302,11 @@ interface ServiceCardProps {
 }
 
 function ServiceCard({ title, description, image, delay }: ServiceCardProps) {
-  // Определяем ссылку на основе названия услуги
-  const getServiceLink = (serviceTitle: string) => {
-    if (serviceTitle.includes('Формула Движения')) {
-      return '/products/formula-movement';
-    }
-    if (serviceTitle.includes('Программа')) {
-      return '/products/personal-program';
-    }
-    if (serviceTitle.includes('Экспресс онлайн-консультация')) {
-      return '/products/consultation';
-    }
-    if (serviceTitle.includes('консультаци')) {
-      return '/products/consultation';
-    }
-    if (serviceTitle.includes('тренировк')) {
-      return '/products/online-training';
-    }
-    if (serviceTitle.includes('протокол')) {
-      return '/products/rehabilitation-protocols';
-    }
-    return '/products';
-  };
-
   return (
-    <Link href={getServiceLink(title)} className='block cursor-pointer'>
+    <Link
+      href={homeServiceTarget(title).href}
+      className='block cursor-pointer'
+    >
       <div className='bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 h-full flex flex-col'>
         <div className='relative h-52'>
           <Image src={image} alt={title} fill className='object-cover' />

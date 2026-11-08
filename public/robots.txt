@@ -1,6 +1,16 @@
-# Разрешаем индексацию всех страниц всем поисковым роботам
 User-agent: *
 Allow: /
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard
+Disallow: /api/
 
-# Указываем расположение карты сайта
-Sitemap: https://minenkovrehab.ru/sitemap.xml 
+User-agent: Yandex
+Allow: /
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard
+Disallow: /api/
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term
+
+Sitemap: https://minenkovrehab.ru/sitemap.xml
