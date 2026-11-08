@@ -56,8 +56,9 @@ Frontend (Next.js) сюда не входит: в образе `rehab-frontend:h
    подмены `replace`, `/_rx/*`, `/sitemap.xml` и картинки из `extras/` для основного сайта больше не используются
    (пункты 4–6 выше и `infra/seo/` оставлены как история). Откат: прежний образ `rehab-frontend:hk-dd8354d`
    и `/opt/rehab/.env.bak-20261108-171636`, `/opt/rehab/Caddyfile.bak-20261108-171636`.
-   Сборка фронтенда на сервере: `git -C /opt/rehab-src fetch origin <ветка>`, `git archive` во временную папку,
-   `docker build -f deploy/timeweb/frontend.Dockerfile -t rehab-frontend:src-<sha> .` (около 8 минут), затем смена `FRONTEND_IMAGE` и `docker compose up -d frontend`.
+   **Деплой фронтенда — из master:** `/opt/rehab/scripts/deploy-frontend.sh` (копия в `infra/scripts/deploy-frontend.sh`).
+   Берёт свежий master из GitHub, собирает образ `rehab-frontend:src-<sha>` (около 8 минут), выкатывает, проверяет
+   здоровье и страницы, при ошибке откатывает. Текущий коммит — в `/opt/rehab/FRONTEND_COMMIT`, история — в `/opt/rehab/deploy.log`.
 
 ### (выполнено 08.11.2026 в ветке seo-audit) Что поправить в исходниках сайта на Mac, чтобы убрать замены из Caddy
 
