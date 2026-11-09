@@ -11,7 +11,8 @@ import {
   REHAB_PROGRAMS_PATH,
 } from '../catalog';
 import { pageMetadata, privateMetadata, productOgImage } from '@/lib/seo';
-import { breadcrumbs, catalogItemNode } from '@/lib/schema';
+import { breadcrumbs, catalogItemNode, faqPage, productVideos, videoObject } from '@/lib/schema';
+import { productPageContent } from '@/data/content';
 import { JsonLd } from '@/components/seo/JsonLd';
 
 export const dynamic = 'force-static';
@@ -62,9 +63,17 @@ export default async function Page({
           { name: item.title, path: productPath(item) },
         ];
 
+  // FAQPage — из того же блока «Частые вопросы», что выводится на странице; VideoObject — публичная видеопрезентация.
+  const content = productPageContent[item.id];
+  const video = productVideos[item.id];
+  const extraNodes = [
+    ...(content?.template === 'program' && content.faq.length ? [faqPage(content.faq)] : []),
+    ...(video ? [videoObject(video)] : []),
+  ];
+
   return (
     <>
-      <JsonLd nodes={[catalogItemNode(item), breadcrumbs(trail)]} />
+      <JsonLd nodes={[catalogItemNode(item), breadcrumbs(trail), ...extraNodes]} />
       <ProductPageProxy product={product} productExists />
     </>
   );

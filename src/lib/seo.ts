@@ -109,8 +109,6 @@ export function pageMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      site: '@minenkovrehab',
-      creator: '@minenkovrehab',
       title: ogTitle,
       description,
       images: [image],

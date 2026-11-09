@@ -37,8 +37,8 @@ export const metadata: Metadata = {
   description:
     'Персональные восстановительные программы и онлайн-тренировки от инструктора-методиста ЛФК Вадима Миненкова. Восстановление после травм и операций.',
   applicationName: BRAND,
+  // Один meta author (без дублирующего creator).
   authors: [{ name: 'Вадим Миненков', url: SITE_URL }],
-  creator: 'Вадим Миненков',
   publisher: BRAND,
   manifest: '/manifest.json',
   formatDetection: {
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     google: 'NfKG4Obn62C9l819n4oDFJbwo7YBssE1xKy-rGZWLPM',
   },
   other: {
-    'msapplication-TileColor': '#0063A5',
+    'msapplication-TileColor': '#0D3C63',
     'msapplication-config': '/favicons/browserconfig.xml',
   },
 };

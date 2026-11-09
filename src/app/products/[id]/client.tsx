@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { authPost } from '@/lib/auth-client';
 import { useGuestEmailDialog } from '@/components/shared/GuestEmailDialog';
 import { formatPrice, Product } from '../data';
+import { catalog } from '../catalog';
 import ImageCarousel from '@/components/ui/ImageCarousel';
 import { VideoPlayer } from '@/components/dashboard/videos/VideoPlayer';
 import Image from 'next/image';
@@ -423,6 +424,14 @@ function ContactBox() {
   );
 }
 
+/** «Ещё программы/услуги»: все остальные продукты каталога — сначала того же типа, потом остальные. */
+function moreProductIds(currentId: string): string[] {
+  const current = catalog.find(i => i.id === currentId);
+  const others = catalog.filter(i => i.id !== currentId);
+  const same = others.filter(i => i.kind === current?.kind);
+  return [...same, ...others.filter(i => i.kind !== current?.kind)].map(i => i.id);
+}
+
 function MoreSection({ title, ids }: { title: string; ids: string[] }) {
   const cards = ids
     .map(id => moreCards[id])
@@ -445,7 +454,7 @@ function MoreSection({ title, ids }: { title: string; ids: string[] }) {
         }
       />
       {/* Телефон: горизонтальная карусель со snap; десктоп: сетка из трёх карточек */}
-      <div className='flex dsk:grid dsk:grid-cols-3 gap-4 dsk:gap-6 overflow-x-auto dsk:overflow-visible snap-x snap-mandatory -mx-4 px-4 dsk:mx-0 dsk:px-0 pb-3 dsk:pb-0 ds-hscroll'>
+      <div className={`flex dsk:grid ${cards.length % 3 === 0 ? 'dsk:grid-cols-3' : 'dsk:grid-cols-2'} gap-4 dsk:gap-6 overflow-x-auto dsk:overflow-visible snap-x snap-mandatory -mx-4 px-4 dsk:mx-0 dsk:px-0 pb-3 dsk:pb-0 ds-hscroll`}>
         {cards.map(c => (
           <div key={c.href} className='flex-[0_0_84%] dsk:flex-auto snap-start'>
             <ServiceCard
@@ -1507,8 +1516,8 @@ export default function ProductClient({ product }: { product: Product }) {
 
         {content ? (
           <MoreSection
-            title={isProgram ? 'Ещё программы' : 'Ещё услуги'}
-            ids={content.more}
+            title={isProgram ? 'Ещё программы и услуги' : 'Ещё услуги и программы'}
+            ids={moreProductIds(product.id)}
           />
         ) : null}
         <StickyBuyBar

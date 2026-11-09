@@ -47,6 +47,11 @@ const servicesDropdownItems = [
     description: 'Пошаговые программы после травм и операций',
   },
   {
+    href: '/products/meniscus-resection',
+    label: 'Восстановление после резекции мениска',
+    description: 'Пошаговая программа с видео упражнений',
+  },
+  {
     href: '/products/online-training',
     label: 'Онлайн-тренировки',
     description: 'Персональные тренировки в режиме реального времени',

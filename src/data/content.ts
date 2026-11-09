@@ -505,6 +505,8 @@ export const educationContent = {
   note: 'Здесь появятся дипломы и сертификаты о повышении квалификации.',
   placeholders: ['Диплом', 'Сертификат', 'Сертификат'],
   items: [] as { title: string; org?: string; year?: string; image: string }[],
+  /** Учебные заведения (для разметки Person.alumniOf). TODO(владелец): заполнить. */
+  institutions: [] as { name: string; url?: string }[],
 };
 
 /** Варианты в поле «Что вас интересует» (формы на главной и в /contacts). */

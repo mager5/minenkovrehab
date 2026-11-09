@@ -16,6 +16,10 @@ const services = [
     label: 'Программа тренировок «Формула Движения»',
   },
   { href: '/products/rehab-programs', label: 'Восстановительные программы' },
+  {
+    href: '/products/meniscus-resection',
+    label: 'Восстановление после резекции мениска',
+  },
   { href: '/products/online-training', label: 'Онлайн-тренировки' },
 ];
 
