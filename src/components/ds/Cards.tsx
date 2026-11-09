@@ -74,6 +74,8 @@ export function CutoutCard({
   plaque,
   priority,
   maxWidth,
+  hS,
+  cardHS,
 }: {
   h?: number;
   cardH?: number;
@@ -82,24 +84,29 @@ export function CutoutCard({
   plaque?: ReactNode;
   priority?: boolean;
   maxWidth?: number;
+  /** Телефон ≤768px: своя высота фото и карточки (по умолчанию как hM / cardHM). */
+  hS?: number;
+  cardHS?: number;
 }) {
   const vars = {
     '--h': `${h}px`,
     '--ch': `${cardH}px`,
     '--hm': `${hM}px`,
     '--chm': `${cardHM}px`,
+    '--hs': `${hS ?? hM}px`,
+    '--chs': `${cardHS ?? cardHM}px`,
     maxWidth,
   } as React.CSSProperties;
   const wDesk = Math.round((h * CUTOUT.width) / CUTOUT.height);
   const wMob = Math.round((hM * CUTOUT.width) / CUTOUT.height);
   return (
     <div
-      className='relative mx-auto w-full h-[var(--hm)] dsk:h-[var(--h)]'
+      className='relative mx-auto w-full h-[var(--hm)] dsk:h-[var(--h)] max-[768px]:h-[var(--hs)]'
       style={vars}
     >
       <div
         aria-hidden='true'
-        className='absolute inset-x-0 bottom-0 h-[var(--chm)] dsk:h-[var(--ch)] rounded-[24px] dsk:rounded-[28px]'
+        className='absolute inset-x-0 bottom-0 h-[var(--chm)] dsk:h-[var(--ch)] max-[768px]:h-[var(--chs)] rounded-[24px] dsk:rounded-[28px]'
         style={{
           background: 'var(--g-photo-card)',
           boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.6)',
@@ -141,7 +148,7 @@ export function Plaque({
       <span className='hidden dsk:inline-flex'>
         <IconBox name={icon} tone='sky' size={44} radius={14} iconSize={22} />
       </span>
-      <span className='text-[14px] dsk:text-[16px] leading-[1.3] font-extrabold text-navy'>
+      <span className='text-[14px] dsk:text-[16px] max-[768px]:text-[15px] leading-[1.3] font-extrabold text-navy'>
         {title}
         <br />
         <span className='font-semibold text-muted'>{sub}</span>

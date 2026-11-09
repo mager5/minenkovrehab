@@ -105,10 +105,13 @@ export function Header() {
 
     try {
       authFetchInFlightRef.current = true;
-      const response = await fetch(`${getRailwayApiBaseUrl()}/api/auth/session`, {
-        method: 'GET',
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `${getRailwayApiBaseUrl()}/api/auth/session`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
       if (response.status === 429) {
         return;
       }
@@ -299,7 +302,10 @@ export function Header() {
   useEffect(() => {
     if (!isProfileDropdownOpen) return;
     const onDown = (e: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(e.target as Node)
+      ) {
         setIsProfileDropdownOpen(false);
       }
     };
@@ -502,7 +508,7 @@ export function Header() {
       >
         <div className='ds-wrap'>
           <div
-            className={`flex items-center justify-between gap-4 bg-white rounded-full py-2 pr-2 pl-[18px] min-[1100px]:py-3 min-[1100px]:pr-3 min-[1100px]:pl-7 transition-shadow duration-300 ${
+            className={`mr-hdr-pill flex items-center justify-between gap-4 bg-white rounded-full py-2 pr-2 pl-[18px] min-[1100px]:py-3 min-[1100px]:pr-3 min-[1100px]:pl-7 transition-shadow duration-300 ${
               isScrolled
                 ? 'shadow-[0_12px_32px_rgba(13,60,99,0.14)]'
                 : 'shadow-[0_8px_24px_rgba(13,60,99,0.06)]'
@@ -511,7 +517,7 @@ export function Header() {
             {/* Логотип */}
             <Link
               href='/'
-              className='flex items-center gap-2.5 no-underline font-extrabold text-[16px] min-[1100px]:text-[19px] text-navy hover:text-navy min-h-[44px] shrink-0'
+              className='mr-hdr-logo flex items-center gap-2.5 no-underline font-extrabold text-[16px] min-[1100px]:text-[19px] text-navy hover:text-navy min-h-[44px] shrink-0'
               aria-label='Миненков Вадим - На главную'
             >
               <Image
@@ -633,7 +639,7 @@ export function Header() {
             </button>
 
             {/* Мобильные действия */}
-            <div className='flex items-center gap-2 min-[1100px]:hidden'>
+            <div className='mr-hdr-actions flex items-center gap-2 min-[1100px]:hidden'>
               {showGuestAuth && (
                 <AuthPopover
                   isMobile={true}
@@ -974,15 +980,26 @@ function ProfileMenuItems({
     <div className='p-2'>
       <div className='px-4 py-3'>
         <p className='text-[15px] text-muted m-0'>Вы вошли как</p>
-        <p className='text-[16px] font-bold text-ink truncate m-0' title={email ?? undefined}>
+        <p
+          className='text-[16px] font-bold text-ink truncate m-0'
+          title={email ?? undefined}
+        >
           {email}
         </p>
       </div>
-      <Link href='/dashboard' onClick={onNavigate} className={`${item} text-ink hover:bg-sky hover:text-navy`}>
+      <Link
+        href='/dashboard'
+        onClick={onNavigate}
+        className={`${item} text-ink hover:bg-sky hover:text-navy`}
+      >
         <Icon name='book' size={20} />
         Мои программы
       </Link>
-      <Link href='/forgot-password' onClick={onNavigate} className={`${item} text-ink hover:bg-sky hover:text-navy`}>
+      <Link
+        href='/forgot-password'
+        onClick={onNavigate}
+        className={`${item} text-ink hover:bg-sky hover:text-navy`}
+      >
         <Icon name='key' size={20} />
         Сменить пароль
       </Link>

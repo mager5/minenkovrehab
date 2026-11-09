@@ -98,10 +98,10 @@ export default function HomeClient() {
       {/* ---------- Hero ---------- */}
       <section className='ds-wrap pt-4 dsk:pt-6'>
         <div
-          className='grid grid-cols-1 dsk:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-x-14 rounded-[32px] dsk:rounded-[40px] px-[22px] py-8 dsk:px-16 dsk:pt-14 dsk:pb-16'
+          className='grid grid-cols-1 dsk:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-x-14 rounded-[32px] dsk:rounded-[40px] px-[22px] py-8 dsk:px-16 dsk:pt-14 dsk:pb-16 max-[768px]:flex max-[768px]:flex-col max-[768px]:pt-6 max-[768px]:pb-7'
           style={{ background: 'var(--g-panel)' }}
         >
-          <div className='dsk:col-start-1 dsk:row-start-1'>
+          <div className='dsk:col-start-1 dsk:row-start-1 max-[768px]:order-1'>
             <p className='m-0 mb-4 dsk:mb-5 inline-block px-4 py-2 rounded-full bg-white text-mint-ink font-bold text-[15px] dsk:text-[16px] leading-snug'>
               Инструктор-методист ЛФК, занятия онлайн
             </p>
@@ -113,12 +113,14 @@ export default function HomeClient() {
             </h1>
           </div>
 
-          <div className='mt-5 dsk:mt-0 dsk:col-start-2 dsk:row-start-1 dsk:row-span-2 self-end'>
+          <div className='mt-5 dsk:mt-0 dsk:col-start-2 dsk:row-start-1 dsk:row-span-2 self-end max-[768px]:order-3 max-[768px]:mt-8 max-[768px]:self-stretch'>
             <CutoutCard
               h={620}
               cardH={470}
               hM={400}
               cardHM={300}
+              hS={320}
+              cardHS={236}
               priority
               plaque={
                 <Plaque
@@ -130,8 +132,8 @@ export default function HomeClient() {
             />
           </div>
 
-          <div className='dsk:col-start-1 dsk:row-start-2 dsk:pb-2'>
-            <ul className='list-none m-0 mt-6 dsk:mt-8 p-0 flex flex-col gap-3.5 text-[18px] dsk:text-[20px]'>
+          <div className='dsk:col-start-1 dsk:row-start-2 dsk:pb-2 max-[768px]:contents'>
+            <ul className='list-none m-0 mt-6 dsk:mt-8 p-0 flex flex-col gap-3.5 text-[18px] dsk:text-[20px] max-[768px]:order-4'>
               {heroPoints.map(t => (
                 <li key={t} className='flex gap-3.5 items-start'>
                   <span
@@ -149,7 +151,7 @@ export default function HomeClient() {
                 </li>
               ))}
             </ul>
-            <div className='flex flex-col dsk:flex-row gap-3.5 mt-8 dsk:mt-10'>
+            <div className='flex flex-col dsk:flex-row gap-3.5 mt-8 dsk:mt-10 max-[768px]:order-2 max-[768px]:mt-6 max-[768px]:gap-3'>
               <ButtonLink href='/contacts' size='lg'>
                 Записаться
               </ButtonLink>
@@ -170,7 +172,7 @@ export default function HomeClient() {
             width={1200}
             height={1600}
             sizes='(max-width: 900px) 100vw, 400px'
-            className='ds-photo aspect-[4/5] h-auto'
+            className='ds-photo aspect-[4/5] h-auto max-[768px]:aspect-[4/3] max-[768px]:[object-position:center_30%]'
             style={{ objectPosition: 'center 58%' }}
           />
           <div>
@@ -214,7 +216,7 @@ export default function HomeClient() {
 
       {/* ---------- Услуги и цены ---------- */}
       <section className='ds-wrap ds-sec' aria-labelledby='home-services'>
-        <div className='text-left dsk:text-center max-w-[720px] dsk:mx-auto mb-8 dsk:mb-12'>
+        <div className='text-left dsk:text-center max-w-[720px] dsk:mx-auto mb-8 dsk:mb-12 max-[768px]:mb-6'>
           <h2 className='ds-h2 mb-3.5' id='home-services'>
             Услуги и цены
           </h2>
@@ -222,22 +224,24 @@ export default function HomeClient() {
             Выберите подходящую услугу для вашего восстановления и реабилитации
           </p>
         </div>
-        <h3 className='m-0 mb-5 text-[22px] dsk:text-[24px] font-extrabold text-ink'>
+        <h3 className='m-0 mb-5 text-[22px] dsk:text-[24px] font-extrabold text-ink max-[768px]:mb-3'>
           Онлайн-занятия
         </h3>
-        <div className='grid gap-4 dsk:gap-6 dsk:grid-cols-3'>
+        <div className='grid gap-4 dsk:gap-6 dsk:grid-cols-3 max-[768px]:hidden'>
           {onlineCards.map(c => (
             <ServiceCard key={c.href} {...c} headingLevel={4} />
           ))}
         </div>
-        <h3 className='m-0 mt-12 dsk:mt-14 mb-5 text-[22px] dsk:text-[24px] font-extrabold text-ink'>
+        <ServiceRows items={onlineCards} />
+        <h3 className='m-0 mt-12 dsk:mt-14 mb-5 text-[22px] dsk:text-[24px] font-extrabold text-ink max-[768px]:mt-8 max-[768px]:mb-3'>
           Программы для самостоятельных занятий
         </h3>
-        <div className='grid gap-4 dsk:gap-6 dsk:grid-cols-3'>
+        <div className='grid gap-4 dsk:gap-6 dsk:grid-cols-3 max-[768px]:hidden'>
           {programCards.map(c => (
             <ServiceCard key={c.href} {...c} headingLevel={4} />
           ))}
         </div>
+        <ServiceRows items={programCards} />
       </section>
 
       {/* ---------- Когда обращаться ---------- */}
@@ -271,7 +275,7 @@ export default function HomeClient() {
             width={1200}
             height={1600}
             sizes='(max-width: 900px) 100vw, 480px'
-            className='ds-photo aspect-[3/4] h-auto'
+            className='ds-photo aspect-[3/4] h-auto max-[768px]:aspect-square max-[768px]:[object-position:center_30%]'
             style={{ objectPosition: 'center 40%' }}
           />
         </div>
@@ -349,5 +353,58 @@ export default function HomeClient() {
         </div>
       </section>
     </div>
+  );
+}
+
+/**
+ * Телефон (≤768px): компактный список услуг вместо больших карточек — название, цена и срок, стрелка;
+ * вся строка — ссылка. На десктопе не показывается (там карточки).
+ */
+function ServiceRows({
+  items,
+}: {
+  items: {
+    title: string;
+    price: string;
+    unit: string;
+    href: string;
+    featured?: boolean;
+  }[];
+}) {
+  return (
+    <ul className='hidden max-[768px]:flex flex-col gap-2.5 list-none m-0 p-0'>
+      {items.map(c => (
+        <li key={c.href}>
+          <Link
+            href={c.href}
+            className={`flex items-center gap-3 min-h-[72px] py-3.5 pl-[18px] pr-3.5 rounded-[20px] no-underline text-ink shadow-ds ${
+              c.featured ? 'ring-2 ring-[#9FD7BE]' : 'bg-white'
+            }`}
+            style={c.featured ? { background: 'var(--g-featured)' } : undefined}
+          >
+            <span className='flex-1 min-w-0'>
+              <span className='block text-[17px] font-extrabold leading-[1.3] text-navy'>
+                {c.title}
+              </span>
+              <span className='block mt-0.5 text-[16px] text-muted'>
+                <strong className='font-extrabold text-ink'>{c.price}</strong>{' '}
+                {c.unit}
+              </span>
+            </span>
+            <span
+              aria-hidden='true'
+              className='flex-none w-10 h-10 rounded-full bg-sky flex items-center justify-center'
+            >
+              <Icon
+                name='chev-right'
+                size={20}
+                strokeWidth={2.6}
+                color='var(--c-blue)'
+              />
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }

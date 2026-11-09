@@ -15,7 +15,10 @@ export function AccountAside({ email }: { email: string | null }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   return (
-    <aside className='ds-card p-[22px] dsk:p-7 flex flex-col gap-4' aria-label='Аккаунт'>
+    <aside
+      className='ds-card p-[22px] dsk:p-7 flex flex-col gap-4'
+      aria-label='Аккаунт'
+    >
       <div className='flex gap-3.5 items-center'>
         <span
           aria-hidden='true'
@@ -49,7 +52,7 @@ export function AccountAside({ email }: { email: string | null }) {
         <Icon name='logout' size={20} />
         {busy ? 'Выходим…' : 'Выйти'}
       </button>
-      <div className='p-4 rounded-2xl bg-canvas text-[15px] text-muted leading-normal [&_a]:text-brand'>
+      <div className='p-4 rounded-2xl bg-canvas text-[15px] text-muted leading-normal [&_a]:text-brand max-[768px]:[&_a]:inline-flex max-[768px]:[&_a]:min-h-[44px] max-[768px]:[&_a]:items-center'>
         Вопросы по доступу:{' '}
         <a href={`mailto:${CONTACTS.email}`}>{CONTACTS.email}</a>,{' '}
         <a href={CONTACTS.telegram} target='_blank' rel='noopener noreferrer'>
@@ -92,7 +95,9 @@ export function ProgramCard({
           <p className='m-0 text-[16px] text-muted'>{course.meta}</p>
         ) : null}
         <span className='inline-flex items-center gap-1.5 mt-1.5 font-extrabold text-brand group-hover:text-navy'>
-          {continueStage ? `Продолжить: этап ${continueStage}` : 'Открыть программу'}
+          {continueStage
+            ? `Продолжить: этап ${continueStage}`
+            : 'Открыть программу'}
           <Icon name='chev-right' size={20} strokeWidth={2.6} />
         </span>
       </div>

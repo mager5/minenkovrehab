@@ -18,6 +18,11 @@
     '.rx-top:focus{outline:none}' +
     '.rx-top:focus-visible{outline:3px solid #16639E;outline-offset:3px}' +
     '@media (min-width:768px){.rx-top{right:32px;bottom:32px;width:52px;height:52px}.rx-top svg{width:24px;height:24px}}' +
+    /* Телефон: 44px, над нижней плашкой покупки (--buybar-h ставит страница услуги) */
+    '@media (max-width:768px){.rx-top{width:44px;height:44px;right:calc(12px + env(safe-area-inset-right,0px));' +
+    'bottom:calc(16px + var(--buybar-h,0px) + env(safe-area-inset-bottom,0px));transition:opacity .25s ease,transform .25s ease,visibility .25s,bottom .3s ease}' +
+    '.rx-top svg{width:20px;height:20px}' +
+    'html[data-buy-in-view] .rx-top{opacity:0;visibility:hidden;pointer-events:none}}' +
     '@media (prefers-reduced-motion:reduce){.rx-top{transition:opacity .01s,visibility .01s}}' +
     '@media print{.rx-top{display:none!important}}';
 
@@ -77,7 +82,14 @@
     var ticking = false;
     function update() {
       ticking = false;
-      var on = topOf(findScroller()) > Math.max(400, window.innerHeight * 0.6);
+      var phone =
+        window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+      // На телефоне кнопка появляется после двух экранов прокрутки
+      var on =
+        topOf(findScroller()) >
+        (phone
+          ? window.innerHeight * 2
+          : Math.max(400, window.innerHeight * 0.6));
       if (on !== btn.classList.contains('rx-top--on')) {
         btn.classList.toggle('rx-top--on', on);
         btn.tabIndex = on ? 0 : -1;

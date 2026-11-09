@@ -285,8 +285,8 @@ body {
     max-width: var(--container);
     margin-left: auto;
     margin-right: auto;
-    padding-left: var(--gutter);
-    padding-right: var(--gutter);
+    padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
     box-sizing: border-box;
   }
   .ds-sec {
@@ -702,5 +702,36 @@ body {
 @media (max-width: 900px) {
   .ds-legal {
     font-size: 16px;
+  }
+}
+
+/* Телефон: поле в фокусе при прокрутке к нему не прячется под липкую шапку */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select,
+  [role='listbox'] {
+    scroll-margin-top: 96px;
+    scroll-margin-bottom: 24px;
+  }
+}
+
+/* Телефон: шапка-«таблетка» помещается целиком (на 375px кнопка меню раньше обрезалась) */
+@media (max-width: 768px) {
+  .mr-hdr-pill {
+    gap: 8px;
+    padding-left: 14px;
+    padding-right: 6px;
+  }
+  .mr-hdr-logo {
+    gap: 8px;
+    font-size: 15px;
+  }
+  .mr-hdr-actions {
+    gap: 6px;
+  }
+  .mr-hdr-actions .w-12.h-12 {
+    width: 44px;
+    height: 44px;
   }
 }

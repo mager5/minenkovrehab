@@ -1,6 +1,7 @@
 // Шрифт Manrope (400–800) раздаётся с нашего сервера через next/font (без запроса к Google Fonts
 // при сборке и в браузере): вариативный woff2 с латиницей и кириллицей лежит в src/fonts.
 import localFont from 'next/font/local';
+import KeyboardSafe from '@/components/shared/KeyboardSafe';
 import './globals.css';
 import { Header } from '@/components/shared/Header';
 import Footer from '@/components/shared/Footer';
@@ -22,6 +23,9 @@ const manrope = localFont({
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  // Телефон: env(safe-area-inset-*) для нижней плашки покупки; клавиатура уменьшает область страницы (Android).
+  viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
   themeColor: '#0D3C63',
 };
 
@@ -114,6 +118,7 @@ export default function RootLayout({
           </main>
           <Footer />
           <CookieBanner />
+          <KeyboardSafe />
         </div>
         {/* Кнопка «Наверх» и Яндекс.Метрика (только после согласия на cookie) */}
         <Script src='/js/scroll-top.js' strategy='afterInteractive' />

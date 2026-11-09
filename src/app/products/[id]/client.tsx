@@ -7,7 +7,7 @@ import { formatPrice, Product } from '../data';
 import ImageCarousel from '@/components/ui/ImageCarousel';
 import { VideoPlayer } from '@/components/dashboard/videos/VideoPlayer';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import {
   PageHead,
@@ -236,10 +236,19 @@ function focusCheckbox(id: string) {
   el.focus({ preventScroll: true });
 }
 
-function MobilePriceBar({ priceLabel, onBuy }: { priceLabel: string; onBuy: () => void }) {
+function MobilePriceBar({
+  priceLabel,
+  onBuy,
+}: {
+  priceLabel: string;
+  onBuy: () => void;
+}) {
   const { price, unit } = splitPrice(priceLabel);
   return (
-    <section className='ds-wrap dsk:hidden pt-4' aria-label='Стоимость'>
+    <section
+      className='ds-wrap dsk:hidden max-[768px]:hidden pt-4'
+      aria-label='Стоимость'
+    >
       <div className='ds-card flex items-center justify-between gap-3 py-4 px-[18px]'>
         <span className='leading-[1.3]'>
           <strong className='block text-[24px] font-extrabold text-navy'>
@@ -256,6 +265,135 @@ function MobilePriceBar({ priceLabel, onBuy }: { priceLabel: string; onBuy: () =
         </button>
       </div>
     </section>
+  );
+}
+
+/** true, если ширина экрана ≤ 768px (мобильная раскладка). На сервере и до гидрации — false. */
+function useIsPhone() {
+  const [phone, setPhone] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const on = () => setPhone(mq.matches);
+    on();
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return phone;
+}
+
+/**
+ * Телефон (≤768px): закреплённая снизу плашка «цена + Купить». Появляется, когда шапка страницы
+ * ушла из вида, и прячется, пока на экране карточка покупки. Учитывает safe-area снизу.
+ * Высота плашки пишется в --buybar-h, чтобы кнопка «Наверх» вставала над ней.
+ */
+function StickyBuyBar({
+  priceLabel,
+  headId,
+  buyId,
+  onBuy,
+}: {
+  priceLabel: string;
+  headId: string;
+  buyId: string;
+  onBuy: () => void;
+}) {
+  const { price, unit } = splitPrice(priceLabel);
+  const [headVisible, setHeadVisible] = useState(true);
+  const [buyVisible, setBuyVisible] = useState(false);
+  const barRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const head = document.getElementById(headId);
+    const buy = document.getElementById(buyId);
+    if (!head || !buy || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(entries => {
+      for (const e of entries) {
+        if (e.target === head) setHeadVisible(e.isIntersecting);
+        if (e.target === buy) setBuyVisible(e.isIntersecting);
+      }
+    });
+    io.observe(head);
+    io.observe(buy);
+    return () => io.disconnect();
+  }, [headId, buyId]);
+  const shown = !headVisible && !buyVisible;
+  // Пока на экране карточка покупки, кнопка «Наверх» на телефоне прячется, чтобы не закрывать её кнопки.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (buyVisible) root.setAttribute('data-buy-in-view', '');
+    else root.removeAttribute('data-buy-in-view');
+    return () => root.removeAttribute('data-buy-in-view');
+  }, [buyVisible]);
+  useEffect(() => {
+    const root = document.documentElement;
+    const isPhone = window.matchMedia('(max-width: 768px)').matches;
+    const h = shown && isPhone ? (barRef.current?.offsetHeight ?? 0) : 0;
+    root.style.setProperty('--buybar-h', `${h}px`);
+    return () => {
+      root.style.removeProperty('--buybar-h');
+    };
+  }, [shown]);
+  return (
+    <>
+      <div
+        ref={barRef}
+        className={`hidden max-[768px]:block fixed inset-x-0 bottom-0 z-40 transition-transform duration-300 ${
+          shown ? 'translate-y-0' : 'translate-y-[110%] pointer-events-none'
+        }`}
+        style={{
+          paddingBottom: 'calc(10px + env(safe-area-inset-bottom, 0px))',
+        }}
+        aria-hidden={!shown}
+      >
+        <div className='mx-3 flex items-center justify-between gap-3 rounded-[22px] bg-white py-2.5 pl-[18px] pr-2.5 shadow-[0_-4px_24px_rgba(13,60,99,0.16),0_12px_32px_rgba(13,60,99,0.14)]'>
+          <span className='leading-[1.25] min-w-0'>
+            <strong className='block text-[21px] font-extrabold text-navy'>
+              {price}
+            </strong>
+            {unit ? (
+              <span className='block text-[15px] text-muted truncate'>
+                {unit}
+              </span>
+            ) : null}
+          </span>
+          <button
+            type='button'
+            onClick={onBuy}
+            tabIndex={shown ? 0 : -1}
+            className='ds-btn ds-btn-primary min-h-[52px] px-7 text-[17px] font-extrabold flex-none'
+          >
+            Купить
+          </button>
+        </div>
+      </div>
+      {/* Запас снизу страницы, чтобы плашка не закрывала подвал */}
+      <div aria-hidden='true' className='hidden max-[768px]:block h-[88px]' />
+    </>
+  );
+}
+
+/** Телефон: обложка видео-презентации с кнопкой «Смотреть»; плеер грузится только по нажатию. */
+function VideoCover({ onPlay }: { onPlay: () => void }) {
+  return (
+    <div className='relative w-full aspect-video bg-navy'>
+      <Image
+        src='/images/products/personal-program-poster.jpg'
+        alt=''
+        fill
+        sizes='100vw'
+        className='object-cover opacity-80'
+      />
+      <button
+        type='button'
+        onClick={onPlay}
+        className='absolute inset-0 flex items-center justify-center bg-transparent border-0 cursor-pointer'
+        aria-label='Смотреть презентацию программы'
+      >
+        <span className='inline-flex items-center gap-2.5 min-h-[52px] px-6 rounded-full bg-white text-navy font-extrabold text-[17px] shadow-[0_12px_30px_rgba(0,0,0,0.25)]'>
+          <Icon name='play' size={22} color='var(--c-blue)' />
+          Смотреть
+        </span>
+      </button>
+    </div>
   );
 }
 
@@ -489,6 +627,9 @@ export default function ProductClient({ product }: { product: Product }) {
   const [isOfferCheckedLevel4, setIsOfferCheckedLevel4] = useState(false);
   const [showConsentErrorLevel4, setShowConsentErrorLevel4] = useState(false);
   const [showOfferErrorLevel4, setShowOfferErrorLevel4] = useState(false);
+  // Телефон: видео-презентация открывается по нажатию «Смотреть» (без загрузки плеера при открытии страницы).
+  const isPhone = useIsPhone();
+  const [videoOpened, setVideoOpened] = useState(false);
   const [presentationVideoUrl, setPresentationVideoUrl] = useState<
     string | null
   >(null);
@@ -870,7 +1011,6 @@ export default function ProductClient({ product }: { product: Product }) {
     }
   };
 
-
   /* ---------- Данные для оформления ---------- */
   const catalogItem = getCatalogItemById(product.id);
   const content = productPageContent[product.id];
@@ -943,7 +1083,9 @@ export default function ProductClient({ product }: { product: Product }) {
       <div>
         <h2 className='sr-only'>Презентация программы</h2>
         <div className='rounded-[24px] dsk:rounded-[28px] overflow-hidden shadow-[0_24px_48px_rgba(13,60,99,.18)] bg-navy'>
-          {isPresentationVideoLoading ? (
+          {isPhone && !videoOpened ? (
+            <VideoCover onPlay={() => setVideoOpened(true)} />
+          ) : isPresentationVideoLoading ? (
             <div
               className='relative w-full aspect-video'
               style={{
@@ -1059,20 +1201,24 @@ export default function ProductClient({ product }: { product: Product }) {
     <>
       {guestEmailDialog.dialog}
       <div className='ds'>
-        <PageHead
-          crumbs={crumbs}
-          title={product.title}
-          lead={lead}
-          right={headRight}
-          extra={headExtra}
-        />
+        <div id='product-head'>
+          <PageHead
+            crumbs={crumbs}
+            title={product.title}
+            lead={lead}
+            right={headRight}
+            extra={headExtra}
+          />
+        </div>
         <MobilePriceBar
           priceLabel={mainPriceLabel}
           onBuy={() => {
             // Без согласий — ошибки и прокрутка к карточке покупки; с согласиями — оплата (1-й уровень у «Формулы»).
             if (!isConsentChecked || !isOfferChecked) {
               checkConsent();
-              focusCheckbox(!isConsentChecked ? 'consent-checkbox' : 'offer-checkbox');
+              focusCheckbox(
+                !isConsentChecked ? 'consent-checkbox' : 'offer-checkbox'
+              );
               return;
             }
             void handlePaymentLevel1();
@@ -1365,6 +1511,24 @@ export default function ProductClient({ product }: { product: Product }) {
             ids={content.more}
           />
         ) : null}
+        <StickyBuyBar
+          priceLabel={mainPriceLabel}
+          headId='product-head'
+          buyId='buy'
+          onBuy={() => {
+            // Плашка ведёт к карточке покупки; без согласий — подсветка ошибок на галочках.
+            if (!isConsentChecked || !isOfferChecked) {
+              checkConsent();
+              focusCheckbox(
+                !isConsentChecked ? 'consent-checkbox' : 'offer-checkbox'
+              );
+              return;
+            }
+            document
+              .getElementById('buy')
+              ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+        />
       </div>
     </>
   );
