@@ -59,6 +59,8 @@ done
 
 echo "$SHA $BRANCH $(date -Is)" > "$APP/FRONTEND_COMMIT"
 echo "$(date -Is) frontend: $TAG выкачен (был $OLD)" | tee -a "$LOG"
+# Старые сборки: оставляем 3 последние + старый дизайн (src-d3a351b) для отката.
+"$APP/scripts/prune-images.sh" rehab-frontend 3 src-d3a351b || true
 
 # IndexNow: сообщить Яндексу обо всех URL из sitemap. Сбой отправки деплой не ломает.
 if [ "${SKIP_INDEXNOW:-0}" = 1 ]; then

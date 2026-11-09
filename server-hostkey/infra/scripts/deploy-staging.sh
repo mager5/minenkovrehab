@@ -63,3 +63,4 @@ echo "$hdr" | grep -q '^HTTP/[0-9.]* 200' || rollback "через Caddy отве
 echo "$hdr" | grep -qi '^x-robots-tag: noindex' || echo "$(date -Is) staging: ВНИМАНИЕ — нет X-Robots-Tag noindex" | tee -a "$LOG"
 
 echo "$(date -Is) staging: $TAG выкачен (был ${OLD:-ничего})" | tee -a "$LOG"
+/opt/rehab/scripts/prune-images.sh rehab-frontend-staging 2 || true
