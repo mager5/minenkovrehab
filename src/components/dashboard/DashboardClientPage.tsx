@@ -1,15 +1,19 @@
 'use client';
 
 // Главная личного кабинета: «Мои программы» (только программы с материалами в кабинете),
-// «Мои покупки» с понятным статусом по типу покупки, карточка аккаунта.
+// «Мои покупки» со статусом по источнику записи (оплата / доступ выдан) и подсказкой по типу,
+// «Вам может подойти» — продукты каталога, которых у человека ещё нет; карточка аккаунта.
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { PageHead } from '@/components/ds/Layout';
 import { Icon } from '@/components/ds/Icon';
+import { ServiceCard } from '@/components/ds/Cards';
 import { COURSES, type Course } from '@/data/courses';
 import {
   COURSE_BY_PRODUCT,
+  RECOMMEND_ORDER,
   accountContent,
+  moreCards,
   purchaseKind,
 } from '@/data/content';
 import { CONTACTS } from '@/lib/seo';
@@ -58,6 +62,9 @@ export function purchaseTitle(purchase: Purchase): string {
 function PurchaseRow({ purchase }: { purchase: Purchase }) {
   const kind = purchaseKind(purchase.slug);
   const status = accountContent.purchaseStatus[kind];
+  const badge = purchase.paid_via
+    ? accountContent.sourceBadge[purchase.paid_via]
+    : status.badge;
   const course = COURSE_BY_PRODUCT[purchase.slug];
   const title = purchaseTitle(purchase);
   return (
@@ -65,7 +72,9 @@ function PurchaseRow({ purchase }: { purchase: Purchase }) {
       <div className='flex-1 min-w-0'>
         <span className='block text-[17px] font-bold text-ink'>{title}</span>
         {status.note ? (
-          <span className='block text-[15px] text-muted mt-0.5'>{status.note}</span>
+          <span className='block text-[15px] text-muted mt-0.5'>
+            {status.note}
+          </span>
         ) : null}
       </div>
       <div className='flex flex-wrap items-center gap-x-4 gap-y-1'>
@@ -74,7 +83,7 @@ function PurchaseRow({ purchase }: { purchase: Purchase }) {
             kind === 'program' ? 'bg-mint text-mint-ink' : 'bg-sky text-navy'
           }`}
         >
-          {status.badge}
+          {badge}
         </span>
         {kind === 'program' && course ? (
           <Link
@@ -96,6 +105,48 @@ function PurchaseRow({ purchase }: { purchase: Purchase }) {
         )}
       </div>
     </li>
+  );
+}
+
+/** До трёх продуктов каталога, которых у человека ещё нет: сначала программы, потом услуги. */
+export function recommendations(purchases: Purchase[]) {
+  const owned = new Set(purchases.map(p => p.slug));
+  return RECOMMEND_ORDER.filter(id => !owned.has(id) && moreCards[id])
+    .slice(0, 3)
+    .map(id => moreCards[id]!);
+}
+
+function Recommendations({ purchases }: { purchases: Purchase[] }) {
+  const cards = useMemo(() => recommendations(purchases), [purchases]);
+  if (!cards.length) return null;
+  return (
+    <section aria-labelledby='recommend-title'>
+      <h2 id='recommend-title' className='ds-h2 ds-h2-sm mb-5'>
+        {accountContent.recommendTitle}
+      </h2>
+      {/* Телефон: горизонтальная карусель со snap; десктоп: сетка */}
+      <div
+        className={`flex dsk:grid gap-4 dsk:gap-5 overflow-x-auto dsk:overflow-visible snap-x snap-mandatory -mx-4 px-4 dsk:mx-0 dsk:px-0 pb-3 dsk:pb-0 ds-hscroll ${
+          cards.length > 2 ? 'dsk:grid-cols-3' : 'dsk:grid-cols-2'
+        }`}
+      >
+        {cards.map(c => (
+          <div
+            key={c.href}
+            className='flex-[0_0_84%] dsk:flex-auto snap-start min-w-0'
+          >
+            <ServiceCard
+              title={c.title}
+              text={c.text}
+              price={c.price}
+              unit={c.unit}
+              href={c.href}
+              compact
+            />
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -146,6 +197,7 @@ export default function DashboardClientPage() {
                 </div>
               </>
             )}
+            {loading ? null : <Recommendations purchases={purchases} />}
           </div>
           <AccountAside email={user?.email ?? null} />
         </div>

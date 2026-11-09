@@ -1058,7 +1058,8 @@ export type PurchaseKind = 'program' | 'pending' | 'service';
 export const accountContent = {
   loginNote:
     'Аккаунт создаётся автоматически при первой оплате — используйте email, указанный при покупке.',
-  dashboardLead: 'Здравствуйте! Здесь программы, к которым у вас открыт доступ.',
+  dashboardLead:
+    'Здравствуйте! Здесь программы, к которым у вас открыт доступ.',
   coursesLead: 'Выберите программу, чтобы открыть описание и материалы.',
   emptyTitle: 'У вас пока нет программ',
   emptyText:
@@ -1078,16 +1079,41 @@ export const accountContent = {
       note: 'Вадим свяжется с вами, чтобы согласовать время',
       action: 'Написать в Telegram',
     },
-  } satisfies Record<PurchaseKind, { badge: string; note: string; action: string }>,
+  } satisfies Record<
+    PurchaseKind,
+    { badge: string; note: string; action: string }
+  >,
+  /** Статус покупки по источнику записи: оплата через Robokassa или ручная выдача доступа. */
+  sourceBadge: {
+    robokassa: 'Оплачено',
+    manual: 'Доступ выдан',
+  } satisfies Record<PurchaseSource, string>,
+  recommendTitle: 'Вам может подойти',
 };
 
+/** Источник записи о покупке (поле paid_via в ответе /api/auth/purchases). */
+export type PurchaseSource = 'robokassa' | 'manual';
+
 /** Покупки-услуги (по slug продукта в базе). */
-const SERVICE_SLUGS = ['consultation', 'express-consultation', 'online-training'];
+const SERVICE_SLUGS = [
+  'consultation',
+  'express-consultation',
+  'online-training',
+];
 
 /** slug продукта в базе → slug программы в кабинете (если у программы есть страница с материалами). */
 export const COURSE_BY_PRODUCT: Record<string, string> = {
   'personal-program': 'meniscus-resection-rehab',
 };
+
+/**
+ * «Вам может подойти» в кабинете: сначала программы с материалами в кабинете, потом услуги.
+ * Программы без материалов в кабинете (Формула, Поясница, Шея, Пяточная шпора) сюда не входят.
+ */
+export const RECOMMEND_ORDER: string[] = [
+  ...Object.keys(COURSE_BY_PRODUCT),
+  ...SERVICE_SLUGS,
+];
 
 /** Тип покупки по slug продукта. Всё, что не услуга и не программа с материалами, — «Оплачено, материалы скоро». */
 export function purchaseKind(productSlug: string): PurchaseKind {

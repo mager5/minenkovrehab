@@ -5,12 +5,18 @@ import { useRouter } from 'next/navigation';
 import { getRailwayApiBaseUrl } from '@/lib/api-base';
 import { authPost } from '@/lib/auth-client';
 
-export type AccountUser = { id: string; email: string | null; full_name: string | null };
+export type AccountUser = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+};
 export type Purchase = {
   id: string;
   product_id: string;
   status: string;
   slug: string;
+  /** Источник записи: 'robokassa' — оплата, 'manual' — доступ выдан вручную. */
+  paid_via?: 'robokassa' | 'manual';
   products?: { title?: string; description?: string | null } | null;
 };
 
@@ -30,19 +36,26 @@ export function useAccount({ withPurchases = true } = {}) {
         });
         const mePayload = await me.json().catch(() => null);
         if (!me.ok || !mePayload?.success || !mePayload?.data?.user?.id) {
-          router.push(`/login?next=${encodeURIComponent(window.location.pathname)}`);
+          router.push(
+            `/login?next=${encodeURIComponent(window.location.pathname)}`
+          );
           return;
         }
         if (cancelled) return;
         setUser(mePayload.data.user);
         if (withPurchases) {
-          const res = await fetch(`${getRailwayApiBaseUrl()}/api/auth/purchases`, {
-            method: 'GET',
-            credentials: 'include',
-          });
+          const res = await fetch(
+            `${getRailwayApiBaseUrl()}/api/auth/purchases`,
+            {
+              method: 'GET',
+              credentials: 'include',
+            }
+          );
           const payload = await res.json().catch(() => null);
           if (!cancelled)
-            setPurchases(res.ok && payload?.success ? payload?.data?.purchases || [] : []);
+            setPurchases(
+              res.ok && payload?.success ? payload?.data?.purchases || [] : []
+            );
         }
       } catch {
         // Запрос прерван или сеть недоступна — показываем то, что успели загрузить, без ошибки в консоли.

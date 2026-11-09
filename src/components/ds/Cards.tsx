@@ -14,6 +14,7 @@ export function ServiceCard({
   featured,
   tag,
   headingLevel = 3,
+  compact,
 }: {
   title: string;
   text: string;
@@ -23,11 +24,13 @@ export function ServiceCard({
   featured?: boolean;
   tag?: string;
   headingLevel?: 2 | 3 | 4;
+  /** Плотнее: для узких колонок (кабинет). */
+  compact?: boolean;
 }) {
   const H = `h${headingLevel}` as 'h3';
   return (
     <article
-      className='ds-card p-6 dsk:p-8 flex flex-col gap-3.5 h-full'
+      className={`ds-card p-6 flex flex-col gap-3.5 h-full ${compact ? 'dsk:p-6' : 'dsk:p-8'}`}
       style={featured ? { background: 'var(--g-featured)' } : undefined}
     >
       {tag ? (
@@ -35,10 +38,18 @@ export function ServiceCard({
           <Badge tone='mint'>{tag}</Badge>
         </div>
       ) : null}
-      <H className='ds-h3'>{title}</H>
-      <p className='m-0 text-[17px] text-muted flex-1'>{text}</p>
+      <H className={`ds-h3${compact ? ' !text-[20px] !leading-[1.3]' : ''}`}>
+        {title}
+      </H>
+      <p
+        className={`m-0 text-muted flex-1 ${compact ? 'text-[16px]' : 'text-[17px]'}`}
+      >
+        {text}
+      </p>
       <p className='m-0 flex items-baseline gap-2 flex-wrap'>
-        <span className='text-[28px] font-extrabold text-ink leading-tight'>
+        <span
+          className={`font-extrabold text-ink leading-tight ${compact ? 'text-[24px]' : 'text-[28px]'}`}
+        >
           {price}
         </span>
         {unit ? <span className='text-[16px] text-muted'>{unit}</span> : null}
