@@ -1,16 +1,29 @@
 #!/bin/bash
-# Устанавливает systemd-таймер ночного бэкапа (03:30 МСК). Запуск: sudo bash scripts/install-backup-timer.sh
+# Устанавливает systemd-таймер ночного бэкапа (03:30 МСК) и письмо о сбое.
+# Запуск: sudo bash scripts/install-backup-timer.sh
+# rehab-backup.service: User=ubuntu, scripts/backup-db.sh; при ошибке (в т.ч. слишком маленькая копия)
+# systemd запускает rehab-backup-alert.service (root: читает env/mail.env) — письмо на MIGRATION_ADMIN_NOTIFY_EMAIL.
 set -euo pipefail
 cat > /etc/systemd/system/rehab-backup.service <<'EOF'
 [Unit]
 Description=Minenkov Rehab: nightly database backup
 After=docker.service
+OnFailure=rehab-backup-alert.service
 
 [Service]
 Type=oneshot
 User=ubuntu
 WorkingDirectory=/opt/rehab
 ExecStart=/bin/bash /opt/rehab/scripts/backup-db.sh
+EOF
+cat > /etc/systemd/system/rehab-backup-alert.service <<'EOF'
+[Unit]
+Description=Minenkov Rehab: email about failed database backup
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/rehab
+ExecStart=/bin/bash /opt/rehab/scripts/backup-alert.sh
 EOF
 cat > /etc/systemd/system/rehab-backup.timer <<'EOF'
 [Unit]
