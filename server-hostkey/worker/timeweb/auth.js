@@ -115,7 +115,9 @@ function createAuth(pool, config) {
   }));
   router.get('/purchases', safe(async(req,res)=>{
     const user=await sessionUser(pool,req); if(!user) return res.sendStatus(401);
+    // paid_via: 'robokassa' — запись создана оплатой (есть заказ или номер счёта Robokassa), иначе 'manual' — доступ выдан вручную.
     const {rows}=await pool.query(`SELECT b.id,b.product_id,b.status,p.slug,
+      CASE WHEN b.order_id IS NOT NULL OR b.robokassa_invoice_id ~ '^[0-9]+$' THEN 'robokassa' ELSE 'manual' END AS paid_via,
       jsonb_build_object('title',p.title,'description',p.description) products
       FROM rehab.purchases b JOIN rehab.products p ON p.id=b.product_id
       WHERE b.user_id=$1 AND b.status='active' AND (b.mode=$2 OR (b.mode IS NULL AND b.source='legacy migration')) AND (b.expires_at IS NULL OR b.expires_at>now())`,[user.id,config.mode]);
