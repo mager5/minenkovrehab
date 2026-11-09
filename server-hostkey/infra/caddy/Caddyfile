@@ -91,10 +91,8 @@ https://new.minenkovrehab.ru {
 		respond @metrika "/* Метрика на тестовой копии отключена */" 200
 		@indexnow path /bcc8f8593ece76dda52e5a727c39f4b8.txt
 		respond @indexnow 404
-		# Оплата отключена: заказы в бэкенд и Robokassa не уходят.
-		@payment path /api/checkout /api/checkout/* /api/robokassa/*
-		header @payment Content-Type "application/json; charset=utf-8"
-		respond @payment `{"success":false,"error":"На тестовой версии оплата отключена"}` 403
+		# Оплата включена (боевая Robokassa, общий бэкенд). Отключить снова — вернуть блок @payment с ответом 403
+		# и собрать копию с PAYMENTS_DISABLED=1 (см. README, раздел 8).
 		# Бэкенд принимает Origin только боевого сайта (CSRF). Запросы с самой тестовой копии
 		# передаём с боевым Origin; чужие Origin не трогаем — бэкенд их отклонит.
 		@self header Origin https://new.minenkovrehab.ru

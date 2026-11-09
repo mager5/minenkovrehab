@@ -2,7 +2,8 @@
 # Обновление тестовой копии new.minenkovrehab.ru из ветки redesign (или другой) одной командой:
 #   /opt/rehab/scripts/deploy-staging.sh            # redesign
 #   /opt/rehab/scripts/deploy-staging.sh <ветка>
-# Собирает образ rehab-frontend-staging:src-<sha> с NEXT_PUBLIC_PAYMENTS_DISABLED=1 (оплата отключена),
+#   PAYMENTS_DISABLED=1 /opt/rehab/scripts/deploy-staging.sh   # собрать с отключённой оплатой
+# Собирает образ rehab-frontend-staging:src-<sha> (оплата включена; с PAYMENTS_DISABLED=1 — тег -nopay, оплата отключена),
 # перезапускает только контейнер rehab-staging (боевой frontend не трогает), проверяет здоровье и ответы,
 # при сбое возвращает прежний образ. IndexNow не отправляет.
 set -euo pipefail
@@ -15,13 +16,15 @@ DC="sudo docker compose --project-directory $STG -f $STG/compose.yaml"
 cd "$SRC"
 git fetch -q origin "$BRANCH"
 SHA=$(git rev-parse --short=7 FETCH_HEAD)
+PAYMENTS_DISABLED=${PAYMENTS_DISABLED:-0}
 TAG=rehab-frontend-staging:src-$SHA
+[ "$PAYMENTS_DISABLED" = 1 ] && TAG=$TAG-nopay
 echo "$(date -Is) staging: $BRANCH $SHA — старт" | tee -a "$LOG"
 
 if ! sudo docker image inspect "$TAG" >/dev/null 2>&1; then
   BUILD=$(mktemp -d)
   git archive FETCH_HEAD | tar -x -C "$BUILD"
-  sudo docker build --build-arg NEXT_PUBLIC_PAYMENTS_DISABLED=1 \
+  sudo docker build --build-arg NEXT_PUBLIC_PAYMENTS_DISABLED="$PAYMENTS_DISABLED" \
     --label org.opencontainers.image.revision="$(git rev-parse FETCH_HEAD)" \
     --label org.opencontainers.image.ref.name="$BRANCH" \
     -f "$BUILD/deploy/timeweb/frontend.Dockerfile" -t "$TAG" "$BUILD"
