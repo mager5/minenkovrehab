@@ -5,9 +5,26 @@ export const SITE_URL = 'https://minenkovrehab.ru';
 export const BRAND = 'Вадим Миненков — специалист по физической реабилитации';
 /** Короткое имя бренда в конце <title>. */
 export const TITLE_SUFFIX = 'Вадим Миненков';
-export const DEFAULT_OG_IMAGE = '/images/og-image.jpg';
-export const SERVICES_OG_IMAGE = '/images/og/services-og.jpg';
-export const CONTACTS_OG_IMAGE = '/images/og/contacts-og.jpg';
+// OG-картинки 1200×630 в стиле концепта 2 (исходник — генератор в scratchpad, 09.11.2026).
+export const DEFAULT_OG_IMAGE = '/images/og/home.jpg';
+export const ABOUT_OG_IMAGE = '/images/og/about.jpg';
+export const SERVICES_OG_IMAGE = '/images/og/services.jpg';
+export const REHAB_PROGRAMS_OG_IMAGE = '/images/og/rehab-programs.jpg';
+export const CONTACTS_OG_IMAGE = '/images/og/contacts.jpg';
+export const REVIEWS_OG_IMAGE = '/images/og/reviews.jpg';
+
+/** Своя OG-картинка у страницы услуги (по slug); у остальных — общая картинка услуг. */
+const PRODUCT_OG_IMAGES: Record<string, string> = {
+  consultation: '/images/og/consultation.jpg',
+  'express-consultation': '/images/og/express-consultation.jpg',
+  'online-training': '/images/og/online-training.jpg',
+  'formula-movement': '/images/og/formula-movement.jpg',
+  'meniscus-resection': '/images/og/meniscus-resection.jpg',
+};
+
+export function productOgImage(slug: string): string {
+  return PRODUCT_OG_IMAGES[slug] ?? SERVICES_OG_IMAGE;
+}
 
 export const CONTACTS = {
   phone: '+7 928 328 70 52',
@@ -75,7 +92,11 @@ export function pageMetadata({
     description,
     alternates: noindex ? undefined : { canonical: path },
     robots: noindex
-      ? { index: false, follow: true, googleBot: { index: false, follow: true } }
+      ? {
+          index: false,
+          follow: true,
+          googleBot: { index: false, follow: true },
+        }
       : undefined,
     openGraph: {
       type,
@@ -102,6 +123,10 @@ export function privateMetadata(title: string, description?: string): Metadata {
   return {
     title: { absolute: title },
     description,
-    robots: { index: false, follow: true, googleBot: { index: false, follow: true } },
+    robots: {
+      index: false,
+      follow: true,
+      googleBot: { index: false, follow: true },
+    },
   };
 }

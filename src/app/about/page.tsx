@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { aboutContent as content, educationContent } from '@/data/content';
-import { pageMetadata } from '@/lib/seo';
+import { ABOUT_OG_IMAGE, pageMetadata } from '@/lib/seo';
 import { breadcrumbs, person } from '@/lib/schema';
 import { JsonLd } from '@/components/seo/JsonLd';
 import {
@@ -18,6 +18,7 @@ export const metadata: Metadata = pageMetadata({
   description:
     'Вадим Миненков — специалист по физической реабилитации и спортивной тренировке, инструктор-методист ЛФК. Опыт 8+ лет, онлайн-консультации и программы.',
   path: '/about',
+  image: ABOUT_OG_IMAGE,
   socialTitle: 'Обо мне — Вадим Миненков',
   type: 'profile',
 });

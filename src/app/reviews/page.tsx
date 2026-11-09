@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import ReviewsClient from './ReviewsClient';
-import { pageMetadata } from '@/lib/seo';
+import { pageMetadata, REVIEWS_OG_IMAGE } from '@/lib/seo';
 import { breadcrumbs } from '@/lib/schema';
 import { JsonLd } from '@/components/seo/JsonLd';
 
@@ -9,6 +9,7 @@ export const metadata: Metadata = pageMetadata({
   description:
     'Отзывы клиентов о занятиях с Вадимом Миненковым: восстановление после травм и операций, коррекция осанки и онлайн-тренировки.',
   path: '/reviews',
+  image: REVIEWS_OG_IMAGE,
   socialTitle: 'Отзывы клиентов',
 });
 

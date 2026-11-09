@@ -10,7 +10,7 @@ import {
   productPath,
   REHAB_PROGRAMS_PATH,
 } from '../catalog';
-import { pageMetadata, privateMetadata, SERVICES_OG_IMAGE } from '@/lib/seo';
+import { pageMetadata, privateMetadata, productOgImage } from '@/lib/seo';
 import { breadcrumbs, catalogItemNode } from '@/lib/schema';
 import { JsonLd } from '@/components/seo/JsonLd';
 
@@ -34,7 +34,7 @@ export async function generateMetadata({
     title: item.seoTitle,
     description: item.seoDescription,
     path: productPath(item),
-    image: SERVICES_OG_IMAGE,
+    image: productOgImage(item.slug),
     socialTitle: item.title,
   });
 }
