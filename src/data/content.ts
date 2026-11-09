@@ -412,7 +412,9 @@ export function homeServiceTarget(title: string): {
       href: '/products/rehab-programs',
       ids: [
         'personal-program',
-        // СКРЫТО 09.11.2026 (см. catalog.ts): 'plantar-fasciopathy', 'low-back-pain', 'neck-thoracic-pain',
+        'plantar-fasciopathy',
+        'low-back-pain',
+        'neck-thoracic-pain',
       ],
     };
   }
@@ -644,8 +646,7 @@ export const productPageContent: Record<
       NOT_MEDICAL_FAQ,
       QUESTIONS_FAQ,
     ],
-    // СКРЫТО 09.11.2026: было ['plantar-fasciopathy', 'low-back-pain', 'neck-thoracic-pain']
-    more: ['formula-movement', 'express-consultation', 'consultation'],
+    more: ['plantar-fasciopathy', 'low-back-pain', 'neck-thoracic-pain'],
   },
   'plantar-fasciopathy': {
     template: 'program',
@@ -1037,7 +1038,6 @@ export const moreCards: Record<
     unit: '/ 6 мес.',
     href: '/products/meniscus-resection',
   },
-  /* plantar-fasciopathy — СКРЫТО 09.11.2026: оплата не подключена + медицинские формулировки (модерация Яндекс Директа). Чтобы вернуть — раскомментировать.
   'plantar-fasciopathy': {
     title: 'Плантарный фасциит «Пяточная шпора»',
     text: 'Пошаговый алгоритм для восстановления при плантарной фасциопатии.',
@@ -1045,8 +1045,6 @@ export const moreCards: Record<
     unit: '/ 6 мес.',
     href: '/products/plantar-fasciopathy',
   },
-  */
-  /* low-back-pain — СКРЫТО 09.11.2026: оплата не подключена + медицинские формулировки (модерация Яндекс Директа). Чтобы вернуть — раскомментировать.
   'low-back-pain': {
     title: 'Восстановительная программа «Поясница»',
     text: 'От мягкого снятия напряжения до формирования «мышечного корсета».',
@@ -1054,8 +1052,6 @@ export const moreCards: Record<
     unit: '/ 6 мес.',
     href: '/products/low-back-pain',
   },
-  */
-  /* neck-thoracic-pain — СКРЫТО 09.11.2026: оплата не подключена + медицинские формулировки (модерация Яндекс Директа). Чтобы вернуть — раскомментировать.
   'neck-thoracic-pain': {
     title: 'Восстановительная программа «Шея + грудной отдел»',
     text: 'От мягкого снятия напряжения до укрепления и контроля движений.',
@@ -1063,7 +1059,6 @@ export const moreCards: Record<
     unit: '/ 6 мес.',
     href: '/products/neck-thoracic-pain',
   },
-  */
 };
 
 /* ============================================================
