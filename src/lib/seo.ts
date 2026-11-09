@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 // Единые данные о сайте для метаданных, sitemap и schema.org.
 export const SITE_URL = 'https://minenkovrehab.ru';
-export const BRAND = 'Вадим Миненков — реабилитолог';
+export const BRAND = 'Вадим Миненков — специалист по физической реабилитации';
 /** Короткое имя бренда в конце <title>. */
 export const TITLE_SUFFIX = 'Вадим Миненков';
 export const DEFAULT_OG_IMAGE = '/images/og-image.jpg';
