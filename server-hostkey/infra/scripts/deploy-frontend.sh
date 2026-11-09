@@ -3,6 +3,8 @@
 # с проверкой здоровья и страниц; при ошибке возвращает прежний образ.
 #   /opt/rehab/scripts/deploy-frontend.sh            # master
 #   /opt/rehab/scripts/deploy-frontend.sh <ветка>
+#   SKIP_INDEXNOW=1 /opt/rehab/scripts/deploy-frontend.sh <ветка>   # без отправки URL в IndexNow
+# Откат на прежний образ: /opt/rehab/scripts/rollback-frontend.sh
 set -euo pipefail
 BRANCH=${1:-master}
 SRC=/opt/rehab-src
@@ -59,4 +61,7 @@ echo "$SHA $BRANCH $(date -Is)" > "$APP/FRONTEND_COMMIT"
 echo "$(date -Is) frontend: $TAG выкачен (был $OLD)" | tee -a "$LOG"
 
 # IndexNow: сообщить Яндексу обо всех URL из sitemap. Сбой отправки деплой не ломает.
+if [ "${SKIP_INDEXNOW:-0}" = 1 ]; then
+  echo "$(date -Is) indexnow: пропущено (SKIP_INDEXNOW=1)" | tee -a "$LOG"; exit 0
+fi
 "$APP/scripts/indexnow-submit.sh" || echo "$(date -Is) indexnow: не отправлено (деплой при этом успешен)" | tee -a "$LOG"
