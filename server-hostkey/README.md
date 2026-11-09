@@ -142,3 +142,16 @@ Email для Let's Encrypt заменён на заглушку (`<acme-email>` 
 - Спам: скрытое поле `website` (honeypot) — молча «успех» без записи; не больше 3 заявок с одного IP за 10 минут (429).
 - Тестовая копия: `LEADS_SITE=test` в `infra/staging/compose.yaml` → `site='test'` и пометка «[ТЕСТ new]».
 - Посмотреть заявки: `SELECT created_at, site, source, name, phone, service FROM rehab.leads ORDER BY created_at DESC LIMIT 20;`
+
+## 11. Бэкап базы
+
+- Каждую ночь в 03:30 МСК таймер `rehab-backup.timer` запускает `scripts/backup-db.sh` (pg_dump схем rehab и public).
+  Копии лежат в `/opt/rehab/backups/rehab-*.dump` и хранятся 14 дней.
+- Скрипт проверяет, что копия читается (`pg_restore --list`) и что она не меньше 20 КБ и не меньше половины прошлой удачной копии.
+  При любой ошибке недописанный `.tmp` удаляется, а systemd запускает `rehab-backup-alert.service`.
+  Это письмо на `MIGRATION_ADMIN_NOTIFY_EMAIL` (info@) напрямую через SMTP Reg.ru, без базы и worker.
+- Проверить письмо: `sudo /opt/rehab/scripts/backup-alert.sh --test`. Переустановить таймер: `sudo bash scripts/install-backup-timer.sh`.
+- Мак забирает копии ежедневно в 10:15 (LaunchAgent `ru.minenkovrehab.backup-pull`, `~/Minenkov-backup/pull-server-backups.sh`,
+  rsync через `minenkov-rehab` = 185.149.147.209). Папки `backups/release-*` (копии перед релизами, владелец root) на Мак не копируются.
+- Новые таблицы должны принадлежать `rehab_migrator`: бэкап делается этой ролью, и таблица другого владельца ломает pg_dump.
+  Именно так бэкапы молча не делались с 27.10 по 09.11.2026.
