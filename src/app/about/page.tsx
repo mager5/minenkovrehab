@@ -4,14 +4,8 @@ import { aboutContent as content, educationContent } from '@/data/content';
 import { ABOUT_OG_IMAGE, pageMetadata } from '@/lib/seo';
 import { breadcrumbs, person } from '@/lib/schema';
 import { JsonLd } from '@/components/seo/JsonLd';
-import {
-  ButtonLink,
-  PageHead,
-  SectionHead,
-  IconBox,
-  Icon,
-  SoonBadge,
-} from '@/components/ds';
+import { EducationGallery } from '@/components/about/EducationGallery';
+import { ButtonLink, PageHead, SectionHead, IconBox } from '@/components/ds';
 
 export const metadata: Metadata = pageMetadata({
   title: 'Обо мне — инструктор-методист ЛФК | Вадим Миненков',
@@ -133,38 +127,16 @@ export default function About() {
         </div>
       </section>
 
-      {/* Образование и сертификаты — заглушка до получения документов (TODO в src/data/content.ts) */}
+      {/* Образование и сертификаты — документы в src/data/content.ts (educationContent) */}
       <section className='ds-wrap ds-sec' aria-labelledby='about-edu'>
-        <div className='ds-card p-6 dsk:p-12'>
-          <div className='flex flex-col dsk:flex-row dsk:justify-between dsk:items-center gap-3 dsk:gap-4 mb-3'>
-            <h2 className='ds-h2' id='about-edu'>
-              {educationContent.title}
-            </h2>
-            {educationContent.status === 'soon' ? (
-              <span>
-                <SoonBadge />
-              </span>
-            ) : null}
-          </div>
+        <div className='ds-card p-6 dsk:p-12 overflow-hidden'>
+          <h2 className='ds-h2 mb-3' id='about-edu'>
+            {educationContent.title}
+          </h2>
           <p className='m-0 mb-7 text-[17px] dsk:text-[19px] text-muted'>
             {educationContent.note}
           </p>
-          <div className='grid gap-4 dsk:gap-5 grid-cols-1 sm:grid-cols-3'>
-            {educationContent.placeholders.map((t, i) => (
-              <div
-                key={i}
-                className='aspect-[4/3] rounded-[20px] border-2 border-dashed border-[#BFD3E4] bg-[#F7FAFC] flex flex-col items-center justify-center gap-2.5 text-muted text-[16px] font-semibold'
-              >
-                <Icon
-                  name='award'
-                  size={32}
-                  strokeWidth={1.8}
-                  color='#7A8896'
-                />
-                {t}
-              </div>
-            ))}
-          </div>
+          <EducationGallery items={educationContent.items} />
         </div>
       </section>
 
