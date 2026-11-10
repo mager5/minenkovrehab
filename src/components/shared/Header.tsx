@@ -449,7 +449,8 @@ export function Header() {
 
       {/* Верхняя строка: часы, телефон, вход (только десктоп) */}
       <div
-        className='hidden min-[1100px]:block ds-wrap pt-3'
+        // Пока открыто меню «Войти» / «Личный кабинет», строка поднимается над липкой шапкой (z-50).
+        className='hidden min-[1100px]:block ds-wrap pt-3 relative has-[[aria-expanded=true]]:z-[60]'
         role='complementary'
         aria-label='Контактная информация'
       >
