@@ -18,7 +18,10 @@ export function ContactForm({
 }) {
   const isHome = variant === 'home';
   const [service, setService] = useState(leadServiceOptions[0]?.value ?? '');
-  const form = useLeadForm({ source: isHome ? 'home' : 'contacts', requireMessage: !isHome });
+  const form = useLeadForm({
+    source: isHome ? 'home' : 'contacts',
+    requireMessage: !isHome,
+  });
   const { values, errors } = form;
 
   const headingId = isHome ? 'lead-form-heading' : 'contact-form-heading';
@@ -34,12 +37,14 @@ export function ContactForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const label = leadServiceOptions.find(o => o.value === service)?.label ?? '';
+    const label =
+      leadServiceOptions.find(o => o.value === service)?.label ?? '';
     void form.submit(label, ids);
   };
 
   return (
-    <div className={`ds-card p-6 dsk:p-10 text-ink ${className}`}>
+    // min-w-0: в сетке карточка не должна расти по длинной подписи в «Что вас интересует» (на телефоне выходила за экран).
+    <div className={`ds-card min-w-0 p-6 dsk:p-10 text-ink ${className}`}>
       <h2
         className={isHome ? 'sr-only' : 'ds-h2 ds-h2-sm mb-6'}
         id={headingId}
@@ -49,19 +54,35 @@ export function ContactForm({
       </h2>
 
       {form.status === 'sent' ? (
-        <div className='flex gap-4 items-start p-6 rounded-[20px] bg-mint' role='status' aria-live='polite'>
+        <div
+          className='flex gap-4 items-start p-6 rounded-[20px] bg-mint'
+          role='status'
+          aria-live='polite'
+        >
           <span className='ds-ibox w-11 h-11 rounded-[14px] bg-white'>
-            <Icon name='check' size={22} strokeWidth={3} color='var(--c-mint-ink)' />
+            <Icon
+              name='check'
+              size={22}
+              strokeWidth={3}
+              color='var(--c-mint-ink)'
+            />
           </span>
           <div>
-            <p className='m-0 font-extrabold text-[20px] text-navy'>Заявка отправлена!</p>
+            <p className='m-0 font-extrabold text-[20px] text-navy'>
+              Заявка отправлена!
+            </p>
             <p className='m-0 mt-1 text-[17px] text-ink'>
               Благодарю за обращение. Я свяжусь с вами в ближайшее время.
             </p>
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className='relative flex flex-col gap-5' aria-labelledby={headingId} noValidate>
+        <form
+          onSubmit={handleSubmit}
+          className='relative flex flex-col gap-5'
+          aria-labelledby={headingId}
+          noValidate
+        >
           <Honeypot id={fid('website')} ref={form.honeypot} />
           <div className='grid gap-4 dsk:grid-cols-2'>
             <TextField
@@ -136,7 +157,11 @@ export function ContactForm({
           </Checkbox>
 
           {form.serverError ? (
-            <div className='ds-error p-4 rounded-2xl bg-[#FBEDEC]' role='alert' aria-live='assertive'>
+            <div
+              className='ds-error p-4 rounded-2xl bg-[#FBEDEC]'
+              role='alert'
+              aria-live='assertive'
+            >
               <Icon name='alert' size={18} color='var(--c-danger-ink)' />
               {form.serverError}
             </div>
@@ -149,9 +174,25 @@ export function ContactForm({
           >
             {sending ? (
               <>
-                <svg className='animate-spin h-5 w-5' fill='none' viewBox='0 0 24 24' aria-hidden='true'>
-                  <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
-                  <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z' />
+                <svg
+                  className='animate-spin h-5 w-5'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  aria-hidden='true'
+                >
+                  <circle
+                    className='opacity-25'
+                    cx='12'
+                    cy='12'
+                    r='10'
+                    stroke='currentColor'
+                    strokeWidth='4'
+                  />
+                  <path
+                    className='opacity-75'
+                    fill='currentColor'
+                    d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z'
+                  />
                 </svg>
                 Отправка...
               </>
