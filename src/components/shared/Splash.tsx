@@ -1,5 +1,5 @@
 // Заставка как у приложения (по образцу NKX Padel): показывается сразу из HTML, ещё до загрузки скриптов,
-// пока страница грузится — логотип с «прыгающей» мятной точкой, имя и бегущая полоска.
+// пока страница грузится — логотип, имя и бегущая полоска.
 // Исчезает, когда страница загружена: не раньше чем через 1,7 с (чтобы логотип успели увидеть) и не позже 8 с.
 // Только при полной загрузке/перезагрузке страницы; переходы внутри сайта её не показывают.
 
@@ -15,8 +15,6 @@ const CSS = `
 #mr-splash .logo{display:block;width:100%;height:100%;border-radius:50%;background:#fff;
   box-shadow:0 14px 34px rgba(13,60,99,.16);opacity:0;transform:scale(.6) rotate(-8deg);
   animation:mrIn .6s cubic-bezier(.2,.9,.3,1.3) .05s forwards}
-#mr-splash .dot{position:absolute;right:-4px;top:-6px;width:20px;height:20px;border-radius:50%;background:#2E8A64;
-  box-shadow:0 0 0 4px #F3F7FA,0 0 18px rgba(46,138,100,.45);opacity:0;animation:mrDot 1.1s cubic-bezier(.45,0,.55,1) .45s infinite}
 #mr-splash .word{display:flex;flex-direction:column;align-items:center;line-height:1;opacity:0;animation:mrFade .5s ease .35s forwards}
 #mr-splash .word b{font:800 28px/1 var(--font-manrope),Manrope,system-ui,sans-serif;letter-spacing:-.01em}
 #mr-splash .word i{font:700 11px/1 var(--font-manrope),Manrope,system-ui,sans-serif;font-style:normal;letter-spacing:.32em;
@@ -25,7 +23,6 @@ const CSS = `
 #mr-splash .bar:after{content:"";display:block;width:40%;height:100%;border-radius:3px;background:#2E8A64;animation:mrBar 1.1s ease-in-out infinite}
 @keyframes mrIn{to{opacity:1;transform:none}}
 @keyframes mrFade{to{opacity:1}}
-@keyframes mrDot{0%{opacity:1;transform:translateY(0) scale(1,1)}40%{transform:translateY(-26px) scale(.95,1.05)}78%{transform:translateY(0) scale(1,1)}88%{transform:translateY(0) scale(1.18,.82)}100%{opacity:1;transform:translateY(0) scale(1,1)}}
 @keyframes mrBar{0%{transform:translateX(-110%)}100%{transform:translateX(280%)}}
 @media (prefers-reduced-motion:reduce){#mr-splash *{animation-duration:.01s!important;animation-iteration-count:1!important}}
 `;
@@ -55,7 +52,6 @@ export default function Splash() {
               fetchPriority='high'
               decoding='sync'
             />
-            <span className='dot' />
           </div>
           <div className='word'>
             <b>Вадим Миненков</b>
