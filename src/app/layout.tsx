@@ -2,6 +2,7 @@
 // при сборке и в браузере): вариативный woff2 с латиницей и кириллицей лежит в src/fonts.
 import localFont from 'next/font/local';
 import KeyboardSafe from '@/components/shared/KeyboardSafe';
+import Splash from '@/components/shared/Splash';
 import './globals.css';
 import { Header } from '@/components/shared/Header';
 import Footer from '@/components/shared/Footer';
@@ -104,6 +105,8 @@ export default function RootLayout({
         <meta httpEquiv='Expires' content='0' />
       </head>
       <body className='antialiased min-h-screen flex flex-col h-full overflow-x-hidden overflow-y-auto'>
+        {/* Заставка с логотипом при загрузке страницы (как у NKX Padel) */}
+        <Splash />
         {/* overflow-x-clip (а не hidden): не создаёт контейнер прокрутки, поэтому sticky-элементы работают */}
         <div className='flex flex-col min-h-screen overflow-x-clip'>
           <a
