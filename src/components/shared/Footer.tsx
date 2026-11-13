@@ -198,6 +198,26 @@ export default function Footer() {
             © {currentYear} ИП Миненков Вадим Леонидович. Все права защищены.
             <br />
             ИНН {CONTACTS.inn}, ОГРНИП {CONTACTS.ogrnip}
+            <a
+              href='https://kmglabs.ru/?utm_source=minenkovrehab.ru&utm_medium=referral&utm_campaign=site-credit'
+              target='_blank'
+              rel='noopener'
+              aria-label='Разработано в KMG Labs'
+              className='flex w-fit items-center gap-2 min-h-[44px] whitespace-nowrap no-underline text-[#B9CFE2] hover:text-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-white focus-visible:outline-offset-2'
+            >
+              <span>Разработано в</span>
+              <span
+                aria-hidden='true'
+                className='block shrink-0 h-[15px]'
+                style={{
+                  aspectRatio: '612 / 116',
+                  background: 'currentColor',
+                  WebkitMask:
+                    'url(/kmg-labs-mask.png) center / contain no-repeat',
+                  mask: 'url(/kmg-labs-mask.png) center / contain no-repeat',
+                }}
+              />
+            </a>
           </div>
           <ul
             className='flex flex-wrap gap-x-[18px] list-none p-0 m-0'
